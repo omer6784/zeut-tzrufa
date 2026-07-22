@@ -215,11 +215,22 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = '×‘×
   const onResize = () => layout();
   window.addEventListener('resize', onResize);
 
-  return function teardown() {
+  function teardown() {
     cancelAnimationFrame(raf);
     window.removeEventListener('resize', onResize);
     host.removeEventListener('pointerdown', onDown);
     try { canvas.remove(); } catch (_) {}
     try { hint.remove(); } catch (_) {}
-  };
+  }
+
+  // Screen-space points for the demo hand: tap a frequency in the column, then
+  // tap the large view to confirm.
+  function demoTargets() {
+    if (!thumbs.length || !big) return [];
+    const r = canvas.getBoundingClientRect();
+    const c = rc => ({ x: r.left + rc.x + rc.w / 2, y: r.top + rc.y + rc.h / 2 });
+    return [c(thumbs[1]), c(big)];
+  }
+
+  return { teardown, demoTargets };
 }

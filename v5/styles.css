@@ -376,6 +376,35 @@ body::-webkit-scrollbar-thumb {
 #cursor .cursor-fist { display: none; }
 #cursor.is-grabbing .cursor-open { display: none; }
 #cursor.is-grabbing .cursor-fist { display: block; }
+
+/* ─── Demo "ghost hand" — auto gesture hint per stage (demo-hand.js) ─── */
+.demo-hand {
+  position: fixed; left: 0; top: 0; width: 30px; height: 36px;
+  transform: translate(-28%, -18%);       /* fingertip sits on the target point */
+  z-index: 9997; pointer-events: none; color: #f5f5ed;
+  opacity: 0;
+  transition: left 0.72s cubic-bezier(0.4, 0, 0.2, 1),
+              top 0.72s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.4s ease, transform 0.18s ease;
+  will-change: left, top;
+}
+.demo-hand.is-dark { color: #282828; }
+.demo-hand.is-on { opacity: 0.95; }
+.demo-hand svg { width: 100%; height: 100%; display: block;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45)); }
+.demo-hand .dh-fist { display: none; }
+.demo-hand.is-grab .dh-open { display: none; }
+.demo-hand.is-grab .dh-fist { display: block; }
+.demo-hand.is-grab { transform: translate(-28%, -18%) scale(0.88); }  /* press-in */
+.demo-ripple {
+  position: absolute; left: 30%; top: 22%; width: 8px; height: 8px; margin: -4px;
+  border-radius: 50%; border: 1.5px solid currentColor; opacity: 0;
+}
+.demo-ripple.is-go { animation: demo-ripple 0.5s ease-out; }
+@keyframes demo-ripple {
+  from { transform: scale(0.4); opacity: 0.7; }
+  to   { transform: scale(3.4); opacity: 0; }
+}
 #cursor.on-orange {
   color: #fffae6;
 }

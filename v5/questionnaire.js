@@ -8,6 +8,7 @@ import { SYMBOLS_3D } from './symbols-3d.js';
 import { mountTimeWheel } from './time-wheel.js';
 import { mountLightGate } from './light-gate.js';
 import { mountCalibration } from './calibration.js';
+import { playHandDemo, stopHandDemo } from './demo-hand.js';
 import { mountDotTiles } from './dot-tiles.js';
 import { mountDrive } from './drive.js';
 import { mountEditor } from './editor.js';
@@ -1118,9 +1119,34 @@ function generateHebrewWordGrid(rows, cols, words) {
   return {grid, placements};
 }
 
+/* Auto "ghost hand" demo for a stage: after a short idle, play the gesture
+   demonstration; cancel it the instant the user actually touches anything. */
+function scheduleStageDemo(getPoints, opts = {}){
+  cancelStageDemo();
+  // Cancel only on a real tap INSIDE the stage (#section-3) — not the landing
+  // CTA that brought us here, and not synthetic events the app dispatches.
+  const target = document.getElementById('section-3') || document;
+  const onUser = (e) => { if (e && e.isTrusted === false) return; cancelStageDemo(); };
+  st._demoCancel = onUser; st._demoTarget = target;
+  target.addEventListener('pointerdown', onUser, { capture: true });
+  st._demoTimer = setTimeout(() => {
+    let pts = []; try { pts = getPoints() || []; } catch (_) {}
+    if (pts.length) playHandDemo(pts, opts);
+  }, 1700);
+}
+function cancelStageDemo(){
+  clearTimeout(st._demoTimer); st._demoTimer = null;
+  if (st._demoCancel && st._demoTarget) {
+    st._demoTarget.removeEventListener('pointerdown', st._demoCancel, { capture: true });
+    st._demoCancel = null; st._demoTarget = null;
+  }
+  stopHandDemo();
+}
+
 function _renderQuestionImpl(idx){
   const q=QUESTIONS[idx]; if(!q) return;
   // Tear down the light-point gate overlay whenever the stage changes.
+  cancelStageDemo();
   if (st._lightGateTeardown) { try { st._lightGateTeardown(); } catch (_) {} st._lightGateTeardown = null; }
   if (st._calibTeardown) { try { st._calibTeardown(); } catch (_) {} st._calibTeardown = null; }
   if (st._driveTeardown) { try { st._driveTeardown(); } catch (_) {} st._driveTeardown = null; }
@@ -1187,9 +1213,12 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('calib-active');
     wrap.innerHTML = `<div id="calib-host" aria-label="כיול תדרים"></div>`;
     if(st._calibTeardown){ try{ st._calibTeardown(); }catch(_){} }
-    st._calibTeardown = mountCalibration(document.getElementById('calib-host'), {
+    const calib = mountCalibration(document.getElementById('calib-host'), {
       onLock: (hex) => { chooseBackground(hex); },
     });
+    st._calibTeardown = calib.teardown;
+    // Auto "ghost hand" demo of the tap-a-frequency → confirm gesture.
+    scheduleStageDemo(() => calib.demoTargets(), { tone: 'light' });
   }
   if(q.type==='stars'){
     const numCols = 9;
