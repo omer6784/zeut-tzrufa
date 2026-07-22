@@ -1,0 +1,862 @@
+/* ════════════════════════════════════════════════════════════════
+   v5 — sacred-geometry interface (rev 3 — light plate palette)
+   ────────────────────────────────────────────────────────────────
+   The geometry IS the interface. No background images, no PNG assets
+   from the original interface are used or visible. Every visible
+   surface is rebuilt from points, lines and outline geometry.
+
+   Palette (per user spec):
+     #fff8e1  cream plate              — full page bg
+     #b27200  warm amber               — every SVG sacred-geometry line
+     #282828  near-black               — text + construction grid lines
+     #282828 @ 35%  — soft guides
+     #282828 @ 14%  — ghost guides
+
+   Loaded after styles.css so each rule wins by cascade order.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Register the grid dot colour as a real <color> so it can ANIMATE (custom
+   properties are otherwise not interpolable). Lets the stage-transition overlay
+   morph the grid colour smoothly from one stage's palette to the next, instead
+   of snapping. Inherited, so per-stage --grid-dot overrides still cascade. */
+@property --grid-dot {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #282828;
+}
+
+:root {
+  --geo-plate:  #f5f5ed;          /* off-white page bg */
+  --geo-shape:  #fb5716;          /* accent orange */
+  --geo-grid:   #282828;          /* primary dark */
+  --geo-stroke: var(--geo-grid);  
+  --geo-thin:   rgba(40, 40, 40, 0.15); 
+  --geo-ghost:  rgba(40, 40, 40, 0.08);
+  --geo-accent: #fb5716;          /* accent orange */
+}
+
+body.theme-negative {
+  --geo-plate:  #282828;          /* dark plate */
+  --geo-grid:   #f5f5ed;          /* off-white text + grid lines */
+  --geo-thin:   rgba(245, 245, 237, 0.15);
+  --geo-ghost:  rgba(245, 245, 237, 0.08);
+}
+
+/* ── 0. Page plate — paper texture across the whole viewport.
+   Loaded as a real image asset per user spec; every screen sits on
+   the same fixed background. ────────────────────────────────── */
+html, body {
+  background-color: var(--geo-plate) !important;
+  background-image: url('/image/v5-interface-bg-v2.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  color: var(--geo-stroke) !important;
+}
+
+/* ── 1. WIPE every legacy bitmap / coloured panel from v4 ─────── */
+/* Hide PNG decorations the user explicitly told us to drop. */
+#s0-hero-img,
+#ui-version-bar,
+#ui-bottom-right .ui-icon,
+.q-header-logo-row img,
+.q-header-logo-box img,
+#btn-restart img,
+#ui-corner-logo,
+#site-logo-metal,
+#logo-metal-mask {
+  display: none !important;
+}
+
+/* High-specificity kill switch for every v4 stage-accent rule.
+   The v4 stylesheet pins these to display:block + url(/image/v4-stage1/…)
+   per stage with selectors like `#section-3[data-stage="0"] .stage-accent.is-brown`
+   (specificity 0,4,0,0). Match that specificity for ALL data-stage values
+   so v5 always wins — geometric.js will draw the new strip from scratch. */
+#section-3[data-stage] .stage-accent,
+#section-3[data-stage] .stage-accent.is-blue,
+#section-3[data-stage] .stage-accent.is-yellow,
+#section-3[data-stage] .stage-accent.is-brown,
+#section-3[data-stage] .stage-accent.is-hatch {
+  display: none !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+#section-3[data-stage] .stage-accent::before,
+#section-3[data-stage] .stage-accent::after,
+#section-3[data-stage] .stage-accent.is-blue::before,
+#section-3[data-stage] .stage-accent.is-blue::after,
+#section-3[data-stage] .stage-accent.is-yellow::before,
+#section-3[data-stage] .stage-accent.is-yellow::after,
+#section-3[data-stage] .stage-accent.is-brown::before,
+#section-3[data-stage] .stage-accent.is-brown::after {
+  content: none !important;
+  display: none !important;
+  background-image: none !important;
+  background: none !important;
+}
+
+/* Same trick for the bottom orange band + the 3 stripes — v4 sets them
+   with `#section-3[data-stage="0"] #questionnaire-layout::after` etc.
+   so we need at least equal specificity to override. */
+#section-3[data-stage] #questionnaire-layout::after,
+#section-3[data-stage] #questionnaire-layout::before,
+#section-3[data-stage] #q-header::after,
+#section-3[data-stage] #q-header::before,
+#section-3[data-stage] #q-main-cell::after,
+#section-3[data-stage] #q-main-cell::before {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+/* And the per-stage bot-right colour fills (`background-color: #ff601a !important`)
+   that v4 paints into stages 0-5 — strip them too. */
+#section-3[data-stage] #q-deco-bot-right,
+#section-3[data-stage] #q-deco-bot-left,
+#section-3[data-stage] #q-main-cell {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+/* The .q-chrome-side, body, html — guarantee no leaked bg colour. */
+.screen-panel, #section-1,
+#questionnaire-layout, .q-chrome-side, #artifact-col {
+  background-image: none !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+#section-3 {
+  background-image: none !important;
+  background-color: #f5f5ed !important;
+  background: #f5f5ed !important;
+}
+
+#section-1 {
+  background: transparent !important;
+  color: var(--geo-stroke) !important;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+#section-1::before {
+  display: none !important;
+}
+body.theme-negative #section-1 {
+  background: transparent !important;
+}
+
+#section-3 {
+  background: #f5f5ed !important;
+  background-color: #f5f5ed !important;
+  color: var(--geo-stroke) !important;
+}
+.screen-panel {
+  background: transparent !important;
+  color: var(--geo-stroke) !important;
+}
+#questionnaire-layout {
+  background: transparent !important;
+  position: relative;
+}
+
+/* ── 3. Header chrome ──────────────────────────────────────── */
+.q-header-container {
+  background: transparent !important;
+  border-bottom: 1px solid var(--geo-thin) !important;
+}
+.q-header-steps-row { border-top: 1px solid var(--geo-thin) !important; }
+.q-header-loadbar-fill {
+  background-color: transparent !important;
+}
+
+/* Top header logo: invert its black PNG into a beige stroke. The
+   v4 q-header-logo-box img rule is left in but recoloured. */
+#questionnaire-layout .q-header-logo-box img,
+.q-header-logo-box img {
+  filter: brightness(0) invert(0.88) sepia(0.4) saturate(0.7) hue-rotate(-5deg) !important;
+  opacity: 0.95;
+  mix-blend-mode: normal !important;
+  display: block !important;
+}
+
+/* ── 4. Sidebar (orange in v4) → transparent column with a faint
+   right edge. All decoration is injected by geometric.js inside it. ─ */
+#section-3 .q-chrome-side {
+  background: transparent !important;
+  border-right: 1px solid var(--geo-thin) !important;
+  position: relative;
+}
+#section-3 #artifact-col {
+  background: transparent !important;
+  z-index: 4 !important;
+}
+#section-3 #artifact-canvas { background: transparent !important; }
+
+/* ── 5. Bottom strip — single hairline. The mandala sits centred
+   on it, drawn by geometric.js. ────────────────────────────── */
+#section-3 #questionnaire-layout::after {
+  display: none !important;
+}
+
+/* ── 6. Right column "hero" — 3 thin horizontal lines with end dots.
+   No big PNG, no decorative graphics — just minimal construction. ─ */
+#section-3[data-stage="0"] #q-header {
+  border-left: none !important;
+  background: transparent !important;
+}
+#section-3[data-stage="0"] #q-header::after {
+  content: '';
+  position: absolute;
+  left: clamp(20px, 2.4vw, 44px);
+  right: clamp(20px, 2.4vw, 44px);
+  top: 60%;
+  height: 30%;
+  background:
+    radial-gradient(circle, var(--geo-stroke) 2.5px, transparent 3px) no-repeat 0   12%,
+    linear-gradient(var(--geo-stroke), var(--geo-stroke)) no-repeat 0 12% / 100% 1px,
+    radial-gradient(circle, var(--geo-stroke) 2.5px, transparent 3px) no-repeat 100% 12%,
+    radial-gradient(circle, var(--geo-stroke) 2.5px, transparent 3px) no-repeat 0   50%,
+    linear-gradient(var(--geo-stroke), var(--geo-stroke)) no-repeat 0 50% / 100% 1px,
+    radial-gradient(circle, var(--geo-accent) 2.5px, transparent 3px) no-repeat 100% 50%,
+    radial-gradient(circle, var(--geo-stroke) 2.5px, transparent 3px) no-repeat 0   88%,
+    linear-gradient(var(--geo-stroke), var(--geo-stroke)) no-repeat 0 88% / 100% 1px,
+    radial-gradient(circle, var(--geo-stroke) 2.5px, transparent 3px) no-repeat 100% 88%
+    !important;
+  border: none !important;
+  padding: 0 !important;
+  pointer-events: none;
+}
+
+/* ── 7. Text everywhere reads as beige on plate ─────────────── */
+#section-3 #q-text,
+#section-3 #q-counter,
+#section-3 #q-num-current,
+#section-3 #q-num-total,
+#section-3 #q-counter-sep,
+#section-3 #q-counter-plus,
+#section-3 .ui-label,
+#section-3 .deco-brand-text,
+#section-3 .deco-brand-sub,
+#section-3 .deco-coords,
+#section-3 .roots-hint,
+#section-3 .float-word,
+#section-3 .star-pick,
+#section-3 .roots-input,
+#section-3 .roots-chip,
+.q-header-step-label,
+.q-progress-label,
+#cta-anchor,
+#q-btn-back-home,
+.ui-text-para,
+.ui-arrow,
+#ui-coords,
+#coord-x, #coord-y, #coord-z,
+#ui-top-left,
+#ui-bottom-left,
+#btn-symbol-library {
+  color: var(--geo-stroke) !important;
+  background: transparent !important;
+}
+#ui-coords { display: flex; }   /* keep them visible (their PNG icons
+                                   were hidden above, but the text is fine) */
+#section-3 #q-text { border-right-color: var(--geo-thin) !important; }
+
+/* ── 8. Buttons, inputs — outline only, monospace beige ────── */
+#q-input-wrap {
+  background: transparent !important;
+  border: 1px solid var(--geo-thin) !important;
+}
+#q-input,
+.roots-input {
+  color: var(--geo-stroke) !important;
+  background: transparent !important;
+  border-bottom: 1px solid var(--geo-thin) !important;
+}
+#q-submit, .roots-btn, .roots-send, .choice-btn {
+  background: transparent !important;
+  color: var(--geo-stroke) !important;
+  border: 1px solid var(--geo-stroke) !important;
+  border-radius: 999px !important;
+}
+#q-submit:hover, .roots-btn:hover, .roots-send:hover, .choice-btn:hover {
+  background: var(--geo-stroke) !important;
+  color: var(--geo-plate) !important;
+}
+/* Help arrows / round buttons */
+.q-help {
+  border: 1px solid var(--geo-stroke) !important;
+  color: var(--geo-stroke) !important;
+}
+
+/* ── 9. Progress dots: outlined, accent on current ───────────── */
+.q-progress-dot {
+  background: transparent !important;
+  border: 1px solid var(--geo-stroke) !important;
+}
+.q-progress-dot.is-filled {
+  background: var(--geo-stroke) !important;
+  border-color: var(--geo-stroke) !important;
+}
+.q-progress-dot.is-current {
+  background: var(--geo-accent) !important;
+  border-color: var(--geo-accent) !important;
+  box-shadow: 0 0 0 4px rgba(255, 96, 26, 0.18) !important;
+}
+.q-progress-sep         { background: var(--geo-thin) !important; }
+.q-progress-dots::before { border-top-color: var(--geo-thin) !important; }
+
+/* ── 10. Globe — square outlined frame, no fill ──────────────── */
+.roots-canvas-wrap {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  position: relative;
+}
+
+/* ── 11. CTA & opening screen UI in beige ──────────────────── */
+#cta-anchor {
+  border: none !important;
+  padding: 10px 24px !important;
+  background: transparent !important;
+  font-size: 12.5px !important;
+}
+/* No hover on the CTA — it breathes on its own and answers on press instead.
+   (A hover transform here would also fight the breathing scale.) */
+
+/* Theme toggle button — outlined disk */
+#theme-toggle-btn {
+  background: var(--geo-plate) !important;
+  border: 1px solid var(--geo-stroke) !important;
+  color: var(--geo-stroke) !important;
+}
+
+/* ── 12. Slot containers for injected SVG decorations ─────── */
+.geo-decor {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+.geo-decor svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.geo-decor svg * {
+  stroke: var(--geo-shape);          /* amber — every sacred-geometry line */
+  fill: none;
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.geo-decor svg .thin    { stroke: var(--geo-shape); stroke-opacity: 0.55; stroke-width: 0.5; }
+.geo-decor svg .ghost   { stroke: var(--geo-shape); stroke-opacity: 0.32; stroke-dasharray: 2 3; stroke-width: 0.5; }
+.geo-decor svg .accent  { stroke: var(--geo-shape); stroke-width: 0.9; }
+.geo-decor svg .nodefill   { fill: var(--geo-shape); stroke: none; }
+.geo-decor svg .accentfill { fill: var(--geo-shape); stroke: none; }
+.geo-decor svg text { fill: var(--geo-shape); stroke: none; }
+
+/* Slow rotation utilities */
+@keyframes geo-spin-slow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+@keyframes geo-spin-rev  { from { transform: rotate(0); } to { transform: rotate(-360deg); } }
+@keyframes geo-pulse     { 0%,100% { opacity: .8 } 50% { opacity: 1 } }
+.geo-rot     { animation: geo-spin-slow 180s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.geo-rot-rev { animation: geo-spin-rev  240s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.geo-pulse   { animation: geo-pulse 5s ease-in-out infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+
+/* ── 13. Floating "v5" stamp ──────────────────────────────── */
+#v5-stamp {
+  position: fixed;
+  bottom: 8px; right: 12px;
+  font-family: 'ArbelG', monospace, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--geo-stroke);
+  opacity: 0.55;
+  padding: 4px 8px;
+  border: 1px solid var(--geo-thin);
+  z-index: 9999;
+  pointer-events: none;
+  background: rgba(22, 22, 22, 0.7);
+}
+body::after { display: none !important; }
+
+/* ════════════════════════════════════════════════════════════════
+   NUCLEAR OVERRIDES — applied last, win every v4 fill / asset.
+   ────────────────────────────────────────────────────────────────
+   v4/styles.css pins coloured fills + bitmap backgrounds with
+   selectors of specificity 0,3-4,0,0 (e.g. `#section-3[data-stage="0"]
+   .q-chrome-side { background: #ff601a !important; }`). The block
+   below ties or beats every one of those for the elements that must
+   stay transparent in v5. Loaded last in the cascade → wins.
+   ════════════════════════════════════════════════════════════════ */
+
+/* — Sidebar (v4 paints it orange per stage) — */
+#section-3[data-stage] .q-chrome-side,
+#section-3[data-stage="0"] .q-chrome-side,
+#section-3[data-stage="1"] .q-chrome-side,
+#section-3[data-stage="2"] .q-chrome-side,
+#section-3[data-stage="3"] .q-chrome-side,
+#section-3[data-stage="4"] .q-chrome-side,
+#section-3[data-stage="5"] .q-chrome-side {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border-right: 1px solid var(--geo-thin) !important;
+}
+
+/* — Top-strip cells (v4 paints them with PNGs per stage) — */
+#section-3[data-stage] .stage-accent,
+#section-3[data-stage] .stage-accent.is-blue,
+#section-3[data-stage] .stage-accent.is-yellow,
+#section-3[data-stage] .stage-accent.is-brown,
+#section-3[data-stage] .stage-accent.is-hatch,
+#section-3[data-stage="0"] .stage-accent.is-blue,
+#section-3[data-stage="0"] .stage-accent.is-yellow,
+#section-3[data-stage="0"] .stage-accent.is-brown,
+#section-3[data-stage="0"] .stage-accent.is-hatch,
+#section-3[data-stage="1"] .stage-accent.is-blue,
+#section-3[data-stage="1"] .stage-accent.is-yellow,
+#section-3[data-stage="1"] .stage-accent.is-brown,
+#section-3[data-stage="2"] .stage-accent.is-blue,
+#section-3[data-stage="2"] .stage-accent.is-yellow,
+#section-3[data-stage="2"] .stage-accent.is-brown,
+#section-3[data-stage="3"] .stage-accent.is-blue,
+#section-3[data-stage="3"] .stage-accent.is-yellow,
+#section-3[data-stage="3"] .stage-accent.is-brown,
+#section-3[data-stage="4"] .stage-accent.is-blue,
+#section-3[data-stage="4"] .stage-accent.is-yellow,
+#section-3[data-stage="4"] .stage-accent.is-brown,
+#section-3[data-stage="5"] .stage-accent.is-blue,
+#section-3[data-stage="5"] .stage-accent.is-yellow,
+#section-3[data-stage="5"] .stage-accent.is-brown {
+  display: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+}
+
+/* The ::before / ::after on those cells render the "01" PNG +
+   "DIMENSIONS" overlay — content:none kills them outright. */
+#section-3[data-stage] .stage-accent::before,
+#section-3[data-stage] .stage-accent::after,
+#section-3[data-stage="0"] .stage-accent.is-blue::before,
+#section-3[data-stage="0"] .stage-accent.is-blue::after,
+#section-3[data-stage="0"] .stage-accent.is-brown::before,
+#section-3[data-stage="0"] .stage-accent.is-brown::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* — Bottom orange band + the 3 right-column stripes are pseudo
+   elements on the layout / q-header. Kill their PNG backgrounds
+   entirely; my own pseudo for the bottom hairline (rule 5 above)
+   still wins because it's later in this stylesheet. */
+#section-3[data-stage] #questionnaire-layout::after,
+#section-3[data-stage] #questionnaire-layout::before,
+#section-3[data-stage] #q-header::after,
+#section-3[data-stage] #q-header::before,
+#section-3[data-stage] #q-main-cell::after,
+#section-3[data-stage] #q-main-cell::before,
+#section-3[data-stage="0"] #questionnaire-layout::after,
+#section-3[data-stage="0"] #questionnaire-layout::before,
+#section-3[data-stage="0"] #q-header::after,
+#section-3[data-stage="0"] #q-header::before {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+/* — Decorative bot-left / bot-right colour fills per stage — */
+#section-3[data-stage] #q-deco-bot-right,
+#section-3[data-stage] #q-deco-bot-left,
+#section-3[data-stage] #q-main-cell,
+#section-3[data-stage="0"] #q-deco-bot-right,
+#section-3[data-stage="3"] #q-deco-bot-right,
+#section-3[data-stage="4"] #q-deco-bot-right,
+#section-3[data-stage="5"] #q-deco-bot-right {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* — Inner sections stay transparent so the html/body texture shows
+   through. html/body themselves are handled at the top of the file
+   (rule 0) — do NOT clobber their background-image here. — */
+.screen-panel, #section-1, #section-3, #questionnaire-layout,
+#section-3[data-stage], #section-3[data-stage="0"],
+#section-3[data-stage="1"], #section-3[data-stage="2"],
+#section-3[data-stage="3"], #section-3[data-stage="4"],
+#section-3[data-stage="5"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* — Kill the frosted-glass overlay on the opening screen. In v4 it
+   blurred the underlying scene canvas; in v5 it would only blur the
+   paper texture, hiding it. — */
+#section-1::before {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── 14. Virtual Keyboard v5 overrides ────────────────────── */
+/* Only the individual keys carry the dotted outline. The keyboard container
+   itself has NO frame — its own dotted border doubled with the edge keys'
+   outlines, so it was dropped (per request). */
+#virtual-keyboard {
+  background-color: var(--geo-plate) !important;
+  border: none !important;
+  background-image: none !important;
+}
+#virtual-keyboard .vk-key {
+  background-color: var(--geo-plate) !important;
+  color: var(--geo-stroke) !important;
+  border: none !important;
+  /* Dotted key outline uses the EXACT dot size / spacing / colour of the fixed
+     interface grid (--grid-dot-size, --grid-dot-gap, --grid-dot). */
+  background-image:
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
+  background-size:
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-size) var(--grid-dot-gap),
+    var(--grid-dot-size) var(--grid-dot-gap) !important;
+  background-position: top, bottom, left, right !important;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y !important;
+}
+#virtual-keyboard .vk-key:hover {
+  background-color: #e2bc71 !important;
+  color: #282828 !important;
+}
+#virtual-keyboard .vk-key.is-pressed {
+  background-color: var(--geo-accent) !important;   /* interface orange */
+  background-image: none !important;                /* solid fill, drop the dots */
+  color: #f5f5ed !important;                         /* cream label */
+}
+
+/* ── 15. Dotted Title Logo on Landing Screen ───────────────── */
+#v5-landing-title-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+#v5-landing-title {
+  width: min(56vw, 680px);
+  height: auto;
+  display: block;
+  transition: filter 0.4s ease;
+}
+body.theme-negative #v5-landing-title {
+  filter: invert(1) brightness(2.5);
+}
+
+/* Animated dotted hamsa pendulum — right side of the landing screen,
+   in the spot the reference mock places the dotted eye. The p5 canvas is
+   square (1000×1000); keep the container square so the sketch isn't
+   distorted, and pin it to the upper-right so the cord hangs from the top. */
+#hamsa-pendulum {
+  position: absolute;
+  top: 5%;
+  right: 5%;
+  /* Slight diagonal lean to the left (cord + eye rotate together).
+     translateX shifts the container back right by half the extra canvas
+     width so the eye keeps its on-screen position after widening; trimmed a
+     touch so the whole eye + cord nudge slightly left. */
+  transform: translateX(5vh) rotate(-6deg);
+  transform-origin: top center;
+  /* Canvas is 1300×1900 (≈0.684 ratio); match it so the sketch isn't
+     distorted. Widened from 1000 → 1300 to give the swinging eye tips
+     side-margin; the eye keeps its size because it's drawn in fixed px.
+     Tall + top-anchored so the long cord reads as hanging from the top of
+     the frame and the hamsa swings lower-right. */
+  height: 96vh;
+  width: calc(96vh * 0.684);
+  z-index: 2;
+  pointer-events: none;
+}
+#hamsa-pendulum canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  display: block;
+}
+
+/* ── 16. Remove Grid Lines / Layout Borders (Keep Progress Bar) ──── */
+/* Hide the SVG overlays generated by geometric.js */
+.geo-decor {
+  display: none !important;
+}
+
+/* Remove all layout grid lines/dividers from the questionnaire container */
+#questionnaire-layout,
+#questionnaire-layout .q-chrome-side,
+#questionnaire-layout #q-main-cell,
+#questionnaire-layout .bot-mid,
+#questionnaire-layout #q-deco-bot-right,
+.q-header-container,
+.q-header-steps-row,
+#section-3 .q-chrome-side,
+#section-3 #q-text {
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* Hide the bottom layout hairline guideline helper */
+#section-3 #questionnaire-layout::after {
+  display: none !important;
+}
+
+/* Hide the three decorative line guides on the step 0 header */
+#section-3[data-stage="0"] #q-header::after {
+  display: none !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   17. Dotted construction grid
+   ────────────────────────────────────────────────────────────────
+   Requested grid motif: small dark dots, never a solid stroke.
+   Two contexts share the same base look —
+     .dot-grid          → free-floating overlay (landing screen)
+     #questionnaire-layout > .dot-grid-line-* → real CSS-grid items,
+     drawn along the layout's own column/row tracks.
+   On the questionnaire screen the lines start collapsed (scale 0)
+   and JS (buildScreen() in app.js) flips them to .is-built with a
+   stagger so the grid visibly "draws itself" on screen entry.
+   ════════════════════════════════════════════════════════════════ */
+/* The element itself stays a 1px-wide/tall reference so it still sits
+   exactly on the grid line and can scale in for the build-in effect.
+   The actual dots render on a wider/taller ::before so each dot has
+   real 2D room to draw as a circle instead of a squeezed-in sliver
+   that reads as a solid stroke. */
+.dot-grid-line-v,
+.dot-grid-line-h {
+  position: relative;
+  pointer-events: none;
+  z-index: 5;
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.dot-grid-line-v {
+  width: 1px;
+  transform: scaleY(0);
+  transform-origin: top center;
+}
+.dot-grid-line-h {
+  height: 1px;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.dot-grid-line-v.is-built { transform: scaleY(1); }
+.dot-grid-line-h.is-built { transform: scaleX(1); }
+
+.dot-grid-line-v::before,
+.dot-grid-line-h::before {
+  content: '';
+  position: absolute;
+  opacity: 0.35;
+  background-image: radial-gradient(circle, var(--geo-grid) 0.9px, transparent 1.2px);
+}
+.dot-grid-line-v::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  transform: translateX(-50%);
+  background-size: 6px 10px;
+  background-repeat: repeat-y;
+  background-position: center top;
+}
+.dot-grid-line-h::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 6px;
+  transform: translateY(-50%);
+  background-size: 10px 6px;
+  background-repeat: repeat-x;
+  background-position: left center;
+}
+
+/* Landing screen — free overlay, always static (no build-in here) */
+.dot-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.dot-grid .dot-grid-line-v { position: absolute; top: 0; height: 100%; }
+.dot-grid .dot-grid-line-h { position: absolute; left: 0; width: 100%; }
+
+/* Landing (orange) screen — same construction grid as the other screens, but
+   rendered in cream so the dots read on the orange background. */
+#section-1 .stage-grid { --grid-dot: #f5f5ed; }
+
+/* ════════════════════════════════════════════════════════════════
+   FIXED INTERFACE GRID (every non-opening screen sits on this)
+   ────────────────────────────────────────────────────────────────
+   A single permanent dotted-grid system, NOT rebuilt or moved per
+   stage. Reference spec is in px at base 1360×768; positions and line
+   lengths scale by --sx / --sy so proportions hold on any viewport,
+   while the dot texture (size + spacing) stays constant so it always
+   reads as the same fine helper system. Lives on #section-3 only —
+   the opening screen (#section-1) is deliberately untouched.
+   ════════════════════════════════════════════════════════════════ */
+:root, #section-3 {
+  --sx: calc(100vw / 1360);
+  --sy: calc(100vh / 768);
+  --grid-dot: #282828;
+  /* The stage's full-screen background colour, mirrored into a clean custom
+     property so the stage-transition cover can read the NEXT stage's colour
+     reliably (the actual `background` cascade on #section-3 is a tangle of
+     competing !important rules and can't be read back). Default = cream plate;
+     the coloured stages override below. Keep in sync with their `background`. */
+  --stage-plate: #f5f5ed;
+  /* ════════════════════════════════════════════════════════════════════
+     THE ONE DOT SYSTEM — single source of truth for every dotted element in
+     the interface (grid lines, dividers, button frames, dotted paths…).
+       --grid-dot-size : dot DIAMETER
+       --grid-dot-gap  : centre-to-centre PITCH
+       --grid-dot      : colour (per-context; override locally where a component
+                         needs a different dot colour, e.g. cream on a dark modal)
+     Every dotted element paints the SAME recipe inline —
+       radial-gradient(circle, var(--grid-dot) calc(size/2),
+                       transparent calc(size/2 + 0.35px))
+     with `background-size` = size × gap. It is written inline (not hidden behind
+     one variable) on purpose: var(--grid-dot) must resolve at the USE site so a
+     local --grid-dot override actually recolours the dots.
+     Alignment: every dotted LINE anchors its along-axis phase to the viewport
+     origin (0,0) via `background-position: calc(-1 * <own offset>)`, so all
+     dots across the whole screen sit on ONE continuous lattice at the same
+     rhythm — junctions stay coherent. (Line POSITIONS are never moved.)
+     ════════════════════════════════════════════════════════════════════ */
+  --grid-dot-size: 1.6px;
+  --grid-dot-gap: 5.5px;
+  --grid-op: 1.0;
+}
+body.theme-negative #section-3 { --grid-dot: #f5f5ed; }
+
+/* Coloured stages — mirror their real full-screen background into --stage-plate
+   so the transition cover morphs to the correct next-stage colour. Keep these in
+   sync with the matching `#section-3[data-stage="N"] { background }` rules. */
+#section-3[data-stage="3"] { --stage-plate: #222020; }   /* dark stage  */
+#section-3[data-stage="5"] { --stage-plate: #ff5003; }   /* orange stage */
+/* Stage 7 ("מה מניע אותך?") — gold background like the globe (origin) stage; its
+   chrome (dark text/deco, orange instruction, dark grid) already matches. The
+   doubled [data-stage] lifts specificity over the shared `background:transparent`
+   reset so the gold actually paints. */
+#section-3[data-stage="4"] { --stage-plate: #e2bc71; }
+#section-3[data-stage="4"][data-stage] { background: #e2bc71 !important; }
+
+.stage-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.stage-grid .sg-v,
+.stage-grid .sg-h {
+  position: absolute;
+  opacity: var(--grid-op);
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+}
+/* Vertical dotted line — dots stacked down, positioned at --x, from --y,
+   length = --h (scaled). translateX centers the dot column on --x. Its
+   along-axis (Y) phase is anchored to the viewport (−own top) so every
+   vertical line shares one global lattice with the rest of the grid. */
+.stage-grid .sg-v {
+  left: var(--x);
+  top: var(--y, 0px);
+  width: var(--grid-dot-size);
+  height: calc(var(--h) * var(--sy));
+  transform: translateX(-50%);
+  background-size: var(--grid-dot-size) var(--grid-dot-gap);
+  background-position: center calc(-1 * var(--y, 0px));
+  background-repeat: repeat-y;
+}
+/* Horizontal dotted line — dots across the full width at --y. */
+.stage-grid .sg-h {
+  left: 0;
+  top: var(--y);
+  width: 100vw;
+  height: var(--grid-dot-size);
+  transform: translateY(-50%);
+  background-size: var(--grid-dot-gap) var(--grid-dot-size);
+  background-position: left center;
+  background-repeat: repeat-x;
+}
+
+/* Brand logo pinned into the SECOND top rectangle from the right —
+   the cell between the vertical at 60px-from-right and the vertical at
+   200px-from-right, above the top horizontal (y0→y85). Scales with the
+   grid; sits on every non-opening stage. */
+.grid-logo {
+  position: absolute;
+  top: 0;
+  left: calc(100vw - 150 * var(--sx));   /* moved right 50 (was 200 from right) */
+  width: calc(140 * var(--sx));          /* 200 − 60 = 140 wide */
+  height: calc(85 * var(--sy));          /* down to the top horizontal */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(14 * var(--sy)) calc(16 * var(--sx));
+  z-index: 2;
+  pointer-events: none;
+}
+.grid-logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* The design-4 logotype replaces the old header logo — hide the original
+   so it isn't duplicated (both the text and the stage-0 image version). */
+.q-header-logo-box-v5 { display: none !important; }
+
+/* Interface cleanup (per request):
+   · remove the top-right "back to opening screen" button entirely
+   · remove all "?" help marks and their explanation tooltips
+   · remove the bottom-right step-indicator capsules */
+#q-btn-back-home,
+.q-help,
+.q-help-tip,
+.q-capsule-progress { display: none !important; }
+
+/* ── 18. Staggered post-grid content reveal ──────────────────── */
+.reveal-el {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+              transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.reveal-el.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* #q-main-cell must never carry a transform: any transform value
+   (even translateY(0)) makes it a containing block for any
+   position:fixed descendant — which is exactly what the globe on
+   the origin question relies on NOT happening. Keep its own fade-in
+   (opacity) but drop the translateY component specifically here. */
+#q-main-cell.reveal-el,
+#q-main-cell.reveal-el.is-revealed {
+  transform: none;
+}

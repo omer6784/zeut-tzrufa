@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="he">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>calib test</title>
+  <style>
+    html,body{margin:0;height:100%;background:#282828;}
+    #wrap{position:fixed;inset:5vh 6vw;}
+    #host{position:absolute;inset:0;cursor:pointer;touch-action:none;}
+    .lbl{position:fixed;top:1.5vh;left:0;right:0;text-align:center;
+         font:12px 'IBM Plex Mono',monospace;color:#f5f5ed;opacity:.5;letter-spacing:.08em;}
+
+    .calib-hint{position:absolute;left:0;right:0;top:10px;text-align:center;
+      font:12px 'IBM Plex Mono',ui-monospace,monospace;letter-spacing:.10em;
+      color:#f5f5ed;opacity:.85;pointer-events:none;transition:opacity .3s ease;
+      text-shadow:0 1px 5px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,.9);}
+    .calib-hint.is-hidden{opacity:0;}
+  </style>
+</head>
+<body>
+  <div class="lbl" id="lbl">frequency squares test — tap one</div>
+  <div id="wrap"><div id="host"></div></div>
+  <script type="module">
+    import { mountCalibration } from './calibration.js';
+    mountCalibration(document.getElementById('host'), {
+      onFreeze: (hex) => { document.getElementById('lbl').textContent = 'freeze ' + hex; },
+      onLock:   (hex) => { document.getElementById('lbl').textContent = 'lock ' + hex; },
+    });
+  </script>
+</body>
+</html>

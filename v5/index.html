@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spatial Interface — v5 geometric</title>
+  <link rel="stylesheet" href="styles.css?v=81" />
+  <!-- v5 override layer: redraws the visual surface as outlines + nodes
+       on top of v4's full functionality. styles.css stays first so its
+       cascade order is preserved; geometric.css wins by being later. -->
+  <link rel="stylesheet" href="geometric.css?v=29" />
+  <link rel="stylesheet" href="stage1.css?v=143" />
+  <!-- Portrait Story recording layout (opening screen only). Loaded LAST and
+       scoped to html.story-mode; inert for the exhibition. -->
+  <link rel="stylesheet" href="story.css?v=18" />
+  <!-- The opening screen is always the ORANGE scheme (the dark/cream variants
+       were dropped). The variety now comes from a RANDOM 3D symbol in the
+       hanging pendulum (see hamsa-pendulum.js). -->
+  <script>
+    document.documentElement.classList.add('landing-orange');
+    // Story/recording frame (demo.html) loads this page with ?story=1 to reflow
+    // the landing for a 1280×2560 portrait Story. Exhibition (no flag) untouched.
+    if (/[?&]story=1\b/.test(location.search)) document.documentElement.classList.add('story-mode');
+  </script>
+</head>
+<body>
+
+  <!-- Global restart button -->
+  <button id="btn-restart" onclick="location.reload()">
+    <img id="btn-restart-img" src="/image/חזור למסך הפתיחה.png" alt="חזור למסך הפתיחה" />
+  </button>
+
+
+  <!-- Section 1: Landing -->
+  <section id="section-1" class="screen-panel">
+    <!-- Construction grid — IDENTICAL to the stage-1 grid (same spans/positions)
+         so it never moves or changes layout during the opening→stage-1
+         transition; only its colour morphs. Rendered white here to read on the
+         orange landing background. -->
+    <div class="stage-grid" aria-hidden="true">
+      <span class="sg-v" style="--x: calc(100vw - 200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-h" style="--y: calc(85 * var(--sy));"></span>
+      <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-v" style="--x: calc(100vw - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-h" style="--y: calc(706 * var(--sy));"></span>
+    </div>
+
+    <div id="v5-landing-title-wrap">
+      <!-- Logotype split into two layers so the letters can be recoloured per
+           landing palette while the gold dot always stays gold:
+           · letters = a solid fill masked by zeut-letters.png (dot removed)
+           · dot     = zeut-dot.png (gold only) overlaid at the same coords -->
+      <div id="v5-landing-title" role="img" aria-label="זהות צרופה">
+        <span class="v5-title-letters" aria-hidden="true"></span>
+        <img class="v5-title-dot" src="/image/zeut-dot.png" alt="" aria-hidden="true" />
+      </div>
+    </div>
+
+    <!-- Animated dotted hamsa (p5 sketch) — hangs like a pendulum on the right -->
+    <div id="hamsa-pendulum" aria-hidden="true"></div>
+
+    <div class="ui-label" id="ui-top-left">צור את התכשיט האישי שלך</div>
+
+    <div id="ui-top-right">
+      <img id="ui-version-bar" src="/image/icons/Asset 43.png" alt="VERSION 2" />
+      <div id="ui-coords">
+        <span id="coord-x">X: 08</span>
+        <span id="coord-y">Y: 22</span>
+        <span id="coord-z">Z: 04</span>
+      </div>
+    </div>
+
+    <div id="ui-bottom-left">
+      <div class="ui-label ui-v">V 2.0</div>
+    </div>
+
+    <div id="ui-bottom-right"></div>
+    <a id="btn-symbol-library" href="/v2/symbol-library.html">מאגר הסמלים</a>
+
+    <!-- CTA -->
+    <div id="cta-anchor">לחץ להתחלה</div>
+
+    <div id="ui-crosshair">⊕</div>
+
+    <!-- Construction grid now lives inside the 3D titleGroup (see initTitleScene3D in app.js)
+         so it inherits the same perspective and motion as the words. -->
+
+  </section>
+
+  <!-- Section 3: Questionnaire -->
+  <section id="section-3" class="screen-panel">
+    <!-- ═══ Fixed interface grid ═══════════════════════════════════
+         One permanent dotted-grid system every non-opening screen sits
+         on. Coordinates are the reference spec at base 1360×768; each
+         position/length is multiplied by --sx / --sy so it stays
+         proportional on any viewport. Never rebuilt or moved per stage. -->
+    <div class="stage-grid" aria-hidden="true">
+      <!-- Top short verticals (y:0, height 85). --sx/--sy are lengths
+           (≈1px at base), so positions/lengths are unitless-number × scale. -->
+      <span class="sg-v" style="--x: calc(100vw - 200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 85;"></span>
+      <!-- Top horizontal (y:85, full width) -->
+      <span class="sg-h" style="--y: calc(85 * var(--sy));"></span>
+      <!-- Center verticals (y:85, height 668) -->
+      <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-v" style="--x: calc(100vw - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <!-- Bottom horizontal (y:686, full width) -->
+      <span class="sg-h" style="--y: calc(706 * var(--sy));"></span>
+    </div>
+
+    <!-- Symbol library button in top-left cell -->
+    <a id="q-btn-symbol-library" href="/v2/symbol-library.html">מאגר הסמלים</a>
+
+    <!-- Restart-stage button — permanent chrome, top-left of the central grid
+         rectangle on every stage. -->
+    <button id="stage-restart-btn" type="button" aria-label="אתחול שלב">
+      <svg class="stage-restart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="1 4 1 10 7 10"></polyline>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+      </svg>
+      <span>אתחול שלב</span>
+    </button>
+
+    <!-- Left progress rail: up-arrow "previous stage" button (near the top
+         grid) above 8 step dots. Fixed to the same spot on every stage. -->
+    <button id="step-prev-btn" type="button" aria-label="לשלב הקודם">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="5 12 12 5 19 12"></polyline>
+      </svg>
+      <span>לשלב הקודם</span>
+    </button>
+    <ol id="step-rail" aria-hidden="true">
+      <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+    </ol>
+    <button id="step-next-btn" type="button" aria-label="לשלב הבא">
+      <span>לשלב הבא</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <polyline points="5 12 12 19 19 12"></polyline>
+      </svg>
+    </button>
+
+    <!-- Per-stage instructions, in the bottom rectangle of the grid. -->
+    <div id="q-instruction" aria-hidden="true"></div>
+
+    <!-- Brand logo (design option 4 · logotype.png), pinned permanently
+         into the SECOND top rectangle from the right formed by the grid
+         (between the verticals 60px and 200px from the right, above the
+         top horizontal at y85). Scales with the grid, present on every
+         non-opening stage. -->
+    <div class="grid-logo" aria-hidden="true">
+      <img src="/image/v5-stage1/logotype.png" alt="זהות צרופה" />
+    </div>
+
+    <!-- Stage 1 (origin) right-hand panel — per the reference: dotted
+         title (roots.png), a dotted divider, the instruction line, a
+         second divider, then the three symbol-legend labels. A dotted
+         vertical rule runs down its left edge. Only on data-stage 0. -->
+    <div class="stage1-panel" aria-hidden="true">
+      <div class="s1p-title" role="img" aria-label="איפה הסיפור שלך מתחיל?">
+        <span class="s1p-line s1p-line-top"></span>
+        <span class="s1p-line s1p-line-bot"></span>
+      </div>
+      <div class="s1p-rule"></div>
+      <div class="s1p-instruction">בחר את ארצות המוצא מהן הגיעה משפחתך.</div>
+    </div>
+
+    <!-- Stage 2 (word) — dark screen per the design-4 reference:
+         big dotted prompt, instruction, left vertical wordmark, and the
+         1-8 step list. Only shown on data-stage 1. -->
+    <div class="stage2" aria-hidden="true">
+      <div class="s2-instruction">לחצו על הנקודה שתסב לכם אושר.</div>
+      <img class="s2-prompt" src="/image/v5-stage2/prompt-light.png" alt="מהי הנקודה שמגדירה את האופי שלך?" />
+      <div id="s2-dots-container" class="s2-dots-container"></div>
+      <ol class="s2-steps">
+        <li>1</li>
+        <li class="is-current">2</li>
+        <li>3</li>
+        <li>4</li>
+        <li>5</li>
+        <li>6</li>
+        <li>7</li>
+        <li>8</li>
+      </ol>
+    </div>
+
+    <div id="questionnaire-layout">
+      <!-- Row 1: Header (continuous toolbar) -->
+      <header class="grid-cell q-header-container reveal-el" style="grid-column: 1 / 4; grid-row: 1; z-index: 100;">
+        <button id="q-btn-back-home" onclick="location.reload()">→ חזור למסך הפתיחה</button>
+        <div class="q-header-progress-text-wrap">
+          <span class="q-header-progress-glow"></span>
+          <span class="q-header-progress-val">
+            <span class="q-hp-current">01</span>
+            <span class="q-hp-line" aria-hidden="true"></span>
+            <span class="q-hp-total">08</span>
+          </span>
+        </div>
+        <div class="q-header-logo-box-v5">
+          <span class="q-header-logo-text">זהות צרופה</span>
+        </div>
+      </header>
+
+      <!-- Left sidebar background (continuous dark sidebar) -->
+      <div class="grid-cell q-chrome-side reveal-el" style="grid-column: 1; grid-row: 2 / 4; z-index: 3;">
+        <div class="q-chrome-side-corner-mark" aria-hidden="true"></div>
+        <div class="q-chrome-side-spine" aria-hidden="true"></div>
+      </div>
+      <!-- The rotated left-margin wordmark (typewriter reveal). It is
+           position:fixed, so it lives OUTSIDE the (now-hidden) jewelry column
+           sidebar — otherwise `.q-chrome-side { display:none }` would hide it. -->
+      <div id="sidebar-tagline" aria-hidden="true"></div>
+
+      <!-- Row 2: Left column (artifact canvas overlay) -->
+      <div class="grid-cell reveal-el" id="artifact-col" style="grid-column: 1; grid-row: 2 / 4; z-index: 4; background: transparent; border-right: none !important;">
+        <canvas id="artifact-canvas"></canvas>
+        <div id="artifact-annotations"></div>
+      </div>
+      <div class="grid-cell mid-mid reveal-el" id="q-main-cell">
+        <div id="stage2-float-dots" aria-hidden="true"></div>
+        <div id="word-field-container"></div>
+        <div id="middle-q-container">
+          <div id="q-header">
+            <div id="q-counter">
+              <span id="q-num-current">01</span>
+              <span id="q-counter-sep"> / </span>
+              <span id="q-num-total">06</span>
+              <span id="q-counter-plus">+</span>
+            </div>
+            <div id="q-text"></div>
+          </div>
+          <div id="q-content">
+            <div id="q-example"></div>
+            <div id="q-input-wrap"></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-cell mid-right reveal-el" id="q-deco-mid-right">
+        <div class="deco-brand-text">TALISMAN / מידות</div>
+        <div class="deco-brand-sub">DIMENSIONS</div>
+        <div class="deco-coords"><span id="deco-coord-val">H 18MM × W 12MM</span></div>
+      </div>
+
+      <!-- v5: hero PNG removed; question text is rendered by Shofar font. -->
+
+
+      <!-- Row 3: Footer decoration cells (bottom nav arrows removed — navigation
+           is only via the right-side rail #step-prev-btn / #step-next-btn). -->
+      <div class="grid-cell bot-left reveal-el" id="q-deco-bot-left"></div>
+      <div class="grid-cell bot-mid"></div>
+      <div class="grid-cell bot-right reveal-el" id="q-deco-bot-right"></div>
+    </div>
+  </section>
+
+  <!-- Global theme toggle button -->
+  <button id="theme-toggle-btn" aria-label="החלף ניגודיות"></button>
+
+  <div id="cursor" aria-hidden="true">
+    <svg viewBox="0 0 22 26" xmlns="http://www.w3.org/2000/svg">
+      <!-- Open hand — the default pointer -->
+      <g class="cursor-open" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="7" y1="3" x2="7" y2="13"/>
+        <line x1="11" y1="1.5" x2="11" y2="13"/>
+        <line x1="14.5" y1="3" x2="14.5" y2="13"/>
+        <line x1="17.5" y1="5" x2="17.5" y2="13"/>
+        <path d="M5 13 Q3 13 2.5 11 Q2 9 3.5 8"/>
+        <path d="M5 13 Q4 19 8 22 L13 22 Q18 22 19 17 L19 13"/>
+      </g>
+      <!-- Grabbing hand (fist) — shown while dragging, e.g. spinning the globe.
+           Simple: a rounded fist with folded-finger divisions and a tucked thumb. -->
+      <g class="cursor-fist" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="11" width="11" height="11" rx="3.4"/>
+        <path d="M8.7 11.2 L8.7 13.8"/>
+        <path d="M11.5 11 L11.5 13.8"/>
+        <path d="M14.3 11.2 L14.3 13.8"/>
+        <path d="M6 14.8 Q3.5 14.5 3.7 12.5 Q3.9 11 5.7 11.5"/>
+      </g>
+    </svg>
+  </div>
+  <script type="module" src="app.js"></script>
+  <script type="module">
+    import { mountHamsaPendulum } from './hamsa-pendulum.js';
+    const host = document.getElementById('hamsa-pendulum');
+    if (host) mountHamsaPendulum(host);
+  </script>
+  <!-- v5 procedural construction-grid overlay disabled to keep UI clean and minimal -->
+  <!-- <script type="module" src="geometric.js" defer></script> -->
+</body>
+</html>

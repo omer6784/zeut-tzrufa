@@ -1,0 +1,734 @@
+/* ============================================================
+   Distilled Identity — Experience Prototype
+   Visual language: Abstracta Obscura — retro-futurist mesh
+   gradient, black silhouette + outline elements, checker,
+   drip, chain, wireframe, grain. Rich motion vocabulary.
+   ============================================================ */
+
+:root {
+  --c-bg:     #f5efe8;
+  --c-ink:    #1a1208;
+  --c-black:  #0d0d0d;
+  --c-grad-1: #f97316; /* orange */
+  --c-grad-2: #facc15; /* yellow */
+  --c-grad-3: #ec4899; /* pink */
+  --c-grad-4: #6366f1; /* indigo */
+  --c-grad-5: #a855f7; /* purple */
+  --ease:        cubic-bezier(.22, .61, .25, 1);
+  --ease-in:     cubic-bezier(.5, 0, .2, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-snap:   cubic-bezier(.83, 0, .17, 1);
+  --ease-drip:   cubic-bezier(.55, 1.6, .4, .9);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: 'Heebo', 'Arial Hebrew', system-ui, sans-serif;
+  overflow: hidden;
+}
+
+#proto-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ─────────────────── Background: aurora mesh gradient ─────────────────── */
+
+#proto-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* The main aurora mesh — multi-stop radial gradient constellation,
+   slow-drifting each stop to create an organic warm field. */
+#proto-mesh {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(ellipse 60% 50% at 18% 28%, rgba(249,115,22,0.55), transparent 60%),
+    radial-gradient(ellipse 52% 46% at 80% 18%, rgba(250,204,21,0.50), transparent 58%),
+    radial-gradient(ellipse 55% 60% at 62% 80%, rgba(236,72,153,0.45), transparent 62%),
+    radial-gradient(ellipse 50% 54% at 8%  78%, rgba(99,102,241,0.40), transparent 58%),
+    radial-gradient(ellipse 44% 46% at 90% 60%, rgba(168,85,247,0.42), transparent 55%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(255,255,255,0.55), transparent 70%);
+  background-color: #fdf6ee;
+  animation: mesh-breathe 28s ease-in-out infinite;
+  filter: blur(0px) saturate(1.05);
+}
+@keyframes mesh-breathe {
+  0%   { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+  25%  { transform: translate3d(-2%,1.5%,0) scale(1.03) rotate(0.4deg); }
+  50%  { transform: translate3d(1.5%,-1%,0) scale(1.06) rotate(-0.3deg); filter: saturate(1.25); }
+  75%  { transform: translate3d(-1%,2%,0) scale(1.02) rotate(0.2deg); }
+  100% { transform: translate3d(0,0,0) scale(1) rotate(0deg); }
+}
+
+/* Checkerboard layer — the single strongest visual cue from the reference.
+   Two variants: flat (above) and perspective-warped (during transitions). */
+#proto-checker {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s var(--ease), transform 1.2s var(--ease-snap);
+  background-image:
+    repeating-conic-gradient(#0d0d0d 0% 25%, transparent 0% 50%);
+  background-size: 40px 40px;
+  mix-blend-mode: multiply;
+}
+#proto-checker.is-flash {
+  opacity: 0.22;
+  animation: checker-flash 0.55s var(--ease-snap) forwards;
+}
+@keyframes checker-flash {
+  0%   { opacity: 0.28; transform: perspective(600px) rotateX(0deg) scale(1.1); }
+  40%  { opacity: 0.18; transform: perspective(600px) rotateX(14deg) scale(1.04); }
+  100% { opacity: 0; transform: perspective(600px) rotateX(0deg) scale(1); }
+}
+
+/* Mood overlays — per-stage tint shifts without losing the mesh.
+   Very low opacity, just enough to nudge warmth/cool balance. */
+.mood {
+  position: absolute;
+  inset: -10%;
+  opacity: 0;
+  transition: opacity 1.6s var(--ease);
+  pointer-events: none;
+}
+.mood.is-active { opacity: 1; }
+
+.mood-blue     { background: radial-gradient(60% 55% at 30% 65%, rgba(99,102,241,0.22), transparent 70%); }
+.mood-warm     { background: radial-gradient(58% 52% at 70% 28%, rgba(249,115,22,0.25), transparent 68%); }
+.mood-contrast { background: radial-gradient(50% 48% at 50% 50%, rgba(236,72,153,0.18), transparent 65%); }
+.mood-soft     { background: radial-gradient(65% 60% at 48% 40%, rgba(168,85,247,0.15), transparent 70%); }
+
+/* Grid reference lines — fine, subtle, always present */
+#proto-grid {
+  position: absolute;
+  inset: -2px;
+  background-image:
+    repeating-linear-gradient(0deg,  rgba(13,13,13,0.08) 0 1px, transparent 1px 80px),
+    repeating-linear-gradient(90deg, rgba(13,13,13,0.08) 0 1px, transparent 1px 80px);
+  transition: transform 1.6s var(--ease);
+}
+
+/* Crosshair */
+#proto-crosshair {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.25;
+  transition: transform 2s var(--ease);
+}
+#proto-crosshair::before,
+#proto-crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(13,13,13,0.2);
+}
+#proto-crosshair::before { left: 0; right: 0; top: 50%; height: 1px; }
+#proto-crosshair::after  { top: 0; bottom: 0; left: 50%; width: 1px; }
+
+/* Grain — heavy, analogue, covers everything */
+#proto-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  animation: grain-shift 0.12s steps(1) infinite;
+}
+@keyframes grain-shift {
+  0%  { background-position: 0 0; }
+  25% { background-position: -40px -20px; }
+  50% { background-position: 20px 40px; }
+  75% { background-position: -20px 10px; }
+}
+
+/* ─────────────────── Floating particle field ─────────────────── */
+/* Small retro-futurist marks: cross, diamond, circle, chain link,
+   arrow, dot — scattered at varying opacities, never still. */
+#proto-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+#proto-particles span {
+  position: absolute;
+  display: inline-block;
+  color: var(--c-black);
+  opacity: var(--p-op, 0.4);
+  font-size: var(--p-size, 18px);
+  left: var(--p-x, 50%);
+  top: var(--p-y, 50%);
+  transform: translate3d(-50%, -50%, 0) rotate(var(--p-rot, 0deg));
+  animation: particle-drift var(--p-dur, 26s) ease-in-out infinite;
+  animation-delay: var(--p-delay, 0s);
+  font-weight: 900;
+  user-select: none;
+}
+#proto-particles span:nth-child(3n)   { color: rgba(13,13,13,0.8); }
+#proto-particles span:nth-child(3n+1) { color: rgba(13,13,13,0.4); }
+#proto-particles span:nth-child(3n+2) { color: rgba(13,13,13,0.6); mix-blend-mode: multiply; }
+@keyframes particle-drift {
+  0%   { transform: translate3d(-50%,-50%,0) rotate(var(--p-rot,0deg)) scale(1); }
+  33%  { transform: translate3d(calc(-50% + 18px), calc(-50% - 22px),0) rotate(calc(var(--p-rot,0deg) + 14deg)) scale(1.1); }
+  66%  { transform: translate3d(calc(-50% - 12px), calc(-50% + 8px), 0) rotate(calc(var(--p-rot,0deg) - 8deg)) scale(0.95); }
+  100% { transform: translate3d(-50%,-50%,0) rotate(var(--p-rot,0deg)) scale(1); }
+}
+
+/* ─────────────────── Persistent object ─────────────────────────
+   The accumulating composition uses retro-futurist fragment
+   vocabulary: chain links, drip, chevron arrows, wireframe box,
+   diamond clusters, nested rectangle outlines. Black filled +
+   outline variants, no colour — the mesh shines through them. */
+
+#proto-object-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: transform 1.5s var(--ease);
+}
+
+#proto-object {
+  position: relative;
+  width: 380px;
+  height: 380px;
+  transition: transform 1.6s var(--ease);
+}
+
+.obj-layer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: center;
+  opacity: 0;
+  transform:
+    translate3d(-50%, calc(-50% - 60px), 0)
+    scale(0.5)
+    rotate(-30deg);
+  transition:
+    opacity 0.7s var(--ease),
+    transform 1.4s var(--ease-drip);
+}
+.obj-layer.is-in {
+  opacity: var(--l-op, 1);
+  transform:
+    translate3d(calc(-50% + var(--lx,0px)), calc(-50% + var(--ly,0px)), 0)
+    scale(var(--ls,1))
+    rotate(var(--lr,0deg));
+  animation: layer-sway var(--l-dur,11s) ease-in-out infinite;
+  animation-delay: var(--l-delay,0s);
+}
+@keyframes layer-sway {
+  0%,100% { margin: 0; }
+  50%     { margin: -8px 6px 0 0; }
+}
+
+/* ── Fragment shapes — all SVG-drawn inline via background-image or
+   clip-path + border tricks. Black or outline only. ── */
+
+/* CHAIN LINK — two interlocked ovals */
+.obj-layer.shape-chain {
+  width: 90px; height: 130px;
+  background:
+    radial-gradient(ellipse 36px 48px at 27px 40px, transparent 20px, var(--c-black) 20px, var(--c-black) 22px, transparent 22px),
+    radial-gradient(ellipse 36px 48px at 63px 90px, transparent 20px, var(--c-black) 20px, var(--c-black) 22px, transparent 22px);
+  opacity: 0.85;
+}
+
+/* DRIP — melting spike shape */
+.obj-layer.shape-drip {
+  width: 80px; height: 110px;
+  background: var(--c-black);
+  clip-path: polygon(
+    10% 0%, 90% 0%,
+    90% 60%, 82% 60%, 88% 80%, 76% 62%, 72% 100%,
+    62% 65%, 58% 88%, 52% 60%, 48% 60%,
+    44% 85%, 38% 60%, 28% 60%, 22% 75%,
+    10% 60%
+  );
+}
+
+/* CHEVRON ARROWS stacked */
+.obj-layer.shape-chevron {
+  width: 100px; height: 80px;
+  background: var(--c-black);
+  clip-path: polygon(
+    0% 20%, 50% 50%, 100% 20%,
+    100% 40%, 50% 70%, 0% 40%
+  );
+}
+
+/* DIAMOND CLUSTER — nested outline diamonds */
+.obj-layer.shape-diamond {
+  width: 100px; height: 100px;
+  background: transparent;
+  border: 10px solid var(--c-black);
+  transform-origin: center;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* WIREFRAME BOX outline */
+.obj-layer.shape-wire {
+  width: 120px; height: 100px;
+  border: 3px solid var(--c-black);
+  background: transparent;
+  box-shadow: 12px 12px 0 var(--c-black);
+}
+
+/* NESTED RECT outlines (like the layered bracket shape in ref) */
+.obj-layer.shape-nested {
+  width: 110px; height: 110px;
+  border: 3px solid var(--c-black);
+  background: transparent;
+  outline: 3px solid var(--c-black);
+  outline-offset: 8px;
+  box-shadow:
+    0 0 0 14px transparent,
+    0 0 0 17px var(--c-black),
+    0 0 0 28px transparent,
+    0 0 0 31px var(--c-black);
+}
+
+/* CROSS ORNAMENT — big plus sign */
+.obj-layer.shape-cross {
+  width: 80px; height: 80px;
+  background: var(--c-black);
+  clip-path: polygon(
+    35%  0%,  65%  0%,  65%  35%,
+    100% 35%, 100% 65%, 65%  65%,
+    65%  100%, 35% 100%, 35%  65%,
+    0%   65%,  0%  35%, 35%  35%
+  );
+}
+
+/* GLYPH — Hebrew letter, black filled, large */
+.obj-layer.shape-glyph {
+  width: 220px; height: 220px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 140px;
+  font-weight: 900;
+  color: var(--c-black);
+  line-height: 1;
+}
+
+/* Impact ring — expands outward on fragment land */
+.impact-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 60px;
+  border: 3px solid var(--c-black);
+  transform: translate3d(-50%,-50%,0) scale(0.3);
+  opacity: 0.6;
+  pointer-events: none;
+  animation: impact-expand 0.7s var(--ease-in) forwards;
+}
+@keyframes impact-expand {
+  to {
+    transform: translate3d(-50%,-50%,0) scale(5);
+    opacity: 0;
+    border-width: 0.5px;
+  }
+}
+
+/* Beat pulse on stage change */
+@keyframes beat-pulse {
+  0%   { transform: scale(1); filter: saturate(1); }
+  20%  { transform: scale(0.96) rotate(-0.8deg); filter: saturate(1.4) contrast(1.08); }
+  50%  { transform: scale(1.02) rotate(0.5deg); filter: saturate(1.1); }
+  100% { transform: scale(1); filter: saturate(1); }
+}
+#proto-root.is-beating {
+  animation: beat-pulse 0.8s var(--ease-spring);
+}
+
+/* ─────────────────── Typography stage ─────────────────────────── */
+
+#proto-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 8vh;
+  pointer-events: none;
+}
+
+#proto-prompt {
+  font-size: clamp(30px, 4.8vw, 62px);
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 88vw;
+  margin-bottom: 40px;
+  color: var(--c-black);
+}
+
+/* Word enter: drops in from above, like a drip */
+#proto-prompt .word {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, -48px, 0) scale(0.82);
+  transition:
+    opacity 0.6s var(--ease),
+    transform 0.9s var(--ease-drip);
+}
+/* Alternate words: outline style on light bg */
+#proto-prompt .word:nth-child(3n+2) {
+  -webkit-text-stroke: 2px var(--c-black);
+  color: transparent;
+}
+#proto-prompt.is-in .word {
+  opacity: 1;
+  transform: translate3d(0,0,0) scale(1);
+}
+#proto-prompt.is-out .word {
+  opacity: 0;
+  transform: translate3d(0, 38px, 0) scale(1.08);
+  transition:
+    opacity 0.4s var(--ease-in),
+    transform 0.5s var(--ease-snap);
+}
+
+/* ── Prompt layout variants ── */
+
+#proto-stage[data-layout] { justify-content: center; }
+
+#proto-prompt[data-layout="giant"] {
+  font-size: clamp(44px, 9vw, 130px);
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  max-width: 92vw;
+}
+
+#proto-prompt[data-layout="diagonal"] {
+  font-size: clamp(32px, 5.8vw, 72px);
+  max-width: 62vw;
+  text-align: start;
+  transform: rotate(-5deg) translateX(-5vw);
+  margin-bottom: 16vh;
+}
+#proto-prompt[data-layout="diagonal"].is-in { transform: rotate(-5deg) translateX(-5vw); }
+
+#proto-prompt[data-layout="fragment"] {
+  max-width: 96vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em 1em;
+  font-size: clamp(28px, 4.8vw, 56px);
+}
+#proto-prompt[data-layout="fragment"] .word:nth-child(odd) {
+  transform: translate3d(0, -44px, 0) rotate(-4deg);
+}
+#proto-prompt[data-layout="fragment"] .word:nth-child(even) {
+  transform: translate3d(0, 40px, 0) rotate(4deg);
+}
+#proto-prompt[data-layout="fragment"].is-in .word {
+  transform: translate3d(0,0,0) rotate(0deg);
+}
+
+#proto-prompt[data-layout="orbit"] {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9vh 8vw;
+  font-size: clamp(28px, 4.4vw, 52px);
+  max-width: none;
+  pointer-events: none;
+}
+#proto-prompt[data-layout="orbit"] .arc { display: block; text-align: center; }
+#proto-prompt[data-layout="orbit"] .arc-top .word    { transform: translate3d(0,-36px,0) scale(0.88); }
+#proto-prompt[data-layout="orbit"] .arc-bottom .word { transform: translate3d(0, 36px,0) scale(0.88); }
+#proto-prompt[data-layout="orbit"].is-in .word       { transform: translate3d(0,0,0) scale(1); }
+
+#proto-prompt[data-layout="stack"] {
+  position: absolute;
+  inset-inline-end: 6vw;
+  inset-block-start: 14vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.06em;
+  max-width: 50vw;
+  text-align: end;
+  font-size: clamp(28px, 5.2vw, 74px);
+  line-height: 1.04;
+}
+#proto-prompt[data-layout="stack"] .word { display: block; }
+#proto-prompt[data-layout="stack"] .word:nth-child(2) { font-size: 1.32em; -webkit-text-stroke: 2px var(--c-black); color: transparent; }
+#proto-prompt[data-layout="stack"] .word:nth-child(odd)  { transform: translate3d(-5vw,46px,0) rotate(-2deg); }
+#proto-prompt[data-layout="stack"] .word:nth-child(even) { transform: translate3d( 5vw,46px,0) rotate( 2deg); }
+#proto-prompt[data-layout="stack"].is-in .word { transform: translate3d(0,0,0) rotate(0deg); }
+#proto-stage[data-layout="stack"] { align-items: flex-start; }
+#proto-stage[data-layout="stack"] #proto-input { position: absolute; bottom: 11vh; }
+
+#proto-prompt[data-layout="marquee"] {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  transform: translateY(-50%) rotate(-2deg);
+  max-width: none;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: clamp(50px, 10vw, 140px);
+  font-weight: 900;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+#proto-prompt[data-layout="marquee"] .marquee-track {
+  display: inline-flex;
+  gap: 0.7em;
+  animation: marquee-scroll 20s linear infinite;
+}
+#proto-prompt[data-layout="marquee"] .word {
+  display: inline-block;
+  transform: none;
+  opacity: 1 !important;
+}
+#proto-prompt[data-layout="marquee"] .word:nth-child(odd)  {
+  -webkit-text-stroke: 3px var(--c-black); color: transparent;
+}
+#proto-prompt[data-layout="marquee"] .word:nth-child(even) { color: var(--c-black); }
+@keyframes marquee-scroll {
+  from { transform: translate3d(0,0,0); }
+  to   { transform: translate3d(-50%,0,0); }
+}
+#proto-stage[data-layout="marquee"] #proto-input { position: absolute; bottom: 12vh; }
+
+#proto-stage[data-layout="diagonal"],
+#proto-stage[data-layout="side"] { align-items: flex-start; }
+
+#proto-stage[data-layout="orbit"] #proto-input { position: absolute; bottom: 9vh; }
+
+/* ─────────────────── Choice cards ─────────────────────────────── */
+
+#proto-input {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translate3d(0, 30px, 0);
+  transition: opacity 0.55s var(--ease) 0.1s, transform 0.65s var(--ease) 0.1s;
+}
+#proto-input.is-in  { opacity: 1; transform: translate3d(0,0,0); }
+#proto-input.is-out { opacity: 0; transform: translate3d(0,-18px,0);
+  transition: opacity 0.32s var(--ease-in), transform 0.38s var(--ease-in); }
+
+/* Cards: black border, white fill, heavy typographic serif weight */
+.opt-card {
+  appearance: none;
+  border: 3px solid var(--c-black);
+  background: rgba(240,236,227,0.85);
+  color: var(--c-black);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 0;               /* sharp corners — no rounded softness */
+  cursor: pointer;
+  transition:
+    transform 0.3s var(--ease),
+    background 0.25s var(--ease),
+    box-shadow 0.3s var(--ease);
+  box-shadow: 4px 4px 0 var(--c-black);
+  position: relative;
+}
+.opt-card:hover {
+  background: var(--c-black);
+  color: var(--c-ink);
+  transform: translate3d(-3px,-3px,0);
+  box-shadow: 7px 7px 0 rgba(13,13,13,0.5);
+}
+.opt-card:active { transform: translate3d(0,0,0); box-shadow: none; }
+.opt-card.is-chosen {
+  background: var(--c-black);
+  color: var(--c-ink);
+  transform: scale(0.96) rotate(-1.5deg);
+  box-shadow: none;
+}
+
+/* ─────────────────── Inscription input ────────────────────────── */
+
+.inscribe-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.inscribe-line {
+  font-size: clamp(22px, 3.2vw, 36px);
+  font-weight: 700;
+  background: transparent;
+  border: none;
+  border-bottom: 4px solid var(--c-black);
+  color: var(--c-black);
+  text-align: center;
+  min-width: 300px;
+  padding: 6px 4px 14px;
+  outline: none;
+  font-family: inherit;
+  caret-color: var(--c-black);
+  transition: border-color 0.3s var(--ease);
+}
+.inscribe-line:focus { border-color: rgba(13,13,13,0.5); }
+.inscribe-line::placeholder { color: rgba(13,13,13,0.3); }
+
+.inscribe-hint {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: rgba(13,13,13,0.5);
+  font-weight: 600;
+}
+.inscribe-go {
+  margin-top: 8px;
+  appearance: none;
+  border: 3px solid var(--c-black);
+  background: var(--c-black);
+  color: var(--c-ink);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 12px 34px;
+  border-radius: 0;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: transform 0.28s var(--ease), background 0.28s var(--ease), color 0.28s var(--ease);
+  box-shadow: 4px 4px 0 rgba(13,13,13,0.35);
+}
+.inscribe-go:hover {
+  background: var(--c-ink);
+  color: var(--c-black);
+  transform: translate3d(-2px,-2px,0);
+}
+
+/* ─────────────────── Progress dots ────────────────────────────── */
+
+#proto-progress {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+  mix-blend-mode: multiply;
+}
+.prog-dot {
+  width: 10px; height: 10px;
+  border: 2px solid var(--c-black);
+  background: transparent;
+  border-radius: 0;
+  transition: background 0.35s var(--ease), transform 0.5s var(--ease-spring);
+}
+.prog-dot.is-active {
+  background: var(--c-black);
+  transform: scale(1.4) rotate(45deg);
+}
+.prog-dot.is-done {
+  background: var(--c-black);
+  opacity: 0.4;
+}
+
+/* ─────────────────── Intro overlay ────────────────────────────── */
+
+#proto-intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  z-index: 10;
+  background: transparent;
+  transition: opacity 1s var(--ease), transform 1.2s var(--ease);
+}
+#proto-intro.is-leaving {
+  opacity: 0;
+  transform: scale(1.1);
+  pointer-events: none;
+}
+
+/* Intro background: light pastel aurora mesh */
+#proto-intro::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(ellipse 55% 50% at 22% 32%, rgba(249,115,22,0.52), transparent 58%),
+    radial-gradient(ellipse 48% 44% at 76% 18%, rgba(250,204,21,0.48), transparent 55%),
+    radial-gradient(ellipse 52% 58% at 62% 80%, rgba(236,72,153,0.42), transparent 60%),
+    radial-gradient(ellipse 46% 50% at 8%  78%, rgba(99,102,241,0.38), transparent 56%),
+    radial-gradient(ellipse 40% 42% at 86% 60%, rgba(168,85,247,0.40), transparent 53%),
+    radial-gradient(ellipse 80% 80% at 50% 48%, rgba(255,255,255,0.60), transparent 68%);
+  background-color: #fdf6ee;
+  animation: mesh-breathe 24s ease-in-out infinite;
+  z-index: -1;
+}
+
+#proto-intro-question {
+  font-size: clamp(36px, 6.5vw, 84px);
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.15;
+  max-width: 82vw;
+  color: var(--c-ink);
+  text-shadow: 0 2px 24px rgba(0,0,0,0.4);
+  animation: intro-drip 1.2s var(--ease-drip) both;
+}
+@keyframes intro-drip {
+  from { opacity: 0; transform: translate3d(0,-60px,0) scale(0.9); }
+  to   { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+
+#proto-intro-cta {
+  appearance: none;
+  border: 3px solid var(--c-black);
+  background: var(--c-black);
+  color: var(--c-ink);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 18px 54px;
+  border-radius: 0;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition:
+    background 0.3s var(--ease),
+    color 0.3s var(--ease),
+    transform 0.3s var(--ease),
+    box-shadow 0.3s var(--ease);
+  box-shadow: 6px 6px 0 rgba(13,13,13,0.55);
+}
+#proto-intro-cta:hover {
+  background: var(--c-ink);
+  color: var(--c-black);
+  transform: translate3d(-3px,-3px,0);
+  box-shadow: 9px 9px 0 rgba(13,13,13,0.3);
+}
+
+/* ─────────────────── Reduced motion ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

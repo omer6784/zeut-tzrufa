@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>זהות צרופה — Story · 1280×2560</title>
+  <!--
+    TEMPORARY recording mode — NOT part of the exhibition.
+
+    Renders the real interface (v5/index.html, unchanged) inside a PORTRAIT
+    1280×2560 Story frame for an mp4 capture. The interface is landscape (16:9),
+    so it can't fill a tall portrait without cropping/stretching — instead it sits
+    FULL-WIDTH and centred, and the space above/below is filled with the
+    interface's OWN live background colour, so the whole thing reads as one
+    continuous portrait composition (not a letter-boxed video). Every animation
+    and interaction is the live interface, just framed.
+
+    The frame scales to fit the preview window; capture it at 1280×2560 for a
+    native Story. The exhibition still runs from /v5/index.html, untouched.
+  -->
+  <style>
+    :root { --fit: 1; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0e0e0e; }
+
+    /* The 1280×2560 portrait recording target. */
+    #rec-frame {
+      position: fixed;
+      top: 50%; left: 50%;
+      width: 1280px; height: 2560px;
+      transform: translate(-50%, -50%) scale(var(--fit));
+      transform-origin: center center;
+      overflow: hidden;
+      background: #f5f5ed;                 /* = the interface's live bg (JS keeps it in sync) */
+      transition: background-color .4s ease;
+    }
+
+    /* The live interface at its native 16:9 (1280×720 = the exhibition size, so it
+       looks identical and stays crisp), full-width and vertically centred. */
+    #ui {
+      position: absolute;
+      inset: 0;
+      width: 1280px; height: 2560px;
+      border: 0; display: block; background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <div id="rec-frame">
+    <iframe id="ui" src="/v5/index.html?story=1" title="זהות צרופה" allow="autoplay; fullscreen"></iframe>
+  </div>
+  <script>
+    const FRAME_W = 1280, FRAME_H = 2560;
+    const frame = document.getElementById('rec-frame');
+    const ui = document.getElementById('ui');
+
+    // Fit the portrait frame into the window (never past 1:1, so a real
+    // 1280×2560 window captures natively).
+    function fit() {
+      const f = Math.min(1, window.innerWidth / FRAME_W, window.innerHeight / FRAME_H);
+      document.documentElement.style.setProperty('--fit', String(f));
+    }
+    window.addEventListener('resize', fit); fit();
+
+    // Keep the frame's fill colour matched to the interface's LIVE background, so
+    // the space above/below the interface reads as one seamless portrait canvas.
+    const isOpaque = (c) => c && c !== 'transparent' && !/rgba?\([^)]*,\s*0\)\s*$/.test(c);
+    function interfaceBg() {
+      try {
+        const d = ui.contentDocument, w = ui.contentWindow;
+        if (!d || !w) return null;
+        // editor page overrides everything while it's up
+        const ed = d.getElementById('editor-view');
+        if (ed) { const c = w.getComputedStyle(ed).backgroundColor; if (isOpaque(c)) return c; }
+        // landing (section-1) sits on top when visible
+        const s1 = d.getElementById('section-1');
+        if (s1) { const cs = w.getComputedStyle(s1); if (cs.display !== 'none' && +cs.zIndex >= 2 && isOpaque(cs.backgroundColor)) return cs.backgroundColor; }
+        // otherwise the stage panel: its live inline bg (time stage) or its
+        // reliable --stage-plate custom property, else the page plate.
+        const s3 = d.getElementById('section-3');
+        if (s3) {
+          const inline = s3.style.backgroundColor;
+          if (isOpaque(inline)) return inline;
+          const plate = w.getComputedStyle(s3).getPropertyValue('--stage-plate').trim();
+          if (plate) return plate;
+        }
+        const body = w.getComputedStyle(d.body).backgroundColor;
+        if (isOpaque(body)) return body;
+      } catch (_) {}
+      return null;
+    }
+    function syncBg() {
+      const c = interfaceBg();
+      if (c) frame.style.backgroundColor = c;
+    }
+    ui.addEventListener('load', () => { syncBg(); });
+    setInterval(syncBg, 200);
+  </script>
+</body>
+</html>

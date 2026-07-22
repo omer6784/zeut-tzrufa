@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ספריית הסמלים — זהות צרופה</title>
+  <meta name="description" content="אוסף סמלים מתרבויות ומסורות שונות — ספריית זהות צרופה" />
+</head>
+<body>
+
+  <!-- Back navigation → opening screen of the current (v5) interface -->
+  <a id="back-link" href="/v5/">← חזרה למסך הפתיחה</a>
+
+  <!-- Page header -->
+  <header id="lib-header">
+    <div id="lib-header-left">
+      <span class="lib-tag">SYMBOL LIBRARY</span>
+      <span class="lib-tag-sep">—</span>
+      <span class="lib-tag">ספריית הסמלים</span>
+    </div>
+    <div id="lib-header-right">
+      <span class="lib-coord">34 סמלים</span>
+      <span class="lib-coord-dot">·</span>
+      <span class="lib-coord">V 2.0</span>
+    </div>
+  </header>
+
+  <!-- Dashed guide frame -->
+  <div id="lib-guide-frame" aria-hidden="true">
+    <div class="guide-corner guide-tl"></div>
+    <div class="guide-corner guide-tr"></div>
+    <div class="guide-corner guide-bl"></div>
+    <div class="guide-corner guide-br"></div>
+  </div>
+
+  <!-- Symbol grid container -->
+  <main id="symbol-grid"></main>
+
+  <!-- Footer -->
+  <footer id="lib-footer">
+    <span class="lib-footer-text">ZEHUT HADASH · IDENTITY FORGING · 2026</span>
+    <span class="lib-footer-text">סמלים מתרבויות ומסורות שונות</span>
+  </footer>
+
+  <!-- Custom cursor -->
+  <div id="cursor" aria-hidden="true">
+    <svg viewBox="0 0 22 26" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="7" y1="3" x2="7" y2="13"/>
+        <line x1="11" y1="1.5" x2="11" y2="13"/>
+        <line x1="14.5" y1="3" x2="14.5" y2="13"/>
+        <line x1="17.5" y1="5" x2="17.5" y2="13"/>
+        <path d="M5 13 Q3 13 2.5 11 Q2 9 3.5 8"/>
+        <path d="M5 13 Q4 19 8 22 L13 22 Q18 22 19 17 L19 13"/>
+      </g>
+    </svg>
+  </div>
+
+  <script type="module" src="symbol-library.js"></script>
+</body>
+</html>

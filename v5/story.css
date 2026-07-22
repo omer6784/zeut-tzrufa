@@ -1,0 +1,98 @@
+/* ══════════════════════════════════════════════════════════════════════
+   STORY MODE — portrait (1280×2560) recording layout, OPENING screen only.
+
+   Loaded LAST and scoped entirely to html.story-mode, so the landscape
+   exhibition (index.html with no flag) is never affected. demo.html loads
+   index.html with ?story=1, which adds .story-mode to <html> and forces the
+   eye pendulum. The composition mirrors the reference mockup: instruction on
+   top, the "זהות צרופה" logotype centred, the 3D eye hanging just below it,
+   and the "לחץ להתחלה" CTA (dotted frame) near the bottom — all inside the
+   portrait dotted-rectangle grid.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Instruction — top-centre, above the logotype (was a small top-left label). */
+html.story-mode #section-1 #ui-top-left {
+  top: calc(11% + 40px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 30px !important;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 8px;
+}
+
+/* No marginal chrome around the grid in the Story (mockup shows a clean
+   dotted frame). Hide the corner labels/coords/crosshair. */
+html.story-mode #section-1 #ui-top-right,
+html.story-mode #section-1 #btn-symbol-library,
+html.story-mode #section-1 #ui-bottom-left,
+html.story-mode #section-1 #ui-crosshair {
+  display: none !important;
+}
+
+/* ── Symmetric outer frame ──────────────────────────────────────────────
+   In landscape the frame margins scale by --sx (÷1360) horizontally and --sy
+   (÷768) vertically, so in portrait the top/bottom margins balloon while the
+   sides stay tight. For the Story the outer rectangle must read as an EVEN
+   border — same margin top, bottom and both sides. Use the side margin
+   (100·--sx) as the single uniform inset and rebuild the four frame lines
+   around it. The two decorative top corner ticks (which only exist at the top)
+   are hidden so the border is truly symmetric. */
+html.story-mode #section-1 .stage-grid {
+  --fm: calc(100 * var(--sx));           /* side inset */
+  --fmv: calc(100 * var(--sx) + 70px);   /* top & bottom inset — pulled further in */
+  /* Slightly larger dots with a touch more spacing, for the Story. */
+  --grid-dot-size: 2.6px;
+  --grid-dot-gap: 9px;
+}
+/* short top verticals (corner ticks) — off */
+html.story-mode #section-1 .stage-grid .sg-v:nth-child(1),
+html.story-mode #section-1 .stage-grid .sg-v:nth-child(2) { display: none; }
+/* top horizontal — 40px lower */
+html.story-mode #section-1 .stage-grid .sg-h:nth-child(3) { top: var(--fmv); }
+/* bottom horizontal — 40px higher */
+html.story-mode #section-1 .stage-grid .sg-h:nth-child(6) { top: auto; bottom: var(--fmv); }
+/* left & right verticals — run the FULL screen height, top edge to bottom edge
+   (they extend past the inset horizontals). */
+html.story-mode #section-1 .stage-grid .sg-v:nth-child(4),
+html.story-mode #section-1 .stage-grid .sg-v:nth-child(5) {
+  top: 0;
+  height: 100vh;
+}
+
+/* Logotype — the hero of the frame: as wide as the frame allows (the masked
+   letters fill their box, so the frame's inner width is the ceiling). Needs
+   !important to beat stage1.css's !important base width. #…-wrap uses
+   translate(-50%,-50%), so `top` is its CENTRE — lifted so the taller logo
+   still clears the eye below. */
+html.story-mode #section-1 #v5-landing-title-wrap {
+  top: calc(34% + 120px);
+}
+html.story-mode #section-1 #v5-landing-title {
+  width: min(80vw, 1010px) !important;
+}
+
+/* Eye pendulum — centred, hanging just below the (now larger) logotype, and
+   enlarged to match. The cord re-anchors to the logotype's bottom in story mode
+   (hamsa-pendulum.js), so this only has to place the eye itself below the logo. */
+html.story-mode #section-1 #hamsa-pendulum {
+  top: 40%;
+  right: auto;
+  left: 50%;
+  height: 52vh;
+  width: calc(52vh * 0.684);
+  /* Shift right so the cord (canvas centre) hangs from the ר of צרופה — nudged a
+     touch left of the letter's centre so it slings over the horizontal bar left
+     of the ר's vertical stroke. */
+  transform: translateX(calc(-50% + 55px));
+}
+
+/* CTA — bottom-centre, enlarged for the Story (padding scales the dotted frame
+   with it). */
+html.story-mode #section-1 #cta-anchor {
+  bottom: calc(14% + 40px);
+  font-size: 30px !important;
+  padding: 28px 54px;
+}

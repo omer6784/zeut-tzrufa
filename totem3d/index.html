@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Totem 3D</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: #b9944f; font-family: -apple-system, system-ui, sans-serif; }
+    #wrap { display: flex; justify-content: center; align-items: flex-start; }
+    canvas { height: 96vh !important; width: auto !important; display: block; }
+    #ui {
+      position: fixed; top: 14px; left: 14px; z-index: 10;
+      display: flex; gap: 10px; align-items: center;
+    }
+    #ui button {
+      background: #282828; color: #f5f5ed; border: 0; border-radius: 8px;
+      padding: 10px 16px; font-size: 14px; cursor: pointer; letter-spacing: .3px;
+    }
+    #ui button:hover { background: #000; }
+    #status {
+      background: rgba(0,0,0,.55); color: #f5f5ed; padding: 8px 12px;
+      border-radius: 8px; font-size: 13px; min-width: 180px;
+    }
+  </style>
+  <script src="p5.min.js"></script>
+  <script src="jszip.min.js"></script>
+  <script src="gif.js"></script>
+</head>
+<body>
+  <div id="ui">
+    <button id="exportBtn">▶ Export GIF</button>
+    <div id="status">loading…</div>
+  </div>
+  <div id="wrap"></div>
+  <script src="sketch.js"></script>
+  <script>
+    document.getElementById("exportBtn").addEventListener("click", function () {
+      if (window.__totem) window.__totem.startGif();
+    });
+  </script>
+</body>
+</html>

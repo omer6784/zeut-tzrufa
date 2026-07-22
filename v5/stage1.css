@@ -1,0 +1,2035 @@
+/* ════════════════════════════════════════════════════════════════
+   v5 · stage 1 (data-stage="0")
+   Reference-driven layout — uses assets from /image/v5-stage1/*
+   Loaded AFTER geometric.css so it wins the cascade.
+   Palette locked to: #fb5716 orange, #efede9 light, #282828 dark.
+   Targets the existing DOM in v5/index.html (no JS injection).
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  --s1-orange: #fb5716;
+  --s1-light:  #f5f5ed;
+  --s1-dark:   #282828;
+}
+
+/* ── 0. Page plate — flat color, no texture (removed per request) */
+html, body {
+  background-color: var(--s1-light) !important;
+  background-image: none !important;
+  color: var(--s1-dark) !important;
+}
+
+/* Landing / opening screen — solid brand orange background.
+   (Loads after geometric.css, so it overrides its transparent rule;
+   only affects section-1, the questionnaire screen stays on the plate.) */
+#section-1 {
+  background: #ff5003 !important;
+}
+
+/* ── Opening → stage-1 transition (no screen fade) ────────────────────
+   Only the background COLOUR morphs (orange → cream); the grid stays fixed
+   and its dot colour is morphed in JS. The opening CONTENT fades away on its
+   own so the frame itself never fades. */
+#section-1.morphing {
+  background: #f5f5ed !important;
+  transition: background-color 1.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+#section-1.morphing #v5-landing-title-wrap,
+#section-1.morphing #hamsa-pendulum,
+#section-1.morphing #ui-top-left,
+#section-1.morphing #ui-top-right,
+#section-1.morphing #ui-bottom-left,
+#section-1.morphing #ui-bottom-right,
+#section-1.morphing #btn-symbol-library,
+#section-1.morphing #cta-anchor,
+#section-1.morphing #ui-crosshair {
+  opacity: 0 !important;
+  transition: opacity 0.45s ease !important;
+  pointer-events: none !important;
+}
+
+/* Per-stage instructions in the bottom rectangle of the grid — same spot on
+   every stage, in the vivid orange. */
+#q-instruction {
+  position: fixed !important;
+  right: calc(120 * var(--sx) + 24px) !important;   /* nudged slightly left (every stage) */
+  top: calc(135 * var(--sy)) !important;   /* aligned with the up-arrow (#step-prev-btn) row */
+  left: auto !important;
+  bottom: auto !important;
+  color: #ff5003 !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: clamp(11px, 0.9vw, 13px) !important;
+  letter-spacing: 0.03em !important;
+  direction: rtl !important;
+  text-align: right !important;
+  max-width: 60vw !important;
+  z-index: 8 !important;
+  pointer-events: none !important;
+}
+
+/* Bottom nav arrows removed — navigation lives only in the right-side rail
+   (#step-prev-btn / #step-next-btn). */
+#q-prev,
+#q-skip {
+  display: none !important;
+}
+
+/* "סימנתי, אפשר להמשיך" — small blinking plain text at the lower-left of the
+   globe (not a button). Still the trigger that spreads the continents. */
+/* The header band is only a visual strip up top; let clicks pass through it
+   (so the "סימנתי" button placed in the cream band beneath it stays clickable),
+   while its own interactive controls keep receiving clicks. */
+#section-3[data-stage="0"] .q-header-container { pointer-events: none !important; }
+#section-3[data-stage="0"] .q-header-container #q-btn-back-home,
+#section-3[data-stage="0"] .q-header-container button,
+#section-3[data-stage="0"] .q-header-container a { pointer-events: auto !important; }
+
+/* (Legacy #roots-done "blinking plain text" styling removed — the button is now
+   a dotted-frame button styled with "סיימתי" further down. Its old
+   transform/animation here were fighting that button's breathing scale.) */
+
+/* ── Right progress rail (dots only) + "previous stage" up-arrow ───────
+   Fixed to the same spot on every questionnaire stage, in the clear right
+   margin (right of the right grid vertical). Replaces the old numbered
+   list (.s2-steps). position:fixed keeps them out of flow so they never
+   push the page content. */
+#section-3 .s2-steps { display: none !important; }
+
+#step-rail {
+  position: fixed !important;
+  right: calc(50 * var(--sx));
+  left: auto;
+  top: 50%;
+  transform: translate(50%, -50%);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(20 * var(--sy));
+  z-index: 30;
+  pointer-events: none;
+}
+#step-rail li {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: #282828;   /* interface dark grey on the light stages */
+  opacity: 1;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+#step-rail li.is-current {
+  background: #fb5716;
+  opacity: 1;
+}
+/* Stage 2 has a dark background — dots read cream. */
+#section-3[data-stage="1"] #step-rail li { background: #f5f5ed; }
+#section-3[data-stage="1"] #step-rail li.is-current { background: #fb5716; }
+
+#step-prev-btn,
+#step-next-btn {
+  position: fixed !important;
+  right: calc(50 * var(--sx));
+  left: auto;
+  transform: translateX(50%);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  cursor: pointer;
+  padding: 0;
+  color: #ff5003 !important;   /* arrows in every stage, incl. dark backgrounds */
+  font-family: 'ArbelG', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  z-index: 30;
+  transition: opacity 0.2s ease;
+}
+/* Arrows only — the "לשלב הבא/הקודם" labels are removed. */
+#step-prev-btn span,
+#step-next-btn span { display: none !important; }
+#step-prev-btn { top: calc(135 * var(--sy)); }
+#step-next-btn { bottom: calc(135 * var(--sy)); top: auto; }
+#step-prev-btn:hover,
+#step-next-btn:hover { opacity: 0.6; }
+
+/* Landing text stack — top line centered above the logo, bottom line below.
+   Both lines are pixel-identical: same font, weight, size, spacing and cream
+   colour, matching the reference. */
+#section-1 #ui-top-left,
+#section-1 #cta-anchor {
+  font-family: 'ArbelG', sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.15em !important;
+  color: #f5f5ed !important;
+}
+/* The two lines used to share one size; split so the top tagline can come down
+   a touch while the CTA keeps its weight (and breathes — see below). */
+#section-1 #ui-top-left { font-size: 12px !important; }
+#section-1 #cta-anchor  { font-size: 14px !important; }
+#section-1 #ui-top-left {
+  top: 17% !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+/* Remove every glow layer on the opening screen — the orange background
+   stays flat (the glow was the v5-landing-glow.png on ::before). */
+#section-1::before,
+#section-1::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+/* ── 1. Wipe previous v5 decorations (sacred geometry SVG stack) */
+.geo-decor,
+#v5-stamp,
+#geo-decor-root,
+.q-grid-line-v,
+.q-grid-line-h {
+  display: none !important;
+}
+
+/* ── Origin (globe) stage — inverts the interface's cream/gold pair ────
+   Gold plate, cream globe, gold continent dots (the canvas side lives in
+   roots.js). Scoped by :has() to the origin question rather than to
+   data-stage="0", because that stage number is shared with the "בחר צבע רקע"
+   picker, which must stay on the cream plate. */
+#section-3[data-stage="0"]:has(#middle-q-container.q-layout-origin) {
+  background-color: #e2bc71 !important;
+  background-image: none !important;
+}
+
+/* The origin stage's keyboard sits on the inverted (gold) plate, so the panel
+   and its keys go gold with it — and the gold hover goes with them, since gold
+   on gold says nothing. Scoped via :has() on body: the keyboard is a body
+   child (not inside #section-3) and is shared with the other text stages,
+   which keep the cream plate. */
+body:has(#middle-q-container.q-layout-origin) #virtual-keyboard,
+body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key,
+body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key:hover {
+  background-color: #e2bc71 !important;
+}
+/* Key dotted OUTLINE in cream; label stays cream on the gold plate. Hover is a
+   no-op. */
+body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key,
+body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key:hover {
+  --grid-dot: #f5f5ed !important;   /* dotted key outline → cream */
+  color: #f5f5ed !important;        /* label → cream */
+  border-color: transparent !important;
+}
+/* Press → the key fills the interface orange with a cream label (dots dropped),
+   then reverts to the cream frame on release (JS clears .is-pressed). Scoped
+   here so it out-specifies the gold resting rule above. */
+body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-pressed {
+  background-color: #fb5716 !important;
+  background-image: none !important;
+  color: #f5f5ed !important;
+}
+
+/* ── 2. Main rounded frame around the interface ──────────
+   The v4 grid uses 100vw × 100vh, so a padded parent breaks it.
+   Instead we let the layout fill the viewport and draw the frame
+   as an ::after pseudo inset from the edges. ─────────────── */
+#section-3 {
+  padding: 0 !important;
+  background: transparent !important;
+}
+#section-3[data-stage="0"] #questionnaire-layout {
+  position: relative !important;
+  background: transparent !important;
+}
+/* Outer black rounded frame removed per user request */
+#section-3[data-stage="0"] #questionnaire-layout::before {
+  content: none !important;
+  display: none !important;
+}
+#section-3[data-stage="0"] #questionnaire-layout::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+/* ── 3. Header (row 1) — logo · progress glow · back button ─
+   No divider line. Grid uses invisible tracks. */
+#section-3[data-stage="0"] .q-header-container {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  align-items: center !important;
+  padding: 14px clamp(20px, 2vw, 32px) !important;
+}
+
+/* back button — outlined pill, left side */
+#section-3[data-stage="0"] #q-btn-back-home {
+  justify-self: start !important;
+  background: transparent !important;
+  color: var(--s1-dark) !important;
+  border: 1px solid var(--s1-dark) !important;
+  border-radius: 999px !important;
+  padding: 7px 16px !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: clamp(10px, 0.9vw, 12px) !important;
+  letter-spacing: 0.02em !important;
+  cursor: pointer !important;
+  transition: background 200ms ease, color 200ms ease !important;
+}
+#section-3[data-stage="0"] #q-btn-back-home:hover {
+  background: var(--s1-dark) !important;
+  color: var(--s1-light) !important;
+}
+
+/* progress glow (center) */
+/* Stage 1 keeps the SAME counter position/size as every other stage (the base
+   fixed rule); only its colour is set for the light background. */
+#section-3[data-stage="0"] .q-header-progress-val {
+  color: var(--s1-dark) !important;
+}
+
+/* Stage 1: the instruction sits ABOVE the globe (right side), smaller, right-
+   aligned over ~3 lines. */
+#section-3[data-stage="0"] #q-instruction {
+  /* Aligned with the up-arrow (#step-prev-btn) row. */
+  top: calc(135 * var(--sy)) !important;
+  bottom: auto !important;
+  right: calc(122 * var(--sx) + 24px) !important;   /* nudged slightly left */
+  left: auto !important;
+  max-width: min(360px, 30vw) !important;
+  font-size: clamp(11px, 0.9vw, 14px) !important;
+  line-height: 1.7 !important;
+  text-align: right !important;
+}
+
+/* logo box (right) — replace the text with the reference logo image */
+#section-3[data-stage="0"] .q-header-logo-box-v5 {
+  justify-self: end !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  width: clamp(110px, 9vw, 140px) !important;
+  height: auto !important;
+  aspect-ratio: 428 / 190 !important;
+  background-image: url('/image/v5-stage1/logo.png') !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center right !important;
+}
+#section-3[data-stage="0"] .q-header-logo-text {
+  display: none !important;
+}
+
+/* ── 4. Left jewelry rail (rows 2–3) — transparent, NO dividers */
+#section-3[data-stage="0"] .q-chrome-side {
+  background: transparent !important;
+  border: none !important;
+  border-right: none !important;
+  border-left: none !important;
+}
+#section-3[data-stage="0"] .q-chrome-side-corner-mark,
+#section-3[data-stage="0"] .q-chrome-side-spine {
+  display: none !important;
+}
+#section-3[data-stage="0"] #artifact-col {
+  background: transparent !important;
+  border: none !important;
+  border-right: none !important;
+  border-left: none !important;
+  /* The jewelry-preview column overlaps the globe on the origin
+     question and, being higher in the stacking order, would otherwise
+     swallow every click meant for the globe. It shows nothing here, so
+     make it (and its canvas) transparent to pointer events. */
+  pointer-events: none !important;
+}
+#section-3[data-stage="0"] #artifact-col * {
+  pointer-events: none !important;
+}
+#section-3[data-stage="0"] #artifact-canvas {
+  background: transparent !important;
+  pointer-events: none !important;
+}
+/* Kill all remaining grid-cell borders in stage 0 */
+#section-3[data-stage="0"] .grid-cell {
+  border: none !important;
+  outline: none !important;
+}
+#section-3[data-stage="0"] #q-input-wrap {
+  border: none !important;
+}
+#section-3[data-stage="0"] #q-text {
+  border: none !important;
+  border-right: none !important;
+}
+#section-3[data-stage="0"] #q-header {
+  border: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+/* v4 leftover: decorative stage-accent stripes render as thin
+   L-shaped borders. Hide entirely in stage 0. */
+#section-3[data-stage="0"] .stage-accent,
+#section-3[data-stage="0"] .stage-accent.is-blue,
+#section-3[data-stage="0"] .stage-accent.is-brown,
+#section-3[data-stage="0"] .stage-accent.is-yellow,
+#section-3[data-stage="0"] .stage-accent.is-orange {
+  display: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+/* v4 pseudo-element stripes (bot orange band + header divider line) */
+#section-3[data-stage="0"] #q-header::after,
+#section-3[data-stage="0"] #q-header::before,
+#section-3[data-stage="0"] #questionnaire-layout::after {
+  content: none !important;
+  display: none !important;
+  border: none !important;
+  background: none !important;
+  animation: none !important;
+}
+/* bot-mid grid-cell border-top / border-right from v4 */
+#section-3[data-stage="0"] .bot-mid,
+#section-3[data-stage="0"] #q-deco-bot-left,
+#section-3[data-stage="0"] #q-deco-bot-right,
+#section-3[data-stage="0"] #q-deco-mid-right,
+#section-3[data-stage="0"] .q-header-container {
+  border: none !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+}
+
+/* ── 5. Middle question column ─────────────────────────── */
+#section-3[data-stage="0"] .mid-mid,
+#section-3[data-stage="0"] #q-main-cell {
+  background: transparent !important;
+  border: none !important;
+}
+#section-3[data-stage="0"] #q-counter {
+  display: none !important;    /* progress moved to top-glow */
+}
+#section-3[data-stage="0"] #q-text {
+  font-family: 'Shofar', 'Georgia', serif !important;
+  font-size: clamp(2.2rem, 4.5vw, 4rem) !important;
+  color: var(--s1-dark) !important;
+  border: none !important;
+  padding: 0 !important;
+  line-height: 1.15 !important;
+  background: transparent !important;
+  text-align: right !important;
+}
+#section-3[data-stage="0"] #q-header {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* ── 6. Right decoration column — muted so it doesn't compete */
+#section-3[data-stage="0"] .mid-right,
+#section-3[data-stage="0"] #q-deco-mid-right {
+  background: transparent !important;
+  border: none !important;
+  color: var(--s1-dark) !important;
+}
+#section-3[data-stage="0"] #q-deco-mid-right .deco-brand-text,
+#section-3[data-stage="0"] #q-deco-mid-right .deco-brand-sub,
+#section-3[data-stage="0"] #q-deco-mid-right .deco-coords {
+  color: var(--s1-dark) !important;
+  opacity: 0.6 !important;
+  font-family: 'ArbelG', 'Georgia', serif !important;
+  letter-spacing: 0.15em !important;
+}
+
+/* ── 7. Bottom-left navigation — pill outlines ─────────── */
+#section-3[data-stage="0"] .bot-left,
+#section-3:is([data-stage="0"], [data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"], [data-stage="6"], [data-stage="7"]) #q-deco-bot-left,
+#section-3:is([data-stage="0"], [data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"], [data-stage="6"], [data-stage="7"]) #q-deco-bot-right {
+  display: block !important;
+  position: relative !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+#section-3 #q-prev,
+#section-3 #q-skip {
+  width: max-content !important;
+  height: auto !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--s1-dark) !important;
+  display: none !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: opacity 200ms ease !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  pointer-events: auto !important;
+  z-index: 150 !important;
+}
+
+#section-3 #q-prev svg,
+#section-3 #q-skip svg {
+  width: 15px !important;
+  height: 15px !important;
+  flex: 0 0 auto !important;
+  stroke-width: 1.4px !important;
+  display: block !important;
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+/* Text label beside each arrow — SimplerPro Regular, small */
+#section-3 .nav-arrow-label {
+  font-family: 'ArbelG', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.04em !important;
+  color: inherit !important;
+  white-space: nowrap !important;
+  flex: 0 0 auto !important;
+  direction: rtl !important;
+}
+
+/* Arrows are fixed to the viewport corners so they sit in the SAME place on
+   every stage, and live in #section-3's root stacking context (above the
+   stage-2 dark word panel) so their clicks always register. */
+#section-3 #q-prev {
+  position: fixed !important;
+  right: calc(50px * var(--sx)) !important;
+  left: auto !important;
+  top: auto !important;
+  bottom: clamp(45px, 6.5vh, 78px) !important;
+  transform: none !important;
+}
+
+#section-3 #q-skip {
+  display: flex !important;
+  position: fixed !important;
+  left: calc(50px * var(--sx)) !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: clamp(45px, 6.5vh, 78px) !important;
+  transform: none !important;
+}
+
+#section-3:is([data-stage="0"], [data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"], [data-stage="6"], [data-stage="7"]) #q-prev {
+  display: flex !important;
+}
+
+/* Stage 2 (data-stage="1") has a dark background — flip the arrows to the
+   light color so they stay visible, and lift them above the dark overlay. */
+#section-3[data-stage="1"] #q-prev,
+#section-3[data-stage="1"] #q-skip {
+  border-color: var(--s1-light) !important;
+  color: var(--s1-light) !important;
+  z-index: 150 !important;
+}
+
+#section-3 #q-prev:hover,
+#section-3 #q-skip:hover {
+  background: transparent !important;
+  color: var(--s1-orange) !important;
+  opacity: 1 !important;
+}
+
+#section-3 .bot-mid {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* The bottom deco cells host the fixed nav arrows. #q-deco-bot-left carried a
+   z-index that established a stacking context, trapping the left arrow's
+   z-index beneath the sibling .bot-mid (z-index:5) and swallowing its clicks.
+   Lift both cells above .bot-mid, and let the empty .bot-mid pass clicks. */
+#section-3 #q-deco-bot-left,
+#section-3 #q-deco-bot-right {
+  z-index: 150 !important;
+}
+#section-3 .bot-mid {
+  pointer-events: none !important;
+}
+
+/* ── 8. Bottom-right — 8 capsule step indicator ────────── */
+#section-3[data-stage="0"] .bot-right,
+#section-3:is([data-stage="0"], [data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"], [data-stage="6"], [data-stage="7"]) #q-deco-bot-right {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  padding: 0 !important;
+}
+#section-3[data-stage="0"] .bot-left,
+#section-3:is([data-stage="0"], [data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"], [data-stage="6"], [data-stage="7"]) #q-deco-bot-left {
+  background: transparent !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 0 !important;
+}
+#section-3[data-stage="0"] .q-capsule-progress {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 6px !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+#section-3[data-stage="0"] .q-capsule {
+  display: block !important;
+  width: 32px !important;
+  height: 10px !important;
+  border: 1px solid var(--s1-dark) !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  opacity: 0.35 !important;
+  transition: opacity 200ms ease, background 200ms ease, border-color 200ms ease !important;
+}
+#section-3[data-stage="0"] .q-capsule.is-active {
+  opacity: 1 !important;
+  background: var(--s1-orange) !important;
+  border-color: var(--s1-orange) !important;
+  box-shadow: 0 0 8px rgba(251, 87, 22, 0.35) !important;
+}
+
+/* ── 9. Roots (globe) — sized and placed on the left side of the
+   viewport, vertically centered in the content row.
+   The `#q-input-wrap.roots-active` qualifier matches styles.css's own
+   sizing rule specificity (it targets that same ID+class combo in one
+   branch of a selector list), so this needs it too to reliably win.
+
+   This is fixed relative to #section-3 (.screen-panel: position:fixed,
+   inset:0 — i.e. it exactly equals the viewport), NOT the viewport
+   itself, since #section-3 carries its own entrance-transition
+   transform. #q-main-cell must never carry a transform of its own (see
+   geometric.css) or IT would become the containing block instead, at
+   the wrong origin — that exact bug once made every click miss. */
+#section-3[data-stage="0"] #q-input-wrap.roots-active .roots-widget .roots-canvas-wrap {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  position: fixed !important;
+  left: auto !important;
+  right: 780px !important;
+  top: calc(var(--q-top-total) + (100vh - var(--q-top-total) - clamp(110px, 13vh, 150px)) / 2) !important;
+  transform: translateY(-50%) !important;
+  width: min(70vh, 520px) !important;
+  height: min(70vh, 520px) !important;
+  z-index: 5 !important;
+  pointer-events: auto !important;
+  transition: width 0.65s cubic-bezier(0.25, 1, 0.5, 1), height 0.65s cubic-bezier(0.25, 1, 0.5, 1), right 0.65s cubic-bezier(0.25, 1, 0.5, 1), left 0.65s cubic-bezier(0.25, 1, 0.5, 1), top 0.65s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+/* Input state — the selected continent (orange dots only, no gold sphere)
+   sits in the UPPER part of where the globe was, with the text box + keyboard
+   below it. */
+#section-3[data-stage="0"] #q-input-wrap.roots-active .roots-widget.state-input .roots-canvas-wrap {
+  /* World-map layout — wide 2:1 canvas so the chosen continents sit in their
+     true global positions. */
+  /* The selected continents sit on the LEFT, just BELOW the top grid line and
+     inside the central rectangle — width capped so the right edge never crosses
+     the right vertical grid line (at 100vw − 100·sx). */
+  /* Full rectangle WIDTH; height runs from the top grid line down to the
+     horizontal divider that sits just above the keyboard/text band (so the
+     continents fill the upper region and clear the keyboard). --kb-band is the
+     keyboard/text band height; 46px = keyboard's 26px lift + 20px gap. */
+  width: calc(100vw - 200 * var(--sx)) !important;
+  height: calc((706 - 85) * var(--sy) - 46px - var(--kb-band)) !important;
+  left: calc(100 * var(--sx)) !important;
+  right: auto !important;
+  bottom: auto !important;
+  top: calc(85 * var(--sy)) !important;   /* top grid line */
+  transform: none !important;
+}
+/* Single continent uses the same left-anchored position as multiple. */
+#section-3.roots-single[data-stage="0"] #q-input-wrap.roots-active .roots-widget.state-input .roots-canvas-wrap {
+  left: calc(100 * var(--sx)) !important;
+  right: auto !important;
+}
+#section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls {
+  position: fixed !important;
+  /* To the LEFT of the keyboard: the keyboard is docked to the right grid line
+     and fills 0.66 of the rectangle, so this column runs from the left grid
+     line to just before the keyboard's left edge. Vertically centred against
+     the keyboard band. */
+  left: calc(100 * var(--sx)) !important;
+  right: calc(100 * var(--sx) + (100vw - 200 * var(--sx)) * 0.66 + 28px) !important;
+  top: auto !important;
+  bottom: calc(100vh - 706 * var(--sy) + 26px) !important;   /* keyboard bottom line */
+  height: var(--kb-band) !important;   /* ≈ keyboard height */
+  width: auto !important;
+  max-width: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  gap: 16px !important;
+  z-index: 1001 !important;   /* above the keyboard */
+}
+/* Dotted vertical divider in the gap between the keyboard and this input
+   column — same dot size/spacing/colour as the fixed interface grid. */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls::before {
+  content: '';
+  position: fixed !important;
+  /* Sits in the gap between the input column and the keyboard. Runs ONLY the
+     bottom band — from the horizontal map/keyboard divider (706·sy − 46px −
+     --kb-band) down to the bottom grid line (706·sy) — so it separates the
+     writing line from the keyboard without reaching up into the map. Same dot
+     size/spacing as the fixed grid. */
+  right: calc(100 * var(--sx) + (100vw - 200 * var(--sx)) * 0.66 + 14px) !important;
+  left: auto !important;
+  top: calc(706 * var(--sy) - 46px - var(--kb-band)) !important;
+  height: calc(46px + var(--kb-band)) !important;
+  bottom: auto !important;
+  width: var(--grid-dot-size) !important;
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
+  background-size: var(--grid-dot-size) var(--grid-dot-gap) !important;
+  /* Global Y phase: offset by −own top so dots land on the shared lattice. */
+  background-position: center calc(-1 * (706 * var(--sy) - 46px - var(--kb-band))) !important;
+  background-repeat: repeat-y !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+/* Keyboard/text band height — reused by the map area (excluded from it), the
+   controls column, and the horizontal divider below. */
+#section-3 { --kb-band: calc(clamp(38px, 5.5vh, 56px) * 4 + 52px); }
+/* Horizontal dotted divider between the map (above) and the keyboard + text
+   band (below) — same dot size/spacing/colour as the fixed interface grid,
+   spanning the rectangle width. */
+#section-3[data-stage="0"] .roots-widget.state-input::before {
+  content: '';
+  position: fixed !important;
+  left: calc(100 * var(--sx)) !important;
+  right: calc(100 * var(--sx)) !important;
+  top: calc(706 * var(--sy) - 46px - var(--kb-band)) !important;
+  height: var(--grid-dot-size) !important;
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
+  background-size: var(--grid-dot-gap) var(--grid-dot-size) !important;
+  /* Global X phase: offset by −own left so dots land on the shared lattice. */
+  background-position: calc(-100 * var(--sx)) center !important;
+  background-repeat: repeat-x !important;
+  pointer-events: none !important;
+  z-index: 6 !important;
+}
+/* The writing line, alone on its row — "הוסף" now lives in the slot below it,
+   so the line simply centres in the column (no nudge to compensate for a
+   button beside it). */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-input-row {
+  display: flex !important;
+  direction: ltr !important;
+  flex-direction: row-reverse !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  position: relative !important;
+}
+/* The writing line carries no placeholder text now — just a blinking caret that
+   signals "type a country name here". Shown only while the field is empty. */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-input-row:has(.roots-input:placeholder-shown)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 9px;
+  bottom: 17px;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #fb5716;
+  animation: roots-caret-blink 1.06s steps(1) infinite;
+  pointer-events: none;
+}
+@keyframes roots-caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+#section-3[data-stage="0"] #roots-scene,
+#section-3[data-stage="0"] .roots-canvas-wrap canvas,
+#section-3[data-stage="0"] .roots-canvas-wrap svg {
+  background: transparent !important;
+  border: none !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Stage 1 (origin) right-hand panel — matches the reference:
+   dotted title (roots.png) · divider · instruction · divider · legend.
+   Sits inside the grid frame, right side; only on the origin stage. */
+.stage1-panel { display: none; }
+/* The colour/calibration stage reuses data-stage 0 but is NOT the origin
+   stage — keep the origin panel (and its vertical dotted rule) off it. */
+#section-3.q-color-stage .stage1-panel { display: none !important; }
+#section-3[data-stage="0"] .stage1-panel {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  /* Spans the right side, between the top (y85) and bottom (y686) grid
+     rules, ending at the right vertical grid line (100 from right). */
+  right: calc(100 * var(--sx));
+  top: calc(85 * var(--sy));
+  height: calc((686 - 85) * var(--sy));
+  width: min(46vw, 610px);   /* sits to the right of the globe, inside the grid */
+  padding: calc(26 * var(--sy)) calc(24 * var(--sx));
+  direction: rtl;
+  text-align: right;
+  z-index: 3;
+  pointer-events: none;
+}
+/* Dotted vertical rule down the panel's left edge — removed per request (no
+   divider between the globe and the "איפה הסיפור שלך מתחיל?" title). */
+#section-3[data-stage="0"] .stage1-panel::before {
+  content: none;
+}
+/* Title wordmark (roots.png). */
+#section-3[data-stage="0"] .stage1-panel .s1p-title {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 878 / 291;   /* the roots.png title image */
+  margin-bottom: auto;
+  margin-top: calc(70px * var(--sy));
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Two overlapping copies of the title image, cropped to each text line (they
+   overlap in the middle band so no letter is ever cut). */
+#section-3[data-stage="0"] .stage1-panel .s1p-title .s1p-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background-image: url('/image/v5-stage1/roots.png?v=7');
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+}
+#section-3[data-stage="0"] .stage1-panel .s1p-title .s1p-line-top {
+  top: 0;
+  height: 58%;
+  background-position: top;
+}
+#section-3[data-stage="0"] .stage1-panel .s1p-title .s1p-line-bot {
+  bottom: 0;
+  height: 58%;
+  background-position: bottom;
+}
+/* Title enters LAST — hidden during the intro until revealed with .is-in. */
+#section-3.intro-chrome-hidden .stage1-panel .s1p-title { opacity: 0 !important; }
+#section-3.intro-chrome-hidden .stage1-panel .s1p-title.is-in { opacity: 1 !important; }
+/* The title is an image, so it "types in" via a stepped right→left clip
+   (Hebrew writing direction) — mimicking letter-by-letter typing. */
+/* Typewriter: the TOP line types in right→left first, then the BOTTOM line —
+   each over its own full height, so tall letters are never cut. steps() gives
+   the letter-by-letter feel. */
+#section-3[data-stage="0"] .stage1-panel .s1p-title.type-in .s1p-line-top {
+  animation: title-typewriter 2s steps(12, end) both;
+}
+#section-3[data-stage="0"] .stage1-panel .s1p-title.type-in .s1p-line-bot {
+  animation: title-typewriter 1.3s steps(6, end) both;
+  animation-delay: 2s;   /* starts after the top line finishes */
+}
+@keyframes title-typewriter {
+  from { clip-path: inset(0 0 0 100%); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+/* When the typing finishes, the title drops just a little (~20px) and the
+   orange instruction is typed closely above it. */
+#section-3[data-stage="0"] .stage1-panel .s1p-title.title-dropped {
+  transform: translateY(45px) !important;
+}
+/* ── "סימנתי" choreography ──────────────────────────────────────────────
+   Phase A: the globe, the title panel (title + its left dotted grid rule) all
+   slide RIGHT off-screen and fade out; the instruction glides to the top-right
+   corner of the central rectangle. Phase B (JS, after 760ms): the flat world
+   map fills in dot-by-dot. */
+
+/* Globe slides right + fades (base globe transform is translateY(-50%)). */
+#section-3.roots-exiting[data-stage="0"] #q-input-wrap.roots-active .roots-widget .roots-canvas-wrap {
+  transform: translate(78vw, -50%) !important;
+  opacity: 0 !important;
+  transition: transform 0.72s cubic-bezier(0.55, 0, 0.85, 0.25),
+              opacity 0.6s ease !important;
+}
+/* Title panel (title + its ::before dotted vertical rule) slides right + fades. */
+#section-3[data-stage="0"] .stage1-panel {
+  transition: transform 0.72s cubic-bezier(0.55, 0, 0.85, 0.25),
+              opacity 0.6s ease;
+}
+/* The title "איפה הסיפור שלך מתחיל?" now STAYS after "סימנתי" (the selected
+   continents appear below it) — it no longer slides away. */
+/* The old instruction "בחר את היבשות…" slides right and vanishes together with
+   the globe and title. */
+#section-3[data-stage="0"] #q-instruction {
+  transition: transform 0.72s cubic-bezier(0.55, 0, 0.85, 0.25),
+              opacity 0.6s ease !important;
+}
+#section-3.roots-exiting[data-stage="0"] #q-instruction {
+  transform: translateX(78vw) !important;
+  opacity: 0 !important;
+}
+#section-3.roots-marked[data-stage="0"] #q-instruction {
+  transform: translateX(78vw) !important;
+  opacity: 0 !important;
+  transition: none !important;
+}
+/* The right title panel (the "right decoration") slides right + fades with the
+   globe so the world map can fill the whole rectangle edge-to-edge. */
+#section-3.roots-exiting[data-stage="0"] .stage1-panel {
+  transform: translateX(78vw) !important;
+  opacity: 0 !important;
+}
+#section-3.roots-marked[data-stage="0"] .stage1-panel {
+  transform: translateX(78vw) !important;
+  opacity: 0 !important;
+  transition: none !important;
+  pointer-events: none !important;
+}
+/* Internal vertical divider (globe ↔ picker) is gone once we're on the map. */
+#section-3[data-stage="0"] .roots-widget.state-input::after {
+  display: none !important;
+}
+/* New instruction "הזן את ארצות המוצא" — top-right of the large central
+   rectangle, fading in once the map is revealed. */
+#section-3[data-stage="0"] .roots-map-note {
+  position: fixed !important;
+  /* Aligned with the "אתחול שלב" restart-button row (top 100·sy). */
+  top: calc(100 * var(--sy)) !important;
+  right: calc(122 * var(--sx)) !important;
+  color: #ff5003 !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: clamp(11px, 0.9vw, 13px) !important;
+  letter-spacing: 0.03em !important;
+  /* Row: [note text] · [חזרה ליבשות] · [→] (left→right). */
+  display: flex !important;
+  direction: ltr !important;
+  align-items: center !important;
+  gap: 16px !important;
+  white-space: nowrap !important;
+  z-index: 8 !important;
+  opacity: 0 !important;
+  transition: opacity 0.5s ease !important;
+}
+#section-3[data-stage="0"] .roots-map-note .roots-map-note-text {
+  pointer-events: none !important;
+}
+/* "אתחול שלב" — permanent restart button (curved-arrow icon + text) on EVERY
+   stage, pinned to the top-left corner of the big central rectangle. */
+#section-3 #stage-restart-btn {
+  position: fixed !important;
+  top: calc(100 * var(--sy)) !important;
+  left: calc(120 * var(--sx)) !important;
+  right: auto !important;
+  display: inline-flex !important;
+  flex-direction: row-reverse !important;   /* icon on the left, text after it */
+  align-items: center !important;
+  gap: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: #ff5003 !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: clamp(11px, 0.9vw, 13px) !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  z-index: 30 !important;
+  transition: opacity 0.2s ease !important;
+}
+#section-3 #stage-restart-btn:hover { opacity: 0.6 !important; }
+/* The corner reset control is retired from view — the action now lives inside
+   the symbol window as ".sw-restart" (symbol-window.js). It stays in the DOM so
+   that button can still trigger it, so it is only hidden, not removed. Placed
+   AFTER the positioning rule above so it wins the same-specificity cascade. */
+#section-3 #stage-restart-btn { display: none !important; }
+#section-3 #stage-restart-btn .stage-restart-icon {
+  width: clamp(14px, 1.1vw, 17px) !important;
+  height: clamp(14px, 1.1vw, 17px) !important;
+  flex: none !important;
+}
+#section-3[data-stage="0"] .roots-widget.state-input .roots-map-note {
+  opacity: 1 !important;
+}
+body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
+  filter: invert(1) brightness(2.5);
+}
+/* Dotted horizontal divider rule. */
+#section-3[data-stage="0"] .stage1-panel .s1p-rule {
+  height: var(--grid-dot-size);
+  width: 100%;
+  opacity: var(--grid-op);
+  background-image: radial-gradient(circle,
+    var(--grid-dot) calc(var(--grid-dot-size) / 2),
+    transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size: var(--grid-dot-gap) var(--grid-dot-size);
+  background-repeat: repeat-x;
+}
+/* ── Fixed-grid chrome intro reveal (one-by-one, as stage 1 appears) ──────
+   Hidden while the opening morph runs, then revealed in order:
+   symbol-library → brand logo → step dots → arrows. */
+/* Everything starts hidden during the intro; JS reveals each element in
+   sequence by adding an `.is-in` class (see runStage0Choreography). */
+#section-3.intro-chrome-hidden #q-btn-symbol-library,
+#section-3.intro-chrome-hidden .grid-logo,
+#section-3.intro-chrome-hidden #step-rail,
+#section-3.intro-chrome-hidden #step-prev-btn,
+#section-3.intro-chrome-hidden #step-next-btn,
+#section-3.intro-chrome-hidden #sidebar-tagline,
+#section-3.intro-chrome-hidden .q-header-progress-text-wrap {
+  opacity: 0 !important;
+}
+#section-3.intro-chrome-hidden #q-btn-symbol-library.is-in,
+#section-3.intro-chrome-hidden .grid-logo.is-in,
+#section-3.intro-chrome-hidden #step-rail.is-in,
+#section-3.intro-chrome-hidden #step-prev-btn.is-in,
+#section-3.intro-chrome-hidden #step-next-btn.is-in,
+#section-3.intro-chrome-hidden #sidebar-tagline.is-in,
+#section-3.intro-chrome-hidden .q-header-progress-text-wrap.is-in {
+  opacity: 1 !important;
+  transition: opacity 0.45s ease !important;
+}
+/* The right-hand step dots are hidden until revealed one-by-one, top→bottom. */
+#section-3.intro-chrome-hidden #step-rail li { opacity: 0 !important; }
+#section-3.intro-chrome-hidden #step-rail li.is-in {
+  opacity: 1 !important;
+  transition: opacity 0.3s ease, background-color 0.3s ease !important;
+}
+/* Progress "01 — 08" types in left→right when revealed. */
+#section-3.intro-chrome-hidden .q-header-progress-text-wrap.is-in .q-header-progress-val {
+  animation: hp-typewriter 0.85s steps(8, end) both;
+}
+@keyframes hp-typewriter {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* Removed per request: the panel's horizontal rule + instruction line. */
+#section-3[data-stage="0"] .stage1-panel .s1p-rule,
+#section-3[data-stage="0"] .stage1-panel .s1p-instruction {
+  display: none !important;
+}
+/* Lower the origin question text by 200px. */
+#section-3[data-stage="0"] #q-text {
+  transform: translateY(200px) !important;
+}
+
+/* Instruction line (dark). */
+#section-3[data-stage="0"] .stage1-panel .s1p-instruction {
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(13px, 1.05vw, 16px);
+  color: var(--s1-dark);
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding: calc(16 * var(--sy)) 0;
+}
+/* Legend labels (orange). */
+#section-3[data-stage="0"] .stage1-panel .s1p-legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  flex: 1;
+  padding-top: calc(20 * var(--sy));
+}
+#section-3[data-stage="0"] .stage1-panel .s1p-legend-row {
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(13px, 1.05vw, 16px);
+  color: var(--s1-orange);
+  letter-spacing: 0.02em;
+}
+
+/* Country input row (appears after continent click) */
+#section-3[data-stage="0"] .roots-input {
+  /* A dotted LINE from the ONE dot system (grid size + spacing), in cream; the
+     country name is written on it, above the line. */
+  background-color: transparent !important;
+  --grid-dot: #f5f5ed !important;
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
+  background-size: var(--grid-dot-gap) var(--grid-dot-size) !important;
+  background-position: bottom !important;
+  background-repeat: repeat-x !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: var(--s1-dark) !important;
+  padding: 6px 4px 12px !important;   /* text sits above the line */
+  font-size: clamp(30px, 2.4vw, 40px) !important;
+  font-family: 'ArbelG', sans-serif !important;
+  /* Shorter dotted line, centred in the cell (the row is justify-content:center). */
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
+  width: 48% !important;
+  text-align: center !important;
+}
+/* "הוסף מדינה" — a plain text button to the right of the box. */
+#section-3[data-stage="0"] .roots-add-country {
+  border: none !important;
+  border-radius: 0 !important;
+  /* Dotted rectangle frame — same dot size/spacing/colour as the fixed grid. */
+  background-color: transparent !important;
+  background-image:
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
+  background-size:
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-size) var(--grid-dot-gap),
+    var(--grid-dot-size) var(--grid-dot-gap) !important;
+  background-position: top, bottom, left, right !important;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y !important;
+  color: var(--s1-orange) !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: clamp(10px, 0.85vw, 13px) !important;
+  letter-spacing: 0.03em !important;
+  padding: 9px 16px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+/* ── "הוסף" + "סיימתי" — one shared look, two positions ──────────────
+   Both are the same object: a dotted rectangle in the grid's own dot
+   size/spacing/colour, dark label, filling orange while pressed. Only where
+   they sit differs, so the appearance lives in ONE rule — restyling one can't
+   silently drift from the other. */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls .roots-add-country,
+#section-3[data-stage="0"] .roots-widget.state-input .roots-finish,
+#section-3[data-stage="0"] #roots-done {
+  display: inline-block !important;
+  border: none !important;
+  background-color: transparent !important;
+  background-image: none !important;   /* frame lives on ::before */
+  padding: 11px 26px !important;       /* room inside the dotted rectangle */
+  /* Frame + label in #282828. Pressing fills it the interface orange (below).
+     --grid-dot drives the ::before dots. (Dimmed until unlocked — see .is-dim.) */
+  color: #282828 !important;
+  --grid-dot: #282828 !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: clamp(10px, 0.85vw, 13px) !important;
+  letter-spacing: 0.03em !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+  /* Breathe as a WHOLE — the scale sits on the button so the label grows with
+     its dotted frame (the ::before is a child and rides along), same as the
+     opening CTA. Positioning below avoids `transform`, leaving it free for the
+     scale. */
+  transform-origin: center !important;
+  animation: dotted-frame-breathe 1.8s ease-in-out infinite !important;
+}
+/* The dotted rectangle itself — same dot size/spacing/colour as the fixed
+   interface grid (four dotted edges via radial-gradients), on ::before so the
+   frame is a separate layer (kept for the pressed state, which drops it). */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls .roots-add-country::before,
+#section-3[data-stage="0"] .roots-widget.state-input .roots-finish::before,
+#section-3[data-stage="0"] #roots-done::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size:
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-size) var(--grid-dot-gap),
+    var(--grid-dot-size) var(--grid-dot-gap);
+  background-position: top, bottom, left, right;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+}
+/* ::before is inset against each button, so both must be containing blocks. */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-finish,
+#section-3[data-stage="0"] .roots-widget.state-input .roots-add-country {
+  position: relative !important;
+}
+
+/* "סימנתי, אפשר להמשיך" — the globe phase's exit. Same object as "סיימתי":
+   same dotted frame (inherited from the shared rule above) in the same spot,
+   just under the stage instruction at the top-right. The old blinking orange
+   text is gone — the frame carries it now, exactly as it does for "סיימתי". */
+/* Shared width for the story title + the button centred over it, so the two
+   stay in sync if the title is resized. */
+#section-3[data-stage="0"] .roots-widget { --story-w: min(50vw, 680px); }
+
+/* "סימנתי, אפשר להמשיך" — sits centred horizontally directly ABOVE the
+   "איפה הסיפור שלך מתחיל?" title. Centred with a left/right band + margin auto
+   (not translateX) so the button's transform stays free for the breathing
+   scale. */
+#section-3[data-stage="0"] #roots-done {
+  position: fixed !important;
+  right: calc(122 * var(--sx)) !important;
+  left: calc(100vw - 122 * var(--sx) - var(--story-w)) !important;
+  margin: 0 auto !important;
+  width: max-content !important;
+  top: calc(100 * var(--sy) + 178px) !important;   /* above the title */
+  bottom: auto !important;
+  z-index: 200 !important;
+}
+
+/* Dotted-pattern title "איפה הסיפור שלך מתחיל?" — dropped well down the right
+   column. Only during continent selection; hidden in the input phase. */
+#section-3[data-stage="0"] .roots-widget .roots-story-title {
+  position: fixed !important;
+  right: calc(122 * var(--sx)) !important;
+  left: auto !important;
+  top: calc(100 * var(--sy) + 360px) !important;
+  width: var(--story-w) !important;
+  height: auto !important;
+  z-index: 8 !important;
+  pointer-events: none !important;
+}
+/* Two stacked lines, right-aligned. Widths kept proportional to the source PNGs
+   (771×118 and 783×195) so both lines share one type scale. */
+/* The two lines are painted as a solid CREAM fill masked by each PNG's alpha
+   silhouette (the source art is orange text on transparent), so the title
+   renders in the interface cream while keeping the typewriter reveal. */
+#section-3[data-stage="0"] .roots-widget .roots-story-line {
+  display: block !important;
+  height: auto !important;
+  margin-left: auto !important;   /* push to the right edge (RTL) */
+  background-color: #f5f5ed !important;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  /* Typewriter reveal: a clip that opens from the RIGHT (first Hebrew letter)
+     to the left, in letter-sized steps. */
+  clip-path: inset(0 0 0 100%);
+}
+#section-3[data-stage="0"] .roots-widget .rsl-1 {
+  width: calc(var(--story-w) * 0.985 * 0.85) !important;   /* both lines shrunk ~15% */
+  aspect-ratio: 771 / 118;   /* source PNG size, so height follows width */
+  -webkit-mask-image: url(/image/v5-stage1/story-line1.png?v=4);
+  mask-image: url(/image/v5-stage1/story-line1.png?v=4);
+  animation: story-type 0.7s steps(11, end) 0.15s forwards;
+}
+#section-3[data-stage="0"] .roots-widget .rsl-2 {
+  width: calc(var(--story-w) * 0.85) !important;
+  aspect-ratio: 783 / 195;   /* source PNG size, so height follows width */
+  -webkit-mask-image: url(/image/v5-stage1/story-line2.png?v=4);
+  mask-image: url(/image/v5-stage1/story-line2.png?v=4);
+  margin-top: calc(6 * var(--sy) - 14px) !important;   /* nudged up a touch */
+  transform: translateX(-70px) !important;             /* "שלך מתחיל?" nudged 70px left */
+  /* starts once line 1 has finished typing */
+  animation: story-type 0.66s steps(10, end) 0.95s forwards;
+}
+@keyframes story-type { to { clip-path: inset(0 0 0 0); } }
+@media (prefers-reduced-motion: reduce) {
+  #section-3[data-stage="0"] .roots-widget .roots-story-line {
+    clip-path: none;
+    animation: none !important;
+  }
+}
+#section-3[data-stage="0"] .roots-widget.state-input .roots-story-title {
+  display: none !important;
+}
+
+/* "הוסף" (right) + "סיימתי" (left) share one row below the writing line, at the
+   bottom of the input column so the row's dotted rectangles line up with the
+   keyboard's bottom key row. direction:rtl → הוסף first (right), סיימתי after
+   it (left). */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-actions-row {
+  position: absolute !important;
+  bottom: 10px !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: flex !important;
+  direction: rtl !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: clamp(10px, 1vw, 18px) !important;
+}
+
+/* Dimmed / "off" state — quiet and inert until unlocked. "סיימתי" is dim until
+   the first country is added; "סימנתי" is dim until a continent is chosen. When
+   the class is removed they return to full cream + the breathing animation. */
+#section-3[data-stage="0"] .roots-finish.is-dim,
+#section-3[data-stage="0"] #roots-done.is-dim {
+  opacity: 0.32 !important;
+  animation: none !important;        /* no breathing while off */
+  pointer-events: none !important;   /* not clickable */
+}
+
+/* Pressed state for the buttons inside the central rectangle — the dotted frame
+   fills with the interface orange and the label turns cream, then transitions
+   back on release (driven by JS `.is-pressed`, so it never sticks on a touch
+   screen the way :active does). Must out-specify AND follow the shared look
+   above, or the dotted frame would paint straight back over the orange fill. */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls .roots-add-country.is-pressed,
+#section-3[data-stage="0"] .roots-widget.state-input .roots-finish.is-pressed,
+#section-3[data-stage="0"] .roots-add-country.is-pressed,
+#section-3[data-stage="0"] .roots-widget.state-input .roots-finish.is-pressed,
+#section-3[data-stage="0"] #roots-done.is-pressed {
+  background-color: #fb5716 !important;
+  background-image: none !important;
+  color: #f5f5ed !important;
+  opacity: 1 !important;
+}
+/* The frame moved to ::before, so the pressed state's `background-image: none`
+   no longer reaches it — drop the dots (and the breathing) here instead, or the
+   rectangle would keep pulsing on top of the solid orange fill. */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls .roots-add-country.is-pressed::before,
+#section-3[data-stage="0"] .roots-widget.state-input .roots-finish.is-pressed::before,
+#section-3[data-stage="0"] #roots-done.is-pressed::before {
+  background-image: none;
+}
+/* Note becomes a two-row stack: the instruction, then "סיימתי" under it,
+   both flush to the right edge (RTL). */
+#section-3[data-stage="0"] .roots-map-note {
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 10px !important;
+}
+/* Two text buttons below the box: "הוסף" and "חזרה ליבשות". */
+#section-3[data-stage="0"] .roots-widget.state-input .roots-actions {
+  display: flex !important;
+  direction: rtl !important;   /* הוסף first (right), חזרה ליבשות after */
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 26px !important;
+  margin-top: 14px !important;
+  padding: 0 !important;   /* right edge lines up with the box + the note text */
+}
+#section-3[data-stage="0"] .roots-actions .roots-add-country { padding: 0 !important; }
+#section-3[data-stage="0"] .roots-input:focus {
+  border-color: var(--s1-dark) !important;
+  outline: none !important;
+  box-shadow: none !important;   /* remove the orange glow */
+}
+#section-3[data-stage="0"] .roots-send,
+#section-3[data-stage="0"] .roots-btn,
+#section-3[data-stage="0"] .roots-continue {
+  background: var(--s1-orange) !important;
+  color: var(--s1-light) !important;
+  border: 1px solid var(--s1-orange) !important;
+  border-radius: 999px !important;
+  padding: 10px 22px !important;
+  font-family: 'ArbelG', sans-serif !important;
+  cursor: pointer !important;
+}
+#section-3[data-stage="0"] .roots-btn.ghost,
+#section-3[data-stage="0"] .roots-back {
+  background: transparent !important;
+  color: var(--s1-dark) !important;
+  border-color: var(--s1-dark) !important;
+}
+
+/* ── 10. Help mark ────────────────────────────────────── */
+#section-3[data-stage="0"] .q-help {
+  border: 1px solid var(--s1-orange) !important;
+  color: var(--s1-orange) !important;
+  background: transparent !important;
+}
+
+/* Ensure the body paper texture background is removed, keeping only the requested solid background color */
+html, body {
+  background-color: var(--s1-light) !important;
+  background-image: none !important;
+}
+#section-3 {
+  background-image: none !important;
+  background-color: var(--s1-light) !important;
+}
+
+/* Ensure absolutely no elements or pseudo-elements in the top-left header zone have any background washes, masks, or overlays that block the grid lines */
+#section-3 .q-header-container,
+#section-3 .q-header-container::before,
+#section-3 .q-header-container::after,
+#section-3 #q-btn-back-home,
+#section-3 #q-btn-back-home::before,
+#section-3 #q-btn-back-home::after,
+#section-3 .q-header-progress-text-wrap,
+#section-3 .q-header-progress-glow,
+#section-3 .q-header-progress-glow::before,
+#section-3 .q-header-progress-glow::after,
+#section-3 .q-header-logo-box-v5,
+#section-3 #btn-restart,
+#section-3 #btn-restart-img {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STAGE 2 (word question · data-stage 1) — dark screen per design-4.
+   First visual pass: dark plate, light-on-dark grid, big dotted
+   prompt, orange instruction, left vertical wordmark, 1-8 step list.
+   ════════════════════════════════════════════════════════════════ */
+#section-3[data-stage="1"] {
+  background: #282828 !important;
+  background-color: #282828 !important;
+  --grid-dot: #f5f5ed;          /* grid flips to light on the dark plate */
+  --s2-cream: #f5f5ed;
+  --s2-orange: #fb5716;
+}
+
+.stage2 { display: none; }
+#section-3[data-stage="1"] .stage2 { display: block; }
+
+/* Big dotted prompt — centered in the content area. */
+#section-3[data-stage="1"] .s2-prompt {
+  position: fixed;
+  top: calc((85 + 686) / 2 * var(--sy));
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(72vw, 1000px);
+  height: auto;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Instruction line — orange, just below the top grid rule, right side. */
+#section-3[data-stage="1"] .s2-instruction {
+  display: none !important;   /* removed — the stage instruction (#q-instruction) is used instead */
+  position: fixed;
+  top: calc(112 * var(--sy));
+  right: calc(140 * var(--sx));
+  direction: rtl;
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(13px, 1.05vw, 16px);
+  letter-spacing: 0.02em;
+  color: var(--s2-orange);
+  z-index: 4;
+}
+
+/* Left vertical wordmark. */
+#section-3[data-stage="1"] .s2-vtext {
+  position: fixed;
+  left: calc(48 * var(--sx));
+  top: 50%;
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  direction: rtl;
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(11px, 0.85vw, 13px);
+  letter-spacing: 0.14em;
+  color: var(--s2-cream);
+  opacity: 0.85;
+  z-index: 4;
+  white-space: nowrap;
+}
+
+/* 1-8 step list — right edge, vertical. */
+#section-3[data-stage="1"] .s2-steps {
+  position: fixed;
+  right: calc(40 * var(--sx));
+  top: 50%;
+  transform: translateY(-50%);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(18 * var(--sy));
+  z-index: 4;
+}
+#section-3[data-stage="1"] .s2-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-direction: row-reverse;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  color: var(--s2-cream);
+  opacity: 0.6;
+}
+#section-3[data-stage="1"] .s2-steps li::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--s2-cream);
+}
+#section-3[data-stage="1"] .s2-steps li.is-current {
+  opacity: 1;
+  color: var(--s2-orange);
+}
+#section-3[data-stage="1"] .s2-steps li.is-current::before {
+  background: var(--s2-orange);
+}
+
+/* Text/UI on the dark plate reads cream. */
+#section-3[data-stage="1"] .q-header-progress-val { color: var(--s2-cream) !important; }
+
+/* Hide the old light-theme word-question content on this stage. */
+#section-3[data-stage="1"] #word-field-container,
+#section-3[data-stage="1"] #middle-q-container { display: none !important; }
+
+/* Hide the leftover big stage-number "02" pseudo on the word stage. */
+#section-3[data-stage="1"] #q-main-cell::before {
+  content: none !important;
+  display: none !important;
+}
+/* Wider prompt to match the reference proportions. */
+#section-3[data-stage="1"] .s2-prompt {
+  width: min(80vw, 1180px);
+}
+
+/* ── 9. Gold dots constellation for stage 2 (words selection) ── */
+.s2-dots-container {
+  /* Bounds = the central framed rectangle, pinned to the frame lines via FIXED
+     positioning (absolute made it depend on an offset ancestor, so the dots
+     spilled past the left line). The TOP starts below the instruction row so the
+     dots never sit over the orange instruction. Dots are placed in % of this box,
+     so they can never leave the rectangle. NB: `N * var(--sx)` — --sx is a length. */
+  position: fixed;
+  left: calc(100 * var(--sx));
+  width: calc(100vw - 200 * var(--sx));
+  top: calc(155 * var(--sy));                 /* clears the top instruction row */
+  height: calc((686 - 155) * var(--sy));      /* down to the same bottom as before */
+  z-index: 5;
+  pointer-events: none;
+}
+
+.gold-dot-pick {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: goldDotFloat var(--dur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  transition: opacity 0.4s ease;
+}
+
+@keyframes goldDotFloat {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-6px);
+  }
+}
+
+.gold-dot-img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+}
+
+.gold-dot-pick:hover .gold-dot-img {
+  transform: scale(1.5);   /* no glow — enlarge only */
+}
+
+/* The word label next to a dot is intentionally NOT shown (no text beside the
+   dots, and no glow). */
+.gold-dot-label {
+  display: none;
+}
+
+.gold-dot-pick.chosen .gold-dot-img {
+  transform: scale(2.2);   /* no glow / brightness — enlarge only */
+}
+
+.gold-dot-pick.fade-out {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hide theme toggle button on landing screen, show it on questionnaire */
+#theme-toggle-btn {
+  display: block !important;
+  position: absolute !important;
+  top: calc(29px * var(--sy)) !important;
+  left: calc(205px * var(--sx)) !important;
+  z-index: 10000 !important;
+}
+
+#section-1:not(.exiting) ~ #theme-toggle-btn {
+  display: none !important;
+}
+
+/* Symbol library button in top-left cell of the questionnaire */
+/* "מאגר הסמלים" — one link, no arrow, centered in the grid's extreme top-left
+   rectangle (edge → first vertical at x:200, above the top horizontal y:85).
+   Identical on the landing and on every questionnaire stage. */
+#q-btn-symbol-library,
+#section-1 #btn-symbol-library {
+  position: absolute;
+  /* Centred in its top-left grid cell (screen-left → the 200·sx vertical), i.e.
+     the cell centre at 100·sx; vertically centred at 42·sy. */
+  left: calc(100 * var(--sx));
+  top: calc(42 * var(--sy));
+  transform: translate(-50%, -50%);
+  z-index: 200;
+  pointer-events: auto;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  color: #ff5003 !important;   /* orange on the questionnaire (light) stages */
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(11px, 0.82vw, 13px);   /* nudged up ~15% across every screen */
+  font-weight: 400 !important;
+  letter-spacing: 0.04em;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  direction: rtl;
+  transition: opacity 0.2s ease;
+}
+
+#q-btn-symbol-library:hover,
+#section-1 #btn-symbol-library:hover {
+  opacity: 0.7;
+}
+/* On the orange opening screen, keep it dark grey (orange-on-orange = invisible). */
+#section-1 #btn-symbol-library {
+  color: #282828 !important;
+}
+
+/* ── SymbolInfoPanel — momentary context on the touch screen for the symbol
+   just added to the jewel. Position changes per stage via [data-variant]. ── */
+#symbol-info-panel {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.2vw, 20px);
+  z-index: 2000;   /* above the on-screen keyboard (z 1000) */
+  max-width: min(360px, 30vw);
+  direction: rtl;
+  text-align: right;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
+}
+#symbol-info-panel.is-in { opacity: 1; transform: translateY(0); }
+#symbol-info-panel .sip-symbol { width: clamp(64px, 6.5vw, 96px); height: clamp(64px, 6.5vw, 96px); flex: none; color: #282828; }
+#symbol-info-panel .sip-symbol svg { display: block; width: 100%; height: 100%; }
+#symbol-info-panel .sip-name { font-family: 'Shofar', sans-serif; font-size: clamp(16px, 1.5vw, 24px); color: #282828; margin-bottom: 4px; }
+#symbol-info-panel .sip-origin { font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 0.9vw, 13px); color: #ff5003; letter-spacing: 0.02em; margin-bottom: 6px; }
+#symbol-info-panel .sip-meaning { font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 0.9vw, 13px); color: #282828; line-height: 1.6; }
+
+/* Per-stage position variants. */
+#symbol-info-panel[data-variant="right"]         { top: 24vh; right: calc(150 * var(--sx)); }
+#symbol-info-panel[data-variant="left"]          { top: 24vh; left: calc(150 * var(--sx)); }
+#symbol-info-panel[data-variant="near-question"] { top: 34vh; right: calc(320 * var(--sx)); }
+#symbol-info-panel[data-variant="panel"]         { top: 30vh; right: calc(130 * var(--sx)); }
+#symbol-info-panel[data-variant="bottom"]        { bottom: calc(96 * var(--sy)); left: 50%; transform: translateX(-50%) translateY(14px); }
+#symbol-info-panel[data-variant="bottom"].is-in  { transform: translateX(-50%) translateY(0); }
+
+/* Maze (path) stage — interface ORANGE background. In stage1.css so it loads
+   AFTER geometric.css (whose #section-3 / .screen-panel bg rules would else win). */
+#section-3[data-stage="5"] { background: #ff5003 !important; }
+
+/* Drop the leftover chrome divider lines on the maze stage (sidebar
+   border-right from geometric.css, content border-top from styles.css) so the
+   whole board is a clean field for the path network. Here because stage1.css is
+   the last stylesheet in the cascade → these win. */
+#section-3[data-stage="5"] .q-chrome-side     { border-right: none !important; }
+#section-3[data-stage="5"] #middle-q-container { border-top: none !important; }
+/* Tiles stage (data-stage="2") — drop the same straight horizontal rule; the
+   dotted grid already carries the structure, so this solid line is redundant. */
+#section-3[data-stage="2"] #middle-q-container { border-top: none !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   Stage 6 — Time selection (data-stage="3"). Dark screen, cream sun
+   dome at the top, four dotted-numeral digit wheels below.
+   ══════════════════════════════════════════════════════════════ */
+#section-3[data-stage="3"] { background: #222020 !important; --grid-dot: #f5f5ed !important; }
+/* The sky colour is driven live by the chosen hour (applyTimeSky) via an inline
+   background-color; ease it so scrubbing the wheel glides the sky smoothly. */
+#section-3[data-stage="3"] { transition: background-color .35s linear !important; }
+#section-3[data-stage="3"] .tw-d,
+#section-3[data-stage="3"] .tw-colon { transition: filter .5s ease; }
+/* Daytime: the sky is bright, so flip the content to dark — dark grid + darkened
+   (from gold) numerals AND colon — so it stays readable. Night keeps the
+   light-on-dark look. The colon carries the same gold as the numerals, so the
+   same filter darkens it to the exact same colour. */
+#section-3[data-stage="3"].tw-daylight { --grid-dot: #282828 !important; }
+#section-3[data-stage="3"].tw-daylight .tw-d,
+#section-3[data-stage="3"].tw-daylight .tw-colon { filter: brightness(0.28) saturate(0.75); }
+/* Remove the leftover bordered #q-input-wrap box (it's empty on this stage —
+   the wheel lives in #word-field-container) so no stray rectangle shows. */
+#section-3[data-stage="3"] #q-input-wrap { border: none !important; }
+/* drop the leftover chrome divider lines, like the maze stage */
+#section-3[data-stage="3"] .q-chrome-side     { border-right: none !important; }
+#section-3[data-stage="3"] #middle-q-container { border-top: none !important; background: transparent !important; }
+
+/* Give the picker the whole central content area (fixed, below the header
+   line and above the footer line) so the sun can hang from the top line and
+   the wheels sit centred — independent of the middle grid cell. */
+#section-3[data-stage="3"] #word-field-container {
+  position: fixed !important;
+  top: 11vh !important; bottom: 8vh !important;   /* between the top and bottom frame lines */
+  left: 8vw !important; right: 8vw !important;
+  width: auto !important; height: auto !important;
+  z-index: 6 !important;
+  pointer-events: auto !important;
+  background: transparent !important;
+}
+#section-3[data-stage="3"] #middle-q-container { overflow: visible !important; }
+#time-wheel { position: absolute; inset: 0; }
+
+.tw-root {
+  position: absolute; inset: 0;
+  --tw-wheelh: clamp(230px, 33vh, 360px);        /* digit band: horizontal line → bottom line */
+  --tw-item: calc(var(--tw-wheelh) * 0.52);      /* selected digit centred, neighbours clipped */
+  /* Right column stops short of the interface's right vertical grid line. That
+     rule sits 100·sx from the VIEWPORT edge while this container ends at 8vw,
+     hence the difference; +16px keeps the text off the dots rather than on them. */
+  --tw-right: calc(100 * var(--sx) - 8vw + 16px);
+}
+
+/* The horizontal rule over the digit band, carried across the full frame so it
+   runs above the right-hand text too. Drawn here rather than on .tw-row (which
+   is only as wide as the digits) — same origin and dot pitch, so it is one
+   continuous line, not two that meet. */
+.tw-root::before {
+  content: '';
+  position: absolute;
+  top: calc(100% - var(--tw-wheelh));
+  left: 0;
+  right: calc(100 * var(--sx) - 8vw);
+  height: var(--grid-dot-size);
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size: var(--grid-dot-gap) var(--grid-dot-size);
+  background-repeat: repeat-x;
+  background-position: left center;
+  pointer-events: none;
+}
+
+/* ── Sun dome ── the sky container clips the disc at the top line so the
+   sun reads as a hanging semicircle near its peak. Pinned to the top,
+   centred horizontally. ── */
+.tw-sky {
+  position: absolute;
+  top: 0; bottom: var(--tw-wheelh);              /* fills from the top line down to the digit band */
+  left: 50%; transform: translateX(-50%);
+  width: min(920px, 66vw);
+  overflow: hidden;                              /* clips the disc at the top line and at the band */
+  /* Scroll / drag anywhere on the sky (background), not just on the sun disc,
+     to change the hour — drives the sun + sky recolour (attachDrag(sky)). */
+  pointer-events: auto;
+  touch-action: none;
+}
+.tw-sun {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+  /* The sky stays click-through; only the disc itself is grabbable, so dragging
+     or scrolling ON the sun drives the hour. border-radius clips hit-testing, so
+     the target is the visible disc, not its bounding box.
+     Deliberately NO cursor here: the piece hides the native cursor (`* {cursor:none}`)
+     and draws its own hand, and any cursor set on .tw-sun would out-specify that
+     and pop the OS arrow back over the sun. */
+  pointer-events: auto;
+  touch-action: none;
+}
+
+/* ── Wheels row  H H : M M ── a grid of dotted cells in the lower area. ── */
+.tw-row {
+  position: absolute;
+  left: 0; bottom: 0;                 /* sits on the bottom frame line */
+  height: var(--tw-wheelh);           /* top edge = the horizontal line under the sun */
+  transform: none;
+  display: flex; align-items: stretch; justify-content: flex-start;
+  direction: ltr;
+}
+.tw-cell {
+  position: relative;
+  height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 clamp(10px, 1.8vw, 30px);
+}
+/* dotted vertical divider between adjacent cells */
+.tw-cell + .tw-cell::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: var(--grid-dot-size);
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size: var(--grid-dot-size) var(--grid-dot-gap);
+  background-repeat: repeat-y; background-position: center top;
+}
+/* The rule above the digit row is drawn by .tw-root::before instead, so it can
+   run past the digits and continue above the right-hand text as one line. */
+/* dotted vertical line closing the digit area on the right */
+.tw-row::after {
+  content: ''; position: absolute; right: -1px; top: 0; height: 100%;
+  width: var(--grid-dot-size);
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size: var(--grid-dot-size) var(--grid-dot-gap);
+  background-repeat: repeat-y; background-position: center top;
+}
+.tw-wheel {
+  height: 100%;                     /* fills the cell band; neighbours clip at the grid lines */
+  overflow: hidden;                 /* clips the neighbours — a hard cut, no fade */
+  position: relative;
+  touch-action: none;               /* we drive the drag ourselves */
+  cursor: grab;
+  user-select: none; -webkit-user-select: none;
+}
+/* four single-digit cells + a narrower colon cell — one digit each, big */
+.tw-ht, .tw-hu, .tw-mt, .tw-mu { width: clamp(74px, 10vw, 158px); }
+.tw-wheel.is-grabbing { cursor: grabbing; }
+/* one single-digit cell — absolutely placed, moved only by transform */
+.tw-num {
+  position: absolute; left: 0; right: 0; top: 0;
+  height: var(--tw-item);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;             /* drags register on the wheel */
+  will-change: transform;
+}
+.tw-d {
+  height: 82%;
+  width: auto;
+  display: block;
+  -webkit-user-drag: none;
+}
+/* Colon — two rings drawn in the numerals' own dots. The two dots sit further
+   apart than the old ":" glyph placed them (166 viewBox units between centres
+   ≈ 64px on screen, was ~52). */
+.tw-colon {
+  height: var(--tw-item);
+  width: auto;
+  align-self: center;
+  display: block;
+  overflow: visible;
+  padding: 0 2px;
+  transform: translateY(-6%);
+}
+.tw-colon-dot {
+  fill: none;
+  stroke: #e2bc71;                  /* the digit artwork's own gold */
+  /* Dot size + pitch must equal the NUMERALS' dots. The digit PNGs (15px dots on
+     a 55.4px pitch in a 1034px-tall image) scale WITH the stage height, so the
+     colon must too — hence viewBox units (NOT non-scaling-stroke, which froze the
+     colon in screen px and made it match at only one screen size). The colon SVG
+     is `height: --tw-item` over a 400-tall viewBox, and a digit renders at
+     0.82·--tw-item over its 1034px art, so, in viewBox units:
+       stroke-width = 15·(0.82/1034)·400 ≈ 4.74   (dot size)
+       pitch        = 55.4·(0.82/1034)·400 ≈ 17.5  (centre-to-centre) */
+  stroke-width: 4.74;
+  stroke-dasharray: 0.1 17.42;
+  stroke-linecap: round;
+}
+
+/* Same object as every other stage button: a DOTTED-rectangle frame (on ::before,
+   from the one dot system) that breathes (grows/shrinks) — like the opening CTA
+   and #roots-done. Theme-adaptive: cream on the dark night sky, #282828 on the
+   bright day sky. */
+.tw-confirm {
+  position: absolute;
+  right: calc(var(--tw-right) + 26px);
+  top: calc(100% - var(--tw-wheelh) + 176px);    /* under the (raised) prompt */
+  left: auto; bottom: auto;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 11px 26px;
+  color: #f5f5ed !important;               /* night: cream label */
+  --grid-dot: #f5f5ed !important;          /* night: cream dotted frame */
+  /* Same font + size as the other stage buttons (#roots-done / opening CTA). */
+  font-family: 'ArbelG', sans-serif;
+  font-weight: 400;
+  font-size: clamp(10px, 0.85vw, 13px);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transform-origin: center;
+  animation: dotted-frame-breathe 1.8s ease-in-out infinite;   /* grow / shrink */
+  transition: color 0.15s ease;
+}
+.tw-confirm::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size:
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-size) var(--grid-dot-gap),
+    var(--grid-dot-size) var(--grid-dot-gap);
+  background-position: top, bottom, left, right;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+}
+.tw-confirm:hover { color: #ff5003 !important; --grid-dot: #ff5003 !important; }
+/* Daytime (bright sky): dark label + dark dotted frame. */
+#section-3[data-stage="3"].tw-daylight .tw-confirm { color: #282828 !important; --grid-dot: #282828 !important; }
+#section-3[data-stage="3"].tw-daylight .tw-confirm:hover { color: #ff5003 !important; --grid-dot: #ff5003 !important; }
+@media (prefers-reduced-motion: reduce) { .tw-confirm { animation: none !important; } }
+
+/* ── Prompt artwork, right of the digit band (per the reference). Measured off
+   the band (--tw-wheelh) rather than the container, so it stays locked to the
+   line as the band resizes. The instruction line lives in the shared
+   #q-instruction slot up in the "אתחול שלב" row, not here. ── */
+.tw-question {
+  position: absolute;
+  right: calc(var(--tw-right) + 26px);           /* nudged left */
+  top: calc(100% - var(--tw-wheelh) + 58px);     /* nudged up */
+  width: clamp(190px, 20vw, 330px);
+  height: auto;
+  display: block;
+  pointer-events: none;
+}
+
+/* Hide the leftover central counter on this stage so the picker reads clean
+   (the top 01—08 progress bar stays). #q-instruction is NOT hidden here: the
+   stage's instruction now uses the same slot as every other stage. */
+#section-3[data-stage="3"] #middle-q-container #q-header { display: none !important; }
+
+/* ════════════════════════════════════════════════════════════════════
+   LANDING LOGOTYPE — two layers so the letters recolour per palette
+   while the gold dot stays gold. Letters = a solid fill masked by
+   zeut-letters.png (dot removed); dot = zeut-dot.png overlaid on top.
+   ════════════════════════════════════════════════════════════════════ */
+#v5-landing-title {
+  position: relative !important;
+  width: min(56vw, 680px) !important;
+  aspect-ratio: 2251 / 1165 !important;
+  height: auto !important;
+  display: block !important;
+}
+#v5-landing-title .v5-title-letters {
+  position: absolute;
+  inset: 0;
+  background-color: var(--landing-logo, #f5f5ed);
+  -webkit-mask: url('/image/zeut-letters.png') center / contain no-repeat;
+          mask: url('/image/zeut-letters.png') center / contain no-repeat;
+  transition: background-color 0.4s ease;
+}
+#v5-landing-title .v5-title-dot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   RANDOMIZED LANDING PALETTES
+   A html.landing-<name> class is set on <html> before first paint
+   (inline script in index.html), fresh on every page load. Because the
+   opening screen is only re-entered via a full reload, each visit /
+   restart / finish draws a new scheme.
+
+   · orange (default) — original look, left untouched.
+   · dark   — #282828 plate, cream grid + cream text, orange logotype.
+   · cream  — #f5f5ed plate, #282828 grid + text, orange logotype.
+
+   The eye (hamsa pendulum) and the logotype's gold dot are constant.
+   All overrides are scoped :not(.morphing) so the opening→stage-1
+   colour morph (handled in app.js) is never frozen.
+   ════════════════════════════════════════════════════════════════════ */
+#section-1 { --landing-logo: #f5f5ed; }   /* orange scheme: cream letters */
+
+/* ── dark plate ── */
+html.landing-dark #section-1:not(.morphing) { background: #282828 !important; }
+html.landing-dark #section-1 { --landing-logo: #fb5716; }
+html.landing-dark #section-1:not(.morphing) .stage-grid { --grid-dot: #f5f5ed !important; }
+html.landing-dark #section-1:not(.morphing) #ui-top-left,
+html.landing-dark #section-1:not(.morphing) #cta-anchor,
+html.landing-dark #section-1:not(.morphing) #ui-coords,
+html.landing-dark #section-1:not(.morphing) #coord-x,
+html.landing-dark #section-1:not(.morphing) #coord-y,
+html.landing-dark #section-1:not(.morphing) #coord-z,
+html.landing-dark #section-1:not(.morphing) #btn-symbol-library,
+html.landing-dark #section-1:not(.morphing) #ui-crosshair,
+html.landing-dark #section-1:not(.morphing) #ui-bottom-left .ui-v {
+  color: #f5f5ed !important;
+}
+
+/* ── Dotted frame around the opening CTA ──────────────────────────────
+   Drawn on ::before rather than the button's own background so the frame can
+   breathe on its own — scaling the button would drag the label with it.
+   Dots are currentColor, so they resolve to whatever the label's colour
+   already is in each palette — cream on the orange and dark plates, #282828
+   on the cream one — rather than restating the palette logic here. Dot size
+   and pitch come from the interface grid's own tokens. */
+#section-1 #cta-anchor {
+  background-color: transparent !important;
+  background-image: none !important;
+  padding: 12px 30px !important;
+  /* Unlike the roots buttons, the CTA breathes as a WHOLE — the scale sits on
+     the anchor itself so the label grows together with its dotted frame (the
+     ::before is a child, so it rides along). translateX(-50%) is baked into the
+     keyframe to preserve the horizontal centring while scaling. */
+  transform-origin: center !important;
+  animation: cta-breathe 1.8s ease-in-out infinite !important;
+}
+@keyframes cta-breathe {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.07); }
+}
+#section-1 #cta-anchor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, currentColor calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, currentColor calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, currentColor calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, currentColor calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size:
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-size) var(--grid-dot-gap),
+    var(--grid-dot-size) var(--grid-dot-gap);
+  background-position: top, bottom, left, right;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  /* No breathe here: the anchor scales the frame and label together, so a
+     second scale on ::before would compound it. */
+}
+
+/* The one breathing loop every dotted-frame button shares — now on the button
+   itself, so the label scales together with its frame. */
+@keyframes dotted-frame-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.07); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #section-1 #cta-anchor,
+  #section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls .roots-add-country,
+  #section-3[data-stage="0"] .roots-widget.state-input .roots-finish,
+  #section-3[data-stage="0"] #roots-done {
+    animation: none !important;
+  }
+}
+
+/* ── cream plate ── */
+html.landing-cream #section-1:not(.morphing) { background: #f5f5ed !important; }
+html.landing-cream #section-1 { --landing-logo: #fb5716; }
+html.landing-cream #section-1:not(.morphing) .stage-grid { --grid-dot: #282828 !important; }
+html.landing-cream #section-1:not(.morphing) #ui-top-left,
+html.landing-cream #section-1:not(.morphing) #cta-anchor,
+html.landing-cream #section-1:not(.morphing) #ui-coords,
+html.landing-cream #section-1:not(.morphing) #coord-x,
+html.landing-cream #section-1:not(.morphing) #coord-y,
+html.landing-cream #section-1:not(.morphing) #coord-z,
+html.landing-cream #section-1:not(.morphing) #btn-symbol-library,
+html.landing-cream #section-1:not(.morphing) #ui-crosshair,
+html.landing-cream #section-1:not(.morphing) #ui-bottom-left .ui-v {
+  color: #282828 !important;
+}

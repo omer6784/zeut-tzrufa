@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Vite Preview (alt port)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "autoPort": true
+    },
+    {
+      "name": "totem3d",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["totem3d/server.cjs"],
+      "port": 8123
+    }
+  ]
+}

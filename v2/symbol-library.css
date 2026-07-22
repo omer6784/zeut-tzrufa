@@ -1,0 +1,437 @@
+/* ═══════════════════════════════════════════════════════════════
+   Symbol Library — Styles
+   Visual language: minimal, archival, grid-aligned.
+   Matches the Identity Forging v2 design system.
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── Font faces — SimplerPro Mono, aliased 'ArbelG' to match the v5 UI ─── */
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/SimplerPro_HLAR_Mono-Regular.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/SimplerPro_HLAR_Mono-Medium.otf') format('opentype');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
+  font-weight: 900;
+}
+@font-face {
+  font-family: 'Shofar';
+  src: url('/image/fonts/shofarregular-webfont.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ─── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: none;
+}
+
+html {
+  background: #efede9;
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: 'ArbelG', 'Georgia', serif;
+  background: #efede9;
+  color: #282828;
+  overflow-x: hidden;
+  overflow-y: auto;
+  direction: rtl;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(48, 46, 46, 0.15) #efede9;
+}
+
+body::-webkit-scrollbar { width: 4px; }
+body::-webkit-scrollbar-track { background: #efede9; }
+body::-webkit-scrollbar-thumb {
+  background: rgba(48, 46, 46, 0.15);
+  border-radius: 2px;
+}
+
+/* ─── Custom cursor ──────────────────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 22px;
+  height: 26px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 99999;
+  will-change: left, top;
+  color: #282828;
+  transition: color 0.15s ease;
+}
+#cursor svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ─── Back link ──────────────────────────────────────────── */
+#back-link {
+  position: fixed;
+  top: 80px;
+  left: 32px;
+  z-index: 100;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  color: #282828;
+  text-decoration: none;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #282828;
+  transition: opacity 0.2s ease;
+  direction: ltr;
+}
+#back-link:hover { opacity: 0.55; }
+
+/* ─── Page header ────────────────────────────────────────── */
+#lib-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: #efede9;
+  border-bottom: 1px solid rgba(48, 46, 46, 0.08);
+  direction: ltr;
+}
+
+#lib-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#lib-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lib-tag {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(48, 46, 46, 0.65);
+}
+
+.lib-tag-sep {
+  font-size: 10px;
+  color: rgba(48, 46, 46, 0.25);
+}
+
+.lib-coord {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: rgba(48, 46, 46, 0.4);
+}
+
+.lib-coord-dot {
+  font-size: 10px;
+  color: rgba(48, 46, 46, 0.2);
+}
+
+/* ─── Guide frame (dashed construction marks) ────────────── */
+#lib-guide-frame {
+  position: fixed;
+  top: 64px;
+  left: 28px;
+  right: 28px;
+  bottom: 28px;
+  border: 1px dashed rgba(48, 46, 46, 0.08);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.guide-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+}
+
+.guide-corner::before,
+.guide-corner::after {
+  content: '';
+  position: absolute;
+  background: rgba(48, 46, 46, 0.12);
+}
+
+.guide-tl { top: -1px; left: -1px; }
+.guide-tl::before { top: 0; left: 0; width: 10px; height: 1px; }
+.guide-tl::after { top: 0; left: 0; width: 1px; height: 10px; }
+
+.guide-tr { top: -1px; right: -1px; }
+.guide-tr::before { top: 0; right: 0; width: 10px; height: 1px; }
+.guide-tr::after { top: 0; right: 0; width: 1px; height: 10px; }
+
+.guide-bl { bottom: -1px; left: -1px; }
+.guide-bl::before { bottom: 0; left: 0; width: 10px; height: 1px; }
+.guide-bl::after { bottom: 0; left: 0; width: 1px; height: 10px; }
+
+.guide-br { bottom: -1px; right: -1px; }
+.guide-br::before { bottom: 0; right: 0; width: 10px; height: 1px; }
+.guide-br::after { bottom: 0; right: 0; width: 1px; height: 10px; }
+
+/* ─── Symbol grid ────────────────────────────────────────── */
+#symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 96px 48px 80px;
+  direction: ltr;
+}
+
+/* ─── Individual cell ──────────────────────────────────────
+   Default: blue 1px grid on beige; hover: solid orange fill. */
+.symbol-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #282828;
+  margin: -0.5px;
+  overflow: hidden;
+  background: #efede9;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+/* ─── Hover overlay ──────────────────────────────────────── */
+.symbol-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #fb5716;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.symbol-cell:hover::before {
+  opacity: 1;
+}
+
+/* ─── SVG symbol artwork ─────────────────────────────────── */
+.symbol-artwork {
+  width: 52%;
+  height: 52%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.25s ease,
+              color 0.25s ease;
+}
+
+.symbol-artwork svg {
+  width: 100%;
+  height: 100%;
+  color: #282828;
+  display: block;
+  transition: color 0.25s ease;
+}
+
+.symbol-cell:hover .symbol-artwork {
+  transform: scale(0.82) translateY(18%);
+  opacity: 0.65;
+}
+
+.symbol-cell:hover .symbol-artwork svg {
+  color: #f5f5ed;
+}
+
+/* ─── Info panel (appears on hover) ──────────────────────── */
+.symbol-info {
+  position: absolute;
+  top: 10%;
+  left: 12%;
+  right: 12%;
+  z-index: 3;
+  direction: rtl;
+  text-align: right;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease 0.05s,
+              transform 0.25s cubic-bezier(0.22, 1, 0.36, 1) 0.05s;
+  pointer-events: none;
+}
+
+.symbol-cell:hover .symbol-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.info-name {
+  font-family: 'Shofar', 'ArbelG', sans-serif;
+  font-size: clamp(13px, 1.3vw, 18px);
+  font-weight: 400;
+  color: #f5f5ed;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.info-tradition {
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(8px, 0.72vw, 10px);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.03em;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.info-meaning {
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(8.5px, 0.78vw, 11px);
+  font-weight: 400;
+  color: #f5f5ed;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+}
+
+/* Thin separator between tradition and meaning */
+.info-sep {
+  width: 16px;
+  height: 0;
+  border-top: 0.8px solid rgba(255, 255, 255, 0.4);
+  margin: 5px 0 5px auto;
+}
+
+/* ─── Cell index number (quiet, archival) ────────────────── */
+.symbol-index {
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 255, 0.35);
+  z-index: 2;
+  transition: color 0.25s ease;
+  direction: ltr;
+}
+
+.symbol-cell:hover .symbol-index {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+#lib-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px 28px;
+  direction: ltr;
+}
+
+.lib-footer-text {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: rgba(48, 46, 46, 0.2);
+}
+
+/* ─── Entrance animation ─────────────────────────────────── */
+.symbol-cell {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: cellReveal 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes cellReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 960px) {
+  #symbol-grid {
+    grid-template-columns: repeat(4, 1fr);
+    padding: 88px 28px 60px;
+  }
+}
+
+@media (max-width: 700px) {
+  #symbol-grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 80px 16px 48px;
+  }
+
+  #lib-header {
+    padding: 0 16px;
+    height: 52px;
+  }
+
+  #back-link {
+    top: 62px;
+    left: 16px;
+  }
+
+  .symbol-artwork {
+    width: 45%;
+    height: 45%;
+  }
+
+  .symbol-info {
+    top: 8%;
+    left: 8%;
+    right: 8%;
+  }
+}
+
+@media (max-width: 480px) {
+  #symbol-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 72px 12px 40px;
+  }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .symbol-cell {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .symbol-cell::before,
+  .symbol-artwork,
+  .symbol-info {
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>זהות עצמית — Prototype v2</title>
+  <link rel="stylesheet" href="/proto-v2.css" />
+</head>
+<body>
+
+<div id="p2-cursor"></div>
+
+<!-- Shared HUD chrome -->
+<div id="p2-hud">
+
+  <div class="hud-tl">
+    <span class="hud-link" data-go="landing">צור את התכשיט שלך</span>
+  </div>
+
+  <div class="hud-tr">
+    <div class="version-bar" aria-hidden="true">
+      <span class="version-dot bar-blue"></span>
+      <span class="version-dot bar-coral"></span>
+      <span class="version-bar-label">Version II</span>
+    </div>
+    <div class="hud-coords">
+      <span class="coord">X · <i id="coord-x">08</i></span>
+      <span class="coord">Y · <i id="coord-y">22</i></span>
+      <span class="coord">Z · <i id="coord-z">04</i></span>
+    </div>
+  </div>
+
+  <div class="hud-bl">
+    <div class="hud-stamp">
+      <span class="stamp-label">v 2.0</span>
+      <span class="stamp-rule"></span>
+    </div>
+    <div class="hud-mono">
+      <span>abcd</span>
+      <span>0 1 2 3 4 5 6 7 8 9</span>
+    </div>
+  </div>
+
+  <div class="hud-br">
+    <p class="hud-poem">
+      תכשיט שנולד מתוך זהות.<br/>
+      מהשורשים, מהמורשת,<br/>
+      מהדברים שמגדירים אותך.<br/>
+      צור את התכשיט שלך.
+    </p>
+    <div class="hud-glyphs">
+      <span class="arrow-left">→</span>
+      <span class="glyph">◯</span>
+      <span class="glyph">◔</span>
+      <span class="glyph">☾</span>
+      <span class="glyph">◉</span>
+      <span class="glyph">△</span>
+      <span class="glyph">◇</span>
+    </div>
+  </div>
+
+  <div class="hud-crosshair" aria-hidden="true">⊕</div>
+
+</div>
+
+<!-- ───────────────────────── SCREEN 1: LANDING ───────────────────────── -->
+<section class="p2-screen" id="p2-landing" data-screen="landing">
+
+  <!-- Atmospheric glow field -->
+  <div class="landing-glow" aria-hidden="true">
+    <div class="gf gf-pink"></div>
+    <div class="gf gf-violet"></div>
+  </div>
+
+  <div class="display-stage">
+
+    <!-- 3D peace model — rotates on Y axis, sits inside the construction geometry -->
+    <canvas id="peace-canvas" aria-hidden="true"></canvas>
+
+    <!-- Construction geometry behind the type -->
+    <svg class="construction-svg" viewBox="-500 -350 1000 700" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <!-- four large overlapping ellipses (a vesica composition) -->
+      <ellipse class="stroke"      cx="-150" cy="0"  rx="240" ry="320"/>
+      <ellipse class="stroke"      cx="150"  cy="0"  rx="240" ry="320"/>
+      <ellipse class="stroke-dot"  cx="0"    cy="0"  rx="240" ry="320"/>
+      <ellipse class="stroke-dash" cx="0"    cy="0"  rx="320" ry="240"/>
+      <!-- central concentric small ellipse -->
+      <ellipse class="stroke"      cx="0"    cy="0"  rx="80"  ry="40"/>
+      <ellipse class="stroke-dot"  cx="0"    cy="0"  rx="40"  ry="20"/>
+
+      <!-- thin construction axes -->
+      <line class="stroke-dot" x1="-460" y1="0" x2="460" y2="0"/>
+      <line class="stroke-dot" x1="0" y1="-320" x2="0" y2="320"/>
+
+      <!-- corner ticks -->
+      <line class="tick" x1="-460" y1="-330" x2="-440" y2="-330"/>
+      <line class="tick" x1="-460" y1="-330" x2="-460" y2="-310"/>
+      <line class="tick" x1=" 460" y1="-330" x2=" 440" y2="-330"/>
+      <line class="tick" x1=" 460" y1="-330" x2=" 460" y2="-310"/>
+      <line class="tick" x1="-460" y1=" 330" x2="-440" y2=" 330"/>
+      <line class="tick" x1="-460" y1=" 330" x2="-460" y2=" 310"/>
+      <line class="tick" x1=" 460" y1=" 330" x2=" 440" y2=" 330"/>
+      <line class="tick" x1=" 460" y1=" 330" x2=" 460" y2=" 310"/>
+    </svg>
+
+    <div class="display-type" aria-label="זהות עצמית">
+      <span class="dt-row dt-row-a">זהות</span>
+      <span class="dt-row dt-row-b">עצמית</span>
+    </div>
+  </div>
+
+  <div class="display-sub">A geometric act of self-discovery</div>
+
+  <button class="p2-cta" data-go="questions" id="cta-start">
+    <span class="cta-text">התחל ליצור</span>
+    <span class="cta-rule"></span>
+  </button>
+
+</section>
+
+<!-- ──────────────────────── SCREEN 2: QUESTIONNAIRE ──────────────────────── -->
+<section class="p2-screen" id="p2-questions" data-screen="questions" hidden>
+
+  <button class="back-link" data-go="landing">חזרה ←</button>
+
+  <div class="q-layout">
+
+    <!-- LEFT: vitrine with growing artifact -->
+    <div class="q-vitrine">
+      <div class="vitrine-frame">
+        <div class="vitrine-glow"></div>
+        <div class="vitrine-label">
+          <span>artifact</span>
+          <span class="vitrine-id">·  02</span>
+        </div>
+        <svg id="artifact-svg" viewBox="-110 -110 220 220" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="vitrine-foot">
+          <span class="vitrine-tick"></span>
+          <span class="vitrine-tick"></span>
+          <span class="vitrine-tick"></span>
+        </div>
+      </div>
+      <div class="vitrine-caption">
+        <span class="cap-key">material</span>
+        <span class="cap-val">brass · hand-cast</span>
+      </div>
+    </div>
+
+    <!-- CENTER: question -->
+    <div class="q-center">
+
+      <div class="q-meta">
+        <span class="q-tag">שאלה</span>
+        <span class="q-counter">
+          <i id="q-current">01</i><span>—</span><i id="q-total">05</i>
+        </span>
+      </div>
+
+      <h2 class="q-headline" id="q-headline">
+        מאיפה מתחיל<br/>הסיפור שלך?
+      </h2>
+
+      <p class="q-sub" id="q-sub">בחר/י נקודה על פני האדמה — עיר, שכונה, או מקום שמרגיש בית.</p>
+
+      <div class="q-input-row">
+        <input type="text" id="q-input" placeholder="כתבי את התשובה שלך…" dir="rtl" />
+        <button class="q-submit" id="q-next">המשך</button>
+      </div>
+
+      <div class="q-nav">
+        <button class="q-link" id="q-prev" disabled>← שאלה קודמת</button>
+        <button class="q-link" id="q-skip">דלג לשאלה הבאה →</button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: progress / stations -->
+    <div class="q-progress">
+      <div class="prog-title">שלבי היצירה</div>
+      <ol class="prog-list" id="prog-list"></ol>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ───────────────────────── SCREEN 3: REVEAL ───────────────────────── -->
+<section class="p2-screen" id="p2-reveal" data-screen="reveal" hidden>
+
+  <button class="back-link" data-go="questions">חזרה לשאלון ←</button>
+
+  <div class="reveal-grid">
+
+    <div class="reveal-left">
+      <span class="reveal-eyebrow">תכשיט · 02 · genesis</span>
+      <h1 class="reveal-title">
+        התכשיט<br/>שלך
+      </h1>
+      <p class="reveal-poem">
+        תכשיט יחיד, נמשך מתוך שמך,<br/>
+        ממילותיך, ממקומך —<br/>
+        מההיסטוריה הקטנה<br/>
+        שאת/ה נושא/ת.
+      </p>
+      <div class="reveal-actions">
+        <button class="reveal-btn primary">הזמן תכשיט</button>
+        <button class="reveal-btn ghost" data-go="landing">צור עוד אחד</button>
+      </div>
+    </div>
+
+    <div class="reveal-center">
+      <div class="reveal-plinth">
+        <svg id="artifact-final" viewBox="-110 -110 220 220" preserveAspectRatio="xMidYMid meet"></svg>
+        <div class="plinth-base"></div>
+        <div class="plinth-shadow"></div>
+      </div>
+    </div>
+
+    <div class="reveal-right">
+      <div class="spec-block">
+        <div class="spec-line"><span class="spec-key">קוד יציקה</span><span class="spec-val" id="spec-code">ZH·0824·02</span></div>
+        <div class="spec-line"><span class="spec-key">גימטריה</span><span class="spec-val" id="spec-gem">412</span></div>
+        <div class="spec-line"><span class="spec-key">שכבות</span><span class="spec-val" id="spec-layers">05 / 05</span></div>
+        <div class="spec-line"><span class="spec-key">קוטר</span><span class="spec-val">18 mm</span></div>
+        <div class="spec-line"><span class="spec-key">חומר</span><span class="spec-val">ברונזה מצופה</span></div>
+      </div>
+
+      <div class="spec-answers">
+        <div class="ans-title">המרכיבים שלך</div>
+        <ol id="ans-list" class="ans-list"></ol>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<script type="module" src="/proto-v2.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distilled Identity — Prototype</title>
+  <link rel="stylesheet" href="prototype.css" />
+</head>
+<body>
+
+  <div id="proto-root">
+
+    <!-- Background graphic system: aurora mesh + checker + particles + grain -->
+    <div id="proto-bg">
+      <div id="proto-mesh"></div>
+      <div class="mood mood-blue"     data-mood="blue"></div>
+      <div class="mood mood-warm"     data-mood="warm"></div>
+      <div class="mood mood-contrast" data-mood="contrast"></div>
+      <div class="mood mood-soft"     data-mood="soft"></div>
+      <div id="proto-grid"></div>
+      <div id="proto-checker"></div>
+      <div id="proto-crosshair"></div>
+      <div id="proto-particles"></div>
+      <div id="proto-grain"></div>
+    </div>
+
+    <!-- The persistent evolving object — stack of accumulating layers -->
+    <div id="proto-object-wrap">
+      <div id="proto-object"></div>
+    </div>
+
+    <!-- Typography stage: question / prompt choreography -->
+    <div id="proto-stage">
+      <div id="proto-prompt"></div>
+      <div id="proto-input"></div>
+    </div>
+
+    <!-- Progress indicator -->
+    <div id="proto-progress"></div>
+
+    <!-- Intro overlay -->
+    <div id="proto-intro">
+      <div id="proto-intro-question">מה הסיפור<br>שהזהות שלך מספרת?</div>
+      <button id="proto-intro-cta">בוא נגלה</button>
+    </div>
+
+  </div>
+
+  <script type="module" src="/prototype.js"></script>
+</body>
+</html>

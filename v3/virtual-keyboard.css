@@ -1,0 +1,121 @@
+/* virtual-keyboard.css — Hebrew on-screen keyboard
+   Visual language: heavy condensed letters, brown-on-cream by default,
+   yellow-on-brown on press. Sits docked to the viewport bottom. */
+
+#virtual-keyboard {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%) translateY(0);
+  width: min(1100px, 96vw);
+  z-index: 1000;
+  background: #fffae6;
+  border: 1px solid #6b4938;
+  border-bottom: none;
+  padding: 10px clamp(8px, 1.2vw, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 0.6vh, 8px);
+  direction: rtl;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.2s ease;
+  opacity: 1;
+}
+
+#virtual-keyboard.vk-hidden {
+  transform: translateX(-50%) translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+#virtual-keyboard .vk-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  gap: clamp(3px, 0.5vw, 6px);
+}
+
+#virtual-keyboard .vk-key {
+  flex: 1 1 0;
+  min-width: 0;
+  height: clamp(38px, 5.5vh, 56px);
+  background: #fffae6;
+  color: #6b4938;
+  border: 1px solid #6b4938;
+  padding: 0;
+  font-family: 'ArbelG', 'Georgia', serif;
+  font-weight: 900;
+  font-size: clamp(18px, 2.2vw, 26px);
+  line-height: 1;
+  letter-spacing: 0;
+  cursor: none;
+  outline: none;
+  user-select: none;
+  transition: background-color 0.12s ease, color 0.12s ease, transform 0.08s ease;
+}
+
+#virtual-keyboard .vk-key:hover {
+  background: #6b4938;
+  color: #fffae6;
+  border-color: #6b4938;
+}
+
+#virtual-keyboard .vk-key:active {
+  background: #ffe6a1;
+  color: #6b4938;
+  border-color: #6b4938;
+  transform: translateY(1px);
+}
+
+#virtual-keyboard .vk-key-ctrl {
+  flex: 0.9 1 0;
+  font-family: 'ArbelG', sans-serif;
+  font-weight: 700;
+  font-size: clamp(18px, 2vw, 24px);
+}
+
+#virtual-keyboard .vk-key-space {
+  flex: 5 1 0;
+  font-family: 'ArbelG', sans-serif;
+  font-weight: 500;
+  font-size: clamp(13px, 1.4vw, 16px);
+  letter-spacing: 0.12em;
+}
+
+#virtual-keyboard .vk-row-controls {
+  margin-top: clamp(2px, 0.4vh, 6px);
+}
+
+/* Theme — negative mode flips palette */
+body.theme-negative #virtual-keyboard {
+  background: #6b4938;
+  border-color: #fffae6;
+}
+body.theme-negative #virtual-keyboard .vk-key {
+  background: #6b4938;
+  color: #fffae6;
+  border-color: #fffae6;
+}
+body.theme-negative #virtual-keyboard .vk-key:hover {
+  background: #ffe6a1;
+  color: #6b4938;
+  border-color: #ffe6a1;
+}
+body.theme-negative #virtual-keyboard .vk-key:active {
+  background: #fffae6;
+  color: #6b4938;
+  border-color: #fffae6;
+}
+
+/* Mobile responsive: tighter keys */
+@media (max-width: 700px) {
+  #virtual-keyboard {
+    width: 100vw;
+    padding: 8px 4px;
+  }
+  #virtual-keyboard .vk-key {
+    height: clamp(34px, 6vh, 46px);
+    font-size: clamp(16px, 4.8vw, 20px);
+  }
+}

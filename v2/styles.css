@@ -1,0 +1,3888 @@
+/* ─── ArbelG Font ─────────────────────────────────────────── */
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/ArbelG-Regular.otf') format('opentype');
+  font-weight: 400;
+}
+
+/* ─── Shofar Font ─────────────────────────────────────────── */
+@font-face {
+  font-family: 'Shofar';
+  src: url('/image/fonts/shofarregular-webfont.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/ArbelG-Medium.otf') format('opentype');
+  font-weight: 500;
+}
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/ArbelG-Bold.otf') format('opentype');
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/image/fonts/ArbelG-Stencil.otf') format('opentype');
+  font-weight: 900;
+}
+
+/* ─── LiaCarnaval ─────────────────────────────────────────── */
+@font-face {
+  font-family: 'LiaCarnaval';
+  src: url('/image/fonts/LiaCarnaval-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'LiaCarnavalTextured';
+  src: url('/image/fonts/LiaCarnaval-Textured.ttf') format('truetype');
+  font-weight: 400;
+}
+
+/* ─── Oscar ───────────────────────────────────────────────── */
+@font-face {
+  font-family: 'OscarLight';
+  src: url('/image/fonts/oscar-light-fm.otf') format('opentype');
+  font-weight: 300;
+}
+@font-face {
+  font-family: 'Oscar';
+  src: url('/image/fonts/oscar-regular-fm.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'OscarRound';
+  src: url('/image/fonts/oscar-round-fm.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'OscarStencil';
+  src: url('/image/fonts/oscar-stencil-fm.otf') format('opentype');
+  font-weight: 400;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: none;
+}
+
+html {
+  background: #fcf7f1;
+}
+
+#scene {
+  will-change: transform;
+}
+
+body {
+  width: 100%;
+  font-family: 'ArbelG', 'Georgia', serif;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  background: transparent;
+  scrollbar-width: thin;
+  scrollbar-color: #fcf7f1 #fcf7f1;
+}
+
+/* Section 1 transition state — fixed overlay while section 2 appears behind */
+#section-1.transitioning {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  overflow: hidden;
+  will-change: transform;
+}
+
+body::-webkit-scrollbar {
+  width: 6px;
+}
+
+body::-webkit-scrollbar-track {
+  background: #fcf7f1;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: #fcf7f1;
+  border-radius: 3px;
+}
+
+/* ─── Screen panels (single-screen, fixed overlay) ───────── */
+.screen-panel {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#section-1 {
+  background: #fcf7f1;
+  perspective: 1200px;
+  z-index: 2;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1),
+              transform 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Frosted glass overlay */
+#section-1::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(40px) saturate(1.4);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#section-1.exiting {
+  opacity: 0;
+  transform: translateX(-6%);
+  pointer-events: none;
+}
+
+#section-3 {
+  background: #fcf7f1;
+  z-index: 1;
+  opacity: 0;
+  transform: translateX(3%);
+  transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s,
+              transform 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s;
+  pointer-events: none;
+}
+
+#section-3.entering {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+}
+
+/* ─── Restart button ──────────────────────────────────────── */
+#btn-restart {
+  position: fixed;
+  top: 24px;
+  left: 28px;
+  z-index: 9999;
+  background: none;
+  border: none;
+  cursor: none;
+  padding: 0;
+  display: none;
+}
+
+#btn-restart img {
+  height: 18px;
+  width: auto;
+  display: block;
+}
+
+#btn-restart.on-orange { display: block; }
+#btn-restart.on-blue   { display: block; }
+#btn-restart.on-beige  { display: block; }
+
+/* ─── Logo construction grid (dashed frame + corner × marks) ─── */
+#logo-bg-grid {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(960px, 76vw);
+  height: min(560px, 68vh);
+  display: grid;
+  grid-template-columns: 38px 1fr 38px;
+  grid-template-rows: 32px 1fr 32px;
+  pointer-events: none;
+  z-index: 0;
+  border: 1px dashed rgba(48, 46, 46, 0.3);
+}
+
+#logo-bg-grid > div {
+  position: relative;
+  border-right: 1px dashed rgba(48, 46, 46, 0.3);
+  border-bottom: 1px dashed rgba(48, 46, 46, 0.3);
+}
+#logo-bg-grid > div:nth-child(3n) { border-right: none; }
+#logo-bg-grid > div:nth-last-child(-n+3) { border-bottom: none; }
+
+#logo-bg-grid > .lcg-x::after {
+  content: '×';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f1eb11;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+
+/* ─── Site logo ───────────────────────────────────────────── */
+#logo-wrapper {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70vw;
+  pointer-events: all;
+}
+
+#site-logo {
+  width: 100%;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Metallic mask wrapper — static, receives the mask */
+#logo-metal-mask {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: mask-image;
+  -webkit-mask-image: radial-gradient(circle 1px at -999px -999px, black, transparent);
+  mask-image:         radial-gradient(circle 1px at -999px -999px, black, transparent);
+}
+
+#site-logo-metal {
+  position: absolute;
+  width: 102.90%;
+  height: auto;
+  top: -3.43%;
+  left: calc(-1.68% - 7px);
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ─── Aleph wheel wrapper ─────────────────────────────────── */
+#wheel-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 420px;
+  height: 420px;
+  margin-left: -210px;
+  margin-top: -210px;
+  pointer-events: all;
+  overflow: hidden;
+}
+
+#aleph-wheel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  animation: spin 18s linear infinite;
+}
+
+/* Wrapper receives the mask — does NOT rotate, so mask stays in screen space */
+#metal-mask-wrapper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: mask-image;
+  -webkit-mask-image: radial-gradient(circle 1px at -999px -999px, black, transparent);
+  mask-image:         radial-gradient(circle 1px at -999px -999px, black, transparent);
+}
+
+/* The image itself rotates inside the static wrapper */
+#aleph-wheel-metal {
+  position: absolute;
+  width: 482px;
+  height: 482px;
+  left: -24px;
+  top:  -35px;
+  transform-origin: 234px 245px;
+  user-select: none;
+  pointer-events: none;
+  animation: spin 18s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Title image */
+#title-3d-img {
+  filter: none;
+}
+
+#canvas-title3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+
+
+#grid-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+#canvas-3d {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+/* ─── Custom cursor — line-art hand ────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 22px;
+  height: 26px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 99999;
+  will-change: left, top;
+  color: var(--q-dark);
+  transition: color 0.15s ease;
+}
+#cursor svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#cursor.on-orange,
+#cursor.on-dark {
+  color: #fcf7f1;
+}
+
+/* ─── Opening screen UI elements ─────────────────────────── */
+.ui-label {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  color: #302e2e;
+  letter-spacing: 0.03em;
+  direction: rtl;
+}
+
+#ui-top-left {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 3px;
+  font-size: 11px;
+  font-family: 'ArbelG', sans-serif;
+  color: #302e2e;
+  z-index: 10;
+}
+
+#ui-top-right {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 10;
+}
+
+#ui-version-bar {
+  width: 28px;
+  height: auto;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(2%) saturate(415%) hue-rotate(314deg) brightness(91%) contrast(88%);
+}
+#ui-version .ver-num {
+  font-size: 14px;
+  font-weight: bold;
+  color: #302e2e;
+}
+
+#ui-coords {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  color: #302e2e;
+}
+
+#ui-project {
+  text-align: right;
+  line-height: 1.5;
+}
+
+#ui-left {
+  position: fixed;
+  left: 38px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 9998;
+}
+
+.step-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.2px solid #302e2e;
+  padding: 0;
+  cursor: none;
+  outline: none;
+  transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.step-dot:hover {
+  transform: scale(1.35);
+}
+
+.step-dot.active {
+  background: #302e2e;
+}
+
+/* Theme variables depending on active section background */
+#ui-left.on-orange .step-dot {
+  border-color: #fcf7f1;
+}
+#ui-left.on-orange .step-dot.active {
+  background: #fcf7f1;
+}
+
+#ui-left.on-blue .step-dot {
+  border-color: #fcf7f1;
+}
+#ui-left.on-blue .step-dot.active {
+  background: #fcf7f1;
+}
+
+#ui-left.on-beige .step-dot {
+  border-color: #302e2e;
+}
+#ui-left.on-beige .step-dot.active {
+  background: #302e2e;
+}
+
+#ui-bottom-left {
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+.ui-v   { font-size: 13px; border-bottom: 1px solid currentColor; padding-bottom: 2px; }
+.ui-abc { font-size: 13px; font-weight: bold; color: #302e2e; }
+
+#ui-bottom-right {
+  position: absolute;
+  bottom: 28px;
+  right: 28px;
+  text-align: right;
+  direction: rtl;
+  z-index: 10;
+}
+.ui-text-para {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  color: #302e2e;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.ui-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: flex-end;
+}
+.ui-arrow { color: #302e2e; font-size: 14px; margin-left: 4px; }
+.ui-icon {
+  height: 18px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+  filter: brightness(0) saturate(100%) invert(18%) sepia(2%) saturate(415%) hue-rotate(314deg) brightness(91%) contrast(88%);
+}
+#icon-eye-bottom {
+  height: 10px;
+}
+
+#ui-crosshair {
+  position: absolute;
+  top: 60px;
+  right: 160px;
+  font-size: 18px;
+  color: #302e2e;
+  opacity: 0.6;
+  z-index: 10;
+}
+
+/* ─── CTA anchor ──────────────────────────────────────────── */
+#cta-anchor {
+  position: absolute;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: all;
+  user-select: none;
+  cursor: none;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 14px;
+  color: #302e2e;
+  font-weight: 500;
+  transition: font-weight 0.15s ease, color 0.15s ease;
+  padding: 14px 28px;
+  letter-spacing: 0.05em;
+  direction: rtl;
+}
+
+#cta-anchor:hover {
+  font-weight: 700;
+}
+
+#cta-anchor.clicked {
+  color: #1a1a1a;
+}
+
+/* ─── Section 2 content ──────────────────────────────────── */
+#s2-number-canvas {
+  position: absolute;
+  top: 30px;
+  right: 50px;
+  width: 140px;
+  height: 200px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+#s2-number-canvas.visible { opacity: 1; }
+
+#s2-prompt {
+  position: absolute;
+  width: 65%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -58%);
+  pointer-events: none;
+}
+
+#s2-form {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58%;
+}
+
+#s2-input {
+  width: 100%;
+  height: 54px;
+  border-radius: 30px;
+  border: 2px solid #fff;
+  background: #fff;
+  padding: 0 28px;
+  font-size: 18px;
+  font-family: 'Georgia', serif;
+  color: #333;
+  outline: none;
+  cursor: none;
+  text-align: right;
+}
+
+#s2-input::placeholder {
+  color: #bbb;
+}
+
+/* Float handled via JS organic motion system */
+
+
+/* ─── Questionnaire Layout ────────────────────────────────── */
+#section-3 {
+  background: #fcf7f1;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#questionnaire-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+/* Left column: artifact */
+#artifact-col {
+  width: 25%;
+  min-width: 220px;
+  height: 100%;
+  position: relative;
+  border-right: 1px solid rgba(26,26,26,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+#artifact-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* "סיימתי" invitation — soft, gently breathing pulse rather than a CTA */
+.finish-blink {
+  align-self: center;
+  margin-top: 36px;
+  background: transparent;
+  border: 1px solid rgba(26,26,26,0.35);
+  border-radius: 30px;
+  padding: 12px 32px;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 16px;
+  color: rgba(48, 46, 46,0.75);
+  letter-spacing: 0.04em;
+  cursor: none;
+  direction: rtl;
+  animation: finish-pulse 2.8s ease-in-out infinite;
+  transition: color 0.3s, border-color 0.3s, transform 0.3s;
+}
+.finish-blink:hover {
+  color: #302e2e;
+  border-color: #302e2e;
+  transform: scale(1.03);
+  animation-play-state: paused;
+}
+@keyframes finish-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* Stage 2 active view — hide unused panels after transition */
+#section-3.stage-2-active #question-col,
+#section-3.stage-2-active #middle-col {
+  display: none;
+}
+
+
+/* Center column: question */
+#question-col {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 72px 44px 56px;
+  direction: rtl;
+  position: relative;
+  overflow-y: auto;
+}
+
+#q-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row-reverse;
+}
+
+#q-label-tag {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  color: #302e2e;
+  letter-spacing: 0.04em;
+}
+
+#q-counter {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-family: 'ArbelG', sans-serif;
+  color: rgba(48, 46, 46,0.4);
+  font-size: 13px;
+}
+
+#q-num-current {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #302e2e;
+  line-height: 1;
+  display: inline-block;
+}
+
+@keyframes countPop {
+  0%   { transform: scale(0.7) translateY(6px); opacity: 0; }
+  60%  { transform: scale(1.1) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+#q-num-current.count-pop {
+  animation: countPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+#q-counter-plus {
+  color: #302e2e;
+  font-size: 18px;
+  margin-right: 6px;
+}
+
+/* Question content */
+#q-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  max-width: 620px;
+  align-self: flex-end;
+  width: 100%;
+}
+
+/* ─── Question text — per-question font variations ────────── */
+#q-text {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 4.2vw, 3.8rem);
+  color: #302e2e;
+  line-height: 1.18;
+  direction: rtl;
+  transition: none;
+}
+
+/* Q0 — שם: Shofar Regular */
+#q-text[data-q="0"] {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+  letter-spacing: -0.01em;
+}
+
+/* Q1 — תאריך לידה: Shofar Regular */
+#q-text[data-q="1"] {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5vw, 4.8rem);
+  letter-spacing: 0.01em;
+}
+
+/* Q2 — מקור: Shofar Regular */
+#q-text[data-q="2"] {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 4.2vw, 4rem);
+  letter-spacing: 0.01em;
+}
+
+/* Q3 — מקור: Shofar Regular */
+#q-text[data-q="3"] {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.8rem, 3.6vw, 3.4rem);
+  letter-spacing: -0.02em;
+}
+
+/* Q4 — יסוד: Shofar Regular */
+#q-text[data-q="4"] {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+  color: #302e2e;
+  letter-spacing: 0.04em;
+}
+
+/* Q5 — סמל: Shofar Regular */
+#q-text[data-q="5"] {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  color: #302e2e;
+}
+
+#q-example {
+  display: none;
+}
+
+#q-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+#q-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(26,26,26,0.25);
+  border-radius: 0;
+  padding: 12px 0 10px;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 1.3rem;
+  color: #302e2e;
+  direction: rtl;
+  resize: none;
+  outline: none;
+  cursor: none;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+  min-height: 56px;
+}
+
+#q-input::placeholder {
+  color: rgba(48, 46, 46,0.25);
+}
+
+#q-input:focus {
+  border-bottom-color: #1a1a1a;
+}
+
+#q-input.shake {
+  animation: inputShake 0.4s ease;
+}
+@keyframes inputShake {
+  0%,100% { transform: translateX(0); }
+  25%      { transform: translateX(-8px); }
+  75%      { transform: translateX(8px); }
+}
+
+/* ─── Help button with hover tooltip ──────────────────────── */
+.q-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(48, 46, 46, 0.45);
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1;
+  cursor: none;
+  user-select: none;
+  flex-shrink: 0;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.q-help::before {
+  content: '?';
+}
+.q-help:hover {
+  color: var(--q-dark);
+}
+.q-help .q-help-tip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 50%;
+  transform: translate(50%, 4px);
+  background: var(--q-dark);
+  color: var(--q-cream);
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 4px;
+  min-width: 160px;
+  max-width: 240px;
+  width: max-content;
+  white-space: normal;
+  direction: rtl;
+  text-align: right;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 50;
+  font-family: 'Shofar', 'ArbelG', sans-serif;
+}
+.q-help:hover .q-help-tip {
+  opacity: 1;
+  transform: translate(50%, 0);
+}
+.q-help-floating {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 5;
+}
+/* Dark-area (stars step) inversion */
+#section-3[data-stage="2"] .q-help {
+  color: rgba(252, 247, 241, 0.55);
+}
+#section-3[data-stage="2"] .q-help:hover {
+  color: var(--q-cream);
+}
+#section-3[data-stage="2"] .q-help .q-help-tip {
+  background: var(--q-cream);
+  color: var(--q-dark);
+}
+
+#q-submit {
+  min-width: 52px;
+  height: 52px;
+  padding: 0 22px;
+  border-radius: 30px;
+  background: transparent;
+  border: 1.5px solid rgba(26,26,26,0.35);
+  color: #302e2e;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 14px;
+  cursor: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+#q-submit:hover {
+  background: #1a1a1a;
+  color: #F9EDDE;
+  border-color: #1a1a1a;
+}
+
+/* Navigation */
+#q-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  direction: rtl;
+  border-top: 1px solid rgba(26,26,26,0.1);
+  padding-top: 20px;
+}
+
+#q-nav button {
+  background: none;
+  border: none;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  color: rgba(48, 46, 46,0.5);
+  cursor: none;
+  padding: 0;
+  transition: color 0.2s, opacity 0.2s;
+  letter-spacing: 0.02em;
+}
+
+#q-nav button:hover { color: #302e2e; }
+
+/* ─── Question transitions ────────────────────────────────── */
+#q-content.q-exit {
+  animation: qSlideOut 0.28s cubic-bezier(0.4,0,1,1) forwards;
+}
+
+@keyframes qSlideOut {
+  from { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  to   { opacity: 0; transform: translateY(-22px) scale(0.97); filter: blur(3px); }
+}
+
+/* Variant 1 — slide up from below */
+#q-content.q-enter-slide {
+  animation: qEnterSlide 0.45s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes qEnterSlide {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Variant 2 — scale in from small */
+#q-content.q-enter-scale {
+  animation: qEnterScale 0.5s cubic-bezier(0.34,1.4,0.64,1) forwards;
+}
+@keyframes qEnterScale {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Variant 3 — blur to clear */
+#q-content.q-enter-blur {
+  animation: qEnterBlur 0.55s ease forwards;
+}
+@keyframes qEnterBlur {
+  from { opacity: 0; filter: blur(12px); transform: translateY(8px); }
+  to   { opacity: 1; filter: blur(0);   transform: translateY(0); }
+}
+
+/* Variant 4 — 3D perspective tilt */
+#q-content.q-enter-3d {
+  animation: qEnter3d 0.55s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes qEnter3d {
+  from { opacity: 0; transform: perspective(600px) rotateX(12deg) translateY(20px); }
+  to   { opacity: 1; transform: perspective(600px) rotateX(0deg)  translateY(0); }
+}
+
+/* Variant 5 — drift from right */
+#q-content.q-enter-drift {
+  animation: qEnterDrift 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+@keyframes qEnterDrift {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Variant 6 — rise with overshoot */
+#q-content.q-enter-rise {
+  animation: qEnterRise 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes qEnterRise {
+  from { opacity: 0; transform: translateY(50px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* Right column: progress */
+#progress-col {
+  width: 20%;
+  min-width: 160px;
+  height: 100%;
+  border-left: 1px solid rgba(26,26,26,0.1);
+  padding: 48px 28px;
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+#progress-title {
+  display: none;
+}
+
+#progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.prog-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.prog-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.prog-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.2px solid rgba(26,26,26,0.3);
+  background: transparent;
+  transition: background 0.35s, border-color 0.35s, transform 0.25s;
+  flex-shrink: 0;
+}
+
+.prog-line {
+  width: 1px;
+  height: 20px;
+  background: rgba(26,26,26,0.1);
+  margin-top: 3px;
+}
+
+.prog-item:last-child .prog-line {
+  display: none;
+}
+
+.prog-label {
+  display: none;
+}
+
+/* States */
+.prog-done .prog-dot {
+  background: rgba(26,26,26,0.35);
+  border-color: rgba(26,26,26,0.35);
+}
+.prog-done .prog-label { color: rgba(48, 46, 46,0.5); }
+
+.prog-active .prog-dot {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  transform: scale(1.4);
+  box-shadow: 0 0 0 3px rgba(26,26,26,0.15);
+}
+.prog-active .prog-label {
+  color: #302e2e;
+  font-weight: 700;
+}
+
+/* ─── Mobile: stack pendant / question / nav vertically ───── */
+@media (max-width: 700px) {
+  #questionnaire-layout {
+    flex-direction: column;
+  }
+
+  #artifact-col {
+    width: 100%;
+    min-width: 0;
+    height: 32vh;
+    border-right: none;
+    border-bottom: 1px solid rgba(26,26,26,0.1);
+  }
+
+  #question-col {
+    flex: 1;
+    min-height: 0;
+    padding: 24px 24px 20px;
+    overflow-y: auto;
+  }
+
+  #q-content {
+    max-width: none;
+  }
+
+  #progress-col {
+    display: none;
+  }
+}
+
+/* ─── Word discovery (floating field) ─────────────────────── */
+#q-input-wrap.words-active {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+#middle-col {
+  position: absolute;
+  top: var(--q-top-total);
+  left: var(--q-side-w);
+  right: var(--q-rcol-w);
+  bottom: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+#word-field-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#word-field {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  direction: rtl;
+  overflow: visible;
+}
+
+.float-word {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-family: 'ArbelG', sans-serif;
+  color: rgba(48, 46, 46,0.55);
+  cursor: none;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: auto;
+  transition: color 0.3s ease, opacity 0.5s ease, transform 0.4s ease;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+}
+
+.float-word.word-anim-1 { animation-name: float-drift-1; }
+.float-word.word-anim-2 { animation-name: float-drift-2; }
+.float-word.word-anim-3 { animation-name: float-drift-3; }
+.float-word.word-anim-4 { animation-name: float-drift-4; }
+
+.float-word:hover {
+  color: #302e2e;
+}
+
+.float-word.chosen {
+  color: #302e2e;
+  animation: none !important;
+  transform: translate(-50%, -50%) scale(1.15) !important;
+}
+
+.float-word.fade-out {
+  opacity: 0;
+}
+
+/* 1. Standard drift with larger displacement */
+@keyframes float-drift-1 {
+  0%   { transform: translate(-50%, -50%) rotate(-1deg); }
+  50%  { transform: translate(calc(-50% + 20px), calc(-50% - 15px)) rotate(1.5deg); }
+  100% { transform: translate(calc(-50% - 15px), calc(-50% + 20px)) rotate(-0.8deg); }
+}
+
+/* 2. Drift + scale variation */
+@keyframes float-drift-2 {
+  0%   { transform: translate(-50%, -50%) rotate(0.8deg) scale(0.85); }
+  50%  { transform: translate(calc(-50% - 18px), calc(-50% + 18px)) rotate(-1.2deg) scale(1.15); }
+  100% { transform: translate(calc(-50% + 15px), calc(-50% - 15px)) rotate(0.5deg) scale(0.85); }
+}
+
+/* 3. Drift + stepped weight shifts */
+@keyframes float-drift-3 {
+  0%   { transform: translate(-50%, -50%) rotate(-1.2deg); font-weight: 400; }
+  25%  { transform: translate(calc(-50% + 15px), calc(-50% - 15px)) rotate(0.8deg); font-weight: 500; }
+  50%  { transform: translate(calc(-50% - 15px), calc(-50% + 15px)) rotate(-0.8deg); font-weight: 900; }
+  75%  { transform: translate(calc(-50% + 12px), calc(-50% + 12px)) rotate(1deg); font-weight: 700; }
+  100% { transform: translate(-50%, -50%) rotate(-1.2deg); font-weight: 400; }
+}
+
+/* 4. Drift + scale + weight shifts */
+@keyframes float-drift-4 {
+  0%   { transform: translate(-50%, -50%) rotate(0.5deg) scale(0.8); font-weight: 500; }
+  50%  { transform: translate(calc(-50% - 20px), calc(-50% - 15px)) rotate(-0.8deg) scale(1.2); font-weight: 900; }
+  100% { transform: translate(calc(-50% + 15px), calc(-50% + 20px)) rotate(0.8deg) scale(0.8); font-weight: 500; }
+}
+
+/* ─── Star discovery field ────────────────────────────────── */
+#q-input-wrap.stars-active {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+#star-field {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  direction: rtl;
+  overflow: visible;
+}
+
+.star-pick {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: rgba(48, 46, 46,0.55);
+  cursor: none;
+  user-select: none;
+  transition: color 0.3s ease, opacity 0.6s ease, transform 0.5s ease;
+  animation-name: star-twinkle;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+}
+
+.star-pick svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.star-pick .star-reveal {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  color: #302e2e;
+  transition: opacity 0.5s ease;
+}
+
+.star-pick:hover {
+  color: #302e2e;
+}
+
+.star-pick.chosen {
+  animation: none;
+  color: transparent;
+}
+
+.star-pick.chosen .star-reveal {
+  opacity: 1;
+}
+
+.star-pick.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes star-twinkle {
+  0%   { opacity: 0.08; transform: translate(-50%, -50%) scale(0.45); }
+  35%  { opacity: calc(var(--star-opacity, 0.85) * 0.65); transform: translate(-50%, -50%) scale(0.85); }
+  55%  { opacity: var(--star-opacity, 0.95); transform: translate(-50%, -50%) scale(1.2); }
+  75%  { opacity: calc(var(--star-opacity, 0.85) * 0.55); transform: translate(-50%, -50%) scale(0.75); }
+  100% { opacity: 0.15; transform: translate(-50%, -50%) scale(0.55); }
+}
+
+/* ─── Dark Theme Overrides for Step 3 (Stars/Dots Screen) ─── */
+.q-header-container,
+.q-header-steps-row,
+#middle-q-container #q-text,
+#middle-q-container #q-counter,
+#middle-q-container #q-counter span,
+#middle-q-container #q-nav button,
+.prog-dot,
+.prog-line {
+  transition: color 0.5s ease, background-color 0.5s ease, border-color 0.5s ease, opacity 0.5s ease;
+}
+
+#section-3[data-stage="2"] {
+  background-color: var(--q-dark) !important;
+}
+#section-3[data-stage="2"] .q-header-container {
+  background-color: var(--q-dark) !important;
+}
+#section-3[data-stage="2"] .q-header-steps-row {
+  background-color: var(--q-dark) !important;
+  color: var(--q-cream) !important;
+}
+#section-3[data-stage="2"] .q-header-step-label {
+  color: var(--q-cream) !important;
+}
+#section-3[data-stage="2"] .q-header-step-active span {
+  color: var(--q-cream) !important;
+}
+#section-3[data-stage="2"] #middle-q-container #q-header #q-text {
+  border-right-color: rgba(252, 247, 241, 0.15) !important;
+  color: rgba(252, 247, 241, 0.7) !important;
+}
+#section-3[data-stage="2"] #middle-q-container #q-counter,
+#section-3[data-stage="2"] #middle-q-container #q-num-current,
+#section-3[data-stage="2"] #middle-q-container #q-counter-sep,
+#section-3[data-stage="2"] #middle-q-container #q-num-total,
+#section-3[data-stage="2"] #middle-q-container #q-counter-plus {
+  color: var(--q-cream) !important;
+}
+#section-3[data-stage="2"] #middle-q-container #q-nav button {
+  color: rgba(252, 247, 241, 0.45) !important;
+}
+#section-3[data-stage="2"] #middle-q-container #q-nav button:hover {
+  color: var(--q-cream) !important;
+}
+
+/* Dots specific styles in dark theme */
+#section-3[data-stage="2"] .star-pick {
+  color: var(--q-cream);
+}
+#section-3[data-stage="2"] .star-pick:hover {
+  color: #ffffff !important;
+  transform: translate(-50%, -50%) scale(1.3) !important;
+}
+#section-3[data-stage="2"] .star-pick.chosen {
+  color: transparent !important;
+}
+#section-3[data-stage="2"] .star-pick .star-reveal {
+  color: var(--q-cream) !important;
+}
+
+/* ─── Family Roots (geo) widget ───────────────────────────── */
+#q-input-wrap.roots-active {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.roots-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  align-items: center;
+}
+
+.roots-canvas-wrap {
+  width: min(420px, 50vh);
+  height: min(420px, 50vh);
+  flex-shrink: 0;
+  border: 1px solid rgba(26,26,26,0.12);
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+
+.roots-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: none;
+}
+
+.roots-hint {
+  display: none;
+}
+
+.roots-controls,
+.roots-map-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+.roots-controls[hidden],
+.roots-map-controls[hidden] {
+  display: none;
+}
+
+.roots-btn {
+  background: transparent;
+  border: 1px solid rgba(26,26,26,0.35);
+  border-radius: 30px;
+  padding: 10px 26px;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 14px;
+  color: #302e2e;
+  cursor: none;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+  direction: rtl;
+}
+.roots-btn:hover {
+  background: #1a1a1a;
+  color: #F9EDDE;
+  transform: scale(1.03);
+}
+.roots-btn.ghost {
+  border: none;
+  padding: 4px 6px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+.roots-btn.ghost:hover {
+  background: none;
+  color: #302e2e;
+  opacity: 1;
+}
+
+.roots-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.roots-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(26,26,26,0.25);
+  padding: 10px 0;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 1.1rem;
+  color: #302e2e;
+  direction: rtl;
+  outline: none;
+  cursor: none;
+  transition: border-color 0.2s;
+}
+.roots-input::placeholder { color: rgba(48, 46, 46,0.25); }
+.roots-input:focus { border-bottom-color: #1a1a1a; }
+
+.roots-send {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid rgba(26,26,26,0.35);
+  color: #302e2e;
+  font-size: 13px;
+  cursor: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+  font-family: 'ArbelG', sans-serif;
+}
+.roots-send:hover {
+  background: #1a1a1a;
+  color: #F9EDDE;
+  border-color: #1a1a1a;
+}
+
+.roots-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  direction: rtl;
+  width: 100%;
+  max-width: 320px;
+}
+
+.roots-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(26,26,26,0.4);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  color: #302e2e;
+}
+.roots-chip::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #302e2e;
+}
+
+/* ─── Choice buttons ──────────────────────────────────────── */
+#q-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  direction: rtl;
+  padding-top: 8px;
+}
+
+.choice-btn {
+  background: transparent;
+  border: 1px solid rgba(26,26,26,0.3);
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 15px;
+  color: rgba(48, 46, 46,0.7);
+  cursor: none;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+  direction: rtl;
+}
+
+.choice-btn:hover {
+  border-color: #1a1a1a;
+  color: #302e2e;
+  transform: scale(1.04);
+}
+
+.choice-btn.selected {
+  background: #1a1a1a;
+  color: #F9EDDE;
+  border-color: #1a1a1a;
+}
+
+/* ─── Pendant-forming preview (placeholder motif modules) ──── */
+
+/* ─── Floating node base ──────────────────────────────────── */
+.node {
+  position: absolute;
+  pointer-events: all;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.node.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   QUESTION SCREEN — visual redesign (chrome over existing layout)
+   Behavior, IDs, JS hooks, animations, camera, state unchanged.
+═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --q-stamp:    #1a1a1a;
+  --q-cream:    #fcf7f1;
+  --q-orange:   #1a1a1a;
+  --q-blue:     #1a1a1a;
+  --q-dark:     #1a1a1a;
+  --q-ink:      #1a1a1a;
+  --q-metal:    linear-gradient(90deg, #e8e8d7 0%, #ede99f 50%, #f1eb11 100%);
+  --q-load:     linear-gradient(270deg, #e8e8d7 0%, #f1eb11 100%);
+  --q-active-soft: linear-gradient(
+    180deg,
+    #f1eb11 0%,
+    #e8e8d7 100%
+  );
+  --q-header-top-h: clamp(75px, 9.5vh, 105px);
+  --q-header-steps-h: clamp(40px, 4.5vh, 50px);
+  --q-metal-h: 14px;
+  --q-top-total: calc(var(--q-header-top-h) + var(--q-header-steps-h) + var(--q-metal-h) * 2);
+  --q-side-w:   clamp(240px, 23vw, 340px);
+  --q-stamp-w:  clamp(130px, 12vw, 180px);
+  --q-stamp-inset-x: clamp(16px, 1.8vw, 32px);
+  --q-stamp-inset-y: clamp(8px, 1.2vh, 18px);
+  --q-rcol-w:   clamp(260px, 24vw, 380px);
+  --q-gap-x:    clamp(24px, 3vw, 44px);
+}
+
+/* ─── Questionnaire Header (v2: dark + metallic) ──────────── */
+.q-header-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--q-top-total);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--q-cream);
+  overflow: hidden;
+}
+
+/* Top row: Logo Bar — cream by default, dark in negative theme */
+.q-header-logo-row {
+  height: var(--q-header-top-h);
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  background: var(--q-cream);
+  color: var(--q-dark);
+  position: relative;
+  z-index: 10;
+}
+
+#q-btn-back-home {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  z-index: 20;
+  background: none;
+  border: none;
+  color: var(--q-dark);
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  cursor: none;
+  padding: 0;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--q-dark);
+  direction: rtl;
+  transition: opacity 0.15s ease;
+}
+#q-btn-back-home:hover {
+  opacity: 0.7;
+}
+
+.q-header-logo-box {
+  width: var(--q-stamp-w);
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 10px;
+  overflow: hidden;
+  background: transparent;
+  margin-left: auto;
+}
+
+.q-header-logo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+/* Single continuous gradient band below the logo row.
+   Uses one strip (no separate metallic ::before/::after) so the progress
+   fill reads as one coherent bar. The unfilled portion shows the base cream
+   so progress is visually unambiguous. */
+.q-header-container::before,
+.q-header-container::after {
+  content: none;
+}
+
+/* Base of the strip: solid cream — the "empty" state */
+.q-header-steps-row {
+  position: relative;
+  height: calc(var(--q-metal-h) * 2 + var(--q-header-steps-h));
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  background: var(--q-cream);
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  color: var(--q-ink);
+  margin-top: 0;
+  overflow: hidden;
+}
+
+/* Load progress fill — covers the full strip and grows right-to-left as
+   --q-load-progress rises (advancing through stages). */
+.q-header-loadbar-fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  background-image: var(--q-metal);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  z-index: 0;
+  pointer-events: none;
+  clip-path: inset(0 0 0 calc(100% - (var(--q-load-progress, 0) * 100%)));
+  transition: clip-path 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Left side steps (Back button & Product step) */
+.q-header-steps-left {
+  position: relative;
+  z-index: 1;
+  width: var(--q-side-w);
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(16px, 1.8vw, 32px);
+}
+
+/* Right side steps (Color, Background, Jewelry) */
+.q-header-steps-right {
+  position: relative;
+  z-index: 1;
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: stretch;
+  direction: rtl;
+}
+
+.q-header-step-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  text-align: center;
+  color: var(--q-ink);
+}
+
+.q-header-step-active {
+  width: var(--q-stamp-w);
+  height: 100%;
+  background: transparent;
+  color: var(--q-ink);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* ─── Layout container — sits inside the chrome inset ─────── */
+#section-3 {
+  background: var(--q-cream);
+  height: 100vh;
+  overflow: hidden;
+  transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s,
+              transform 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s,
+              background-color 0.5s ease;
+}
+#questionnaire-layout {
+  padding-top: var(--q-top-total);
+  height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── LEFT pendant panel (v2: black) ──────────────────────────
+   .q-chrome-side  → solid black background + decorative SVG
+      symbols (eye/diamond/crescent/ankh) in cream strokes.
+   #artifact-col   → overlays the same area; canvas is transparent
+      with cream pendant strokes drawn on top. */
+.q-chrome-side {
+  position: absolute;
+  top: var(--q-top-total);
+  left: 0;
+  width: var(--q-side-w);
+  bottom: 0;
+  background: var(--q-dark);
+  z-index: 3;
+  pointer-events: none;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: width 0.8s ease-in-out;
+}
+/* Dashed central spine — guide line that the artifact-canvas
+   draws its dynamically-generated pendant symbols on top of. */
+.q-chrome-side-spine {
+  position: absolute;
+  left: 50%;
+  top: clamp(40px, 7vh, 72px);
+  bottom: clamp(40px, 7vh, 72px);
+  width: 0;
+  border-left: 0.7px dashed rgba(252, 247, 241, 0.45);
+  transform: translateX(-50%);
+}
+.q-chrome-side-corner-mark {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  width: 22px;
+  height: 11px;
+  border: 1px solid var(--q-cream);
+  opacity: 0.7;
+}
+.q-chrome-side-corner-mark::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: -3px;
+  width: 2px;
+  height: 5px;
+  background: var(--q-cream);
+}
+#artifact-col {
+  position: absolute;
+  top: var(--q-top-total);
+  left: 0;
+  width: var(--q-side-w);
+  bottom: 0;
+  height: auto;
+  background: transparent;
+  z-index: 4;
+  flex: none;
+  border-right: none;
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+  overflow: hidden;
+  transition: width 0.8s ease-in-out;
+}
+#artifact-canvas {
+  mix-blend-mode: normal;
+}
+
+/* ─── Question column on the right ────────────────────────── */
+#question-col {
+  width: var(--q-rcol-w);
+  flex: 0 0 auto;
+  height: 100%;
+  margin-left: auto;
+  padding: clamp(14px, 2vh, 24px) clamp(20px, 2.2vw, 36px) clamp(16px, 2.5vh, 28px);
+  border-left: 1px solid rgba(26, 26, 26, 0.08);
+  background: transparent;
+  position: static;
+  overflow: hidden;
+  justify-content: flex-start;
+  gap: clamp(12px, 2vh, 24px);
+}
+
+/* ─── Question header (counter row) ───────────────────────── */
+#q-header {
+  border-bottom: 1px solid rgba(26, 26, 26, 0.12);
+  padding-bottom: 14px;
+  margin-bottom: 8px;
+  /* RTL + row (not row-reverse): the counter (first HTML child) appears
+     on the right, the question text (second child) flows to its left. */
+  flex-direction: row;
+  align-items: baseline;
+  gap: clamp(12px, 1.4vw, 24px);
+}
+#q-header #q-text {
+  flex: 1;
+  text-align: left;
+}
+#q-label-tag {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: none;
+  color: #302e2e;
+}
+#q-counter { color: rgba(48, 46, 46, 0.55); font-size: 12px; }
+#q-num-current {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 22px;
+  color: #302e2e;
+  font-weight: 700;
+}
+#q-counter-plus { color: #302e2e; font-size: 14px; }
+
+/* ─── Question text — restrained, right-aligned ───────────── */
+#q-content {
+  align-self: stretch;
+  max-width: none;
+  gap: clamp(14px, 2.4vh, 28px);
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  overflow: hidden;
+  min-height: 0;
+}
+#q-text {
+  font-family: 'Shofar', sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.4rem, 2.5vw, 2.3rem);
+  color: #302e2e;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+#q-text[data-q="0"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.5rem, 2.6vw, 2.4rem); }
+#q-text[data-q="1"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.6rem, 2.8vw, 2.6rem); }
+#q-text[data-q="2"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.4rem, 2.4vw, 2.2rem); }
+#q-text[data-q="3"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.3rem, 2.2vw, 2rem); }
+#q-text[data-q="4"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.5rem, 2.5vw, 2.3rem); }
+#q-text[data-q="5"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.6rem, 2.7vw, 2.5rem); }
+
+/* ─── Input frame — bordered square, replaces underline ───── */
+#q-input-wrap {
+  position: relative;
+  border: 1px solid rgba(26, 26, 26, 0.45);
+  border-radius: 0;
+  background: transparent;
+  padding: 18px 18px 14px;
+  min-height: clamp(150px, 28vh, 260px);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex-direction: column;
+  transition: border-color 0.25s ease;
+}
+#q-input-wrap:focus-within { border-color: var(--q-blue); }
+
+#q-input {
+  flex: 1 1 auto;
+  width: 100%;
+  border: none;
+  border-bottom: none;
+  padding: 0;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 1.05rem;
+  color: #302e2e;
+  background: transparent;
+  resize: none;
+  outline: none;
+  cursor: none;
+  line-height: 1.5;
+  min-height: auto;
+}
+#q-input::placeholder { color: rgba(48, 46, 46, 0.45); font-size: 13px; }
+
+#q-submit {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  min-width: 0;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 0;
+  background: transparent;
+  border: 1px solid rgba(26, 26, 26, 0.45);
+  color: #302e2e;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+#q-submit:hover {
+  background: var(--q-blue);
+  color: var(--q-cream);
+  border-color: var(--q-blue);
+}
+
+/* When the wrap holds an interactive widget (roots/words/stars),
+   drop the framed box — those widgets need their own air. */
+#q-input-wrap.roots-active,
+#q-input-wrap.words-active,
+#q-input-wrap.stars-active {
+  border: none;
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+}
+
+/* Roots widget (geo question) — float the globe visually into the
+   central area between #artifact-col (pendant) and #question-col.
+   CSS-only; JS still mounts into #roots-host inside the wrap and
+   the original onAdd → triggerLayer(4) flow is untouched. */
+#q-input-wrap.roots-active {
+  position: absolute;
+  top: calc(var(--q-top-total) + clamp(24px, 5vh, 64px));
+  bottom: clamp(24px, 5vh, 64px);
+  left: calc(var(--q-side-w) + clamp(24px, 3vw, 56px));
+  right: calc(var(--q-rcol-w) + clamp(24px, 3vw, 56px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  pointer-events: none;
+  z-index: 3;
+}
+#q-input-wrap.roots-active > * { pointer-events: auto; }
+#q-input-wrap.roots-active .roots-canvas-wrap {
+  width: min(46vh, 360px);
+  height: min(46vh, 360px);
+  max-width: 100%;
+  max-height: 100%;
+}
+#q-input-wrap.roots-active #selected-origins-list {
+  font-family: 'ArbelG', sans-serif;
+  font-size: 11px;
+  color: rgba(48, 46, 46, 0.65);
+  letter-spacing: 0.04em;
+  direction: rtl;
+  text-align: center;
+  max-width: 80%;
+}
+
+/* ─── Footer nav (prev / skip) ────────────────────────────── */
+#q-nav {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 8px;
+}
+#q-nav button {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(48, 46, 46, 0.6);
+}
+
+/* ─── Progress column → reposition into the orange band ───── */
+#progress-col {
+  display: none !important;
+}
+
+/* ─── Artifact view (pendant takeover) — hide all chrome ──── */
+/* ─── Stage 2 (תוצר) transition styles ──── */
+#section-3.stage-2-view .q-chrome-side {
+  width: 100%;
+}
+#section-3.stage-2-view #artifact-col {
+  width: 100%;
+}
+
+/* ─── Mobile fallback — collapse chrome to a slim header ──── */
+@media (max-width: 700px) {
+  :root {
+    --q-header-top-h: 60px;
+    --q-header-steps-h: 36px;
+    --q-side-w: 80px;
+    --q-stamp-w: 120px;
+  }
+  .q-chrome-side { display: none; }
+  
+  .q-header-steps-left {
+    padding: 0 10px;
+    justify-content: center;
+  }
+  .q-header-steps-left .q-header-step-label {
+    display: none;
+  }
+  .q-header-step-label {
+    font-size: 10px;
+  }
+  .q-header-step-active {
+    font-size: 10px;
+  }
+  .q-header-logo-box {
+    padding: 6px;
+  }
+
+  #q-btn-back-home {
+    font-size: 11px;
+  }
+
+  #questionnaire-layout {
+    padding-top: var(--q-top-total);
+    padding-left: 0;
+    flex-direction: column;
+  }
+  #artifact-col {
+    position: static;
+    width: 100%;
+    height: 30vh;
+    border-right: none;
+    padding: 12px;
+  }
+  #question-col {
+    width: 100%;
+    flex: 1;
+    padding: 20px 20px 16px;
+    border-left: none;
+  }
+  #middle-col {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    height: 300px;
+    z-index: 10;
+  }
+}
+
+/* ─── Reduced motion — respect the existing animations ────── */
+@media (prefers-reduced-motion: reduce) {
+  #q-num-current.count-pop,
+  #q-content.q-exit,
+  #q-content[class*="q-enter-"] {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+
+/* ─── Paths game (replaces roots-tree) ─────────────────────
+   Dense organic channel network. Each edge is rendered as two
+   strokes stacked: a wide DARK stroke + a narrower CREAM stroke
+   on top. The visible result is two thin parallel dark lines
+   (the "channel walls") with cream between them. No icons are
+   shown on the network — the symbol stays hidden until the user
+   reaches a sink. */
+#paths-game {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  display: block;
+  pointer-events: auto;
+}
+.paths-game-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: none;
+  cursor: none;
+}
+.paths-channel-outer {
+  fill: none;
+  stroke: #1a1a1a;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.paths-channel-inner {
+  fill: none;
+  stroke: #fcf7f1;
+  stroke-width: 5.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+/* Thin black ink line drawn through the centre of the corridor as the
+   user moves. Thinner than the corridor walls and always pure black. */
+.paths-ink-trail {
+  fill: none;
+  stroke: #1a1a1a;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+  opacity: 0.95;
+}
+.paths-source {
+  fill: var(--q-ink, #1a1a1a);
+  cursor: pointer;
+  transition: r 0.18s ease-out;
+}
+.paths-source.active { r: 2.5px; }
+.paths-sink {
+  fill: rgba(26, 26, 26, 0.45);
+  pointer-events: none;
+  transition: fill 0.2s ease, r 0.2s ease-out;
+}
+.paths-sink.revealed {
+  fill: #1a1a1a;
+  r: 4;
+}
+body.theme-negative .paths-sink {
+  fill: rgba(252, 247, 241, 0.45);
+}
+
+.paths-tracer {
+  fill: var(--q-ink, #1a1a1a);
+  pointer-events: none;
+  transition: opacity 0.18s ease-out;
+}
+.paths-reveal {
+  pointer-events: none;
+  transition: opacity 0.35s ease-out;
+}
+.paths-reveal-icon {
+  stroke: #1a1a1a;
+  fill: none;
+  stroke-width: 1.4;
+}
+.paths-game-svg.tracing { cursor: none; }
+.roots-tree-hint {
+  margin-top: 14px;
+  text-align: center;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  color: var(--q-ink);
+  opacity: 0.6;
+  direction: rtl;
+  letter-spacing: 0.04em;
+}
+/* Quiet annotation panel that appears under the network once the user
+   reaches an exit. Three structured rows (סמל / מסורת / משמעות). */
+.roots-tree-hint.paths-info-shown {
+  opacity: 1;
+  text-align: right;
+  max-width: 460px;
+  margin: 18px auto 0;
+  letter-spacing: 0.02em;
+  font-size: 13px;
+  line-height: 1.7;
+  animation: paths-info-fade 0.6s ease-out both;
+}
+.paths-info-row { direction: rtl; }
+.paths-info-label {
+  font-weight: 700;
+  opacity: 0.7;
+}
+.paths-info-value {
+  opacity: 0.95;
+}
+@keyframes paths-info-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#q-input-wrap.roots-tree-active {
+  border: none;
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+}
+
+/* ─── Global Theme Toggle Button ──────────────────────────── */
+#theme-toggle-btn {
+  position: fixed;
+  top: 24px;
+  left: 180px;
+  z-index: 10000;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  /* Left half is dark gray, right half is cream */
+  background: linear-gradient(90deg, #1a1a1a 50%, #fcf7f1 50%);
+  border: 1.5px solid #302e2e;
+  cursor: none;
+  padding: 0;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+#theme-toggle-btn:hover {
+  transform: scale(1.15);
+}
+
+/* ─── Negative Theme Overrides ────────────────────────────── */
+body.theme-negative {
+  --q-cream:    #1a1a1a;
+  --q-dark:     #fcf7f1;
+  --q-ink:      #fcf7f1;
+  --q-stamp:    #fcf7f1;
+  --q-blue:     #fcf7f1;
+  --q-spine-color: rgba(26, 26, 26, 0.45);
+  color: var(--q-dark) !important;
+  background-color: var(--q-cream) !important;
+}
+
+body.theme-negative #theme-toggle-btn {
+  border-color: var(--q-dark) !important;
+  transform: rotate(180deg);
+}
+
+body.theme-negative #theme-toggle-btn:hover {
+  transform: rotate(180deg) scale(1.15);
+}
+
+body.theme-negative #q-text,
+body.theme-negative #q-label-tag,
+body.theme-negative #q-counter,
+body.theme-negative #q-num-current,
+body.theme-negative #q-counter-plus,
+body.theme-negative #q-input,
+body.theme-negative #q-submit,
+body.theme-negative #q-nav button,
+body.theme-negative .float-word,
+body.theme-negative .choice-btn,
+body.theme-negative .star-pick,
+body.theme-negative .roots-btn,
+body.theme-negative .roots-input,
+body.theme-negative .roots-send,
+body.theme-negative #selected-origins-list,
+body.theme-negative .roots-hint,
+body.theme-negative .roots-tree-hint,
+body.theme-negative .ui-label,
+body.theme-negative .ui-text-para,
+body.theme-negative .ui-arrow,
+body.theme-negative #coord-x,
+body.theme-negative #coord-y,
+body.theme-negative #coord-z,
+body.theme-negative #ui-crosshair,
+body.theme-negative #logo-bg-grid div,
+body.theme-negative #progress-title,
+body.theme-negative .prog-item,
+body.theme-negative #cta-anchor {
+  color: var(--q-dark) !important;
+}
+
+body.theme-negative #q-input-wrap,
+body.theme-negative .roots-canvas-wrap,
+body.theme-negative .roots-input,
+body.theme-negative #q-input,
+body.theme-negative .choice-btn,
+body.theme-negative .roots-btn,
+body.theme-negative .roots-send,
+body.theme-negative #q-submit {
+  border-color: var(--q-dark) !important;
+}
+
+body.theme-negative #q-submit:hover,
+body.theme-negative .roots-btn:hover,
+body.theme-negative .roots-send:hover,
+body.theme-negative .choice-btn.selected {
+  background: var(--q-dark) !important;
+  color: var(--q-cream) !important;
+  border-color: var(--q-dark) !important;
+}
+
+body.theme-negative .q-chrome-side-spine {
+  border-left-color: var(--q-spine-color) !important;
+}
+
+body.theme-negative .q-header-logo-box img {
+  filter: none;
+}
+
+/* Negative theme: border colors of Section 1 grid, question column, question header, and question navigation */
+body.theme-negative #logo-bg-grid,
+body.theme-negative #logo-bg-grid div,
+body.theme-negative #question-col,
+body.theme-negative #q-header,
+body.theme-negative #q-nav {
+  border-color: rgba(252, 247, 241, 0.15) !important;
+}
+
+/* Negative theme: Section 1 navigation dots */
+body.theme-negative .step-dot {
+  border-color: var(--q-dark) !important;
+}
+body.theme-negative .step-dot.active {
+  background-color: var(--q-dark) !important;
+}
+
+/* Negative theme: placeholder and navigation hover colors */
+body.theme-negative #q-input::placeholder {
+  color: rgba(252, 247, 241, 0.35) !important;
+}
+body.theme-negative #q-nav button:hover {
+  color: var(--q-dark) !important;
+  opacity: 0.75;
+}
+
+/* Negative theme: finish button styling */
+body.theme-negative .finish-blink {
+  color: rgba(252, 247, 241, 0.75) !important;
+  border-color: rgba(252, 247, 241, 0.35) !important;
+}
+body.theme-negative .finish-blink:hover {
+  color: var(--q-dark) !important;
+  border-color: var(--q-dark) !important;
+}
+
+/* Negative theme: icons and version bar color tinting */
+body.theme-negative .ui-icon,
+body.theme-negative #ui-version-bar {
+  filter: brightness(0) saturate(100%) invert(98%) sepia(13%) saturate(302%) hue-rotate(320deg) brightness(101%) contrast(97%) !important;
+}
+
+/* Negative theme: default step text color is light */
+body.theme-negative .q-header-step-label,
+body.theme-negative .q-header-step-active,
+body.theme-negative .q-header-step-active span {
+  color: var(--q-dark) !important; /* light beige #fcf7f1 */
+}
+
+/* Negative theme: covered steps text color override (dark text on light progress bar) */
+/* Stage 1 is covered if:
+   - row has data-covered-1="true" (during Stage 1)
+   - OR row has data-stage="2", "3", or "4"
+*/
+body.theme-negative .q-header-steps-row[data-covered-1="true"] [data-stage="1"],
+body.theme-negative .q-header-steps-row[data-covered-1="true"] [data-stage="1"] span,
+body.theme-negative .q-header-steps-row:is([data-stage="2"], [data-stage="3"], [data-stage="4"]) [data-stage="1"],
+body.theme-negative .q-header-steps-row:is([data-stage="2"], [data-stage="3"], [data-stage="4"]) [data-stage="1"] span,
+
+/* Stage 2 is covered if row has data-stage="2", "3", or "4" */
+body.theme-negative .q-header-steps-row:is([data-stage="2"], [data-stage="3"], [data-stage="4"]) [data-stage="2"],
+body.theme-negative .q-header-steps-row:is([data-stage="2"], [data-stage="3"], [data-stage="4"]) [data-stage="2"] span,
+
+/* Stage 3 is covered if row has data-stage="3" or "4" */
+body.theme-negative .q-header-steps-row:is([data-stage="3"], [data-stage="4"]) [data-stage="3"],
+body.theme-negative .q-header-steps-row:is([data-stage="3"], [data-stage="4"]) [data-stage="3"] span,
+
+/* Stage 4 is covered if row has data-stage="4" */
+body.theme-negative .q-header-steps-row[data-stage="4"] [data-stage="4"],
+body.theme-negative .q-header-steps-row[data-stage="4"] [data-stage="4"] span {
+  color: var(--q-cream) !important; /* dark #1a1a1a */
+}
+
+/* Negative theme: Section 1 (opening screen) background color and glass overlay updates */
+body.theme-negative #section-1 {
+  background: var(--q-cream) !important;
+}
+body.theme-negative #section-1::before {
+  background: rgba(26, 26, 26, 0.35) !important;
+}
+
+/* Mobile responsive theme toggle position */
+@media (max-width: 700px) {
+  #theme-toggle-btn {
+    top: 18px;
+    left: 130px;
+  }
+  body.theme-negative #theme-toggle-btn {
+    transform: rotate(180deg);
+  }
+  body.theme-negative #theme-toggle-btn:hover {
+    transform: rotate(180deg) scale(1.15);
+  }
+}
+
+/* ─── Symbol Annotation Overlay ────────────────────────── */
+#artifact-annotations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.symbol-annotation {
+  position: absolute;
+  opacity: 0;
+  direction: rtl;
+  text-align: right;
+  font-family: 'ArbelG', sans-serif;
+  color: var(--q-dark);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.symbol-annotation.side-right {
+  left: calc(50% + 42px);
+  right: 14px;
+  transform: translateY(-50%) translateX(12px);
+}
+
+.symbol-annotation.side-left {
+  right: calc(50% + 42px);
+  left: 14px;
+  transform: translateY(-50%) translateX(-12px);
+}
+
+.symbol-annotation.revealed {
+  opacity: 0.85;
+}
+
+.symbol-annotation.side-right.revealed {
+  transform: translateY(-50%) translateX(0);
+}
+
+.symbol-annotation.side-left.revealed {
+  transform: translateY(-50%) translateX(0);
+}
+
+.annotation-row {
+  margin-bottom: 5px;
+}
+
+.annotation-label {
+  font-size: 10px;
+  font-weight: 300;
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+  display: block;
+}
+
+.annotation-value {
+  font-size: 11.5px;
+  font-weight: 500;
+  opacity: 0.95;
+  display: block;
+  word-wrap: break-word;
+}
+
+/* Dashed connector line from symbol to annotation */
+.symbol-annotation::before {
+  content: '';
+  position: absolute;
+  top: 8px; /* aligns horizontally with the 'סמל:' label */
+  width: 26px; /* length of the connector */
+  border-top: 1.2px dashed var(--q-spine-color, rgba(252, 247, 241, 0.35));
+}
+
+.symbol-annotation.side-right::before {
+  right: 100%;
+  left: auto;
+  margin-right: 8px;
+  margin-left: 0;
+}
+
+.symbol-annotation.side-left::before {
+  left: 100%;
+  right: auto;
+  margin-left: 8px;
+  margin-right: 0;
+}
+
+/* Keep annotations visible when in Stage 2 (talisman presentation view) */
+/* #section-3.stage-2-view #artifact-annotations {
+  display: none !important;
+} */
+
+/* Mobile responsive behavior: hide annotations on portrait mobile screens */
+@media (max-width: 700px) {
+  #artifact-annotations {
+    display: none !important;
+  }
+}
+
+/* ─── Centered Questionnaire & Dynamic Layouts ────────────────── */
+
+/* Hide the old right-side question column */
+#question-col {
+  display: none !important;
+}
+
+/* Expand the middle column to occupy the entire screen to the right of the pendant */
+#middle-col {
+  right: 0 !important;
+  pointer-events: none;
+}
+
+/* Wrapper for centered question elements */
+#middle-q-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  box-sizing: border-box;
+  z-index: 10;
+  display: block;
+}
+
+/* Header (question + counter) floating in top-right */
+#middle-q-container #q-header {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: auto;
+  z-index: 10;
+  direction: rtl;
+}
+
+#middle-q-container #q-header #q-text {
+  all: unset;
+  display: block;
+  flex: 1;
+  font-family: 'Shofar', 'ArbelG', sans-serif;
+  font-size: clamp(18px, 2.2vw, 28px);
+  font-weight: 400;
+  color: #302e2e;
+  line-height: 1.25;
+  text-align: left;
+  direction: rtl;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Footer Navigation (Previous / Skip) floating at bottom center */
+#middle-q-container #q-nav {
+  position: absolute;
+  bottom: 32px;
+  left: 32px;
+  right: 32px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 10;
+  border-top: none;
+  margin-top: 0;
+  padding-top: 0;
+  direction: rtl; /* RTL layout: prev (first) aligns to the right, skip (second) aligns to the left */
+}
+#middle-q-container #q-nav button {
+  pointer-events: auto;
+  background: transparent;
+  border: none;
+  font-family: 'ArbelG', sans-serif;
+  font-size: 13px;
+  color: rgba(48, 46, 46, 0.45);
+  cursor: none;
+  transition: color 0.25s ease;
+}
+#middle-q-container #q-nav button:hover {
+  color: #302e2e;
+}
+
+/* Base Question Content inside middle container */
+#middle-q-container #q-content {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Make inputs/buttons clickable */
+#middle-q-container #q-input-wrap,
+#middle-q-container #q-input,
+#middle-q-container #q-submit {
+  pointer-events: auto;
+}
+
+/* Hide Stage 2 active components */
+#section-3.stage-2-active #middle-q-container {
+  display: none !important;
+}
+
+
+/* ─── Specific Layout Classes ─── */
+
+/* 1. Origin Widget Layout (Step 1) */
+.q-layout-origin #q-content {
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 5vh;
+}
+/* 1. Origin Layout (Step 1) - Horizontal Split */
+.q-layout-origin #middle-q-container {
+  display: flex !important;
+  flex-direction: row-reverse !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  max-width: 960px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  gap: 40px !important;
+}
+.q-layout-origin #q-header {
+  width: 45% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  border: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.q-layout-origin #q-text {
+  font-family: 'Shofar', sans-serif;
+  font-size: clamp(2.2rem, 3.8vw, 3.6rem) !important;
+  text-align: right !important;
+  line-height: 1.15 !important;
+  margin-bottom: 0 !important;
+}
+.q-layout-origin #q-content {
+  width: 50% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.q-layout-origin #q-input-wrap {
+  position: relative !important;
+  top: auto !important; left: auto !important; right: auto !important; bottom: auto !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  min-height: 0;
+  pointer-events: auto;
+}
+.q-layout-origin #roots-host {
+  margin-top: 10px;
+}
+.q-layout-origin .roots-canvas-wrap {
+  width: min(48vh, 380px) !important;
+  height: min(48vh, 380px) !important;
+}
+
+/* 2. Floating Words Layout (Step 2) */
+.q-layout-word #q-content {
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.q-layout-word #q-text {
+  font-family: 'Shofar', sans-serif;
+  font-size: clamp(3.8rem, 6.5vw, 6rem) !important;
+  text-align: center !important;
+  line-height: 1.05 !important;
+  color: #302e2e;
+  opacity: 0.12; /* elegant watermark behind floating words */
+  user-select: none;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* 3. Star Picker Layout (Step 3) - Asymmetrical clean constellation */
+.q-layout-stars #middle-q-container {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  max-width: 900px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  height: 100% !important;
+  position: relative !important;
+}
+.q-layout-stars #q-header {
+  position: absolute !important;
+  top: 2vh !important;
+  left: 0 !important;
+  max-width: 320px !important;
+  text-align: left !important;
+  border: none !important;
+}
+.q-layout-stars #q-text {
+  font-family: 'Shofar', sans-serif;
+  font-size: clamp(1.4rem, 2vw, 1.8rem) !important;
+  text-align: left !important;
+  line-height: 1.3 !important;
+  font-weight: 300 !important;
+  letter-spacing: 0.04em !important;
+  opacity: 0.8 !important;
+}
+.q-layout-stars #q-content {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.q-layout-stars #q-input-wrap.stars-active {
+  position: relative !important;
+  top: auto !important; left: auto !important;
+  width: 100% !important;
+  height: 85% !important;
+  border: none;
+  padding: 0;
+  pointer-events: auto;
+}
+
+/* 4. Personal Word Layout (Step 4) - Minimalist focused vertical spread */
+.q-layout-personal #q-content {
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.q-layout-personal #q-text {
+  font-family: 'Shofar', sans-serif;
+  font-size: clamp(2.4rem, 3.8vw, 3.6rem) !important;
+  text-align: center !important;
+  line-height: 1.25;
+  margin-bottom: 40px;
+  font-weight: 300 !important;
+}
+.q-layout-personal #q-input-wrap {
+  border: none;
+  border-bottom: 2px solid rgba(26,26,26,0.15) !important;
+  border-radius: 0;
+  padding: 10px 0;
+  min-height: 0;
+  width: 100% !important;
+  max-width: 500px !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  transition: border-bottom-color 0.25s ease;
+}
+.q-layout-personal #q-input-wrap:focus-within {
+  border-bottom-color: #1a1a1a !important;
+}
+.q-layout-personal #q-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3.2rem) !important;
+  color: #302e2e;
+  text-align: center !important;
+  outline: none;
+  padding: 0;
+  font-weight: 300 !important;
+}
+.q-layout-personal #q-submit {
+  position: static;
+  margin-right: 16px;
+  height: 38px;
+  border: 1px solid rgba(48, 46, 46, 0.25);
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  padding: 0 20px;
+  cursor: none;
+}
+
+/* 5. Roots Tree Layout (Step 5) - Split diagram view */
+.q-layout-roots #middle-q-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  max-width: 960px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  gap: 40px !important;
+}
+.q-layout-roots #q-header {
+  width: 35% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  border: none !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.q-layout-roots #q-text {
+  font-family: 'Shofar', sans-serif;
+  font-size: clamp(1.8rem, 2.8vw, 2.6rem) !important;
+  text-align: right !important;
+  line-height: 1.25 !important;
+  font-weight: 400 !important;
+}
+.q-layout-roots #q-content {
+  width: 60% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding-top: 0 !important;
+}
+.q-layout-roots #q-input-wrap {
+  border: none;
+  padding: 0;
+  min-height: 0;
+}
+
+/* 6. Name Layout (Step 6) - Grand Finale with Gematria live watermark */
+.q-layout-name #middle-q-container {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  height: 100% !important;
+  padding: 6vh 0 !important;
+  position: relative !important;
+}
+.q-layout-name #q-header {
+  align-self: flex-start !important;
+  text-align: right !important;
+  border: none !important;
+  width: 100% !important;
+}
+.q-layout-name #q-text {
+  font-family: 'Shofar', sans-serif;
+  font-size: clamp(2.8rem, 4.5vw, 4.2rem) !important;
+  text-align: right !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+}
+.q-layout-name #q-content {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  justify-content: flex-end !important;
+}
+.q-layout-name #q-input-wrap {
+  border: none;
+  border-bottom: 2px solid #1a1a1a !important;
+  border-radius: 0;
+  padding: 10px 0;
+  min-height: 0;
+  width: 100% !important;
+  max-width: 440px !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  z-index: 2;
+}
+.q-layout-name #q-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(2rem, 3.5vw, 2.8rem) !important;
+  color: #302e2e;
+  text-align: right !important;
+  outline: none;
+  padding: 0;
+  font-weight: 500 !important;
+}
+.q-layout-name #q-submit {
+  position: static;
+  margin-right: 16px;
+  height: 38px;
+  border: 1px solid rgba(48, 46, 46, 0.25);
+  font-family: 'ArbelG', sans-serif;
+  font-size: 12px;
+  padding: 0 20px;
+  cursor: none;
+}
+#gematria-watermark {
+  position: absolute;
+  bottom: 8vh;
+  left: 0;
+  font-family: 'Shofar', sans-serif;
+  font-size: clamp(8rem, 15vw, 15rem);
+  font-weight: 900;
+  color: #1a1a1a;
+  opacity: 0.04;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  direction: ltr;
+}
+body.theme-negative #gematria-watermark {
+  color: #fcf7f1;
+}
+
+/* Responsive Mobile Layout adjustments */
+@media (max-width: 700px) {
+  #middle-col {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 450px;
+    z-index: 10;
+  }
+  #middle-q-container #q-header {
+    top: 12px;
+    right: 16px;
+  }
+  .q-layout-personal #q-content,
+  .q-layout-name #q-content {
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
+  .q-layout-personal #q-input-wrap,
+  .q-layout-name #q-input-wrap {
+    width: 90%;
+  }
+  .q-layout-origin #q-content,
+  .q-layout-roots #q-content {
+    padding-top: 20px;
+  }
+}
+
+/* [NEW ARCHITECTURAL GRID LAYOUT DEFINITIONS] */
+:root {
+  --q-grid-border: rgba(26, 26, 26, 0.12);
+}
+body.theme-negative {
+  --q-grid-border: rgba(252, 247, 241, 0.15);
+}
+
+/* ─── Architectural 3x3 Grid Layout Overrides ─── */
+#section-3 #questionnaire-layout {
+  display: grid !important;
+  grid-template-columns: var(--col-1) var(--col-2) var(--col-3) !important;
+  grid-template-rows: var(--row-1) var(--row-2) var(--row-3) !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  margin: 0 !important;
+  flex-direction: row !important;
+  overflow: hidden !important;
+  transition: grid-template-columns 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              grid-template-rows 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base styling for all grid cells */
+#questionnaire-layout .grid-cell {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background-color: var(--q-cream);
+  color: var(--q-dark);
+  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Explicit cell placement within the 3x3 grid */
+#questionnaire-layout .q-header-container {
+  grid-column: 1 / 4 !important;
+  grid-row: 1 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  border-bottom: 1px solid var(--q-grid-border) !important;
+}
+#questionnaire-layout .q-chrome-side {
+  grid-column: 1 !important;
+  grid-row: 2 / 4 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  bottom: auto !important;
+  display: flex !important;
+}
+#questionnaire-layout #artifact-col {
+  grid-column: 1 !important;
+  grid-row: 2 / 4 !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  bottom: auto !important;
+  z-index: 10 !important;
+  background: transparent !important;
+  border-right: none !important;
+  overflow: visible !important;
+}
+#questionnaire-layout #artifact-annotations {
+  z-index: 11 !important;
+  overflow: visible !important;
+}
+#questionnaire-layout #q-main-cell {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+}
+#questionnaire-layout #q-deco-mid-right {
+  grid-column: 3 !important;
+  grid-row: 2 !important;
+}
+#questionnaire-layout #q-deco-bot-left {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+  z-index: 3 !important;
+  background: transparent !important;
+  border: none !important;
+}
+#questionnaire-layout .bot-mid {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+}
+#questionnaire-layout #q-deco-bot-right {
+  grid-column: 3 !important;
+  grid-row: 3 !important;
+}
+
+/* Explicit Column styling (All columns have cream background and dark text by default, dark in negative theme) */
+#questionnaire-layout .q-chrome-side,
+#questionnaire-layout #q-deco-bot-left,
+#questionnaire-layout #q-main-cell,
+#questionnaire-layout #q-deco-mid-right,
+#questionnaire-layout .bot-mid,
+#questionnaire-layout #q-deco-bot-right {
+  background-color: var(--q-cream) !important;
+  color: var(--q-dark) !important;
+}
+
+/* Grid borders - thin, architectural lines */
+#questionnaire-layout .grid-cell {
+  border: none !important;
+}
+/* Right vertical borders on Col 1 and Col 2 elements */
+#questionnaire-layout .q-chrome-side,
+#questionnaire-layout #q-main-cell,
+#questionnaire-layout .bot-mid {
+  border-right: 1px solid var(--q-grid-border) !important;
+}
+/* Top horizontal borders on Row 3 */
+#questionnaire-layout .bot-mid,
+#questionnaire-layout #q-deco-bot-right {
+  border-top: 1px solid var(--q-grid-border) !important;
+}
+#questionnaire-layout #q-deco-bot-left {
+  border: none !important;
+}
+
+/* Stage-specific column and row track definitions */
+#section-3 {
+  --col-1: clamp(280px, 24vw, 360px);
+  --col-2: 1fr;
+  --col-3: clamp(240px, 22vw, 340px);
+  --row-1: var(--q-top-total);
+  --row-2: 1fr;
+  --row-3: clamp(110px, 13vh, 150px);
+}
+#section-3.stage-2-view,
+#section-3.stage-2-active {
+  --col-1: 100vw !important;
+  --col-2: 0vw !important;
+  --col-3: 0vw !important;
+  --row-1: 0px !important;
+  --row-2: 1fr !important;
+  --row-3: 0px !important;
+}
+#section-3.stage-2-view .grid-cell,
+#section-3.stage-2-active .grid-cell,
+#section-3.stage-2-view .q-chrome-side,
+#section-3.stage-2-active .q-chrome-side {
+  border: none !important;
+}
+
+/* ─── Fixed chrome: jewelry panel + nav row stay constant across stages.
+   Only the central content area composition changes per stage. ─── */
+#section-3,
+#section-3[data-stage] {
+  --col-1: clamp(280px, 24vw, 360px);   /* jewelry panel — locked */
+  --col-2: 1fr;                          /* main content — fills remaining */
+  --col-3: clamp(240px, 22vw, 340px);   /* right deco/yellow — locked */
+  --row-1: var(--q-top-total);
+  --row-2: 1fr;
+  --row-3: clamp(110px, 13vh, 150px);   /* nav row — locked */
+}
+
+/* Cell-specific element adjustments */
+
+/* Cell 1 & 2: Header modifications (removing split styles, restoring logo row & steps row) */
+#questionnaire-layout #q-btn-back-home {
+  position: absolute !important;
+  top: clamp(22px, 2.6vh, 32px) !important;
+  left: clamp(20px, 2.4vw, 36px) !important;
+  z-index: 20 !important;
+  background: none !important;
+  border: none !important;
+  color: inherit !important;
+  border-bottom: 1px solid currentColor !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.03em !important;
+  cursor: none !important;
+  padding: 0 2px 3px 2px !important;
+  margin: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  direction: rtl !important;
+  flex: 0 0 auto !important;
+  align-self: center !important;
+  transition: opacity 0.2s ease !important;
+}
+#questionnaire-layout #q-btn-back-home:hover {
+  opacity: 0.7 !important;
+}
+
+#questionnaire-layout .q-header-steps-row {
+  margin-top: auto !important;
+  height: var(--q-header-steps-h) !important;
+  width: 100% !important;
+  background: transparent !important;
+  border-top: 1px solid var(--q-grid-border) !important;
+  border-bottom: 1px solid var(--q-grid-border) !important;
+}
+#questionnaire-layout .q-header-steps-left {
+  display: flex !important;
+}
+#questionnaire-layout .q-header-steps-right {
+  width: auto !important;
+  flex-grow: 1 !important;
+}
+#questionnaire-layout .q-header-step-label {
+  color: inherit !important;
+}
+#questionnaire-layout .q-header-logo-row {
+  position: relative !important;
+  justify-content: flex-end !important;
+}
+#questionnaire-layout .q-header-logo-box {
+  width: var(--q-stamp-w) !important;
+  height: 100% !important;
+  margin-left: 0 !important;
+  margin-right: clamp(12px, 1.6vw, 24px) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 10px !important;
+}
+#questionnaire-layout .q-header-logo-box img {
+  max-height: 100% !important;
+  width: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+  transition: filter 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Cell 5: Question main content */
+#questionnaire-layout #q-main-cell {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  padding: clamp(24px, 4vh, 48px) clamp(32px, 5vw, 64px) !important;
+  z-index: 2 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+/* Fill the central cell so legacy per-stage layouts (.q-layout-origin etc.)
+   can position q-header / q-content / q-input-wrap inside it. Without this
+   the container collapsed to h=0 and the globe/words/stars overlapped or
+   disappeared behind the question text. */
+#questionnaire-layout #middle-q-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  align-self: auto;
+}
+
+/* Ensure background illustrations (Words & Paths-game) are positioned behind counter & inputs */
+#questionnaire-layout #word-field-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+}
+#questionnaire-layout #word-field-container * {
+  pointer-events: auto;
+}
+#paths-game {
+  pointer-events: auto !important;
+}
+
+/* Cell 6: Rotating coordinates / brand text */
+#questionnaire-layout #q-deco-mid-right {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: clamp(16px, 3vh, 32px) !important;
+  direction: ltr !important;
+  gap: 6px !important;
+}
+#questionnaire-layout #q-deco-mid-right .deco-brand-text {
+  font-family: 'ArbelG', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.1em !important;
+  line-height: 1.2 !important;
+}
+#questionnaire-layout #q-deco-mid-right .deco-brand-sub {
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: 10px !important;
+  opacity: 0.6 !important;
+  letter-spacing: 0.15em !important;
+  line-height: 1.2 !important;
+}
+#questionnaire-layout #q-deco-mid-right .deco-coords {
+  font-family: monospace !important;
+  font-size: 9.5px !important;
+  opacity: 0.7 !important;
+  margin-top: 10px !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Cell 7: Circular typographic stamp badge */
+#questionnaire-layout #q-deco-bot-left {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 10px !important;
+}
+.deco-circle-badge {
+  position: relative !important;
+  width: clamp(75px, 9vh, 90px) !important;
+  height: clamp(75px, 9vh, 90px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.deco-circle-badge svg {
+  width: 100% !important;
+  height: 100% !important;
+  animation: spin-stamp 25s linear infinite !important;
+}
+.deco-circle-badge .badge-center {
+  position: absolute !important;
+  font-family: 'ArbelG', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  letter-spacing: 0.05em !important;
+}
+@keyframes spin-stamp {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Cell 8: Footer nav buttons */
+#questionnaire-layout .bot-mid {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 10px !important;
+}
+#questionnaire-layout #q-nav {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 620px !important;
+  border-top: none !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  direction: rtl !important;
+}
+#questionnaire-layout #q-nav button {
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: 11px !important;
+  letter-spacing: 0.05em !important;
+  color: inherit !important;
+  opacity: 0.75 !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+#questionnaire-layout #q-nav button:hover {
+  opacity: 1 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Cell 9: Solid yellow step number box */
+#questionnaire-layout #q-deco-bot-right {
+  background-color: #f1eb11 !important;
+  color: #1a1a1a !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-right: none !important;
+}
+#questionnaire-layout .deco-number-box {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+#questionnaire-layout .deco-number-val {
+  font-family: 'ArbelG', sans-serif !important;
+  font-weight: 900 !important;
+  font-size: clamp(40px, 5.5vh, 64px) !important;
+  line-height: 1 !important;
+  color: transparent !important;
+  -webkit-text-stroke: 1.5px #1a1a1a !important;
+  letter-spacing: 0.02em !important;
+}
+#questionnaire-layout .deco-number-label {
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.15em !important;
+  color: #1a1a1a !important;
+  margin-top: 3px !important;
+}
+
+/* Hide other absolute center columns that might conflict */
+#middle-col {
+  display: none !important;
+}
+
+/* ─── Stage transitions — smooth grid morph + cell content fades ──
+   The grid container already has `transition: grid-template-rows /
+   grid-template-columns 0.8s` (defined above), so per-stage track
+   adjustments animate by themselves. For cells whose content moves
+   between rows (right-column decos), we animate the cell itself —
+   transform + opacity — when its grid position changes. */
+#questionnaire-layout #q-deco-mid-right,
+#questionnaire-layout #q-deco-bot-right,
+#questionnaire-layout #q-main-cell {
+  transition:
+    background-color 0.6s cubic-bezier(0.45, 0, 0.2, 1),
+    color 0.6s cubic-bezier(0.45, 0, 0.2, 1),
+    padding 0.6s cubic-bezier(0.45, 0, 0.2, 1);
+}
+#questionnaire-layout #word-field-container,
+#questionnaire-layout #middle-q-container {
+  transition:
+    background-color 0.6s cubic-bezier(0.45, 0, 0.2, 1),
+    flex 0.6s cubic-bezier(0.45, 0, 0.2, 1);
+}
+/* Row 3 (nav row with "השלב הקודם / השלב הבא") is locked to a
+   single height across all stages — never changes per stage. */
+
+/* ════════════════════════════════════════════════════════════════
+   Stage 02 (data-stage="1") — Two-pane layout
+   ──────────────────────────────────────────────────────────────────
+   LEFT pane  (col 2): top = yellow "02" panel, bottom = question.
+   RIGHT pane (col 3): cream with floating words.
+   Nav row (row 3) is preserved at its locked height.
+   Left sidebar (artifact column) is untouched.
+   ──────────────────────────────────────────────────────────────── */
+#section-3[data-stage="1"] #q-main-cell {
+  padding: 0 !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: clamp(140px, 20vh, 200px) 1fr !important;
+  overflow: hidden !important;
+  border-right: 1px solid var(--q-grid-border);
+}
+
+/* Top-left: yellow panel with outlined "02" */
+#section-3[data-stage="1"] #q-main-cell::before {
+  content: '02';
+  background: #f1eb11;
+  font-family: 'ArbelG', sans-serif;
+  font-weight: 900;
+  font-size: clamp(70px, 11vh, 130px);
+  color: transparent;
+  -webkit-text-stroke: 2.5px var(--q-dark);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 clamp(20px, 3vw, 40px);
+  border-bottom: 1px solid var(--q-grid-border);
+  grid-row: 1;
+  grid-column: 1;
+}
+
+/* Bottom-left: question text */
+#section-3[data-stage="1"] #middle-q-container {
+  grid-row: 2 !important;
+  grid-column: 1 !important;
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: clamp(28px, 5vh, 60px) clamp(28px, 4vw, 56px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  background: var(--q-cream);
+  max-width: none !important;
+}
+#section-3[data-stage="1"] #middle-q-container #q-counter {
+  display: none !important;
+}
+#section-3[data-stage="1"] #middle-q-container #q-header {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  display: block !important;
+  border: none !important;
+  text-align: right !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+#section-3[data-stage="1"] #middle-q-container #q-header #q-text {
+  font-family: 'Shofar', 'ArbelG', sans-serif !important;
+  font-size: clamp(2.6rem, 5.2vw, 4.8rem) !important;
+  text-align: right !important;
+  line-height: 1.05 !important;
+  color: var(--q-dark) !important;
+  font-weight: 400 !important;
+  flex: none !important;
+  display: block !important;
+  width: 100% !important;
+}
+#section-3[data-stage="1"] .q-layout-word #q-content {
+  display: none !important;
+}
+
+/* Right pane (col 3 area): cream with floating words.
+   q-deco-mid-right is repurposed as the words container for this
+   stage; we hide its metadata text and let word-field-container
+   render inside via absolute overlay covering both rows 2 & 3. */
+#section-3[data-stage="1"] #q-deco-mid-right {
+  background-color: var(--q-cream) !important;
+  padding: 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+#section-3[data-stage="1"] #q-deco-mid-right .deco-brand-text,
+#section-3[data-stage="1"] #q-deco-mid-right .deco-brand-sub,
+#section-3[data-stage="1"] #q-deco-mid-right .deco-coords {
+  display: none !important;
+}
+
+/* Flip column proportions for Q2: narrow LEFT pane (q-main-cell)
+   with yellow + question, wide RIGHT pane (q-deco-mid-right area)
+   with floating words. Specificity bumped via `body` to win against
+   the `#section-3[data-stage]` rule that sets the default tracks. */
+body #section-3[data-stage="1"] {
+  --col-2: clamp(380px, 38vw, 560px) !important;
+  --col-3: 1fr !important;
+}
+
+#section-3[data-stage="1"] #word-field-container {
+  position: fixed !important;
+  top: var(--q-top-total) !important;
+  right: 0 !important;
+  bottom: var(--row-3) !important;
+  /* Width derived from the side+q-main-cell so it always fills the
+     remaining viewport width regardless of zoom / breakpoints. */
+  left: calc(var(--col-1) + var(--col-2)) !important;
+  width: auto !important;
+  height: auto !important;
+  background: var(--q-cream) !important;
+  z-index: 6 !important;
+  overflow: hidden;
+  pointer-events: auto !important;
+  border-left: 1px solid var(--q-grid-border);
+}
+
+/* Bot-right: empty cream block for Q2 (the "02" lives in the new
+   yellow panel inside q-main-cell instead). */
+#section-3[data-stage="1"] #q-deco-bot-right {
+  background-color: var(--q-cream) !important;
+}
+#section-3[data-stage="1"] #q-deco-bot-right .deco-number-box {
+  display: none !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Stage 01 (data-stage="0") — Origin / Globe
+   Reference composition:
+     Col 2 top strip: metadata (REMIX / REIMAGINE + coords)
+     Col 2 main:      globe centered
+     Col 3:           counter + large question text
+     Bot-right:       yellow 01 block extends up into col 3
+   ════════════════════════════════════════════════════════════════ */
+
+/* --- Sub-grid: split #q-main-cell into col-2-inner + col-3 --- */
+#section-3[data-stage="0"] #q-main-cell {
+  grid-column: 2 / 4 !important;
+  grid-row: 2 !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: grid !important;
+  grid-template-columns: 1fr var(--col-3) !important;
+  grid-template-rows: 90px 1fr !important;
+  padding: 0 !important;
+  border-right: none !important;
+}
+
+/* --- Metadata: top-left of column 2 --- */
+#section-3[data-stage="0"] #q-deco-mid-right {
+  grid-column: 2 / 4 !important;
+  grid-row: 2 !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: calc(100% - var(--col-3)) !important;
+  height: 90px !important;
+  z-index: 10 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: 20px clamp(24px, 3vw, 40px) !important;
+  box-sizing: border-box !important;
+  border-bottom: 1px solid var(--q-grid-border) !important;
+  border-right: none !important;
+  background: transparent !important;
+}
+
+/* --- Middle container: becomes the sub-grid host --- */
+#section-3[data-stage="0"] #middle-q-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: grid !important;
+  grid-template-columns: 1fr var(--col-3) !important;
+  grid-template-rows: 100% !important;
+  pointer-events: none !important;
+}
+
+/* --- Question header (counter + text): fills column 3 --- */
+#section-3[data-stage="0"] #q-header {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  padding: clamp(28px, 5vh, 56px) clamp(24px, 3vw, 40px) !important;
+  border-left: 1px solid var(--q-grid-border) !important;
+  pointer-events: auto !important;
+  gap: 16px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  direction: rtl !important;
+}
+
+/* --- Question text: large editorial typography --- */
+#section-3[data-stage="0"] #q-text {
+  font-family: 'Shofar', sans-serif !important;
+  font-size: clamp(2.4rem, 4.2vw, 4rem) !important;
+  line-height: 1.1 !important;
+  font-weight: 400 !important;
+  text-align: right !important;
+  direction: rtl !important;
+  color: var(--q-dark) !important;
+}
+
+/* --- Counter: small, positioned above question --- */
+#section-3[data-stage="0"] #q-counter {
+  font-family: 'ArbelG', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.04em !important;
+  direction: ltr !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 2px !important;
+}
+
+/* --- Globe / content area: fills column 2, below metadata strip --- */
+#section-3[data-stage="0"] #q-content {
+  position: absolute !important;
+  top: 90px !important;
+  left: 0 !important;
+  width: calc(100% - var(--col-3)) !important;
+  height: calc(100% - 90px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+}
+
+/* --- Globe widget: locked size & position across ALL sub-stages --- */
+#section-3[data-stage="0"] #q-input-wrap,
+#section-3[data-stage="0"] #q-input-wrap.roots-active {
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  pointer-events: none !important;
+  z-index: auto !important;
+}
+#section-3[data-stage="0"] #q-input-wrap > *,
+#section-3[data-stage="0"] #q-input-wrap.roots-active > * {
+  pointer-events: auto !important;
+}
+#section-3[data-stage="0"] #roots-host {
+  width: 100% !important;
+  height: auto !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+}
+#section-3[data-stage="0"] .roots-widget {
+  width: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+}
+/* Fixed globe circle size — identical across all sub-stages */
+#section-3[data-stage="0"] .roots-canvas-wrap,
+#section-3[data-stage="0"] #q-input-wrap.roots-active .roots-canvas-wrap {
+  width: min(300px, 36vh) !important;
+  height: min(300px, 36vh) !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  flex-shrink: 0 !important;
+}
+/* Controls below globe — compact, don't push globe around */
+#section-3[data-stage="0"] .roots-controls,
+#section-3[data-stage="0"] .roots-map-controls {
+  width: auto !important;
+  max-width: min(300px, 36vh) !important;
+  flex-shrink: 0 !important;
+}
+#section-3[data-stage="0"] .roots-input-row {
+  max-width: min(300px, 36vh) !important;
+}
+
+/* --- Yellow stage block: stays in bot-right (col 3, row 3) --- */
+#section-3[data-stage="0"] #q-deco-bot-right {
+  grid-column: 3 !important;
+  grid-row: 3 !important;
+  border-top: 1px solid var(--q-grid-border) !important;
+  border-left: 1px solid var(--q-grid-border) !important;
+}
+
+/* --- Bottom nav: stays in bot-mid (col 2, row 3) --- */
+#section-3[data-stage="0"] .bot-mid {
+  grid-column: 2 !important;
+  grid-row: 3 !important;
+  border-top: 1px solid var(--q-grid-border) !important;
+  border-right: 1px solid var(--q-grid-border) !important;
+}
+
+/* ─── Mobile stack layout collapse ─── */
+@media (max-width: 700px) {
+  #section-3 #questionnaire-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    padding-top: 0 !important;
+    overflow-y: auto !important;
+  }
+  
+  #questionnaire-layout .grid-cell {
+    border: none !important;
+    background-color: var(--q-cream) !important;
+    color: var(--q-dark) !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+  
+  #questionnaire-layout .top-left {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 60px !important;
+    height: 50px !important;
+    z-index: 10 !important;
+  }
+  #questionnaire-layout .top-mid {
+    width: 100% !important;
+    height: 50px !important;
+    padding-left: 60px !important;
+    padding-right: 80px !important;
+    z-index: 5 !important;
+  }
+  #questionnaire-layout .top-right {
+    position: absolute !important;
+    top: 0;
+    right: 0;
+    width: 80px !important;
+    height: 50px !important;
+    z-index: 10 !important;
+  }
+  
+  #questionnaire-layout #artifact-col {
+    height: 35vh !important;
+    width: 100% !important;
+    border: none !important;
+  }
+  
+  #questionnaire-layout #q-main-cell {
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 16px 20px !important;
+    border: none !important;
+  }
+  
+  #questionnaire-layout #q-deco-mid-right,
+  #questionnaire-layout #q-deco-bot-left,
+  #questionnaire-layout #q-deco-bot-right {
+    display: none !important;
+  }
+  
+  #questionnaire-layout .bot-mid {
+    width: 100% !important;
+    height: 60px !important;
+    border-top: 1px solid var(--q-grid-border) !important;
+    padding: 10px 20px !important;
+  }
+}
+
+/* Global Background Image and Transparency Overrides */
+html, body {
+  background: url('../image/v5-interface-bg-v2.png') no-repeat center center !important;
+  background-size: 102vw 102vh !important;
+  background-attachment: fixed !important;
+}
+
+body {
+  background-color: transparent !important;
+}
+
+#questionnaire-layout, #section-1, #section-2, .screen-panel {
+  border: none !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+#section-3 {
+  border: none !important;
+  background-color: #f5f5ed !important;
+  background-image: none !important;
+}
+
+#questionnaire-layout .grid-cell,
+#questionnaire-layout .q-chrome-side,
+#questionnaire-layout #q-text,
+#questionnaire-layout #q-header,
+#questionnaire-layout #q-content,
+#questionnaire-layout #q-deco-bot-left,
+#questionnaire-layout #q-deco-bot-right,
+#questionnaire-layout .bot-mid,
+#questionnaire-layout #q-main-cell,
+#questionnaire-layout #roots-host {
+  background: transparent !important;
+  background-color: transparent !important;
+}

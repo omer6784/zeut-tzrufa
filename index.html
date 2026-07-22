@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spatial Interface</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Global restart button -->
+  <button id="btn-restart" onclick="location.reload()">
+    <img id="btn-restart-img" src="image/חזור למסך הפתיחה.png" alt="חזור למסך הפתיחה" />
+  </button>
+
+  <!-- Section 1: Landing -->
+  <section id="section-1" class="screen-panel">
+    <canvas id="canvas-title3d"></canvas>
+
+    <div class="ui-label" id="ui-top-left">צור את התכשיט שלך</div>
+
+    <div id="ui-top-right">
+      <img id="ui-version-bar" src="image/icons/Asset 43.png" alt="VERSION 2" />
+      <div id="ui-coords">
+        <span id="coord-x">X: 08</span>
+        <span id="coord-y">Y: 22</span>
+        <span id="coord-z">Z: 04</span>
+      </div>
+    </div>
+
+    <div id="ui-bottom-left">
+      <div class="ui-label ui-v">V 2.0</div>
+      <div class="ui-label ui-abc">ABCD<br>123456789</div>
+    </div>
+
+    <div id="ui-bottom-right">
+      <p class="ui-text-para">תכשיט שנולד מתוך זהות.<br>
+      מהשורשים, מהמורשת,<br>
+      מהדברים שמגדירים אותך.<br>
+      צור את התכשיט שלך.</p>
+      <div class="ui-dots">
+        <span class="ui-arrow">→</span>
+        <img class="ui-icon" src="image/icons/Asset 12.png" alt="" />
+        <img class="ui-icon" src="image/icons/Asset 13.png" alt="" />
+        <img class="ui-icon" src="image/icons/Asset 14.png" alt="" />
+        <img class="ui-icon" id="icon-eye-bottom" src="image/icons/Asset 15.png" alt="" />
+        <img class="ui-icon" src="image/icons/Asset 16.png" alt="" />
+        <img class="ui-icon" src="image/icons/Asset 17.png" alt="" />
+        <img class="ui-icon" src="image/icons/Asset 18.png" alt="" />
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div id="cta-anchor">התחל ליצור</div>
+
+    <div id="ui-crosshair">⊕</div>
+
+    <!-- 3x4 Background Grid -->
+    <div id="logo-bg-grid">
+      <div></div><div></div><div></div><div></div>
+      <div></div><div></div><div></div><div></div>
+      <div></div><div></div><div></div><div></div>
+    </div>
+  </section>
+
+  <!-- Section 3: Questionnaire -->
+  <section id="section-3" class="screen-panel">
+    <div id="questionnaire-layout">
+      <!-- Row 1: Header (continuous toolbar) -->
+      <header class="grid-cell q-header-container" style="grid-column: 1 / 4; grid-row: 1; z-index: 100;">
+        <div class="q-header-logo-row">
+          <button id="q-btn-back-home" onclick="location.reload()">חזור</button>
+          <div class="q-header-logo-box">
+            <img src="image/section 1/logo.jpg" alt="זהות צרופה" />
+          </div>
+        </div>
+        <div class="q-header-steps-row" data-stage="1">
+          <div class="q-header-loadbar-fill" style="--q-load-progress: 0" aria-hidden="true"></div>
+          <div class="q-header-steps-left">
+            <span class="q-header-step-label" data-stage="3" style="visibility: hidden">בחירת הרקע</span>
+          </div>
+          <div class="q-header-steps-right">
+            <span class="q-header-step-label" data-stage="2" style="visibility: hidden">התכשיט שלך מוכן</span>
+            <div class="q-header-step-active" data-stage="1">
+              <span>עיצוב התכשיט</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Left sidebar background (continuous dark sidebar) -->
+      <div class="grid-cell q-chrome-side" style="grid-column: 1; grid-row: 2 / 4; z-index: 3;">
+        <div class="q-chrome-side-corner-mark" aria-hidden="true"></div>
+        <div class="q-chrome-side-spine" aria-hidden="true"></div>
+      </div>
+
+      <!-- Row 2: Left column (artifact canvas overlay) -->
+      <div class="grid-cell" id="artifact-col" style="grid-column: 1; grid-row: 2 / 4; z-index: 4; background: transparent; border-right: none !important;">
+        <canvas id="artifact-canvas"></canvas>
+        <div id="artifact-annotations"></div>
+      </div>
+      <div class="grid-cell mid-mid" id="q-main-cell">
+        <div id="word-field-container"></div>
+        <div id="middle-q-container">
+          <div id="q-header">
+            <div id="q-counter">
+              <span id="q-num-current">01</span>
+              <span id="q-counter-sep"> / </span>
+              <span id="q-num-total">06</span>
+              <span id="q-counter-plus">+</span>
+            </div>
+            <div id="q-text"></div>
+          </div>
+          <div id="q-content">
+            <div id="q-example"></div>
+            <div id="q-input-wrap"></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-cell mid-right" id="q-deco-mid-right">
+        <div class="deco-brand-text">REMIX / REIMAGINE</div>
+        <div class="deco-brand-sub">IDENTITY FORGING</div>
+        <div class="deco-coords">COORD: <span id="deco-coord-val">32.0853° N, 34.7818° E</span></div>
+      </div>
+
+      <!-- Row 3: Footer navigation and decoration cells -->
+      <div class="grid-cell bot-left" id="q-deco-bot-left">
+        <div class="deco-circle-badge">
+          <svg viewBox="0 0 100 100">
+            <path id="circlePath" d="M 50,50 m -37,0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" fill="none" />
+            <text font-family="ArbelG" font-size="9" fill="currentColor">
+              <textPath href="#circlePath">ZEHUT HADASH • IDENTITY FORGING • 2026 •</textPath>
+            </text>
+          </svg>
+          <div class="badge-center">ZH</div>
+        </div>
+      </div>
+      <div class="grid-cell bot-mid">
+        <div id="q-nav">
+          <button id="q-prev">→ השלב הקודם</button>
+          <button id="q-skip">← השלב הבא</button>
+        </div>
+      </div>
+      <div class="grid-cell bot-right" id="q-deco-bot-right">
+        <div class="deco-number-box">
+          <div class="deco-number-val" id="deco-number-val">01</div>
+          <div class="deco-number-label">STAGE</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="cursor"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

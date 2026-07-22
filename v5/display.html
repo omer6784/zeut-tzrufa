@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>זהות צרופה — תצוגה</title>
+  <!--
+    Hidden exhibition display screen.
+
+    A true fullscreen page that fills the ACTUAL browser viewport. The
+    external monitor is physically rotated and set to Portrait in the OS,
+    so the viewport is already vertical (≈9:16) — no CSS rotation, no
+    simulated frame. The 3D pendant is centered and the camera frames it
+    for whatever the real viewport aspect is (portrait on the exhibition
+    monitor). Updates live from the main interface via BroadcastChannel +
+    localStorage. No questions, buttons, navigation, or interaction. This
+    page is intentionally not linked from the main interface.
+  -->
+  <style>
+    :root {
+      /* Existing project graphic language (palette locked). */
+      --plate: #efede9;
+      --ink:   #282828;
+      --accent:#fb5716;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      cursor: none;                     /* exhibition kiosk — no pointer */
+      /* Plate + soft accent glow live on the very back layer, so the centre
+         line sits above them and the jewel (transparent canvas) sits above the
+         line — the symbols cover the line, the line shows in the gaps. */
+      background:
+        radial-gradient(ellipse 60% 42% at 50% 50%,
+          rgba(251, 87, 22, 0.10) 0%,
+          rgba(251, 87, 22, 0.03) 45%,
+          rgba(251, 87, 22, 0) 72%),
+        var(--plate);
+    }
+
+    /* Fullscreen stage — fills the real (portrait) viewport. The pendant
+       mounts here; fitCameraDisplay() frames it centered for the actual
+       viewport aspect, so it lays out correctly for a 9:16 portrait screen. */
+    #display-stage {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      /* centre the jewel canvas in the portrait viewport */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: transparent;   /* the plate/glow are on <body>, behind the line */
+      z-index: 2;                /* jewel canvas sits ABOVE the centre line */
+    }
+
+    /* The jewel engine mounts a 1080x1920 canvas here; scale it to fill the
+       portrait viewport height (centred), so its centre axis lines up with the
+       dotted centre line. */
+    #display-stage canvas {
+      height: 100% !important;
+      width: auto !important;
+      display: block;
+    }
+
+    /* Block any accidental interaction. */
+    #display-stage * { pointer-events: none; user-select: none; }
+
+    /* Permanent vertical dotted line down the centre — the axis the symbols
+       gather around (same dot language as the interface grid). */
+    #display-center-line {
+      position: fixed;
+      left: 50%;
+      /* The line spans the "long frame" the symbols hang on — ~70% of the
+         display height, centred vertically (not the full screen). */
+      top: 15%;
+      bottom: 15%;
+      width: 3px;
+      transform: translateX(-50%);
+      z-index: 1;   /* above the plate/glow, BEHIND the jewel */
+      /* Dot colour follows the chosen background for contrast (set by display.js
+         from the LINE_ON map). Defaults to cream so it reads on the dark
+         start-up screen before any background is picked. */
+      background-image: radial-gradient(circle, var(--center-line-color, #f5f5ed) 0.9px, transparent 1.1px);
+      background-size: 100% 9px;
+      background-repeat: repeat-y;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="display-center-line" aria-hidden="true"></div>
+  <div id="display-stage" aria-hidden="true"></div>
+  <!-- Global p5 + the jewel engine (classic scripts, run before the module). -->
+  <script src="/jewel/p5.min.js"></script>
+  <script src="/jewel/jewel-engine.js?v=28"></script>
+  <script type="module" src="display.js"></script>
+</body>
+</html>
