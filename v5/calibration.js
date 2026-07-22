@@ -216,28 +216,41 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   window.addEventListener('resize', onResize);
 
   // ── Auto "ghost hand" demo: empty → tap the orange square → it appears large
-  //    → tap "המשך". Loops until a real touch. ──
+  //    → tap "המשך". Plays ONCE, 2s after the stage is actually on screen. ──
   function tileCenter(i) { const r = canvas.getBoundingClientRect(); const rc = thumbs[i]; return { x: r.left + rc.x + rc.w / 2, y: r.top + rc.y + rc.h / 2 }; }
   function contCenter() { const r = cont.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
   function stopDemo() { demoToken++; try { getGhostHand().hide(); } catch (_) {} }
+  // Calibration is pre-mounted while the intro is still up (its host sits inside a
+  // faded-out section), so gate the demo on the stage being genuinely visible.
+  function stageVisible() {
+    let n = host;
+    while (n && n !== document.body) {
+      const cs = getComputedStyle(n);
+      if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) < 0.05) return false;
+      n = n.parentElement;
+    }
+    return host.getBoundingClientRect().width > 0;
+  }
   async function runDemo() {
     const my = ++demoToken;
     const gh = getGhostHand();
-    await gh.sleep(1700);
+    while (my === demoToken && !committed && !stageVisible()) await gh.sleep(200);
+    if (my !== demoToken || committed) return;
+    await gh.sleep(2000);                          // let the visitor settle in first
     if (my !== demoToken || committed) return;
     gh.show('light');
-    while (my === demoToken && !committed) {
-      active = -1; updateContinue();
-      await gh.sleep(250); if (my !== demoToken) break;
-      let p = tileCenter(0); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) break;
-      await gh.tap();
-      active = 0; updateContinue();                // orange appears large + "המשך" grows in
-      await gh.sleep(850); if (my !== demoToken) break;
-      p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) break;
-      await gh.tap();
-      await gh.sleep(950);
-    }
+    active = -1; updateContinue();
+    await gh.sleep(250); if (my !== demoToken) return gh.hide();
+    let p = tileCenter(0); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
+    await gh.tap();
+    active = 0; updateContinue();                  // orange appears large + "המשך" grows in
+    await gh.sleep(850); if (my !== demoToken) return gh.hide();
+    p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
+    await gh.tap();
+    await gh.sleep(550);
     gh.hide();
+    // Reset to the clean empty state so the visitor makes their own choice.
+    if (my === demoToken && !committed) { active = -1; updateContinue(); }
   }
   runDemo();
 
