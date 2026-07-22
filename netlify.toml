@@ -1,0 +1,14 @@
+# Netlify deploy config — builds the Vite app and serves dist/ from the site root
+# (so the project's absolute /image/ /assets/ paths keep working).
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Open the v5 interface directly when visiting the site root.
+[[redirects]]
+  from = "/"
+  to = "/v5/"
+  status = 302
