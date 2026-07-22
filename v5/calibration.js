@@ -28,6 +28,8 @@ const GRID_R = 0.8, GRID_PITCH = 5.5; // match the fixed interface grid (Ø1.6 /
 const LOCK_DUR = 0.55;
 const TAU = Math.PI * 2;
 
+import { getGhostHand } from './demo-hand.js';
+
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
 const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
@@ -56,6 +58,14 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   hint.textContent = hintText;
   host.appendChild(hint);
 
+  // "המשך" confirm button — grows in next to the cue once a frequency is picked;
+  // fills orange on press (same graphic language as the symbol-window button).
+  const cont = document.createElement('button');
+  cont.type = 'button';
+  cont.className = 'calib-continue';
+  cont.textContent = 'המשך';
+  host.appendChild(cont);
+
   // A dot-grid template for a rect of the given size (uniform pitch → round dots;
   // pattern coords normalise by the SHORT side so the fields stay circular).
   function makeGrid(w, h) {
@@ -82,7 +92,7 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    hLineY = 30;                       // horizontal rule under the cue
+    hLineY = 76;                       // horizontal rule below the cue + "המשך" button
     const mainY = hLineY + 12;         // top of the master/detail area
     const colW = Math.max(170, Math.min(300, W * 0.24));
     const vGap = 14;
@@ -103,7 +113,8 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
 
   // ── State ──
   let t = 0, last = performance.now(), raf = 0;
-  let active = 0, committed = false, lockT = 0, lockFired = false;
+  let active = -1, committed = false, lockT = 0, lockFired = false;   // -1 = nothing picked (left empty)
+  let demoToken = 0;
 
   const LEVELS = 8;
   function drawField(rect, grid, tile, alpha) {
@@ -153,32 +164,15 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    // Large detail view — the active frequency.
-    drawField(big, gridBig, TILES[active], 1);
-    // Right column of thumbnails (the active one full, the rest a touch dimmer).
+    // Large detail view — only once a frequency is picked (empty left before that).
+    if (active >= 0) drawField(big, gridBig, TILES[active], 1);
+    // Right column — the picked one full, the rest a touch dimmer.
     for (let i = 0; i < thumbs.length; i++) drawField(thumbs[i], gridThumb, TILES[i], i === active ? 1 : 0.62);
 
     // Dotted rules (contained in the rectangle).
     dottedH(0, W, hLineY);              // under the cue
     dottedV(vLineX, big.y, H);          // between the big view and the column
     for (const y of thumbDivs) dottedH(colX, W, y);   // between the four squares
-
-    // Confirm cue on the large view.
-    if (!committed) {
-      const inv = TILES[active].invert;
-      const cx = big.x + big.w / 2, cy = big.y + big.h - 20;
-      const txt = 'לחצו כאן לאישור';
-      ctx.textAlign = 'center';
-      ctx.font = "600 14px 'IBM Plex Mono', ui-monospace, monospace";
-      ctx.globalAlpha = 0.6 + 0.35 * (0.5 + 0.5 * Math.sin(t * 2.2));
-      // Halo in the panel colour so the text reads over the dots.
-      ctx.lineWidth = 4; ctx.lineJoin = 'round';
-      ctx.strokeStyle = inv ? `rgb(${CREAM_BG[0]},${CREAM_BG[1]},${CREAM_BG[2]})` : `rgb(${TILE_BG[0]},${TILE_BG[1]},${TILE_BG[2]})`;
-      ctx.strokeText(txt, cx, cy);
-      ctx.fillStyle = inv ? 'rgb(40,40,40)' : `rgb(${GRID_DOT})`;
-      ctx.fillText(txt, cx, cy);
-      ctx.globalAlpha = 1;
-    }
   }
 
   function tick(now) {
@@ -194,43 +188,68 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   raf = requestAnimationFrame(tick);
 
   function inRect(r, x, y) { return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; }
+  function updateContinue() { cont.classList.toggle('is-shown', active >= 0 && !committed); }
+
   function commit() {
-    if (committed) return;
+    if (committed || active < 0) return;
     committed = true; lockT = 0; lockFired = false;
     hint.classList.add('is-hidden');
+    cont.classList.remove('is-shown');
+    cont.classList.add('is-pressed');            // fills orange
     onFreeze && onFreeze(TILES[active].hex);
   }
+
+  // Tap a square in the column → it shows large on the left + "המשך" grows in.
   function onDown(e) {
+    stopDemo();                                   // any real touch ends the demo
     if (committed) return;
-    e.preventDefault();
     const r = canvas.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
     for (let i = 0; i < thumbs.length; i++) {
-      if (inRect(thumbs[i], x, y)) { if (i === active) commit(); else active = i; return; }   // preview only
+      if (inRect(thumbs[i], x, y)) { e.preventDefault(); active = i; updateContinue(); return; }
     }
-    if (inRect(big, x, y)) commit();
   }
   host.addEventListener('pointerdown', onDown);
+  cont.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); stopDemo(); commit(); });
 
   const onResize = () => layout();
   window.addEventListener('resize', onResize);
 
+  // ── Auto "ghost hand" demo: empty → tap the orange square → it appears large
+  //    → tap "המשך". Loops until a real touch. ──
+  function tileCenter(i) { const r = canvas.getBoundingClientRect(); const rc = thumbs[i]; return { x: r.left + rc.x + rc.w / 2, y: r.top + rc.y + rc.h / 2 }; }
+  function contCenter() { const r = cont.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+  function stopDemo() { demoToken++; try { getGhostHand().hide(); } catch (_) {} }
+  async function runDemo() {
+    const my = ++demoToken;
+    const gh = getGhostHand();
+    await gh.sleep(1700);
+    if (my !== demoToken || committed) return;
+    gh.show('light');
+    while (my === demoToken && !committed) {
+      active = -1; updateContinue();
+      await gh.sleep(250); if (my !== demoToken) break;
+      let p = tileCenter(0); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) break;
+      await gh.tap();
+      active = 0; updateContinue();                // orange appears large + "המשך" grows in
+      await gh.sleep(850); if (my !== demoToken) break;
+      p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) break;
+      await gh.tap();
+      await gh.sleep(950);
+    }
+    gh.hide();
+  }
+  runDemo();
+
   function teardown() {
+    stopDemo();
     cancelAnimationFrame(raf);
     window.removeEventListener('resize', onResize);
     host.removeEventListener('pointerdown', onDown);
     try { canvas.remove(); } catch (_) {}
     try { hint.remove(); } catch (_) {}
+    try { cont.remove(); } catch (_) {}
   }
 
-  // Screen-space points for the demo hand: tap a frequency in the column, then
-  // tap the large view to confirm.
-  function demoTargets() {
-    if (!thumbs.length || !big) return [];
-    const r = canvas.getBoundingClientRect();
-    const c = rc => ({ x: r.left + rc.x + rc.w / 2, y: r.top + rc.y + rc.h / 2 });
-    return [c(thumbs[1]), c(big)];
-  }
-
-  return { teardown, demoTargets };
+  return { teardown };
 }

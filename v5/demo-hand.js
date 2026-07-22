@@ -38,6 +38,19 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 function moveTo(x, y) { hand.style.left = x + 'px'; hand.style.top = y + 'px'; }
 function pulse() { ripple.classList.remove('is-go'); void ripple.offsetWidth; ripple.classList.add('is-go'); }
 
+/* Low-level primitives for stages that must sync the hand with their own state
+   changes (e.g. the frequency stage: tap a square → it appears → tap "המשך"). */
+export function getGhostHand() {
+  ensure();
+  return {
+    el: hand, sleep,
+    show(tone) { hand.classList.toggle('is-dark', tone === 'dark'); hand.classList.add('is-on'); },
+    hide() { hand.classList.remove('is-on', 'is-grab'); },
+    move(x, y) { moveTo(x, y); },
+    async tap() { hand.classList.add('is-grab'); pulse(); await sleep(250); hand.classList.remove('is-grab'); },
+  };
+}
+
 /* points: array of {x,y} screen coords to tap in sequence; loops until stopped.
    opts.tone: 'light' (default, cream) or 'dark' — pick for contrast on the stage. */
 export async function playHandDemo(points, opts = {}) {

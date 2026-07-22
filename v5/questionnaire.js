@@ -1217,8 +1217,8 @@ function _renderQuestionImpl(idx){
       onLock: (hex) => { chooseBackground(hex); },
     });
     st._calibTeardown = calib.teardown;
-    // Auto "ghost hand" demo of the tap-a-frequency → confirm gesture.
-    scheduleStageDemo(() => calib.demoTargets(), { tone: 'light' });
+    // The frequency stage runs its own ghost-hand demo (tap a square → it shows
+    // large → tap "המשך"), synced to its internal state — see calibration.js.
   }
   if(q.type==='stars'){
     const numCols = 9;

@@ -297,7 +297,16 @@
       "Bash(git config *)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git commit -m 'Initial commit — זהות צרופה interface *)"
+      "Bash(git commit -m 'Initial commit — זהות צרופה interface *)",
+      "Bash(git --version)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'Frequency stage: master-detail squares, dark start, restyled cue; display dark start-up *)",
+      "Bash(git commit -m 'Fix: raise calibration panel above #q-header so the right frequency column is tappable *)",
+      "Bash(git commit -m 'Calibration: dark \\(#282828\\) tile inverted — dark dots on cream, distinct '\\\\''weave'\\\\'' animation *)",
+      "Bash(git commit -m 'Calibration: 4th tile concentric-diamond animation \\(in-family\\); readable confirm cue with halo *)",
+      "Bash(git commit -m 'Add auto '\\\\''ghost hand'\\\\'' gesture demo — first wired on the frequency stage *)",
+      "Bash(git commit -q -m 'Frequency stage: empty-left start, tap → large + grow-in '\\\\''המשך'\\\\'' button, self-run ghost-hand demo *)"
     ]
   },
   "hooks": {
