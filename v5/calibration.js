@@ -17,9 +17,12 @@ const TILES = [
   { rgb: [255, 80, 3],    hex: '#ff5003', anim: 'pulse'   }, // orange
   { rgb: [226, 188, 113], hex: '#e2bc71', anim: 'squares' }, // gold
   { rgb: [245, 245, 237], hex: '#f5f5ed', anim: 'vortex'  }, // cream
-  { rgb: [245, 245, 237], hex: '#282828', anim: 'tunnel'  }, // charcoal → drawn in cream
+  // The dark option is INVERTED: #282828 dots on a cream panel, so the dominant
+  // colour (#282828) itself is what you see — clearly the dark choice.
+  { rgb: [40, 40, 40],    hex: '#282828', anim: 'weave', invert: true },
 ];
-const TILE_BG = [22, 22, 22];       // near-black panel
+const TILE_BG  = [22, 22, 22];      // near-black panel (the coloured-dot tiles)
+const CREAM_BG = [240, 236, 228];   // cream panel for the inverted (#282828) tile
 const GRID_DOT = '245,245,237';     // cream — the grid colour on the dark plate
 const GRID_R = 0.8, GRID_PITCH = 5.5; // match the fixed interface grid (Ø1.6 / 5.5)
 const LOCK_DUR = 0.55;
@@ -33,6 +36,9 @@ const FIELD = {
   squares: (nx, ny, t) => 0.5 + 0.5 * Math.sin(Math.max(Math.abs(nx), Math.abs(ny)) * 11 - t * 2.0),
   vortex:  (nx, ny, t) => (0.5 + 0.5 * Math.sin(Math.hypot(nx, ny) * 8 + Math.atan2(ny, nx) * 4 - t * 2.6)) * smooth(0.0, 0.14, Math.hypot(nx, ny)),
   tunnel:  (nx, ny, t) => 0.5 + 0.5 * Math.sin(Math.hypot(nx, ny) * 13 - t * 3.2),
+  // Woven grid — two crossing sine fields breathe in a plaid, clearly unlike the
+  // radial/spiral/square patterns of the other three.
+  weave:   (nx, ny, t) => 0.5 + 0.5 * (Math.sin(nx * 6 - t * 1.8) * Math.sin(ny * 6 + t * 1.4)),
 };
 
 export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'בחרו את התדר איתו תרצו להיכנס לתהליך היצירה' } = {}) {
@@ -103,8 +109,9 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   function drawField(rect, grid, tile, alpha) {
     if (alpha <= 0.001) return;
     const field = FIELD[tile.anim], isTunnel = tile.anim === 'tunnel';
+    const panel = tile.invert ? CREAM_BG : TILE_BG;
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = `rgb(${TILE_BG[0]},${TILE_BG[1]},${TILE_BG[2]})`;
+    ctx.fillStyle = `rgb(${panel[0]},${panel[1]},${panel[2]})`;
     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
 
     const buckets = Array.from({ length: LEVELS }, () => []);
@@ -159,7 +166,7 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     // Confirm cue on the large view.
     if (!committed) {
       ctx.globalAlpha = 0.5 + 0.3 * (0.5 + 0.5 * Math.sin(t * 2.2));
-      ctx.fillStyle = `rgb(${GRID_DOT})`;
+      ctx.fillStyle = TILES[active].invert ? 'rgb(40,40,40)' : `rgb(${GRID_DOT})`;
       ctx.font = "12px 'IBM Plex Mono', ui-monospace, monospace";
       ctx.textAlign = 'center';
       ctx.fillText('לחצו כאן לאישור', big.x + big.w / 2, big.y + big.h - 16);
