@@ -6253,15 +6253,17 @@ html:not(.cursor-active) *::after {
 /* Right-side step rail → cream dots, current step orange. */
 #section-3.q-color-stage[data-stage="0"] #step-rail li { background: #f5f5ed !important; }
 #section-3.q-color-stage[data-stage="0"] #step-rail li.is-current { background: #ff5003 !important; }
+/* The "בחר צבע רקע" instruction is replaced by the in-panel cue (.calib-hint). */
+#section-3.q-color-stage[data-stage="0"] #q-instruction { display: none !important; }
 
-/* Standing touch cue over the squares — cream on the dark plate. The tiles now
-   fill the whole rectangle, so it overlays the top edge with a shadow to read. */
+/* Standing cue above the squares — reuses the stage-instruction's font & colour
+   (ArbelG, interface orange), since the "בחר צבע רקע" instruction is hidden here. */
 .calib-hint {
   position: absolute; left: 0; right: 0; top: 10px; text-align: center;
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: 12px; letter-spacing: 0.10em; color: #f5f5ed;
-  opacity: 0.85; pointer-events: none; transition: opacity 0.3s ease; z-index: 2;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.9), 0 0 2px rgba(0, 0, 0, 0.9);
+  font-family: 'ArbelG', sans-serif; direction: rtl;
+  font-size: clamp(12px, 1vw, 14px); letter-spacing: 0.03em; color: #ff5003;
+  pointer-events: none; transition: opacity 0.3s ease; z-index: 2;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
 }
 .calib-hint.is-hidden { opacity: 0; }
 .calib-status {

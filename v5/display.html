@@ -29,15 +29,10 @@
       height: 100vh;
       overflow: hidden;
       cursor: none;                     /* exhibition kiosk — no pointer */
-      /* Plate + soft accent glow live on the very back layer, so the centre
-         line sits above them and the jewel (transparent canvas) sits above the
-         line — the symbols cover the line, the line shows in the gaps. */
-      background:
-        radial-gradient(ellipse 60% 42% at 50% 50%,
-          rgba(251, 87, 22, 0.10) 0%,
-          rgba(251, 87, 22, 0.03) 45%,
-          rgba(251, 87, 22, 0) 72%),
-        var(--plate);
+      /* Dark from the very first paint (matches the engine's default
+         setBackground(dark)) — no light plate / pink glow flash on load.
+         The jewel canvas is transparent above; the centre line shows in gaps. */
+      background: var(--ink);
     }
 
     /* Fullscreen stage — fills the real (portrait) viewport. The pendant

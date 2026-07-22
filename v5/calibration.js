@@ -35,7 +35,7 @@ const FIELD = {
   tunnel:  (nx, ny, t) => 0.5 + 0.5 * Math.sin(Math.hypot(nx, ny) * 13 - t * 3.2),
 };
 
-export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'לחצו על התדר שמדבר אליכם' } = {}) {
+export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'בחרו את התדר איתו תרצו להיכנס לתהליך היצירה' } = {}) {
   if (!host) return () => {};
   if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
 
