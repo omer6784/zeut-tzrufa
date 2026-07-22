@@ -6215,7 +6215,7 @@ html:not(.cursor-active) *::after {
 #q-input-wrap.calib-active {
   position: fixed !important; left: 7.5% !important; right: 7.5% !important;
   top: 22% !important; bottom: 11% !important;
-  width: auto !important; height: auto !important; z-index: 4 !important;
+  width: auto !important; height: auto !important; z-index: 20 !important;
   display: flex !important; flex-direction: column; padding: 0;
 }
 /* Pin the frequency-bands area to the central rectangle (frame lines). The rule
@@ -6229,7 +6229,9 @@ html:not(.cursor-active) *::after {
   bottom: calc(100vh - 706 * var(--sy)) !important;
   width: auto !important; height: auto !important;
   display: flex !important; flex-direction: column;
-  z-index: 4 !important;
+  /* Above #q-header (z-index 10), which otherwise covers the right frequency
+     column and swallows taps on the four squares. */
+  z-index: 20 !important;
 }
 #calib-host {
   position: relative; flex: 1 1 auto; width: 100%; min-height: 0;
