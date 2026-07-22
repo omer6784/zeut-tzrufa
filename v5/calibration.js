@@ -92,19 +92,22 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
+    // ONE light gap used everywhere — between the squares, between them and the
+    // big view, and as the inset from the surrounding grid (all sides equal).
+    const g = 14;
     hLineY = 76;                       // horizontal rule below the cue + "המשך" button
-    const mainY = hLineY + 12;         // top of the master/detail area
+    const mainY = hLineY + g;          // top of the master/detail area
+    const botY = H - g;                // bottom of the tiles (equal gap to the grid)
     const colW = Math.max(170, Math.min(300, W * 0.24));
-    const vGap = 14;
-    colX = W - colW;
-    vLineX = colX - vGap / 2;
-    big = { x: 0, y: mainY, w: colX - vGap, h: H - mainY };
+    colX = W - g - colW;               // column inset one gap from the right grid
+    vLineX = colX - g / 2;             // dotted rule centred in the big↔column gap
+    big = { x: g, y: mainY, w: colX - 2 * g, h: botY - mainY };
 
-    const n = TILES.length, hGap = 12;
-    const th = (H - mainY - (n - 1) * hGap) / n;
-    thumbs = TILES.map((_, i) => ({ x: colX, y: mainY + i * (th + hGap), w: colW, h: th }));
+    const n = TILES.length;
+    const th = (botY - mainY - (n - 1) * g) / n;
+    thumbs = TILES.map((_, i) => ({ x: colX, y: mainY + i * (th + g), w: colW, h: th }));
     thumbDivs = [];
-    for (let i = 1; i < n; i++) thumbDivs.push(mainY + i * (th + hGap) - hGap / 2);
+    for (let i = 1; i < n; i++) thumbDivs.push(mainY + i * (th + g) - g / 2);
 
     gridBig = makeGrid(big.w, big.h);
     gridThumb = makeGrid(colW, th);
@@ -169,10 +172,11 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     // Right column — the picked one full, the rest a touch dimmer.
     for (let i = 0; i < thumbs.length; i++) drawField(thumbs[i], gridThumb, TILES[i], i === active ? 1 : 0.62);
 
-    // Dotted rules (contained in the rectangle).
-    dottedH(0, W, hLineY);              // under the cue
-    dottedV(vLineX, big.y, H);          // between the big view and the column
-    for (const y of thumbDivs) dottedH(colX, W, y);   // between the four squares
+    // Dotted rules (contained in the rectangle), each centred in a gap.
+    dottedH(0, W, hLineY);                                   // under the cue
+    dottedV(vLineX, big.y, big.y + big.h);                   // between the big view and the column
+    const cr = thumbs.length ? thumbs[0].x + thumbs[0].w : W;
+    for (const y of thumbDivs) dottedH(colX, cr, y);         // between the four squares
   }
 
   function tick(now) {
@@ -188,13 +192,19 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   raf = requestAnimationFrame(tick);
 
   function inRect(r, x, y) { return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; }
-  function updateContinue() { cont.classList.toggle('is-shown', active >= 0 && !committed); }
+  // "המשך" stays on screen the whole stage: dimmed/greyed (unusable) until a
+  // frequency is picked, cream + clickable once one is.
+  function updateContinue() {
+    if (committed) return;
+    cont.classList.add('is-shown');
+    cont.classList.toggle('is-disabled', active < 0);
+  }
 
   function commit() {
     if (committed || active < 0) return;
     committed = true; lockT = 0; lockFired = false;
     hint.classList.add('is-hidden');
-    cont.classList.remove('is-shown');
+    cont.classList.remove('is-disabled');
     cont.classList.add('is-pressed');            // fills orange
     onFreeze && onFreeze(TILES[active].hex);
   }
@@ -215,8 +225,10 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   const onResize = () => layout();
   window.addEventListener('resize', onResize);
 
+  updateContinue();                                // button present (dimmed) from the start
+
   // ── Auto "ghost hand" demo: empty → tap the orange square → it appears large
-  //    → tap "המשך". Plays ONCE, 2s after the stage is actually on screen. ──
+  //    → tap "המשך". Plays ONCE, 1.5s after the stage is actually on screen. ──
   function tileCenter(i) { const r = canvas.getBoundingClientRect(); const rc = thumbs[i]; return { x: r.left + rc.x + rc.w / 2, y: r.top + rc.y + rc.h / 2 }; }
   function contCenter() { const r = cont.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
   function stopDemo() { demoToken++; try { getGhostHand().hide(); } catch (_) {} }
@@ -236,12 +248,13 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     const gh = getGhostHand();
     while (my === demoToken && !committed && !stageVisible()) await gh.sleep(200);
     if (my !== demoToken || committed) return;
-    await gh.sleep(2000);                          // let the visitor settle in first
+    await gh.sleep(1500);                          // let the visitor settle in first
     if (my !== demoToken || committed) return;
-    gh.show('light');
     active = -1; updateContinue();
-    await gh.sleep(250); if (my !== demoToken) return gh.hide();
-    let p = tileCenter(0); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
+    let p = tileCenter(0);
+    gh.place(p.x, p.y);                             // appear already on the first square
+    gh.show('light');
+    await gh.sleep(650); if (my !== demoToken) return gh.hide();
     await gh.tap();
     active = 0; updateContinue();                  // orange appears large + "המשך" grows in
     await gh.sleep(850); if (my !== demoToken) return gh.hide();

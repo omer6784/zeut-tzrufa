@@ -46,6 +46,9 @@ export function getGhostHand() {
     el: hand, sleep,
     show(tone) { hand.classList.toggle('is-dark', tone === 'dark'); hand.classList.add('is-on'); },
     hide() { hand.classList.remove('is-on', 'is-grab'); },
+    // Jump to a point with no glide — use before show() so the hand appears
+    // already on target instead of flashing in from the corner.
+    place(x, y) { const tr = hand.style.transition; hand.style.transition = 'none'; moveTo(x, y); void hand.offsetWidth; hand.style.transition = tr; },
     move(x, y) { moveTo(x, y); },
     async tap() { hand.classList.add('is-grab'); pulse(); await sleep(250); hand.classList.remove('is-grab'); },
   };

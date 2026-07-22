@@ -6333,6 +6333,13 @@ html:not(.cursor-active) *::after {
   opacity: 1; pointer-events: auto;
   transform: translateX(-50%) scale(1);
 }
+/* Not usable until a frequency is picked — greyed, dimmed, no clicks. Comes
+   after .is-shown so it overrides pointer-events for the same specificity. */
+.calib-continue.is-disabled {
+  --grid-dot: rgba(245, 245, 237, 0.22);
+  color: rgba(245, 245, 237, 0.3) !important;
+  pointer-events: none; cursor: default;
+}
 .calib-continue.is-pressed {
   background-color: #ff5003 !important;
   background-image: none !important;   /* solid fill on press — drop the dots */
