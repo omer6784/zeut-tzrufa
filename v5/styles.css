@@ -6359,13 +6359,13 @@ html:not(.cursor-active) *::after {
 .stage-band {
   position: fixed;
   left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
-  bottom: 0; height: calc(120 * var(--sy));
+  bottom: 0; height: calc(160 * var(--sy));
   display: none; z-index: 9; pointer-events: none;
 }
 .stage-band.is-shown { display: block; }
 .stage-band .sb-rule {
   position: absolute; left: 0; right: 0;
-  bottom: calc(96 * var(--sy));           /* our added rule — above the bottom grid line (62) */
+  bottom: calc(124 * var(--sy));          /* our added rule — well above the bottom grid line (62) */
   height: var(--grid-dot-size);
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
   background-size: var(--grid-dot-gap) var(--grid-dot-size);
@@ -6373,13 +6373,13 @@ html:not(.cursor-active) *::after {
 }
 .stage-band .sb-note {
   position: absolute; left: 0; right: 0;
-  bottom: calc(74 * var(--sy));            /* between our rule and the bottom grid line */
+  bottom: calc(100 * var(--sy));           /* between our rule and the button */
   font-family: 'ArbelG', sans-serif; color: #ff5003;
   font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
   direction: rtl; text-align: center;
 }
 .stage-band .sb-btn {
-  position: absolute; left: 50%; bottom: calc(20 * var(--sy));   /* below the bottom grid line */
+  position: absolute; left: 50%; bottom: calc(70 * var(--sy));   /* between the two grid lines */
   transform: translateX(-50%);
   pointer-events: auto; cursor: pointer;
   font-family: 'ArbelG', sans-serif;
