@@ -309,7 +309,8 @@
       "Bash(git commit -q -m 'Frequency stage: empty-left start, tap → large + grow-in '\\\\''המשך'\\\\'' button, self-run ghost-hand demo *)",
       "Bash(git commit -q -m 'Frequency demo: skip intro, start 2s after stage is visible, play once \\(no loop\\) *)",
       "Bash(git commit -q -m 'Frequency stage: 1.5s demo delay, persistent dimmed '\\\\''המשך'\\\\'' button, uniform tile gaps, no corner hand flash *)",
-      "Bash(git commit -q -m 'Frequency demo: hand glides in from below \\(no sudden pop\\); ring + fade cue on frequency pick *)"
+      "Bash(git commit -q -m 'Frequency demo: hand glides in from below \\(no sudden pop\\); ring + fade cue on frequency pick *)",
+      "Bash(git commit -q -m 'Globe \\(origin\\) stage: invert colours — light plate, gold globe \\(cream/dark continents\\), gold map land *)"
     ]
   },
   "hooks": {

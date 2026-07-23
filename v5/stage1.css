@@ -202,31 +202,29 @@ html, body {
 }
 
 /* ── Origin (globe) stage — inverts the interface's cream/gold pair ────
-   Gold plate, cream globe, gold continent dots (the canvas side lives in
-   roots.js). Scoped by :has() to the origin question rather than to
+   Light (cream) plate, gold globe, cream continent dots (the canvas side lives
+   in roots.js). Scoped by :has() to the origin question rather than to
    data-stage="0", because that stage number is shared with the "בחר צבע רקע"
-   picker, which must stay on the cream plate. */
+   picker. */
 #section-3[data-stage="0"]:has(#middle-q-container.q-layout-origin) {
-  background-color: #e2bc71 !important;
+  background-color: #f5f5ed !important;
   background-image: none !important;
 }
 
-/* The origin stage's keyboard sits on the inverted (gold) plate, so the panel
-   and its keys go gold with it — and the gold hover goes with them, since gold
-   on gold says nothing. Scoped via :has() on body: the keyboard is a body
-   child (not inside #section-3) and is shared with the other text stages,
-   which keep the cream plate. */
+/* The origin stage's keyboard sits on the light (cream) plate, so the panel and
+   its keys go cream with it. Scoped via :has() on body: the keyboard is a body
+   child (not inside #section-3) and is shared with the other text stages. */
 body:has(#middle-q-container.q-layout-origin) #virtual-keyboard,
 body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key,
 body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key:hover {
-  background-color: #e2bc71 !important;
+  background-color: #f5f5ed !important;
 }
-/* Key dotted OUTLINE in cream; label stays cream on the gold plate. Hover is a
-   no-op. */
+/* Key dotted OUTLINE + label in dark, so they read on the cream plate. Hover is
+   a no-op. */
 body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key,
 body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key:hover {
-  --grid-dot: #f5f5ed !important;   /* dotted key outline → cream */
-  color: #f5f5ed !important;        /* label → cream */
+  --grid-dot: #282828 !important;   /* dotted key outline → dark */
+  color: #282828 !important;        /* label → dark */
   border-color: transparent !important;
 }
 /* Press → the key fills the interface orange with a cream label (dots dropped),
@@ -1048,10 +1046,10 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
 
 /* Country input row (appears after continent click) */
 #section-3[data-stage="0"] .roots-input {
-  /* A dotted LINE from the ONE dot system (grid size + spacing), in cream; the
-     country name is written on it, above the line. */
+  /* A dotted LINE from the ONE dot system (grid size + spacing), in dark so it
+     reads on the light plate; the country name is written on it, above the line. */
   background-color: transparent !important;
-  --grid-dot: #f5f5ed !important;
+  --grid-dot: #282828 !important;
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
   background-size: var(--grid-dot-gap) var(--grid-dot-size) !important;
   background-position: bottom !important;
@@ -1193,14 +1191,15 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
 }
 /* Two stacked lines, right-aligned. Widths kept proportional to the source PNGs
    (771×118 and 783×195) so both lines share one type scale. */
-/* The two lines are painted as a solid CREAM fill masked by each PNG's alpha
-   silhouette (the source art is orange text on transparent), so the title
-   renders in the interface cream while keeping the typewriter reveal. */
+/* The two lines are painted as a solid DARK fill masked by each PNG's alpha
+   silhouette (the source art is orange text on transparent), so the title reads
+   clearly on the light plate (gold-on-cream would be too low-contrast) while
+   keeping the typewriter reveal. */
 #section-3[data-stage="0"] .roots-widget .roots-story-line {
   display: block !important;
   height: auto !important;
   margin-left: auto !important;   /* push to the right edge (RTL) */
-  background-color: #f5f5ed !important;
+  background-color: #282828 !important;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-mask-position: center; mask-position: center;
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;

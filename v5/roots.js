@@ -785,10 +785,10 @@ export function initRootsWidget(container, opts){
     });
 
     // Flat circular background — hidden once a continent is selected.
-    // This stage inverts the interface's cream/gold pair: cream sphere on the
-    // gold plate (the plate is set in stage1.css, scoped to this question).
+    // This stage inverts the interface's cream/gold pair: gold sphere on the
+    // light (cream) plate (the plate is set in stage1.css, scoped to this question).
     if (!inputMode) {
-      ctx.fillStyle = '#f5f5ed';
+      ctx.fillStyle = '#e2bc71';
       ctx.beginPath();
       ctx.arc(cx, cy, R, 0, Math.PI * 2);
       ctx.fill();
@@ -870,9 +870,10 @@ export function initRootsWidget(container, opts){
               dotRadius = 0.75;
             } else {
               // Unselected (and hovered) — the WHOLE continent is emphasised in
-              // gold and gently breathes as one (all dots pulse together in size,
-              // each continent on its own phase), inviting the tap.
-              color = isNeg ? '#282828' : '#e2bc71';
+              // cream and gently breathes as one (all dots pulse together in size,
+              // each continent on its own phase), inviting the tap. Cream reads on
+              // the gold sphere (this stage's inverted pair).
+              color = isNeg ? '#282828' : '#f5f5ed';
               if (fullyIn) {
                 let hh = 0;
                 for (let ci = 0; ci < continentId.length; ci++) hh = (hh * 31 + continentId.charCodeAt(ci)) & 0xffff;
@@ -923,9 +924,9 @@ export function initRootsWidget(container, opts){
       ctx.translate(p.x, p.y);
       ctx.rotate(ang);
       ctx.scale(s, s);
-      // Selected (tapped) continent's name turns gold; others stay dark. (Gold,
-      // not cream — the sphere under it is cream now, so cream would vanish.)
-      ctx.fillStyle = state.selected.has(c.id) ? '#e2bc71' : (isNeg ? '#f5f5ed' : '#282828');
+      // Selected (tapped) continent's name turns cream; others stay dark. (Cream,
+      // not gold — the sphere under it is gold now, so gold would vanish.)
+      ctx.fillStyle = state.selected.has(c.id) ? '#f5f5ed' : (isNeg ? '#f5f5ed' : '#282828');
       ctx.font = "10.5px 'SimplerPro_HLAR_Mono-Regular', 'ArbelG', sans-serif";
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -973,7 +974,7 @@ export function initRootsWidget(container, opts){
         }
       }
     }
-    ctx.fillStyle = '#f5f5ed';                  // cream land on the gold plate
+    ctx.fillStyle = '#e2bc71';                  // gold land on the light (cream) plate
     for(const p of pts){
       if(p[2] > state.mapT) continue;           // revealed once mapT passes its threshold
       ctx.beginPath(); ctx.arc(p[0], p[1], 1.15, 0, Math.PI*2); ctx.fill();
@@ -993,10 +994,10 @@ export function initRootsWidget(container, opts){
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         // Subtle background-colour halo so the name reads over the dots — which
-        // is the gold plate on this stage, not the cream one.
+        // is the light (cream) plate on this stage.
         ctx.lineWidth = 3;
         ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#e2bc71';
+        ctx.strokeStyle = '#f5f5ed';
         ctx.globalAlpha = 0.85;
         ctx.strokeText(p.name, px, py + 6);
         ctx.fillStyle = isNegC ? '#f5f5ed' : '#282828';
