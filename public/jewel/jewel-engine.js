@@ -80,8 +80,8 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    jewel (galleryMode off). */
 // Target card size (px). The gallery tiles the WHOLE display at this size, so it
 // fills the full width/height whatever the screen aspect. On the portrait 1080×1920
-// exhibition monitor this works out to exactly 5 cols × 4 rows (the previous size).
-const GALLERY_CARD_W = 216, GALLERY_CARD_H = 480;
+// exhibition monitor this works out to exactly 4 cols × 5 rows.
+const GALLERY_CARD_W = 270, GALLERY_CARD_H = 384;
 const GALLERY_GAP = 0;                                  // cards fill edge-to-edge (no gutter)
 // Per-card background, one entry per cell (idx 0..19, row-major over 5 cols),
 // hand-scattered so no COLUMN repeats a colour — avoids the "column of the same
