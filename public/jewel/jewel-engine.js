@@ -79,7 +79,7 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    The moment the interface goes active, the display swaps to the single live
    jewel (galleryMode off). */
 const GALLERY_COLS = 4, GALLERY_ROWS = 5;
-const GALLERY_GAP = 26;                                 // dark gutter between talisman cards
+const GALLERY_GAP = 0;                                  // cards fill edge-to-edge (no gutter)
 // Per-card background, one entry per cell (idx 0..19), hand-scattered so no row or
 // column repeats a colour — avoids the "column of the same background" look.
 const GALLERY_BGS = [
