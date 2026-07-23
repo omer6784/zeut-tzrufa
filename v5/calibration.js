@@ -114,13 +114,13 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
   let selAt = -1, selIdx = -1;        // time + index of the last pick (drives the tap cue)
 
   const LEVELS = 8;
-  function drawField(rect, grid, tile, alpha) {
+  function drawField(tctx, rect, grid, tile, alpha) {
     if (alpha <= 0.001) return;
     const field = FIELD[tile.anim], isTunnel = tile.anim === 'tunnel';
     const panel = tile.invert ? CREAM_BG : TILE_BG;
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = `rgb(${panel[0]},${panel[1]},${panel[2]})`;
-    ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    tctx.globalAlpha = alpha;
+    tctx.fillStyle = `rgb(${panel[0]},${panel[1]},${panel[2]})`;
+    tctx.fillRect(rect.x, rect.y, rect.w, rect.h);
 
     const buckets = Array.from({ length: LEVELS }, () => []);
     for (const p of grid.pts) {
@@ -131,18 +131,18 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
       const items = buckets[lv];
       if (!items.length) continue;
       const b = (lv + 0.5) / LEVELS;
-      ctx.globalAlpha = alpha * (0.18 + 0.82 * b);
-      ctx.fillStyle = `rgb(${tile.rgb[0]},${tile.rgb[1]},${tile.rgb[2]})`;
-      ctx.beginPath();
+      tctx.globalAlpha = alpha * (0.18 + 0.82 * b);
+      tctx.fillStyle = `rgb(${tile.rgb[0]},${tile.rgb[1]},${tile.rgb[2]})`;
+      tctx.beginPath();
       for (const p of items) {
         let r = grid.maxR * (0.14 + 0.86 * b);
         if (isTunnel) r *= (0.35 + 0.65 * Math.hypot(p.nx, p.ny));
         const cx = rect.x + p.fx * rect.w, cy = rect.y + p.fy * rect.h;
-        ctx.moveTo(cx + r, cy); ctx.arc(cx, cy, r, 0, TAU);
+        tctx.moveTo(cx + r, cy); tctx.arc(cx, cy, r, 0, TAU);
       }
-      ctx.fill();
+      tctx.fill();
     }
-    ctx.globalAlpha = 1;
+    tctx.globalAlpha = 1;
   }
 
   // Dotted rules matching the fixed interface grid.
@@ -167,23 +167,16 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     const growP = committed ? smooth(0, 1, lockT / LOCK_DUR) : 0;
 
     // Large detail view — only once a frequency is picked (empty left before that).
+    // On commit the GROW is handled by a full-screen overlay (drawGrow below); the
+    // confined canvas keeps painting the big view so the overlay starts seamlessly.
     if (active >= 0) {
-      if (growP > 0) {
-        const scale = 1 + growP * 6;
-        const cx = big.x + big.w / 2, cy = big.y + big.h / 2;
-        ctx.save();
-        ctx.translate(cx, cy); ctx.scale(scale, scale); ctx.translate(-cx, -cy);
-        drawField(big, gridBig, TILES[active], 1);
-        ctx.restore();
-      } else {
-        drawField(big, gridBig, TILES[active], smooth(0, 0.45, selAge));   // fades up on pick
-      }
+      drawField(ctx, big, gridBig, TILES[active], committed ? 1 : smooth(0, 0.45, selAge));
     }
 
     // Right column + dotted rules — fade out as the grow takes over.
     const chromeA = 1 - growP;
     if (chromeA > 0.01) {
-      for (let i = 0; i < thumbs.length; i++) drawField(thumbs[i], gridThumb, TILES[i], (i === active ? 1 : 0.62) * chromeA);
+      for (let i = 0; i < thumbs.length; i++) drawField(ctx, thumbs[i], gridThumb, TILES[i], (i === active ? 1 : 0.62) * chromeA);
       ctx.globalAlpha = chromeA;
       dottedV(vLineX, big.y, big.y + big.h);                   // between the big view and the column
       const cr = thumbs.length ? thumbs[0].x + thumbs[0].w : W;
@@ -208,6 +201,41 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     }
   }
 
+  // ── Full-screen grow overlay ──────────────────────────────────────────────
+  // On commit, the chosen frequency grows out of the big view to cover the WHOLE
+  // screen (not just the content rectangle). A separate fixed, full-viewport
+  // canvas above everything renders the same field, scaling from the big view's
+  // on-screen rect until it covers the viewport — the hand-off into the globe.
+  let growCanvas = null, gctx = null, growBig = null, growCover = 1;
+  function startFullscreenGrow() {
+    const hostRect = host.getBoundingClientRect();
+    growCanvas = document.createElement('canvas');
+    growCanvas.className = 'calib-grow-overlay';
+    growCanvas.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:9999;pointer-events:none;';
+    document.body.appendChild(growCanvas);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    growCanvas.width = Math.round(innerWidth * dpr);
+    growCanvas.height = Math.round(innerHeight * dpr);
+    gctx = growCanvas.getContext('2d');
+    gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // The big view's rect in SCREEN coordinates (overlay is pinned at 0,0).
+    growBig = { x: hostRect.left + big.x, y: hostRect.top + big.y, w: big.w, h: big.h };
+    const cx = growBig.x + growBig.w / 2, cy = growBig.y + growBig.h / 2;
+    const needW = 2 * Math.max(cx, innerWidth - cx);
+    const needH = 2 * Math.max(cy, innerHeight - cy);
+    growCover = Math.max(needW / growBig.w, needH / growBig.h) * 1.06;   // enough to fully cover
+  }
+  function drawGrow(growP) {
+    if (!gctx || active < 0) return;
+    gctx.clearRect(0, 0, innerWidth, innerHeight);
+    const scale = 1 + growP * (growCover - 1);
+    const cx = growBig.x + growBig.w / 2, cy = growBig.y + growBig.h / 2;
+    gctx.save();
+    gctx.translate(cx, cy); gctx.scale(scale, scale); gctx.translate(-cx, -cy);
+    drawField(gctx, growBig, gridBig, TILES[active], 1);
+    gctx.restore();
+  }
+
   function tick(now) {
     const dt = Math.min((now - last) / 1000, 0.05); last = now;
     t += dt;
@@ -216,6 +244,7 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
       if (!lockFired && lockT >= LOCK_DUR) { lockFired = true; onLock && onLock(TILES[active].hex); }
     }
     draw();
+    if (committed && gctx) drawGrow(smooth(0, 1, lockT / LOCK_DUR));
     raf = requestAnimationFrame(tick);
   }
   raf = requestAnimationFrame(tick);
@@ -236,6 +265,7 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     stopDemo();
     if (cont) { cont.classList.remove('is-disabled'); cont.classList.add('is-pressed'); }  // fills orange
     onFreeze && onFreeze(TILES[active].hex);
+    startFullscreenGrow();   // the picked frequency grows to cover the whole screen
   }
 
   // Tap a square in the column → it shows large on the left + "המשך" grows in.
@@ -305,6 +335,7 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     window.removeEventListener('resize', onResize);
     host.removeEventListener('pointerdown', onDown);
     try { canvas.remove(); } catch (_) {}
+    try { if (growCanvas) growCanvas.remove(); } catch (_) {}
     // Leave the shared band button as-is (owned by questionnaire.js); just clear
     // any transient state it carried for this stage.
     if (cont) cont.classList.remove('is-pressed', 'is-disabled');
