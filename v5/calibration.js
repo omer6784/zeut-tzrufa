@@ -118,6 +118,7 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   let t = 0, last = performance.now(), raf = 0;
   let active = -1, committed = false, lockT = 0, lockFired = false;   // -1 = nothing picked (left empty)
   let demoToken = 0;
+  let selAt = -1, selIdx = -1;        // time + index of the last pick (drives the tap cue)
 
   const LEVELS = 8;
   function drawField(rect, grid, tile, alpha) {
@@ -167,8 +168,10 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    // Large detail view — only once a frequency is picked (empty left before that).
-    if (active >= 0) drawField(big, gridBig, TILES[active], 1);
+    const selAge = selAt >= 0 ? t - selAt : 999;
+    // Large detail view — only once a frequency is picked (empty left before that);
+    // it fades up on selection so the pick reads as a deliberate move.
+    if (active >= 0) drawField(big, gridBig, TILES[active], smooth(0, 0.45, selAge));
     // Right column — the picked one full, the rest a touch dimmer.
     for (let i = 0; i < thumbs.length; i++) drawField(thumbs[i], gridThumb, TILES[i], i === active ? 1 : 0.62);
 
@@ -177,6 +180,22 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     dottedV(vLineX, big.y, big.y + big.h);                   // between the big view and the column
     const cr = thumbs.length ? thumbs[0].x + thumbs[0].w : W;
     for (const y of thumbDivs) dottedH(colX, cr, y);         // between the four squares
+
+    // Tap cue: a ring pulses out from the square you just picked (contrasting
+    // colour so it reads on both the dark tiles and the cream 4th one).
+    if (selIdx >= 0 && selAge < 0.62) {
+      const rc = thumbs[selIdx];
+      const cx = rc.x + rc.w / 2, cy = rc.y + rc.h / 2;
+      const p = selAge / 0.62;                               // 0 → 1
+      const ring = TILES[selIdx].invert ? '40,40,40' : '245,245,237';
+      ctx.save();
+      ctx.strokeStyle = `rgba(${ring},${(1 - p) * 0.85})`;
+      ctx.lineWidth = 1 + 2.2 * (1 - p);
+      ctx.beginPath();
+      ctx.arc(cx, cy, Math.min(rc.w, rc.h) * (0.18 + 0.42 * p), 0, TAU);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 
   function tick(now) {
@@ -192,6 +211,8 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   raf = requestAnimationFrame(tick);
 
   function inRect(r, x, y) { return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; }
+  // Pick a frequency: fire the tap cue (ripple + big-view fade-in) and enable "המשך".
+  function select(i) { active = i; selIdx = i; selAt = t; updateContinue(); }
   // "המשך" stays on screen the whole stage: dimmed/greyed (unusable) until a
   // frequency is picked, cream + clickable once one is.
   function updateContinue() {
@@ -216,7 +237,7 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     const r = canvas.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
     for (let i = 0; i < thumbs.length; i++) {
-      if (inRect(thumbs[i], x, y)) { e.preventDefault(); active = i; updateContinue(); return; }
+      if (inRect(thumbs[i], x, y)) { e.preventDefault(); select(i); return; }
     }
   }
   host.addEventListener('pointerdown', onDown);
@@ -251,12 +272,15 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     await gh.sleep(1500);                          // let the visitor settle in first
     if (my !== demoToken || committed) return;
     active = -1; updateContinue();
+    // Glide the hand IN from below the frame (outside → in), never a sudden pop.
     let p = tileCenter(0);
-    gh.place(p.x, p.y);                             // appear already on the first square
+    gh.place(p.x + 24, (window.innerHeight || H) + 60);
     gh.show('light');
-    await gh.sleep(650); if (my !== demoToken) return gh.hide();
+    await gh.sleep(90); if (my !== demoToken) return gh.hide();
+    gh.move(p.x, p.y);                             // slides up onto the first square
+    await gh.sleep(820); if (my !== demoToken) return gh.hide();
     await gh.tap();
-    active = 0; updateContinue();                  // orange appears large + "המשך" grows in
+    select(0);                                     // orange appears large + selection cue + "המשך" enables
     await gh.sleep(850); if (my !== demoToken) return gh.hide();
     p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
     await gh.tap();
