@@ -25,7 +25,7 @@ const TILE_BG  = [22, 22, 22];      // near-black panel (the coloured-dot tiles)
 const CREAM_BG = [240, 236, 228];   // cream panel for the inverted (#282828) tile
 const GRID_DOT = '245,245,237';     // cream — the grid colour on the dark plate
 const GRID_R = 0.8, GRID_PITCH = 5.5; // match the fixed interface grid (Ø1.6 / 5.5)
-const LOCK_DUR = 0.55;
+const LOCK_DUR = 0.7;   // commit → grow the picked frequency → hand off to the globe
 const TAU = Math.PI * 2;
 
 import { getGhostHand } from './demo-hand.js';
@@ -159,20 +159,38 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
   function draw() {
     ctx.clearRect(0, 0, W, H);
     const selAge = selAt >= 0 ? t - selAt : 999;
-    // Large detail view — only once a frequency is picked (empty left before that);
-    // it fades up on selection so the pick reads as a deliberate move.
-    if (active >= 0) drawField(big, gridBig, TILES[active], smooth(0, 0.45, selAge));
-    // Right column — the picked one full, the rest a touch dimmer.
-    for (let i = 0; i < thumbs.length; i++) drawField(thumbs[i], gridThumb, TILES[i], i === active ? 1 : 0.62);
+    // On commit the picked frequency GROWS/zooms to fill the frame — the visual
+    // hand-off into the globe stage.
+    const growP = committed ? smooth(0, 1, lockT / LOCK_DUR) : 0;
 
-    // Dotted rules (contained in the rectangle), each centred in a gap.
-    dottedV(vLineX, big.y, big.y + big.h);                   // between the big view and the column
-    const cr = thumbs.length ? thumbs[0].x + thumbs[0].w : W;
-    for (const y of thumbDivs) dottedH(colX, cr, y);         // between the four squares
+    // Large detail view — only once a frequency is picked (empty left before that).
+    if (active >= 0) {
+      if (growP > 0) {
+        const scale = 1 + growP * 6;
+        const cx = big.x + big.w / 2, cy = big.y + big.h / 2;
+        ctx.save();
+        ctx.translate(cx, cy); ctx.scale(scale, scale); ctx.translate(-cx, -cy);
+        drawField(big, gridBig, TILES[active], 1);
+        ctx.restore();
+      } else {
+        drawField(big, gridBig, TILES[active], smooth(0, 0.45, selAge));   // fades up on pick
+      }
+    }
+
+    // Right column + dotted rules — fade out as the grow takes over.
+    const chromeA = 1 - growP;
+    if (chromeA > 0.01) {
+      for (let i = 0; i < thumbs.length; i++) drawField(thumbs[i], gridThumb, TILES[i], (i === active ? 1 : 0.62) * chromeA);
+      ctx.globalAlpha = chromeA;
+      dottedV(vLineX, big.y, big.y + big.h);                   // between the big view and the column
+      const cr = thumbs.length ? thumbs[0].x + thumbs[0].w : W;
+      for (const y of thumbDivs) dottedH(colX, cr, y);         // between the four squares
+      ctx.globalAlpha = 1;
+    }
 
     // Tap cue: a ring pulses out from the square you just picked (contrasting
     // colour so it reads on both the dark tiles and the cream 4th one).
-    if (selIdx >= 0 && selAge < 0.62) {
+    if (!committed && selIdx >= 0 && selAge < 0.62) {
       const rc = thumbs[selIdx];
       const cx = rc.x + rc.w / 2, cy = rc.y + rc.h / 2;
       const p = selAge / 0.62;                               // 0 → 1
