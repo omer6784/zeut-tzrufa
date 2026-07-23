@@ -574,8 +574,7 @@ function ensureStageBand(){
   if(!sec) return null;
   const band = document.createElement('div');
   band.className = 'stage-band';
-  band.innerHTML = `<div class="sb-rule" aria-hidden="true"></div>`
-    + `<div class="sb-note"></div>`
+  band.innerHTML = `<div class="sb-note"></div>`
     + `<button type="button" class="sb-btn"></button>`;
   sec.appendChild(band);
   const btn = band.querySelector('.sb-btn');

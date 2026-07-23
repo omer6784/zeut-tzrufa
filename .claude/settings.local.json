@@ -315,7 +315,9 @@
       "Bash(git commit -q -m 'Frequency stage uses the shared bottom band too \\(band moved top → bottom\\) *)",
       "Bash(git commit -q -m 'Band button is the sole forward trigger: no more auto-advance on pick *)",
       "Bash(git commit -q -m 'Bottom band: raise the added rule; instruction sits between it and the bottom grid line, button drops below the line *)",
-      "Bash(git commit -q -m 'Bottom band: raise the added rule further; button now sits between the two grid lines *)"
+      "Bash(git commit -q -m 'Bottom band: raise the added rule further; button now sits between the two grid lines *)",
+      "Bash(xargs -I{} echo {})",
+      "Bash(git commit -q -m 'Drop the added rule; raise bottom grid line by 100 \\(706→606\\); put instruction+button below it *)"
     ]
   },
   "hooks": {

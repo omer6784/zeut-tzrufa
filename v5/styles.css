@@ -6255,7 +6255,7 @@ html:not(.cursor-active) *::after {
   left: calc(100 * var(--sx)) !important;
   right: calc(100 * var(--sx)) !important;
   top: calc(85 * var(--sy)) !important;
-  bottom: calc(100vh - 706 * var(--sy)) !important;
+  bottom: calc(100vh - 606 * var(--sy)) !important;   /* end at the raised bottom line */
   width: auto !important; height: auto !important;
   display: flex !important; flex-direction: column;
   /* Above #q-header (z-index 10), which otherwise covers the right frequency
@@ -6354,32 +6354,23 @@ html:not(.cursor-active) *::after {
 
 /* ── Shared bottom band (questionnaire.js) — dotted rule + instruction + forward
    button below every stage's content. Same dot language as the frequency band. */
-/* The elements straddle the fixed bottom grid line (y706): the added rule sits
-   above it, the instruction between the two lines, the button below the line. */
+/* Instruction + button sit BELOW the (raised, y606) bottom grid line. */
 .stage-band {
   position: fixed;
   left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
-  bottom: 0; height: calc(160 * var(--sy));
+  bottom: 0; height: calc(180 * var(--sy));
   display: none; z-index: 9; pointer-events: none;
 }
 .stage-band.is-shown { display: block; }
-.stage-band .sb-rule {
-  position: absolute; left: 0; right: 0;
-  bottom: calc(124 * var(--sy));          /* our added rule — well above the bottom grid line (62) */
-  height: var(--grid-dot-size);
-  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
-  background-size: var(--grid-dot-gap) var(--grid-dot-size);
-  background-repeat: repeat-x;
-}
 .stage-band .sb-note {
   position: absolute; left: 0; right: 0;
-  bottom: calc(100 * var(--sy));           /* between our rule and the button */
+  bottom: calc(146 * var(--sy));           /* just below the bottom grid line (~162) */
   font-family: 'ArbelG', sans-serif; color: #ff5003;
   font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
   direction: rtl; text-align: center;
 }
 .stage-band .sb-btn {
-  position: absolute; left: 50%; bottom: calc(70 * var(--sy));   /* between the two grid lines */
+  position: absolute; left: 50%; bottom: calc(100 * var(--sy));   /* below the instruction */
   transform: translateX(-50%);
   pointer-events: auto; cursor: pointer;
   font-family: 'ArbelG', sans-serif;
