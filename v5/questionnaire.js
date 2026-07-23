@@ -1812,7 +1812,9 @@ function runGlobeDemo(){
       await gh.sleep(70); if(dead()) return abort();
       for(let f = 0; f < steps && !dead(); f++){
         rd.spinBy(0.03);                          // turn RIGHT
-        gh.move(startX + swipeLen * (f + 1) / steps, gcy);
+        // place() (instant, no glide) so the fist tracks the rotation frame-by-
+        // frame — a real visible DRAG. move()'s CSS glide would lag and read as a tap.
+        gh.place(startX + swipeLen * (f + 1) / steps, gcy);
         await gh.sleep(16);
         done++;
       }
