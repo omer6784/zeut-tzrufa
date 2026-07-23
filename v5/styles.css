@@ -6405,6 +6405,10 @@ html:not(.cursor-active) *::after {
 /* The per-stage instruction now lives in the bottom band, not the top slot. */
 #q-instruction { display: none !important; }
 
+/* Each stage's own confirm control is replaced by the shared bottom-band button
+   (the band drives these programmatically), so hide the in-widget duplicates. */
+#roots-done, #roots-finish, .tw-confirm { display: none !important; }
+
 /* ─────────────────────────────────────────────────────────────────────────
    Symbol window (symbol-window.js) — the centred 2D-symbol + text card that
    opens on the interface after a stage choice, mirroring the 3D build on the

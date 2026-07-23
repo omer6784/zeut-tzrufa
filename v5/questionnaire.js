@@ -589,6 +589,9 @@ function ensureStageBand(){
 }
 /* Called on every stage: fill in that stage's instruction + button wording and
    the forward action. `background` (frequency) opts out — it has its own band. */
+/* Stages where the forward button stays dimmed until the visitor makes a choice
+   (the stage calls armBand once the pick is in). Others are ready immediately. */
+const GATED_STAGES = new Set(['origin', 'word', 'roots', 'life-wish', 'personal', 'stars']);
 function updateStageBand(qid){
   const sb = ensureStageBand();
   if(!sb) return;
@@ -605,8 +608,22 @@ function updateStageBand(qid){
   }
   sb.note.textContent = INSTRUCTIONS[qid] || '';
   sb.btn.textContent = STAGE_CONTINUE_TEXT[qid] || 'המשך';
-  // Default forward action: `name` submits; every other stage confirms + advances.
-  st._stageContinue = () => { if(qid === 'name') submitAnswer(); else advance(); };
+  if(GATED_STAGES.has(qid)){
+    // Dimmed until the stage arms it (see armBand, called on the pick).
+    sb.btn.classList.add('is-disabled');
+    st._stageContinue = null;
+  } else {
+    // Ready immediately (e.g. name): submit / advance on press.
+    st._stageContinue = () => { if(qid === 'name') submitAnswer(); else advance(); };
+  }
+}
+/* A stage calls this once a choice is made: light up the forward button and set
+   what its press does. Replaces the old "advance the instant you pick" flow. */
+function armBand(fn){
+  const sb = ensureStageBand();
+  if(!sb) return;
+  sb.btn.classList.remove('is-disabled');
+  st._stageContinue = fn;
 }
 function fireStageContinue(){
   const fn = st._stageContinue; st._stageContinue = null;
@@ -1213,6 +1230,8 @@ function _renderQuestionImpl(idx){
   if (st._lightGateTeardown) { try { st._lightGateTeardown(); } catch (_) {} st._lightGateTeardown = null; }
   if (st._calibTeardown) { try { st._calibTeardown(); } catch (_) {} st._calibTeardown = null; }
   if (st._driveTeardown) { try { st._driveTeardown(); } catch (_) {} st._driveTeardown = null; }
+  if (st._originBandPoll) { clearInterval(st._originBandPoll); st._originBandPoll = null; }
+  st._calib = null;
   // Clear the "מה השעה שלך" live sky tint so it never lingers on other stages
   // (it's an inline background on the shared #section-3). The time stage re-sets
   // it via applyTimeSky when it mounts.
@@ -1261,6 +1280,9 @@ function _renderQuestionImpl(idx){
   if (middleQ) {
     middleQ.className = `q-layout-${q.id}`;
   }
+  // Set up the bottom band BEFORE the per-type branches, so a stage can arm/route
+  // its forward button (armBand) after this default is in place.
+  updateStageBand(q.id);
   // Placeholder stages show ONLY the fixed grid — flag the section so its
   // leftover layout lines + the stage counter are hidden (see CSS).
   document.getElementById('section-3')?.classList.toggle('q-placeholder-stage', q.type === 'placeholder');
@@ -1402,7 +1424,7 @@ function _renderQuestionImpl(idx){
       st.answers.word = word || '';
       st.p5SymbolsByStage = st.p5SymbolsByStage || {};
       if (!st.p5SymbolsByStage[1]) st.p5SymbolsByStage[1] = [getRandomSymbol()];
-      advance();
+      armBand(advance);              // light up "המשך"; the press continues
     };
     // Old click-to-advance is superseded; reset the persistent scattered dots.
     document.querySelectorAll('.s2-float-dot').forEach(el => {
@@ -1452,6 +1474,33 @@ function _renderQuestionImpl(idx){
         advance();
       },
     });
+    // Origin is a two-step stage: mark continents → "סימנתי" spreads them to a
+    // map → add countries → "סיימתי" finishes. Drive the shared band from whichever
+    // of the (now hidden) widget confirms is currently live, and mirror its wording.
+    const originLiveBtn = () => {
+      const fin = document.getElementById('roots-finish');
+      if (fin && !fin.classList.contains('is-dim')) return fin;
+      const done = document.getElementById('roots-done');
+      if (done && !done.classList.contains('is-dim')) return done;
+      return null;
+    };
+    st._stageContinue = () => { const b = originLiveBtn(); if (b) b.click(); };
+    clearInterval(st._originBandPoll);
+    st._originBandPoll = setInterval(() => {
+      const sb = ensureStageBand(); if (!sb) return;
+      // Hide the widget's own confirms inline (a stage rule out-specifies the
+      // stylesheet hide); the band drives them from behind the scenes.
+      ['roots-done', 'roots-finish'].forEach(id => {
+        const b = document.getElementById(id);
+        if (b && b.style.display !== 'none') b.style.setProperty('display', 'none', 'important');
+      });
+      const live = originLiveBtn();
+      const liveId = live ? live.id : null;
+      // Phase changed (mark → finish) → un-press so the band accepts the next tap.
+      if (liveId !== st._originLastLive) { sb.btn.classList.remove('is-pressed'); st._originLastLive = liveId; }
+      sb.btn.classList.toggle('is-disabled', !live);
+      sb.btn.textContent = (live && live.id === 'roots-finish') ? 'סיימתי' : 'סימנתי';
+    }, 200);
     // Virtual Hebrew keyboard — attaches once the country input is mounted
     // (the roots widget shows it lazily on phase change), so retry briefly.
     (function bindCountryKbd(tries){
@@ -1476,7 +1525,7 @@ function _renderQuestionImpl(idx){
           st.p5SymbolsByStage[4] = [getRandomSymbol()];
         }
         triggerLayer(5); spawnBurst();
-        setTimeout(() => advance(), 900);
+        setTimeout(() => armBand(advance), 900);   // light up "המשך" once the path lands
       });
     }
   } else if(q.type==='time'){
@@ -1495,6 +1544,9 @@ function _renderQuestionImpl(idx){
           advance();
         },
       });
+      // An hour is always selected → the band button is ready at once; it drives
+      // the wheel's (now hidden) "זו השעה שלי" confirm.
+      armBand(() => document.querySelector('.tw-confirm')?.click());
     }
   } else if(q.type==='word-grid'){
     // Replaced the yellow letter grid with 8 animated dot tiles — the user picks
@@ -1516,7 +1568,7 @@ function _renderQuestionImpl(idx){
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
         st.p5SymbolsByStage[6] = [symbolKey + '.obj'];
         if (st._dotTilesTeardown) { try { st._dotTilesTeardown(); } catch (_) {} st._dotTilesTeardown = null; }
-        advance();
+        armBand(advance);              // light up "המשך"; the press continues
       },
     });
 
@@ -1534,7 +1586,7 @@ function _renderQuestionImpl(idx){
         st.answers = st.answers || {};
         st.answers.personal = word;
         st._forcedSymbol = symbol;
-        advance();
+        armBand(advance);              // light up "המשך"; the press continues
       },
     });
   } else if(q.type==='placeholder'){
@@ -1557,7 +1609,6 @@ function _renderQuestionImpl(idx){
       inp.addEventListener('input',()=>{ st.gematriaValue=calcGematria(inp.value); });
     }
   }
-  updateStageBand(q.id);
   updateProgressList(idx);
   const pb=document.getElementById('q-prev'); if(pb) pb.style.opacity='1';
   const sb=document.getElementById('q-skip');
