@@ -336,7 +336,8 @@
       "Bash(git commit -q -m 'Globe stage ghost-hand demo: open hand glides in → fist spins the globe to Asia → pointing finger taps it \\(marks black\\) → open hand presses סימנתי; plays once, resets, cancels on real touch *)",
       "Bash(git commit -q -m 'Fix symbol window on the origin stage: fireStageContinue no longer nulls st._stageContinue, so the two-phase finish \\(סימנתי → הזנתי\\) fires advance\\(\\) → symbol window \\(single-press stages already worked\\) *)",
       "Bash(git commit -q -m 'Touch-screen cursor: no cursor at rest; appears only while pressing/dragging — open-hand flash \\(0.5s\\) → finger \\(press\\) / fist \\(drag\\) → fades out on release *)",
-      "Bash(git commit -q -m 'Cursor: with a MOUSE show it always \\(open on hover → finger/fist on press/drag → open on release\\) for testing; TOUCH still only shows it during a press/drag and fades out on release \\(pointerType split\\) *)"
+      "Bash(git commit -q -m 'Cursor: with a MOUSE show it always \\(open on hover → finger/fist on press/drag → open on release\\) for testing; TOUCH still only shows it during a press/drag and fades out on release \\(pointerType split\\) *)",
+      "Bash(git commit -q -m 'Instruction texts move to the content rectangle'\\\\''s TOP-RIGHT corner \\(20px inside the top + right grid lines\\), right-aligned; the continue button stays in the bottom band *)"
     ]
   },
   "hooks": {

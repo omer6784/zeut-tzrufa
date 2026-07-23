@@ -6370,12 +6370,17 @@ html:not(.cursor-active) *::after {
   display: none; z-index: 9; pointer-events: none;
 }
 .stage-band.is-shown { display: block; }
+/* Instruction sits in the TOP-RIGHT corner of the content rectangle, 20px in from
+   the top + right grid lines. (The button stays in the bottom band.) */
 .stage-band .sb-note {
-  position: absolute; left: 0; right: 0;
-  bottom: calc(76 * var(--sy));            /* lowered 20 — sits closer above the button */
+  position: fixed;
+  top: calc(85 * var(--sy) + 20px);
+  right: calc(100 * var(--sx) + 20px);
+  left: auto; bottom: auto;
+  max-width: 46vw;
   font-family: 'ArbelG', sans-serif; color: #ff5003;
   font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
-  direction: rtl; text-align: center;
+  direction: rtl; text-align: right;
 }
 .stage-band .sb-btn {
   position: absolute; left: 50%; bottom: calc(30 * var(--sy));    /* below the instruction */
