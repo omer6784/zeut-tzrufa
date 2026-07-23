@@ -78,7 +78,7 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    would NOT shrink with a matrix scale() — baking s.s makes the dots scale too.
    The moment the interface goes active, the display swaps to the single live
    jewel (galleryMode off). */
-const GALLERY_COLS = 5, GALLERY_ROWS = 4;               // narrow, tall cards
+const GALLERY_COLS = 6, GALLERY_ROWS = 8;               // TEMP: densely packed screen (revert to 5×4)
 const GALLERY_GAP = 0;                                  // cards fill edge-to-edge (no gutter)
 // Per-card background, one entry per cell (idx 0..19, row-major over 5 cols),
 // hand-scattered so no COLUMN repeats a colour — avoids the "column of the same
@@ -306,21 +306,35 @@ function galleryFrameColor(bgHex) {
   for (const c of order) if (c !== bgHex) return c;
   return PALETTE.tan;
 }
+// A distinct 6-symbol config for any cell index: the fixed 20 first, then a
+// deterministic pseudo-random draw for the extra cells (dense-fill mode).
+function galleryConfigFor(k) {
+  if (k < GALLERY_CONFIGS.length) return GALLERY_CONFIGS[k];
+  let seed = ((k + 1) * 2654435761) >>> 0;
+  const rnd = () => { seed = (seed * 48271 + 1) >>> 0; return (seed % 100000) / 100000; };
+  const out = [];
+  for (let i = 0; i < 6; i++) out.push(BUILD_KEYS[Math.floor(rnd() * BUILD_KEYS.length)]);
+  return out;
+}
+const GALLERY_BG_PAL = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark];
 function buildGallery() {
   const cellW = CANVAS_W / GALLERY_COLS, cellH = CANVAS_H / GALLERY_ROWS;
   const cards = [];
-  GALLERY_CONFIGS.forEach((keys, idx) => {
+  const TOTAL = GALLERY_COLS * GALLERY_ROWS;
+  for (let idx = 0; idx < TOTAL; idx++) {
+    const keys = galleryConfigFor(idx);
     const c = idx % GALLERY_COLS, r = Math.floor(idx / GALLERY_COLS);
     const cx = -CANVAS_W / 2 + cellW * (c + 0.5);
     const cy = -CANVAS_H / 2 + cellH * (r + 0.5);
     const innerW = cellW - GALLERY_GAP, innerH = cellH - GALLERY_GAP;
-    const bg = GALLERY_BGS[idx] || PALETTE.tan;
+    // Scatter the background so no column lines up on one colour.
+    const bg = GALLERY_BG_PAL[(c + r * 2 + ((r % 2) ? 1 : 0)) % GALLERY_BG_PAL.length];
     const pool = PALETTE_LIST.filter(x => x !== bg);   // symbols use the other 3 colours
 
     // 6 symbols stacked on the axis, coloured from the non-bg palette (cycled).
     const insts = [];
     keys.forEach((key, i) => { if (built[key]) insts.push(galleryInstance(key, pool[(idx + i) % pool.length])); });
-    if (!insts.length) return;
+    if (!insts.length) continue;
     const n = insts.length, OVERLAP = 1.55;
     const ly = new Array(n); ly[0] = 0;
     for (let i = 1; i < n; i++) ly[i] = ly[i - 1] + (insts[i - 1].halfH + insts[i].halfH) * OVERLAP;
@@ -345,7 +359,7 @@ function buildGallery() {
     const frame = { hex: galleryFrameColor(bg), sx: frameHalfW / 450, sy: frameHalfH / 900, dots };
 
     cards.push({ cx, cy, innerW, innerH, bg, insts, line, frame });
-  });
+  }
   galleryCards = cards;
 }
 function drawGallery() {
