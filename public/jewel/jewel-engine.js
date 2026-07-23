@@ -79,16 +79,35 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    The moment the interface goes active, the display swaps to the single live
    jewel (galleryMode off). */
 const GALLERY_COLS = 4, GALLERY_ROWS = 5;
-const GALLERY_PALETTE = [PALETTE.tan, PALETTE.orange, PALETTE.cream]; // never dark → visible on the dark screen
+const GALLERY_GAP = 26;                                 // dark gutter between talisman cards
+const GALLERY_BGS = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark];  // per-card background (cycled)
+// 20 fixed, each-different talismans — a FULL composition each (6 symbols on the
+// axis, like a finished piece). Symbols use the 3 palette colours the card's
+// background doesn't (same rule as the real jewel).
 const GALLERY_CONFIGS = [
-  ['hamsa', 'rimon'],            ['eye', 'lotus', 'fish'],      ['scarab', 'djed'],           ['anah', 'spiral'],
-  ['moon', 'tiltan', 'dharma'],  ['pyramid', 'horseshoe'],      ['vegvisir', 'artichoke'],    ['hamsa', 'eye', 'moon'],
-  ['rimon', 'lotus'],            ['fish', 'spiral', 'anah'],     ['djed', 'pyramid'],          ['scarab', 'tiltan'],
-  ['dharma', 'horseshoe', 'moon'], ['lotus', 'artichoke'],      ['eye', 'hamsa'],             ['spiral', 'vegvisir', 'rimon'],
-  ['moon', 'fish'],              ['tiltan', 'djed', 'eye'],      ['anah', 'lotus', 'horseshoe'], ['pyramid', 'scarab'],
+  ['rimon', 'fish', 'djed', 'horseshoe', 'artichoke', 'anah'],
+  ['hamsa', 'eye', 'moon', 'lotus', 'spiral', 'scarab'],
+  ['pyramid', 'tiltan', 'vegvisir', 'fish', 'rimon', 'moon'],
+  ['eye', 'hamsa', 'dharma', 'horseshoe', 'lotus', 'djed'],
+  ['scarab', 'anah', 'spiral', 'artichoke', 'moon', 'fish'],
+  ['rimon', 'lotus', 'eye', 'tiltan', 'pyramid', 'horseshoe'],
+  ['moon', 'fish', 'hamsa', 'djed', 'spiral', 'vegvisir'],
+  ['anah', 'rimon', 'artichoke', 'eye', 'dharma', 'tiltan'],
+  ['horseshoe', 'moon', 'lotus', 'scarab', 'fish', 'hamsa'],
+  ['djed', 'pyramid', 'spiral', 'rimon', 'eye', 'moon'],
+  ['tiltan', 'vegvisir', 'hamsa', 'artichoke', 'fish', 'lotus'],
+  ['eye', 'moon', 'rimon', 'horseshoe', 'anah', 'spiral'],
+  ['lotus', 'dharma', 'fish', 'pyramid', 'moon', 'scarab'],
+  ['hamsa', 'rimon', 'tiltan', 'eye', 'horseshoe', 'artichoke'],
+  ['spiral', 'fish', 'moon', 'djed', 'lotus', 'vegvisir'],
+  ['scarab', 'eye', 'rimon', 'anah', 'moon', 'hamsa'],
+  ['pyramid', 'horseshoe', 'lotus', 'tiltan', 'fish', 'dharma'],
+  ['moon', 'artichoke', 'hamsa', 'spiral', 'eye', 'rimon'],
+  ['djed', 'fish', 'lotus', 'moon', 'scarab', 'tiltan'],
+  ['rimon', 'eye', 'horseshoe', 'vegvisir', 'moon', 'anah'],
 ];
 let galleryMode = false;
-let galleryInstances = null;   // flat list; each carries its baked grid transform
+let galleryCards = null;   // built lazily; each = { bg, rect, line[], frame[], insts[] }
 
 let objFiles = {};
 let built = {};            // key -> symbol object (point cloud ready)
@@ -253,11 +272,11 @@ function drawOrnament() {
   pop();
 }
 
-/* ---- idle gallery: 20 mini-jewels in a 4×5 grid ------------------------ */
+/* ---- idle gallery: 20 FULL talismans in a 4×5 grid --------------------- */
 function setGallery(on) {
   galleryMode = !!on;
   if (!on) return;
-  if (finishedBuildingAll && !galleryInstances) buildGallery();  // else built lazily in draw
+  if (finishedBuildingAll && !galleryCards) buildGallery();   // else built lazily in draw
 }
 // A lightweight symbol instance that reuses a pre-built point cloud (no builder).
 function galleryInstance(key, hex) {
@@ -271,43 +290,89 @@ function galleryInstance(key, hex) {
     activatedTick: 0, rotOffset: random(1000)
   };
 }
-// Stack a cell's symbols in a clean vertical column, centred on the cell origin.
-function layoutGalleryCell(insts) {
-  const n = insts.length, OVERLAP = 1.6;
-  const ly = new Array(n); ly[0] = 0;
-  for (let i = 1; i < n; i++) ly[i] = ly[i - 1] + (insts[i - 1].halfH + insts[i].halfH) * OVERLAP;
-  const top = ly[0] - insts[0].halfH, bottom = ly[n - 1] + insts[n - 1].halfH, mid = (top + bottom) / 2;
-  insts.forEach((s, i) => { s.lx = 0; s.ly = ly[i] - mid; });
-}
-function galleryExtent(insts) {
-  let minY = Infinity, maxY = -Infinity, maxHW = 0;
-  insts.forEach(s => { minY = Math.min(minY, s.ly - s.halfH); maxY = Math.max(maxY, s.ly + s.halfH); maxHW = Math.max(maxHW, s.halfW); });
-  return { w: maxHW * 2, h: maxY - minY };
+// The dot colour of the centre line for a given card background (contrast).
+const GALLERY_LINE_ON = { '#e2bc71': '#282828', '#f5f5ed': '#282828', '#ff5003': '#f5f5ed', '#282828': '#f5f5ed' };
+// Frame colour: first palette colour that is neither the background nor cream-on-cream.
+function galleryFrameColor(bgHex) {
+  const order = [PALETTE.tan, PALETTE.orange, PALETTE.dark, PALETTE.cream];
+  for (const c of order) if (c !== bgHex) return c;
+  return PALETTE.tan;
 }
 function buildGallery() {
   const cellW = CANVAS_W / GALLERY_COLS, cellH = CANVAS_H / GALLERY_ROWS;
-  const all = [];
+  const cards = [];
   GALLERY_CONFIGS.forEach((keys, idx) => {
     const c = idx % GALLERY_COLS, r = Math.floor(idx / GALLERY_COLS);
     const cx = -CANVAS_W / 2 + cellW * (c + 0.5);
     const cy = -CANVAS_H / 2 + cellH * (r + 0.5);
+    const innerW = cellW - GALLERY_GAP, innerH = cellH - GALLERY_GAP;
+    const bg = GALLERY_BGS[idx % GALLERY_BGS.length];
+    const pool = PALETTE_LIST.filter(x => x !== bg);   // symbols use the other 3 colours
+
+    // 6 symbols stacked on the axis, coloured from the non-bg palette (cycled).
     const insts = [];
-    keys.forEach((key, i) => { if (built[key]) insts.push(galleryInstance(key, GALLERY_PALETTE[(idx + i) % GALLERY_PALETTE.length])); });
+    keys.forEach((key, i) => { if (built[key]) insts.push(galleryInstance(key, pool[(idx + i) % pool.length])); });
     if (!insts.length) return;
-    layoutGalleryCell(insts);
-    const ext = galleryExtent(insts);
-    const scale = Math.min((cellW * 0.80) / (ext.w || 1), (cellH * 0.78) / (ext.h || 1));
-    // Bake the grid transform into each instance (position + scale), so drawSymbol
-    // needs no extra push/scale and the dots shrink WITH the jewel.
-    insts.forEach(s => { s.s = scale; s.x = cx + s.lx * scale; s.y = cy + s.ly * scale; s.phase = idx * 11.7; });
-    all.push(...insts);
+    const n = insts.length, OVERLAP = 1.55;
+    const ly = new Array(n); ly[0] = 0;
+    for (let i = 1; i < n; i++) ly[i] = ly[i - 1] + (insts[i - 1].halfH + insts[i].halfH) * OVERLAP;
+    const top = ly[0] - insts[0].halfH, bottom = ly[n - 1] + insts[n - 1].halfH, mid = (top + bottom) / 2;
+    let maxHW = 0; insts.forEach(s => { maxHW = Math.max(maxHW, s.halfW); });
+    const colH = bottom - top, colW = maxHW * 2;
+    // Fit the column inside the frame (frame hugs ~86% of the card).
+    const frameHalfW = innerW * 0.40, frameHalfH = innerH * 0.42;
+    const scale = Math.min((frameHalfW * 2 * 0.62) / (colW || 1), (frameHalfH * 2 * 0.82) / (colH || 1));
+    insts.forEach((s, i) => { s.s = scale; s.x = cx; s.y = cy + (ly[i] - mid) * scale; s.phase = idx * 11.7; });
+
+    // Centre line — dots down the axis spanning the symbol column.
+    const lineHex = GALLERY_LINE_ON[bg] || '#f5f5ed';
+    const lineHalf = (colH * 0.5 * scale) + 10;
+    const line = { hex: lineHex, x: cx, y0: cy - lineHalf, y1: cy + lineHalf };
+
+    // Frame — the Moroccan dotted ornament, sized to the card; its dot COUNT
+    // (gematria) varies per card so every frame is different ("changes with the name").
+    const gem = 56 + (idx * 11) % 150;
+    const dots = buildOrnament(gem);              // built at the 450×900 reference size
+    const frame = { hex: galleryFrameColor(bg), sx: frameHalfW / 450, sy: frameHalfH / 900, dots };
+
+    cards.push({ cx, cy, innerW, innerH, bg, insts, line, frame });
   });
-  galleryInstances = all;
+  galleryCards = cards;
 }
 function drawGallery() {
-  if (!galleryInstances) buildGallery();
-  if (!galleryInstances) return;
-  for (const s of galleryInstances) drawSymbol(s, tick + s.phase);
+  if (!galleryCards) buildGallery();
+  if (!galleryCards) return;
+  for (const card of galleryCards) {
+    // 1. background card
+    push();
+    translate(card.cx, card.cy, -60);
+    noStroke();
+    const bc = color(card.bg);
+    fill(red(bc), green(bc), blue(bc));
+    plane(card.innerW, card.innerH);
+    pop();
+    // 2. centre line (dotted)
+    const lc = color(card.line.hex);
+    push();
+    stroke(red(lc), green(lc), blue(lc));
+    strokeWeight(3.2);
+    beginShape(POINTS);
+    for (let y = card.line.y0; y <= card.line.y1; y += 11) vertex(card.line.x, y, -40);
+    endShape();
+    pop();
+    // 3. frame ornament (dotted), scaled to the card
+    const fc = color(card.frame.hex);
+    push();
+    translate(card.cx, card.cy, -40);
+    stroke(red(fc), green(fc), blue(fc));
+    strokeWeight(2.4);
+    beginShape(POINTS);
+    for (const d of card.frame.dots) vertex(d.x * card.frame.sx, -d.y * card.frame.sy, 0);
+    endShape();
+    pop();
+    // 4. the 6 symbols, each with its own motion
+    for (const s of card.insts) drawSymbol(s, tick + s.phase);
+  }
 }
 
 /* ---- build all point clouds up-front, staged over frames --------------- */
