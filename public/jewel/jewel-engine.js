@@ -80,7 +80,15 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    jewel (galleryMode off). */
 const GALLERY_COLS = 4, GALLERY_ROWS = 5;
 const GALLERY_GAP = 26;                                 // dark gutter between talisman cards
-const GALLERY_BGS = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark];  // per-card background (cycled)
+// Per-card background, one entry per cell (idx 0..19), hand-scattered so no row or
+// column repeats a colour — avoids the "column of the same background" look.
+const GALLERY_BGS = [
+  PALETTE.tan,    PALETTE.orange, PALETTE.cream,  PALETTE.dark,
+  PALETTE.cream,  PALETTE.dark,   PALETTE.tan,    PALETTE.orange,
+  PALETTE.orange, PALETTE.tan,    PALETTE.dark,   PALETTE.cream,
+  PALETTE.dark,   PALETTE.cream,  PALETTE.orange, PALETTE.tan,
+  PALETTE.cream,  PALETTE.tan,    PALETTE.dark,   PALETTE.orange,
+];
 // 20 fixed, each-different talismans — a FULL composition each (6 symbols on the
 // axis, like a finished piece). Symbols use the 3 palette colours the card's
 // background doesn't (same rule as the real jewel).
@@ -306,7 +314,7 @@ function buildGallery() {
     const cx = -CANVAS_W / 2 + cellW * (c + 0.5);
     const cy = -CANVAS_H / 2 + cellH * (r + 0.5);
     const innerW = cellW - GALLERY_GAP, innerH = cellH - GALLERY_GAP;
-    const bg = GALLERY_BGS[idx % GALLERY_BGS.length];
+    const bg = GALLERY_BGS[idx] || PALETTE.tan;
     const pool = PALETTE_LIST.filter(x => x !== bg);   // symbols use the other 3 colours
 
     // 6 symbols stacked on the axis, coloured from the non-bg palette (cycled).
