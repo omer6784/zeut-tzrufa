@@ -1789,19 +1789,20 @@ function runGlobeDemo(){
     gh.place(gcx + 40, (window.innerHeight || 900) + 60);
     gh.show('dark');
     await gh.sleep(90); if(dead()) return abort();
-    gh.move(gcx + cr.width * 0.26, gcy);
+    gh.move(gcx - cr.width * 0.26, gcy);          // glide to the LEFT side to flick rightward
     await gh.sleep(720); if(dead()) return abort();
 
     // 2. fist → spin the globe to bring Asia to the front, done as 3 SHORT swipes
     //    (grab, flick a little, release, reposition), the way a visitor really
-    //    rolls it round — not one long drag. Measure the total rotation first and
-    //    rewind synchronously (no await → the intermediate never renders), then
-    //    replay it split evenly across the three flicks.
+    //    rolls it round — not one long drag. The globe turns to the RIGHT (the hand
+    //    flicks rightward). Measure the total rotation first and rewind synchronously
+    //    (no await → the intermediate never renders), then replay it split evenly
+    //    across the three flicks.
     const asiaFront = () => { const p = rd.continentPos('asia'); return !!(p && p.z > 0.62); };
     let need = 0;
-    while(need < 400 && !asiaFront()){ rd.spinBy(-0.03); need++; }
-    rd.spinBy(0.03 * need);                       // rewind to the start (no frame rendered)
-    const startX = gcx + cr.width * 0.26, swipeLen = cr.width * 0.30;
+    while(need < 400 && !asiaFront()){ rd.spinBy(0.03); need++; }
+    rd.spinBy(-0.03 * need);                       // rewind to the start (no frame rendered)
+    const startX = gcx - cr.width * 0.26, swipeLen = cr.width * 0.30;
     const perSwipe = Math.max(1, Math.ceil(need / 3));
     let done = 0;
     for(let s = 0; s < 3 && !dead() && done < need; s++){
@@ -1810,15 +1811,15 @@ function runGlobeDemo(){
       rd.hold(true);
       await gh.sleep(70); if(dead()) return abort();
       for(let f = 0; f < steps && !dead(); f++){
-        rd.spinBy(-0.03);
-        gh.move(startX - swipeLen * (f + 1) / steps, gcy);
+        rd.spinBy(0.03);                          // turn RIGHT
+        gh.move(startX + swipeLen * (f + 1) / steps, gcy);
         await gh.sleep(16);
         done++;
       }
       rd.hold(false);                             // let go — the globe holds while the hand lifts
       if(s < 2 && done < need){
         gh.open();
-        gh.move(startX, gcy);                     // reposition to the right for the next flick
+        gh.move(startX, gcy);                     // reposition to the left for the next flick
         await gh.sleep(200); if(dead()) return abort();
       }
     }
