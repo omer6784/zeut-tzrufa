@@ -619,7 +619,7 @@ export function initRootsWidget(container, opts){
   canvas.style.cursor = 'none';
   // Custom-cursor swap: while the globe is grabbed the hand closes into a fist.
   const cursorEl = document.getElementById('cursor');
-  const grabCursor = on => cursorEl && cursorEl.classList.toggle('is-grabbing', on);
+  const grabCursor = () => {};   // the global touch-cursor (app.js) now shows the fist while dragging
   let dragStartX = 0, dragLastX = 0, dragMoved = false;
   canvas.addEventListener('pointerdown', e => {
     if(state.phase!=='globe') return;

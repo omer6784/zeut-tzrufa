@@ -365,17 +365,23 @@ body::-webkit-scrollbar-thumb {
   z-index: 99999;
   will-change: left, top;
   color: var(--q-ink);
-  transition: color 0.15s ease;
+  /* Touch-screen model: no cursor at rest. It only appears while the visitor is
+     actually pressing/dragging (see app.js), so it stays hidden until .is-shown. */
+  opacity: 0;
+  transition: color 0.15s ease, opacity 0.18s ease;
 }
+#cursor.is-shown { opacity: 1; }
 #cursor svg {
   display: block;
   width: 100%;
   height: 100%;
 }
-/* Open hand by default; while grabbing (dragging the globe) swap to the fist. */
-#cursor .cursor-fist { display: none; }
-#cursor.is-grabbing .cursor-open { display: none; }
-#cursor.is-grabbing .cursor-fist { display: block; }
+/* Open hand is the default; pressing shows the finger, dragging shows the fist. */
+#cursor .cursor-fist, #cursor .cursor-point { display: none; }
+#cursor.cur-fist .cursor-open, #cursor.is-grabbing .cursor-open { display: none; }
+#cursor.cur-fist .cursor-fist, #cursor.is-grabbing .cursor-fist { display: block; }
+#cursor.cur-finger .cursor-open, #cursor.cur-finger .cursor-fist { display: none; }
+#cursor.cur-finger .cursor-point { display: block; }
 
 /* ─── Demo "ghost hand" — auto gesture hint per stage (demo-hand.js) ─── */
 .demo-hand {
