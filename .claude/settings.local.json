@@ -318,7 +318,8 @@
       "Bash(git commit -q -m 'Bottom band: raise the added rule further; button now sits between the two grid lines *)",
       "Bash(xargs -I{} echo {})",
       "Bash(git commit -q -m 'Drop the added rule; raise bottom grid line by 100 \\(706→606\\); put instruction+button below it *)",
-      "Bash(git commit -q -m 'Bottom grid line raised 50 \\(not 100\\): y606→656; instruction+button follow down with it *)"
+      "Bash(git commit -q -m 'Bottom grid line raised 50 \\(not 100\\): y606→656; instruction+button follow down with it *)",
+      "Bash(git commit -q -m 'Bottom band: lower the instruction text by 20 \\(closer above the button\\) *)"
     ]
   },
   "hooks": {

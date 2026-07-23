@@ -6364,7 +6364,7 @@ html:not(.cursor-active) *::after {
 .stage-band.is-shown { display: block; }
 .stage-band .sb-note {
   position: absolute; left: 0; right: 0;
-  bottom: calc(96 * var(--sy));            /* just below the bottom grid line (~112) */
+  bottom: calc(76 * var(--sy));            /* lowered 20 — sits closer above the button */
   font-family: 'ArbelG', sans-serif; color: #ff5003;
   font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
   direction: rtl; text-align: center;
