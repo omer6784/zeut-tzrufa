@@ -86,7 +86,10 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     // ONE light gap used everywhere — between the squares, between them and the
     // big view, and as the inset from the surrounding grid (all sides equal).
     const g = 14;
-    const mainY = g;                   // content fills the host; the cue + button now
+    // Start the content lower so the top-right instruction text (.sb-note, ~20px
+    // below the top grid line) stays visible — the squares/big view no longer
+    // paint over it. This also shortens every element (smaller big view + tiles).
+    const mainY = 58;                  // top inset that clears the instruction line
     const botY = H - g;                // live in the shared bottom band below it
     const colW = Math.max(170, Math.min(300, W * 0.24));
     colX = W - g - colW;               // column inset one gap from the right grid

@@ -628,7 +628,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   border-radius: 50% !important;
   position: fixed !important;
   left: auto !important;
-  right: 870px !important;   /* nudged a bit further left */
+  right: 890px !important;   /* nudged a bit further left */
   top: calc(var(--q-top-total) + (100vh - var(--q-top-total) - clamp(110px, 13vh, 150px)) / 2) !important;
   transform: translateY(-50%) !important;
   width: min(70vh, 520px) !important;
@@ -1185,7 +1185,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   position: fixed !important;
   right: calc(122 * var(--sx)) !important;
   left: auto !important;
-  top: calc(100 * var(--sy) + 250px) !important;   /* raised so line 2 clears the bottom grid line */
+  top: calc(100 * var(--sy) + 300px) !important;   /* lowered 50px */
   width: var(--story-w) !important;
   height: auto !important;
   z-index: 8 !important;
