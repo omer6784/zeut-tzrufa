@@ -596,16 +596,17 @@ function updateStageBand(qid){
   if(!sb) return;
   sb.btn.classList.remove('is-pressed', 'is-disabled');
   sb.band.classList.add('is-shown');
+  st._bandNoteText = null;   // force a fresh typewriter reveal on stage entry
   // Frequency stage: the band is driven by calibration.js — dimmed until a
   // frequency is picked, and the press commits that choice.
   if(qid === 'background'){
-    sb.note.textContent = FREQ_HINT;
+    setBandNote(FREQ_HINT);
     sb.btn.textContent = 'המשך';
     sb.btn.classList.add('is-disabled');
     st._stageContinue = () => { if(st._calib) st._calib.commit(); };
     return;
   }
-  sb.note.textContent = INSTRUCTIONS[qid] || '';
+  setBandNote(INSTRUCTIONS[qid] || '');
   sb.btn.textContent = STAGE_CONTINUE_TEXT[qid] || 'המשך';
   if(GATED_STAGES.has(qid)){
     // Dimmed until the stage arms it (see armBand, called on the pick).
@@ -627,6 +628,15 @@ function armBand(fn){
 function fireStageContinue(){
   const fn = st._stageContinue; st._stageContinue = null;
   if(fn) fn();
+}
+/* Reveal the band's instruction with a one-shot typewriter. Re-types only when
+   the target text changes (so the origin poll re-running every 200ms is a no-op,
+   but a globe→input phase swap does re-type). */
+function setBandNote(text){
+  const sb = ensureStageBand();
+  if(!sb || st._bandNoteText === text) return;
+  st._bandNoteText = text;
+  typewriterText(sb.note, text || '', 34);
 }
 
 /* Maps each question id to its fixed pendant layer (drawing/animation slot),
@@ -1502,7 +1512,7 @@ function _renderQuestionImpl(idx){
       // country prompt and the button reads "הזנתי, אפשר להמשיך".
       const inputPhase = !!document.querySelector('.roots-widget.state-input');
       sb.btn.textContent = inputPhase ? 'הזנתי, אפשר להמשיך' : 'סימנתי';
-      sb.note.textContent = inputPhase ? 'הזן את ארצות המוצא' : (INSTRUCTIONS.origin || '');
+      setBandNote(inputPhase ? 'הזן את ארצות המוצא' : (INSTRUCTIONS.origin || ''));
     }, 200);
     // Virtual Hebrew keyboard — attaches once the country input is mounted
     // (the roots widget shows it lazily on phase change), so retry briefly.
