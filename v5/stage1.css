@@ -1222,8 +1222,9 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   mask-image: url(/image/v5-stage1/story-line2.png?v=5);
   margin-top: calc(6 * var(--sy) - 14px) !important;   /* nudged up a touch */
   /* "שלך מתחיל?" holds its position; only line 1 ("איפה הסיפור") took the 50px
-     drop, so pull line 2 back up by the same 50px. */
-  transform: translateX(-70px) translateY(-50px) !important;
+     drop, so pull line 2 back up by the same 50px — then nudge it 10px down + 15px
+     left of that. */
+  transform: translateX(-85px) translateY(-40px) !important;
 }
 /* The stepped clip reveal plays only once the choreography arms it (.story-go),
    so it can type in while the title is held BIG + centred (see runStage0Choreography). */
