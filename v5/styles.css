@@ -6375,7 +6375,7 @@ html:not(.cursor-active) *::after {
   pointer-events: auto; cursor: pointer;
   font-family: 'ArbelG', sans-serif;
   font-size: clamp(13px, 0.95vw, 16px); letter-spacing: 0.02em;
-  color: var(--grid-dot);
+  color: var(--grid-dot) !important;   /* beat the generic #section-3 button colour */
   padding: 0.5em 2.3em; border: none; background-color: transparent;
   background-image:
     radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
@@ -6391,8 +6391,10 @@ html:not(.cursor-active) *::after {
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
+/* Press → text + dotted frame turn the interface orange (no solid fill). Setting
+   --grid-dot recolours both (the frame dots and color:var(--grid-dot) text). */
 .stage-band .sb-btn.is-pressed {
-  background-color: #ff5003; background-image: none; color: #f5f5ed;
+  --grid-dot: #ff5003;
 }
 /* Dimmed / unusable until the stage arms it (e.g. the frequency pick). */
 .stage-band .sb-btn.is-disabled {
