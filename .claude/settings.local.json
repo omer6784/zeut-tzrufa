@@ -324,7 +324,9 @@
       "Bash(git commit -q -m 'Fix band button: force text to --grid-dot \\(המשך was invisible dark-on-dark on frequency\\); press turns text + dotted frame orange \\(no solid fill\\) *)",
       "Bash(git commit -q -m 'Origin input phase: keyboard+input row+add button follow the raised bottom line \\(706→656\\); move '\\\\''הזן את ארצות המוצא'\\\\'' to the bottom note and switch the button to '\\\\''הזנתי, אפשר להמשיך'\\\\'' *)",
       "Bash(git commit -q -m 'Band instruction reveals with a one-shot typewriter on stage entry \\(re-types only on a real text change, e.g. globe→input phase\\) *)",
-      "Bash(git commit -q -m 'Frequency commit: the picked frequency grows/zooms to fill the frame while the chrome fades — a hand-off into the globe stage \\(lock 0.55→0.7s\\) *)"
+      "Bash(git commit -q -m 'Frequency commit: the picked frequency grows/zooms to fill the frame while the chrome fades — a hand-off into the globe stage \\(lock 0.55→0.7s\\) *)",
+      "Bash(sips -g pixelWidth -g pixelHeight public/image/v5-stage1/story-line1.png public/image/v5-stage1/story-line2.png)",
+      "Bash(git commit -q -m 'Globe entry: title '\\\\''איפה הסיפור שלך מתחיל?'\\\\'' types in LARGE + centred, then shrinks to its corner, then the globe reveals; use the new dotted title art *)"
     ]
   },
   "hooks": {

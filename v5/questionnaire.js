@@ -1674,72 +1674,55 @@ function playStage0Intro(){
 function runStage0Choreography(){
   const sec = document.getElementById('section-3');
   if(!sec) return;
-  const logo    = sec.querySelector('.grid-logo');
-  const symBtn  = document.getElementById('q-btn-symbol-library');
+  const rootsTitle = sec.querySelector('.roots-story-title');
+  const canvasWrap = sec.querySelector('.roots-canvas-wrap');
+  const s1pTitle   = sec.querySelector('.stage1-panel .s1p-title');
   const rail    = document.getElementById('step-rail');
   const railDots= rail ? [...rail.querySelectorAll('li')] : [];
-  const progWrap= sec.querySelector('.q-header-progress-text-wrap');
-  const sidebar = document.getElementById('sidebar-tagline');
-  const prevBtn = document.getElementById('step-prev-btn');
-  const nextBtn = document.getElementById('step-next-btn');
-  const symText = symBtn ? symBtn.textContent.trim() : 'מאגר הסמלים';
-
-  // The render already flags the top dot as current; clear it so the dots
-  // reveal grey and the top one turns orange only in step 5.
   railDots.forEach(d => d.classList.remove('is-current'));
 
-  // FIRST — before any of the surrounding chrome — the continents + their names
-  // build up one-after-another on the (already rotating) globe.
-  window.dispatchEvent(new CustomEvent('globe-reveal-dots'));
+  // Hold the globe + the small corner title hidden while the big title plays.
+  // The roots title itself stays clipped (no .story-go) through the slide-in.
+  if(canvasWrap){ canvasWrap.style.transition = 'none'; canvasWrap.style.opacity = '0'; }
+  if(s1pTitle){ s1pTitle.style.transition = 'none'; s1pTitle.style.opacity = '0'; }
+  if(rootsTitle){ rootsTitle.classList.remove('story-go'); rootsTitle.style.transition = 'none'; rootsTitle.style.transform = 'none'; }
 
-  // Immediately after the globe fills in (dots build ~650ms), the surrounding
-  // elements start — no gap between the two entrances.
-  let t = 750;
+  const SETTLE = 450;      // let the stage's slide-in finish before measuring
+  const TITLE_MS = 2000;   // both lines type in at the big size
 
-  // Everything in the fixed grid enters TOGETHER — logo, the "מאגר הסמלים"
-  // button (typed), the right-hand dots, the top-bar progress and the arrows —
-  // EXCEPT the vertical left-hand text, which starts a little afterwards.
+  // ── 1. After the slide settles: the title writes in LARGE, centred. ──
   setTimeout(() => {
-    logo && logo.classList.add('is-in');
-    if(symBtn){ symBtn.classList.add('is-in'); typewriterText(symBtn, symText, 75); }
-    rail && rail.classList.add('is-in');
-    railDots.forEach(d => d.classList.add('is-in'));
-    progWrap && progWrap.classList.add('is-in');
-    prevBtn && prevBtn.classList.add('is-in');
-    nextBtn && nextBtn.classList.add('is-in');
-  }, t);
-  // The current stage's dot turns orange just after the dots land.
-  setTimeout(() => railDots[st.current] && railDots[st.current].classList.add('is-current'), t + 500);
-
-  // AFTER the rest, and exactly in parallel with each other: the vertical
-  //  left-hand text AND the dotted title "איפה מתחיל הסיפור שלך?" both type
-  //  themselves in from empty. The title is an image, so its "typing" is a
-  //  stepped right→left clip reveal (see .type-in in stage1.css).
-  const title = sec.querySelector('.stage1-panel .s1p-title');
-  const revealAt = t + 1100;
-  const TITLE_TYPE_MS = 3300;   // top line (2s) + bottom line (1.3s)
-  setTimeout(() => {
-    if(sidebar){ sidebar.textContent = ''; sidebar.classList.add('is-in'); }
-    startSidebarTaglineLoop();
-    if(title){ title.classList.add('is-in', 'type-in'); }
-  }, revealAt);
-
-  // Drop the base-hidden class once everything has typed in.
-  setTimeout(() => sec.classList.remove('intro-chrome-hidden'), revealAt + TITLE_TYPE_MS + 300);
-
-  // The moment the title finishes typing in, it drops down first…
-  const dropAt = revealAt + TITLE_TYPE_MS + 350;
-  setTimeout(() => title && title.classList.add('title-dropped'), dropAt);
-  // …and only once it has settled does the orange instruction type in above it.
-  setTimeout(() => {
-    const instrEl = document.getElementById('q-instruction');
-    // Guard: only type if we're STILL on the origin stage. Otherwise this
-    // delayed typewriter would overwrite the next stage's instruction (e.g. the
-    // light-point stage's "מתח קו…").
-    if(instrEl && QUESTIONS[st.current] && QUESTIONS[st.current].id === 'origin') {
-      typewriterText(instrEl, INSTRUCTIONS.origin || '', 34);
+    if(rootsTitle){
+      rootsTitle.style.transition = 'none';
+      rootsTitle.style.transform = 'none';
+      void rootsTitle.offsetWidth;
+      const R = rootsTitle.getBoundingClientRect();   // now-settled resting rect
+      const sx = innerWidth / 1360, sy = innerHeight / 768;
+      const L = 100 * sx, Rt = innerWidth - 100 * sx;   // central-rectangle sides
+      const T = 85 * sy, B = 656 * sy;                  // top line → raised bottom line
+      const S = R.width ? ((Rt - L) * 0.86) / R.width : 1.6;
+      const cx = (L + Rt) / 2, cy = (T + B) / 2;
+      const dx = cx - (R.left + R.width / 2), dy = cy - (R.top + R.height / 2);
+      rootsTitle.style.transformOrigin = 'center center';
+      rootsTitle.style.transform = `translate(${dx}px, ${dy}px) scale(${S})`;
+      void rootsTitle.offsetWidth;
+      rootsTitle.classList.add('story-go');   // arm the stepped clip reveal (types in big)
     }
-  }, dropAt + 900);   // after the ~0.8s drop transition
+    // ── 2. Shrink the title down to its resting corner. ──
+    setTimeout(() => {
+      if(rootsTitle){
+        rootsTitle.style.transition = 'transform 0.85s cubic-bezier(0.4, 0, 0.15, 1)';
+        rootsTitle.style.transform = 'none';
+      }
+    }, TITLE_MS);
+    // ── 3. Once it's home, the globe fills in and the corner title returns. ──
+    setTimeout(() => {
+      if(canvasWrap){ canvasWrap.style.transition = 'opacity 0.55s ease'; canvasWrap.style.opacity = '1'; }
+      if(s1pTitle){ s1pTitle.style.transition = 'opacity 0.4s ease'; s1pTitle.style.opacity = ''; }
+      window.dispatchEvent(new CustomEvent('globe-reveal-dots'));
+      setTimeout(() => railDots[st.current] && railDots[st.current].classList.add('is-current'), 400);
+    }, TITLE_MS + 950);
+  }, SETTLE);
 }
 window.addEventListener('opening-morph-start', () => {
   document.getElementById('section-3')?.classList.add('intro-chrome-hidden');
