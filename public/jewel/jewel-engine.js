@@ -288,26 +288,10 @@ function drawOrnament() {
 /* ---- idle gallery: 20 FULL talismans in a 4×5 grid --------------------- */
 function setGallery(on) {
   galleryMode = !!on;
-  if (on) {
-    // Fill the whole screen: size the canvas to the viewport so the grid spans the
-    // full width/height (no dark side margins). The card size stays fixed, so the
-    // number of columns/rows follows the screen. Fall back to the portrait size if
-    // the viewport reports 0 (headless/hidden), so it never collapses to nothing.
-    const vw = windowWidth || CANVAS_W, vh = windowHeight || CANVAS_H;
-    if (width !== vw || height !== vh) resizeCanvas(vw, vh);
-    galleryCards = null;
-    if (finishedBuildingAll) buildGallery();
-  } else {
-    // Back to the portrait single-jewel canvas.
-    if (width !== CANVAS_W || height !== CANVAS_H) resizeCanvas(CANVAS_W, CANVAS_H);
-    galleryCards = null;
-  }
-}
-// Keep the gallery filling the screen if the window changes.
-function windowResized() {
-  if (!galleryMode) return;
-  resizeCanvas(windowWidth || CANVAS_W, windowHeight || CANVAS_H);
-  galleryCards = null;   // rebuilt on the next draw for the new grid
+  galleryCards = null;
+  // The canvas stays the fixed portrait 1080×1920 (the display page scales it to
+  // the monitor). buildGallery tiles that at the card size → 4 cols × 5 rows.
+  if (on && finishedBuildingAll) buildGallery();
 }
 // A lightweight symbol instance that reuses a pre-built point cloud (no builder).
 function galleryInstance(key, hex) {
