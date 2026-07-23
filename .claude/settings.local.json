@@ -339,7 +339,12 @@
       "Bash(git commit -q -m 'Cursor: with a MOUSE show it always \\(open on hover → finger/fist on press/drag → open on release\\) for testing; TOUCH still only shows it during a press/drag and fades out on release \\(pointerType split\\) *)",
       "Bash(git commit -q -m 'Instruction texts move to the content rectangle'\\\\''s TOP-RIGHT corner \\(20px inside the top + right grid lines\\), right-aligned; the continue button stays in the bottom band *)",
       "Bash(git commit -q -m 'Fix: origin stage '\\\\''הזנתי, אפשר להמשיך'\\\\'' now opens the symbol window *)",
-      "Bash(git commit -q -m 'Add symbol sound: play public/sounds/symbolsound.mp3 whenever the symbol window opens \\(in sync with the symbol appearing on the display screen\\) *)"
+      "Bash(git commit -q -m 'Add symbol sound: play public/sounds/symbolsound.mp3 whenever the symbol window opens \\(in sync with the symbol appearing on the display screen\\) *)",
+      "Bash(git pull *)",
+      "Bash(git rm *)",
+      "Bash(git commit *)",
+      "Bash(git ls-tree *)",
+      "Bash(awk '$4 > 50000000 {print $4, $5}')"
     ]
   },
   "hooks": {

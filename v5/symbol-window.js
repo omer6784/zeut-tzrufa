@@ -63,6 +63,7 @@ let contourInstance = null;
 let continueHandler = null;
 let coverBg = null;          // explicit override for the expand-cover target colour (else read live)
 let covering = false;        // true while the expand-cover animation owns the window teardown
+let plainClose = false;      // skip the grow-cover; just fade the window out (next stage builds itself)
 
 // The background the interface shows for the CURRENT stage. Read from the
 // --stage-plate custom property (set per data-stage in geometric.css), which
@@ -125,6 +126,21 @@ function ensureWindow() {
     if (covering) return;                      // guard double-press
     btn.classList.add('is-pressed');           // lock in the orange state
     const cb = continueHandler;
+    // Plain close: no grow-cover. Fade the window out and build the next stage
+    // underneath at the same time — it runs its own gradual entry (e.g. the
+    // light-point stage assembling on the bare grid).
+    if (plainClose) {
+      setTimeout(() => {
+        winEl.style.transition = 'opacity 0.55s ease';
+        winEl.style.opacity = '0';
+        if (cb) cb();                          // next stage assembles as the window fades
+        setTimeout(() => {
+          closeSymbolWindow();
+          winEl.style.transition = ''; winEl.style.opacity = '';
+        }, 580);
+      }, 160);
+      return;
+    }
     const frame = winEl.querySelector('.sw-frame');
     const sec = document.getElementById('section-3');
     const startStage = sec ? sec.getAttribute('data-stage') : null;
@@ -353,6 +369,7 @@ export function openSymbolWindow(motif, opts = {}) {
   el.querySelector('.sw-restart')?.classList.remove('is-pressed');
   continueHandler = opts.onContinue || null;
   coverBg = opts.nextBg || null;
+  plainClose = !!opts.plainClose;      // fade-out instead of grow-cover (next stage self-builds)
   covering = false;                    // fresh window → no cover in flight
 
   const symbolHost = el.querySelector('.sw-symbol');

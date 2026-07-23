@@ -17,7 +17,7 @@
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 
-export function mountLightGate({ arena, dots, onAbsorb } = {}) {
+export function mountLightGate({ arena, dots, onAbsorb, revealDelay = 0 } = {}) {
   if (!arena) return () => {};
   dots = Array.from(dots || []);
 
@@ -30,27 +30,32 @@ export function mountLightGate({ arena, dots, onAbsorb } = {}) {
   const sizeSvg = () => { svg.setAttribute('viewBox', `0 0 ${innerWidth} ${innerHeight}`); svg.setAttribute('width', innerWidth); svg.setAttribute('height', innerHeight); };
   sizeSvg();
 
-  // ── Gate (a small rectangle with square corners + a faint centre marker) ──
-  const gateEl = el('rect', { class: 's2-gate-rect', rx: 0, ry: 0 });
+  // ── Gate (a small dotted CIRCLE with a faint centre marker) ──
+  const gateEl = el('circle', { class: 's2-gate-rect' });   // class kept; now a circle
   const gateDot = el('circle', { class: 's2-gate-mark', r: 1.6 });
   svg.appendChild(gateEl);
   svg.appendChild(gateDot);
   let gate = null;
   function computeGate() {
     const a = arena.getBoundingClientRect();
-    // A touch smaller again (~12%) — the clamps scale with it so the gate keeps
-    // its proportions at every viewport size.
-    const w = Math.max(70, Math.min(135, a.width * 0.12));
-    const h = Math.max(25, Math.min(47, a.height * 0.063));
-    const x = a.left + a.width / 2 - w / 2;
-    const y = a.bottom - h - a.height * 0.08;               // clear margin below it
-    gate = { x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
-    gateEl.setAttribute('x', x); gateEl.setAttribute('y', y);
-    gateEl.setAttribute('width', w); gateEl.setAttribute('height', h);
-    gateDot.setAttribute('cx', gate.cx); gateDot.setAttribute('cy', gate.cy);
+    // Radius scales with the arena (clamped) so the circle keeps its proportions
+    // at every viewport size — roughly the old rectangle's footprint.
+    const r = Math.max(30, Math.min(52, a.height * 0.072));
+    const cx = a.left + a.width / 2;
+    const cy = a.bottom - r - a.height * 0.08;              // clear margin below it
+    gate = { cx, cy, r, x: cx - r, y: cy - r, w: r * 2, h: r * 2 };
+    gateEl.setAttribute('cx', cx); gateEl.setAttribute('cy', cy);
+    gateEl.setAttribute('r', r);
+    gateDot.setAttribute('cx', cx); gateDot.setAttribute('cy', cy);
   }
   computeGate();
   document.body.appendChild(svg);
+  // Fade the gate in with the stage's gradual build (0 = show immediately).
+  if (revealDelay > 0) {
+    svg.style.opacity = '0';
+    svg.style.transition = 'opacity 0.8s ease';
+    setTimeout(() => { svg.style.opacity = '1'; }, revealDelay);
+  }
 
   // Keep the target area clear: hide any point sitting inside the gate + a
   // breathing margin, so the gate always reads as empty, dedicated space.
@@ -74,7 +79,9 @@ export function mountLightGate({ arena, dots, onAbsorb } = {}) {
   let sel = null, line = null, raf = 0;
 
   const center = d => { const r = d.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
-  const inGate = (x, y) => x >= gate.x && x <= gate.x + gate.w && y >= gate.y && y <= gate.y + gate.h;
+  // Release counts as "in the gate" when it lands inside the circle (a touch of
+  // slack so it's forgiving on a touch screen).
+  const inGate = (x, y) => Math.hypot(x - gate.cx, y - gate.cy) <= gate.r * 1.12;
 
   function onMove(e) {
     if (phase !== 'dragging') return;

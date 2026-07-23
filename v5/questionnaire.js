@@ -529,7 +529,7 @@ const QUESTIONS = [
   /* 3 = light-point ("נקודת אור" — scattered gold dots you click; type 'words'),
      4 = path — a placeholder for now (fixed grid only, no content),
      5 = word selection (the yellow letter grid; type 'word-grid'). */
-  { id:'word',      label:'מילה',       text:'איזו מילה\nתפסה לך את העין?',    type:'words',       styleStage:1 },
+  { id:'word',      label:'מילה',       text:'מהי נקודת האור\nשלך?',           type:'words',       styleStage:1 },
   { id:'roots',     label:'מסלול',      text:'',                              type:'roots-tree', styleStage:5 },
   { id:'life-wish', label:'משאלה',      text:'איזו תנועה\nמושכת אותך?',       type:'word-grid',   styleStage:2 },
   /* Stages 6–7 are placeholders for now (fixed grid stays, no middle content):
@@ -544,7 +544,7 @@ const QUESTIONS = [
 const INSTRUCTIONS = {
   background: 'בחר צבע רקע לתכשיט שלך',
   origin: 'בחר את היבשות מהן הגיעו בני משפחתך',
-  word: 'מתח קו בין הנקודה למלבן',
+  word: 'מתח קו בין הנקודה לעיגול',
   roots: 'בחרו את המסלול שלכם',
   stars: 'גללו ובחרו את השעה הרצויה.',
   personal: 'בחרו את הכוח שמוביל אתכם:',
@@ -1241,6 +1241,7 @@ function _renderQuestionImpl(idx){
   if (st._calibTeardown) { try { st._calibTeardown(); } catch (_) {} st._calibTeardown = null; }
   if (st._driveTeardown) { try { st._driveTeardown(); } catch (_) {} st._driveTeardown = null; }
   if (st._originBandPoll) { clearInterval(st._originBandPoll); st._originBandPoll = null; }
+  if (st._lightEntryTimers) { st._lightEntryTimers.forEach(clearTimeout); st._lightEntryTimers = []; }
   st._globeDemoToken = (st._globeDemoToken || 0) + 1;   // kill any running globe demo
   st._roots = null;
   st._calib = null;
@@ -1279,6 +1280,12 @@ function _renderQuestionImpl(idx){
     firstStage0Intro = false;
     qEl.innerHTML = '';
     if(instrEl){ stopTypewriter(instrEl); instrEl.textContent = ''; }
+  } else if(q.id === 'word'){
+    // Light-point stage: the title FADES in (not typed) — held blank here and
+    // revealed by the gradual-entry choreography in the 'words' branch below.
+    stopTypewriter(qEl);
+    qEl.textContent = '';
+    if(instrEl){ stopTypewriter(instrEl); instrEl.textContent = INSTRUCTIONS[q.id] || ''; }
   } else {
     typewriterText(qEl, q.text.replace(/\n/g, ' '));
     if(instrEl){ stopTypewriter(instrEl); instrEl.textContent = INSTRUCTIONS[q.id] || ''; }
@@ -1423,7 +1430,27 @@ function _renderQuestionImpl(idx){
     
     wrap.classList.add('words-active');
     wrap.innerHTML = '';
-    
+
+    // ── Gradual entry (replaces the grow-cover transition): a short beat on the
+    //    bare grid → the title "מהי נקודת האור שלך?" FADES in → the dotted gate
+    //    circle fades in → then the gold light-points appear one after another. ──
+    const TITLE_AT = 550, GATE_AT = 1350, DOTS_AT = 1550, DOT_STEP = 46;
+    st._lightEntryTimers = st._lightEntryTimers || [];
+    const lightT = (fn, ms) => st._lightEntryTimers.push(setTimeout(fn, ms));
+    const qTitle = document.getElementById('q-text');
+    if (qTitle) {
+      stopTypewriter(qTitle);
+      qTitle.textContent = q.text.replace(/\n/g, ' ');
+      qTitle.style.opacity = '0';
+      qTitle.style.transition = 'opacity 0.9s ease';
+      lightT(() => { qTitle.style.opacity = '1'; }, TITLE_AT);
+    }
+    // Gold dots start hidden (their .gold-dot-pick 0.4s opacity transition fades
+    // them in), then cascade in one-by-one after the title.
+    const dotEls = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.gold-dot-pick')) : [];
+    dotEls.forEach(d => { d.style.opacity = '0'; });
+    dotEls.forEach((d, i) => lightT(() => { d.style.opacity = ''; }, DOTS_AT + i * DOT_STEP));
+
     // Picking a light-point — works for BOTH the labelled dots and the small
     // scattered dots. Fades every other dot (both layers), marks the chosen one,
     // stores the word + a symbol, then advances.
@@ -1449,6 +1476,7 @@ function _renderQuestionImpl(idx){
       arena: document.getElementById('q-main-cell'),
       dots: document.querySelectorAll('.s2-float-dot, .gold-dot-pick'),
       onAbsorb: (dotEl) => commitWord(dotEl),
+      revealDelay: GATE_AT,          // the dotted gate circle fades in with the build
     });
   } else if(q.type==='choice'){
     wrap.innerHTML=`<div id="q-choices">${q.choices.map(c=>`<button class="choice-btn" data-value="${c}">${c}</button>`).join('')}</div>`;
@@ -2044,7 +2072,11 @@ function advance(){
   // The symbol window opens on the touch screen (grow-in → dotted divider draws →
   // contour animates → text types). "המשך" closes it and continues to the next
   // stage. Triggered per-stage automatically because every choice calls advance().
-  if(sym) openSymbolWindow(sym, { onContinue: goNext });
+  // Leaving the globe → the light-point stage: skip the grow-cover transition
+  // (frame grows dark then recolours). Instead the window simply fades out while
+  // the light-point stage assembles gradually underneath (see its 'words' branch).
+  const plainClose = qid === 'origin';
+  if(sym) openSymbolWindow(sym, { onContinue: goNext, plainClose });
   else goNext();
 }
 function goPrev(){
