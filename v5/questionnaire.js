@@ -550,6 +550,59 @@ const INSTRUCTIONS = {
   personal: 'בחרו את הכוח שמוביל אתכם:',
 };
 
+/* Forward button wording per stage (kept from each stage's own confirm). The
+   frequency (background) stage carries its own band inside calibration.js. */
+const STAGE_CONTINUE_TEXT = {
+  origin: 'סיימתי',
+  word: 'המשך',
+  roots: 'המשך',
+  'life-wish': 'המשך',
+  stars: 'זו השעה שלי',
+  personal: 'המשך',
+  name: 'סיום',
+};
+
+/* ── Shared bottom band: below every stage's content — a dotted rule, the
+   instruction, then a forward button (same dot language as the frequency band,
+   just at the bottom). Order top→bottom: rule → instruction → button. ── */
+let _stageBand = null;
+function ensureStageBand(){
+  if(_stageBand) return _stageBand;
+  const sec = document.getElementById('section-3');
+  if(!sec) return null;
+  const band = document.createElement('div');
+  band.className = 'stage-band';
+  band.innerHTML = `<div class="sb-rule" aria-hidden="true"></div>`
+    + `<div class="sb-note"></div>`
+    + `<button type="button" class="sb-btn"></button>`;
+  sec.appendChild(band);
+  const btn = band.querySelector('.sb-btn');
+  btn.addEventListener('click', () => {
+    if(btn.classList.contains('is-pressed')) return;
+    btn.classList.add('is-pressed');
+    fireStageContinue();
+  });
+  _stageBand = { band, note: band.querySelector('.sb-note'), btn };
+  return _stageBand;
+}
+/* Called on every stage: fill in that stage's instruction + button wording and
+   the forward action. `background` (frequency) opts out — it has its own band. */
+function updateStageBand(qid){
+  const sb = ensureStageBand();
+  if(!sb) return;
+  if(qid === 'background'){ sb.band.classList.remove('is-shown'); return; }
+  sb.note.textContent = INSTRUCTIONS[qid] || '';
+  sb.btn.textContent = STAGE_CONTINUE_TEXT[qid] || 'המשך';
+  sb.btn.classList.remove('is-pressed');
+  sb.band.classList.add('is-shown');
+  // Default forward action: `name` submits; every other stage confirms + advances.
+  st._stageContinue = () => { if(qid === 'name') submitAnswer(); else advance(); };
+}
+function fireStageContinue(){
+  const fn = st._stageContinue; st._stageContinue = null;
+  if(fn) fn();
+}
+
 /* Maps each question id to its fixed pendant layer (drawing/animation slot),
    independent of question order in the array above. */
 const LAYER_BY_ID = { name:1, word:2, symbol:2, 'life-wish':2, stars:3, birthdate:3, origin:4, zodiac:5, element:6, personal:7, roots:5 };
@@ -1491,6 +1544,7 @@ function _renderQuestionImpl(idx){
       inp.addEventListener('input',()=>{ st.gematriaValue=calcGematria(inp.value); });
     }
   }
+  updateStageBand(q.id);
   updateProgressList(idx);
   const pb=document.getElementById('q-prev'); if(pb) pb.style.opacity='1';
   const sb=document.getElementById('q-skip');

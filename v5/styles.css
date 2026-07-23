@@ -6352,6 +6352,55 @@ html:not(.cursor-active) *::after {
   color: var(--q-ink, #282828); opacity: 0.6;
 }
 
+/* ── Shared bottom band (questionnaire.js) — dotted rule + instruction + forward
+   button below every stage's content. Same dot language as the frequency band. */
+.stage-band {
+  position: fixed;
+  left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
+  bottom: calc(22 * var(--sy));
+  display: none; flex-direction: column; align-items: center;
+  gap: calc(9 * var(--sy));
+  z-index: 9; pointer-events: none;
+}
+.stage-band.is-shown { display: flex; }
+.stage-band .sb-rule {
+  width: 100%; height: var(--grid-dot-size);
+  background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size: var(--grid-dot-gap) var(--grid-dot-size);
+  background-repeat: repeat-x;
+}
+.stage-band .sb-note {
+  font-family: 'ArbelG', sans-serif; color: #ff5003;
+  font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
+  direction: rtl; text-align: center;
+}
+.stage-band .sb-btn {
+  pointer-events: auto; cursor: pointer;
+  font-family: 'ArbelG', sans-serif;
+  font-size: clamp(13px, 0.95vw, 16px); letter-spacing: 0.02em;
+  color: var(--grid-dot);
+  padding: 0.5em 2.3em; border: none; background-color: transparent;
+  background-image:
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
+    radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
+  background-size:
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-gap) var(--grid-dot-size),
+    var(--grid-dot-size) var(--grid-dot-gap),
+    var(--grid-dot-size) var(--grid-dot-gap);
+  background-position: top, bottom, left, right;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.stage-band .sb-btn.is-pressed {
+  background-color: #ff5003; background-image: none; color: #f5f5ed;
+}
+
+/* The per-stage instruction now lives in the bottom band, not the top slot. */
+#q-instruction { display: none !important; }
+
 /* ─────────────────────────────────────────────────────────────────────────
    Symbol window (symbol-window.js) — the centred 2D-symbol + text card that
    opens on the interface after a stage choice, mirroring the 3D build on the
