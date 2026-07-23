@@ -344,7 +344,12 @@
       "Bash(git rm *)",
       "Bash(git commit *)",
       "Bash(git ls-tree *)",
-      "Bash(awk '$4 > 50000000 {print $4, $5}')"
+      "Bash(awk '$4 > 50000000 {print $4, $5}')",
+      "Bash(afinfo \"design option 4/sounds/Calm your Nervous System Healing Frequency 432 Hz.mp3\")",
+      "Bash(mkdir -p public/sounds)",
+      "Bash(time afconvert -f m4af -d aac -b 48000 \"design option 4/sounds/Calm your Nervous System Healing Frequency 432 Hz.mp3\" \"public/sounds/bg-432hz.m4a\")",
+      "Bash(curl -s -I \"http://localhost:5173/sounds/bg-432hz.m4a\")",
+      "Bash(curl -s -r 0-1023 -o /dev/null -w \"range status:%{http_code} got:%{size_download} bytes\\\\n\" \"http://localhost:5173/sounds/bg-432hz.m4a\")"
     ]
   },
   "hooks": {

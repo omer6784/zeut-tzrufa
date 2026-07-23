@@ -1711,7 +1711,27 @@ window.addEventListener('DOMContentLoaded', () => {
   initOrganicFloat();
   initQuestionnaire();
   initStage2FloatDots();
+  initBackgroundMusic();
 });
+
+/* Ambient background track — "Calm your Nervous System · 432 Hz" — loops forever
+   under the whole interface. Browsers block autoplay until a user gesture, so it
+   starts on the first touch/click (e.g. "לחץ להתחלה"). Kept at a low volume so the
+   per-stage symbol sound plays clearly ON TOP of it. Streams (progressive) so the
+   long track doesn't delay start. */
+function initBackgroundMusic() {
+  const music = new Audio('/sounds/bg-432hz.m4a');
+  music.loop = true;
+  music.volume = 0.4;
+  music.preload = 'auto';
+  // First real user gesture kicks it off; retry on the next gesture if it was blocked.
+  const onGesture = () => {
+    music.play().then(() => {
+      window.removeEventListener('pointerdown', onGesture, true);
+    }).catch(() => { /* still blocked — leave the listener for the next gesture */ });
+  };
+  window.addEventListener('pointerdown', onGesture, true);
+}
 
 /* Stage 2 — scatter many small equal-size gold dots that drift gently inside
    the central rectangle. */
