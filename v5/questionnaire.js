@@ -1431,12 +1431,26 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('words-active');
     wrap.innerHTML = '';
 
-    // ── Gradual entry (replaces the grow-cover transition): a short beat on the
-    //    bare grid → the title "מהי נקודת האור שלך?" FADES in → the dotted gate
-    //    circle fades in → then the gold light-points appear one after another. ──
-    const TITLE_AT = 550, GATE_AT = 1350, DOTS_AT = 1550, DOT_STEP = 46;
+    // ── Entry choreography (under the grow-cover that already turned everything
+    //    dark + recoloured the grid): once the cover reveals the dark stage, the
+    //    light-points — BIG and small alike, all clipped inside the content
+    //    rectangle — appear one after another, and only THEN the title
+    //    "מהי נקודת האור שלך?" fades in. Timed to start just after the cover
+    //    reveals (~650ms after this stage builds under it). ──
+    const DOTS_START = 720, DOT_STEP = 9;
     st._lightEntryTimers = st._lightEntryTimers || [];
     const lightT = (fn, ms) => st._lightEntryTimers.push(setTimeout(fn, ms));
+    // Both dot layers: big labelled (.gold-dot-pick) + small scattered
+    // (.s2-float-dot). Shuffle them together so the rectangle fills as a scatter.
+    const bigDots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.gold-dot-pick')) : [];
+    const smallDots = Array.from(document.querySelectorAll('#stage2-float-dots .s2-float-dot'));
+    const allDots = [...bigDots, ...smallDots];
+    for (let i = allDots.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [allDots[i], allDots[j]] = [allDots[j], allDots[i]]; }
+    allDots.forEach(d => { d.style.opacity = '0'; d.style.transition = 'opacity 0.4s ease'; });
+    allDots.forEach((d, i) => lightT(() => { d.style.opacity = ''; }, DOTS_START + i * DOT_STEP));
+    // Title fades in LAST — after every dot has appeared.
+    const TITLE_AT = DOTS_START + allDots.length * DOT_STEP + 250;
+    const GATE_AT = DOTS_START + Math.round(allDots.length * DOT_STEP * 0.5);   // gate circle mid-cascade
     const qTitle = document.getElementById('q-text');
     if (qTitle) {
       stopTypewriter(qTitle);
@@ -1445,11 +1459,6 @@ function _renderQuestionImpl(idx){
       qTitle.style.transition = 'opacity 0.9s ease';
       lightT(() => { qTitle.style.opacity = '1'; }, TITLE_AT);
     }
-    // Gold dots start hidden (their .gold-dot-pick 0.4s opacity transition fades
-    // them in), then cascade in one-by-one after the title.
-    const dotEls = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.gold-dot-pick')) : [];
-    dotEls.forEach(d => { d.style.opacity = '0'; });
-    dotEls.forEach((d, i) => lightT(() => { d.style.opacity = ''; }, DOTS_AT + i * DOT_STEP));
 
     // Picking a light-point — works for BOTH the labelled dots and the small
     // scattered dots. Fades every other dot (both layers), marks the chosen one,
@@ -2092,11 +2101,11 @@ function advance(){
   // The symbol window opens on the touch screen (grow-in → dotted divider draws →
   // contour animates → text types). "המשך" closes it and continues to the next
   // stage. Triggered per-stage automatically because every choice calls advance().
-  // Leaving the globe → the light-point stage: skip the grow-cover transition
-  // (frame grows dark then recolours). Instead the window simply fades out while
-  // the light-point stage assembles gradually underneath (see its 'words' branch).
-  const plainClose = qid === 'origin';
-  if(sym) openSymbolWindow(sym, { onContinue: goNext, plainClose });
+  // Leaving the globe → the light-point stage uses the grow-cover: the window
+  // grows and turns everything dark (the light-point stage's own bg), the fixed
+  // grid recolours in step, then the stage assembles underneath (see its 'words'
+  // branch: dots cascade in, title fades in last).
+  if(sym) openSymbolWindow(sym, { onContinue: goNext });
   else goNext();
 }
 function goPrev(){
