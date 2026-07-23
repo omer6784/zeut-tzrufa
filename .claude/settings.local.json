@@ -326,7 +326,9 @@
       "Bash(git commit -q -m 'Band instruction reveals with a one-shot typewriter on stage entry \\(re-types only on a real text change, e.g. globe→input phase\\) *)",
       "Bash(git commit -q -m 'Frequency commit: the picked frequency grows/zooms to fill the frame while the chrome fades — a hand-off into the globe stage \\(lock 0.55→0.7s\\) *)",
       "Bash(sips -g pixelWidth -g pixelHeight public/image/v5-stage1/story-line1.png public/image/v5-stage1/story-line2.png)",
-      "Bash(git commit -q -m 'Globe entry: title '\\\\''איפה הסיפור שלך מתחיל?'\\\\'' types in LARGE + centred, then shrinks to its corner, then the globe reveals; use the new dotted title art *)"
+      "Bash(git commit -q -m 'Globe entry: title '\\\\''איפה הסיפור שלך מתחיל?'\\\\'' types in LARGE + centred, then shrinks to its corner, then the globe reveals; use the new dotted title art *)",
+      "Bash(git check-ignore *)",
+      "Bash(git commit -q -m 'Bump stage1.css v147 so the gated story-title reveal actually loads \\(v146 was cached from before the gating → title revealed at rest, no big-centred intro\\) *)"
     ]
   },
   "hooks": {
