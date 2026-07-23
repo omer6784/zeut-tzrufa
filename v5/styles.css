@@ -6255,7 +6255,7 @@ html:not(.cursor-active) *::after {
   left: calc(100 * var(--sx)) !important;
   right: calc(100 * var(--sx)) !important;
   top: calc(85 * var(--sy)) !important;
-  bottom: calc(100vh - 606 * var(--sy)) !important;   /* end at the raised bottom line */
+  bottom: calc(100vh - 656 * var(--sy)) !important;   /* end at the raised bottom line */
   width: auto !important; height: auto !important;
   display: flex !important; flex-direction: column;
   /* Above #q-header (z-index 10), which otherwise covers the right frequency
@@ -6364,13 +6364,13 @@ html:not(.cursor-active) *::after {
 .stage-band.is-shown { display: block; }
 .stage-band .sb-note {
   position: absolute; left: 0; right: 0;
-  bottom: calc(146 * var(--sy));           /* just below the bottom grid line (~162) */
+  bottom: calc(96 * var(--sy));            /* just below the bottom grid line (~112) */
   font-family: 'ArbelG', sans-serif; color: #ff5003;
   font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
   direction: rtl; text-align: center;
 }
 .stage-band .sb-btn {
-  position: absolute; left: 50%; bottom: calc(100 * var(--sy));   /* below the instruction */
+  position: absolute; left: 50%; bottom: calc(50 * var(--sy));    /* below the instruction */
   transform: translateX(-50%);
   pointer-events: auto; cursor: pointer;
   font-family: 'ArbelG', sans-serif;

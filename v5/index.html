@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spatial Interface — v5 geometric</title>
-  <link rel="stylesheet" href="styles.css?v=93" />
+  <link rel="stylesheet" href="styles.css?v=94" />
   <!-- v5 override layer: redraws the visual surface as outlines + nodes
        on top of v4's full functionality. styles.css stays first so its
        cascade order is preserved; geometric.css wins by being later. -->
@@ -105,8 +105,8 @@
       <!-- Center verticals (y:85, height 668) -->
       <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
       <span class="sg-v" style="--x: calc(100vw - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
-      <!-- Bottom horizontal (raised 100 up: y706 → y606) -->
-      <span class="sg-h" style="--y: calc(606 * var(--sy));"></span>
+      <!-- Bottom horizontal (raised 50 up from original: y706 → y656) -->
+      <span class="sg-h" style="--y: calc(656 * var(--sy));"></span>
     </div>
 
     <!-- Symbol library button in top-left cell -->
