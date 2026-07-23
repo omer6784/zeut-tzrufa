@@ -626,8 +626,9 @@ function armBand(fn){
   st._stageContinue = fn;
 }
 function fireStageContinue(){
-  const fn = st._stageContinue; st._stageContinue = null;
-  if(fn) fn();
+  // Don't null it — the button's own is-pressed guard prevents a double-fire, and
+  // the two-phase origin needs to fire again after the poll clears is-pressed.
+  if(st._stageContinue) st._stageContinue();
 }
 /* Reveal the band's instruction with a one-shot typewriter. Re-types only when
    the target text changes (so the origin poll re-running every 200ms is a no-op,
