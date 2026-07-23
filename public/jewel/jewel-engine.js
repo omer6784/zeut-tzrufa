@@ -78,7 +78,10 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    would NOT shrink with a matrix scale() — baking s.s makes the dots scale too.
    The moment the interface goes active, the display swaps to the single live
    jewel (galleryMode off). */
-const GALLERY_COLS = 6, GALLERY_ROWS = 8;               // TEMP: densely packed screen (revert to 5×4)
+// Target card size (px). The gallery tiles the WHOLE display at this size, so it
+// fills the full width/height whatever the screen aspect. On the portrait 1080×1920
+// exhibition monitor this works out to exactly 5 cols × 4 rows (the previous size).
+const GALLERY_CARD_W = 216, GALLERY_CARD_H = 480;
 const GALLERY_GAP = 0;                                  // cards fill edge-to-edge (no gutter)
 // Per-card background, one entry per cell (idx 0..19, row-major over 5 cols),
 // hand-scattered so no COLUMN repeats a colour — avoids the "column of the same
@@ -187,7 +190,9 @@ function setup() {
 
 function draw() {
   if (RENDER_BG) background(RENDER_BG); else clear();
-  ortho(-CANVAS_W / 2, CANVAS_W / 2, -CANVAS_H / 2, CANVAS_H / 2, -4000, 4000);
+  // Use the CURRENT canvas size — the gallery resizes the canvas to fill the whole
+  // screen, the single jewel keeps the fixed 1080×1920 portrait.
+  ortho(-width / 2, width / 2, -height / 2, height / 2, -4000, 4000);
 
   if (!finishedBuildingAll) { buildStep(); return; }
 
@@ -283,8 +288,26 @@ function drawOrnament() {
 /* ---- idle gallery: 20 FULL talismans in a 4×5 grid --------------------- */
 function setGallery(on) {
   galleryMode = !!on;
-  if (!on) return;
-  if (finishedBuildingAll && !galleryCards) buildGallery();   // else built lazily in draw
+  if (on) {
+    // Fill the whole screen: size the canvas to the viewport so the grid spans the
+    // full width/height (no dark side margins). The card size stays fixed, so the
+    // number of columns/rows follows the screen. Fall back to the portrait size if
+    // the viewport reports 0 (headless/hidden), so it never collapses to nothing.
+    const vw = windowWidth || CANVAS_W, vh = windowHeight || CANVAS_H;
+    if (width !== vw || height !== vh) resizeCanvas(vw, vh);
+    galleryCards = null;
+    if (finishedBuildingAll) buildGallery();
+  } else {
+    // Back to the portrait single-jewel canvas.
+    if (width !== CANVAS_W || height !== CANVAS_H) resizeCanvas(CANVAS_W, CANVAS_H);
+    galleryCards = null;
+  }
+}
+// Keep the gallery filling the screen if the window changes.
+function windowResized() {
+  if (!galleryMode) return;
+  resizeCanvas(windowWidth || CANVAS_W, windowHeight || CANVAS_H);
+  galleryCards = null;   // rebuilt on the next draw for the new grid
 }
 // A lightweight symbol instance that reuses a pre-built point cloud (no builder).
 function galleryInstance(key, hex) {
@@ -318,14 +341,19 @@ function galleryConfigFor(k) {
 }
 const GALLERY_BG_PAL = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark];
 function buildGallery() {
-  const cellW = CANVAS_W / GALLERY_COLS, cellH = CANVAS_H / GALLERY_ROWS;
+  // Tile the whole (current) canvas with cards at ~the target size, filling the
+  // full width and height for whatever screen aspect the display is.
+  const W = width, H = height;
+  const cols = Math.max(1, Math.round(W / GALLERY_CARD_W));
+  const rows = Math.max(1, Math.round(H / GALLERY_CARD_H));
+  const cellW = W / cols, cellH = H / rows;
   const cards = [];
-  const TOTAL = GALLERY_COLS * GALLERY_ROWS;
+  const TOTAL = cols * rows;
   for (let idx = 0; idx < TOTAL; idx++) {
     const keys = galleryConfigFor(idx);
-    const c = idx % GALLERY_COLS, r = Math.floor(idx / GALLERY_COLS);
-    const cx = -CANVAS_W / 2 + cellW * (c + 0.5);
-    const cy = -CANVAS_H / 2 + cellH * (r + 0.5);
+    const c = idx % cols, r = Math.floor(idx / cols);
+    const cx = -W / 2 + cellW * (c + 0.5);
+    const cy = -H / 2 + cellH * (r + 0.5);
     const innerW = cellW - GALLERY_GAP, innerH = cellH - GALLERY_GAP;
     // Scatter the background so no column lines up on one colour.
     const bg = GALLERY_BG_PAL[(c + r * 2 + ((r % 2) ? 1 : 0)) % GALLERY_BG_PAL.length];
