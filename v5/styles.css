@@ -6440,6 +6440,12 @@ html:not(.cursor-active) *::after {
   transition: opacity .2s ease;
 }
 #symbol-window.is-open { opacity: 1; pointer-events: auto; }
+/* While the frame grows to cover the screen, the container itself goes dark so
+   the OLD stage's background (e.g. the light globe stage) never peeks AROUND the
+   growing dark frame — no light flash between the window and the next stage. The
+   dark frame recolours to the destination and hides before this is seen at the
+   edges, so this is safe for every transition. */
+#symbol-window.is-covering { background-color: #282828; transition: background-color .12s ease; }
 
 #symbol-window .sw-frame {
   position: relative;
