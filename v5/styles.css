@@ -6397,6 +6397,10 @@ html:not(.cursor-active) *::after {
 .stage-band .sb-btn.is-pressed {
   background-color: #ff5003; background-image: none; color: #f5f5ed;
 }
+/* Dimmed / unusable until the stage arms it (e.g. the frequency pick). */
+.stage-band .sb-btn.is-disabled {
+  opacity: 0.32; pointer-events: none; cursor: default;
+}
 
 /* The per-stage instruction now lives in the bottom band, not the top slot. */
 #q-instruction { display: none !important; }

@@ -43,7 +43,7 @@ const FIELD = {
   diamond: (nx, ny, t) => 0.5 + 0.5 * Math.sin((Math.abs(nx) + Math.abs(ny)) * 9 - t * 2.2),
 };
 
-export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'בחרו את התדר איתו תרצו להיכנס לתהליך היצירה' } = {}) {
+export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
   if (!host) return () => {};
   if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
 
@@ -53,18 +53,9 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   host.appendChild(canvas);
   const ctx = canvas.getContext('2d');
 
-  const hint = document.createElement('div');
-  hint.className = 'calib-hint';
-  hint.textContent = hintText;
-  host.appendChild(hint);
-
-  // "המשך" confirm button — grows in next to the cue once a frequency is picked;
-  // fills orange on press (same graphic language as the symbol-window button).
-  const cont = document.createElement('button');
-  cont.type = 'button';
-  cont.className = 'calib-continue';
-  cont.textContent = 'המשך';
-  host.appendChild(cont);
+  // `cont` is the SHARED bottom-band button (questionnaire.js). The frequency
+  // stage drives it directly: dimmed until a frequency is picked, fills orange
+  // on commit, and the ghost-hand demo taps it — same as every other stage.
 
   // A dot-grid template for a rect of the given size (uniform pitch → round dots;
   // pattern coords normalise by the SHORT side so the fields stay circular).
@@ -84,7 +75,7 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   }
 
   // ── Layout (rebuilt on resize) ──
-  let W = 0, H = 0, big = null, thumbs = [], vLineX = 0, hLineY = 0, colX = 0, thumbDivs = [], gridBig = null, gridThumb = null;
+  let W = 0, H = 0, big = null, thumbs = [], vLineX = 0, colX = 0, thumbDivs = [], gridBig = null, gridThumb = null;
   function layout() {
     const rect = host.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -95,9 +86,8 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     // ONE light gap used everywhere — between the squares, between them and the
     // big view, and as the inset from the surrounding grid (all sides equal).
     const g = 14;
-    hLineY = 76;                       // horizontal rule below the cue + "המשך" button
-    const mainY = hLineY + g;          // top of the master/detail area
-    const botY = H - g;                // bottom of the tiles (equal gap to the grid)
+    const mainY = g;                   // content fills the host; the cue + button now
+    const botY = H - g;                // live in the shared bottom band below it
     const colW = Math.max(170, Math.min(300, W * 0.24));
     colX = W - g - colW;               // column inset one gap from the right grid
     vLineX = colX - g / 2;             // dotted rule centred in the big↔column gap
@@ -176,7 +166,6 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     for (let i = 0; i < thumbs.length; i++) drawField(thumbs[i], gridThumb, TILES[i], i === active ? 1 : 0.62);
 
     // Dotted rules (contained in the rectangle), each centred in a gap.
-    dottedH(0, W, hLineY);                                   // under the cue
     dottedV(vLineX, big.y, big.y + big.h);                   // between the big view and the column
     const cr = thumbs.length ? thumbs[0].x + thumbs[0].w : W;
     for (const y of thumbDivs) dottedH(colX, cr, y);         // between the four squares
@@ -213,20 +202,18 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   function inRect(r, x, y) { return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; }
   // Pick a frequency: fire the tap cue (ripple + big-view fade-in) and enable "המשך".
   function select(i) { active = i; selIdx = i; selAt = t; updateContinue(); }
-  // "המשך" stays on screen the whole stage: dimmed/greyed (unusable) until a
-  // frequency is picked, cream + clickable once one is.
+  // The shared "המשך" button is dimmed/greyed (unusable) until a frequency is
+  // picked, cream + clickable once one is.
   function updateContinue() {
-    if (committed) return;
-    cont.classList.add('is-shown');
+    if (committed || !cont) return;
     cont.classList.toggle('is-disabled', active < 0);
   }
 
   function commit() {
     if (committed || active < 0) return;
     committed = true; lockT = 0; lockFired = false;
-    hint.classList.add('is-hidden');
-    cont.classList.remove('is-disabled');
-    cont.classList.add('is-pressed');            // fills orange
+    stopDemo();
+    if (cont) { cont.classList.remove('is-disabled'); cont.classList.add('is-pressed'); }  // fills orange
     onFreeze && onFreeze(TILES[active].hex);
   }
 
@@ -241,7 +228,7 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     }
   }
   host.addEventListener('pointerdown', onDown);
-  cont.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); stopDemo(); commit(); });
+  // The shared band button's click is wired by questionnaire.js → calib.commit().
 
   const onResize = () => layout();
   window.addEventListener('resize', onResize);
@@ -251,7 +238,7 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
   // ── Auto "ghost hand" demo: empty → tap the orange square → it appears large
   //    → tap "המשך". Plays ONCE, 1.5s after the stage is actually on screen. ──
   function tileCenter(i) { const r = canvas.getBoundingClientRect(); const rc = thumbs[i]; return { x: r.left + rc.x + rc.w / 2, y: r.top + rc.y + rc.h / 2 }; }
-  function contCenter() { const r = cont.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+  function contCenter() { const r = (cont || canvas).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
   function stopDemo() { demoToken++; try { getGhostHand().hide(); } catch (_) {} }
   // Calibration is pre-mounted while the intro is still up (its host sits inside a
   // faded-out section), so gate the demo on the stage being genuinely visible.
@@ -297,9 +284,10 @@ export function mountCalibration(host, { onFreeze, onLock, hint: hintText = 'ב�
     window.removeEventListener('resize', onResize);
     host.removeEventListener('pointerdown', onDown);
     try { canvas.remove(); } catch (_) {}
-    try { hint.remove(); } catch (_) {}
-    try { cont.remove(); } catch (_) {}
+    // Leave the shared band button as-is (owned by questionnaire.js); just clear
+    // any transient state it carried for this stage.
+    if (cont) cont.classList.remove('is-pressed', 'is-disabled');
   }
 
-  return { teardown };
+  return { teardown, commit };
 }

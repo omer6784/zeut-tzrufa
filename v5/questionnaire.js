@@ -550,8 +550,10 @@ const INSTRUCTIONS = {
   personal: 'בחרו את הכוח שמוביל אתכם:',
 };
 
-/* Forward button wording per stage (kept from each stage's own confirm). The
-   frequency (background) stage carries its own band inside calibration.js. */
+/* The frequency stage's own cue text (shown in the shared band's note slot). */
+const FREQ_HINT = 'בחרו את התדר איתו תרצו להיכנס לתהליך היצירה';
+
+/* Forward button wording per stage (kept from each stage's own confirm). */
 const STAGE_CONTINUE_TEXT = {
   origin: 'סיימתי',
   word: 'המשך',
@@ -578,7 +580,7 @@ function ensureStageBand(){
   sec.appendChild(band);
   const btn = band.querySelector('.sb-btn');
   btn.addEventListener('click', () => {
-    if(btn.classList.contains('is-pressed')) return;
+    if(btn.classList.contains('is-pressed') || btn.classList.contains('is-disabled')) return;
     btn.classList.add('is-pressed');
     fireStageContinue();
   });
@@ -590,11 +592,19 @@ function ensureStageBand(){
 function updateStageBand(qid){
   const sb = ensureStageBand();
   if(!sb) return;
-  if(qid === 'background'){ sb.band.classList.remove('is-shown'); return; }
+  sb.btn.classList.remove('is-pressed', 'is-disabled');
+  sb.band.classList.add('is-shown');
+  // Frequency stage: the band is driven by calibration.js — dimmed until a
+  // frequency is picked, and the press commits that choice.
+  if(qid === 'background'){
+    sb.note.textContent = FREQ_HINT;
+    sb.btn.textContent = 'המשך';
+    sb.btn.classList.add('is-disabled');
+    st._stageContinue = () => { if(st._calib) st._calib.commit(); };
+    return;
+  }
   sb.note.textContent = INSTRUCTIONS[qid] || '';
   sb.btn.textContent = STAGE_CONTINUE_TEXT[qid] || 'המשך';
-  sb.btn.classList.remove('is-pressed');
-  sb.band.classList.add('is-shown');
   // Default forward action: `name` submits; every other stage confirms + advances.
   st._stageContinue = () => { if(qid === 'name') submitAnswer(); else advance(); };
 }
@@ -1266,10 +1276,13 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('calib-active');
     wrap.innerHTML = `<div id="calib-host" aria-label="כיול תדרים"></div>`;
     if(st._calibTeardown){ try{ st._calibTeardown(); }catch(_){} }
+    const sb = ensureStageBand();
     const calib = mountCalibration(document.getElementById('calib-host'), {
       onLock: (hex) => { chooseBackground(hex); },
+      cont: sb && sb.btn,
     });
     st._calibTeardown = calib.teardown;
+    st._calib = calib;
     // The frequency stage runs its own ghost-hand demo (tap a square → it shows
     // large → tap "המשך"), synced to its internal state — see calibration.js.
   }
