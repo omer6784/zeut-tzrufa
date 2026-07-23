@@ -78,16 +78,16 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    would NOT shrink with a matrix scale() — baking s.s makes the dots scale too.
    The moment the interface goes active, the display swaps to the single live
    jewel (galleryMode off). */
-const GALLERY_COLS = 4, GALLERY_ROWS = 5;
+const GALLERY_COLS = 5, GALLERY_ROWS = 4;               // narrow, tall cards
 const GALLERY_GAP = 0;                                  // cards fill edge-to-edge (no gutter)
-// Per-card background, one entry per cell (idx 0..19), hand-scattered so no row or
-// column repeats a colour — avoids the "column of the same background" look.
+// Per-card background, one entry per cell (idx 0..19, row-major over 5 cols),
+// hand-scattered so no COLUMN repeats a colour — avoids the "column of the same
+// background" look.
 const GALLERY_BGS = [
-  PALETTE.tan,    PALETTE.orange, PALETTE.cream,  PALETTE.dark,
-  PALETTE.cream,  PALETTE.dark,   PALETTE.tan,    PALETTE.orange,
-  PALETTE.orange, PALETTE.tan,    PALETTE.dark,   PALETTE.cream,
-  PALETTE.dark,   PALETTE.cream,  PALETTE.orange, PALETTE.tan,
-  PALETTE.cream,  PALETTE.tan,    PALETTE.dark,   PALETTE.orange,
+  PALETTE.tan,    PALETTE.cream,  PALETTE.orange, PALETTE.dark,   PALETTE.cream,
+  PALETTE.orange, PALETTE.dark,   PALETTE.tan,    PALETTE.cream,  PALETTE.tan,
+  PALETTE.cream,  PALETTE.tan,    PALETTE.dark,   PALETTE.orange, PALETTE.dark,
+  PALETTE.dark,   PALETTE.orange, PALETTE.cream,  PALETTE.tan,    PALETTE.orange,
 ];
 // 20 fixed, each-different talismans — a FULL composition each (6 symbols on the
 // axis, like a finished piece). Symbols use the 3 palette colours the card's
