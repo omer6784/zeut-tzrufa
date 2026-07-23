@@ -2,3 +2,6 @@ node_modules/
 dist/
 scratch/
 .DS_Store
+
+# Oversized raw audio (>100MB, exceeds GitHub limit) — kept locally only
+design option 4/sounds/Calm your Nervous System Healing Frequency 432 Hz.mp3

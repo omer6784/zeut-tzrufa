@@ -18,6 +18,17 @@
 import { SYMBOL_INFO } from './symbol-info.js';
 import { mountSymbolContour } from './symbol-contour.js';
 
+/* Sound played each time the symbol window opens (a stage was completed). Served
+   from the Vite public root (public/sounds/). Preloaded once and rewound before
+   each play so rapid stage completions retrigger it cleanly. Autoplay is allowed
+   because opening the window is driven by the user's button press. */
+const symbolSound = typeof Audio !== 'undefined' ? new Audio('/sounds/symbolsound.mp3') : null;
+if (symbolSound) symbolSound.preload = 'auto';
+function playSymbolSound() {
+  if (!symbolSound) return;
+  try { symbolSound.currentTime = 0; symbolSound.play().catch(() => {}); } catch (_) {}
+}
+
 /* Motif key → OBJ file served from the Vite public root. Callers may override
    with opts.objPath for anything not listed here. */
 const MOTIF_OBJ = {
@@ -348,8 +359,10 @@ export function openSymbolWindow(motif, opts = {}) {
   if (contourInstance) { try { contourInstance.remove(); } catch (_) {} contourInstance = null; }
   symbolHost.innerHTML = '';
 
-  // 1. Open — the frame scales up from the centre (CSS).
+  // 1. Open — the frame scales up from the centre (CSS). Play the symbol sound in
+  //    sync (the same moment the 3D symbol appears on the display screen).
   el.classList.add('is-open');
+  playSymbolSound();
 
   // Hide the stage's gold dots (both the clickable layer and the decorative
   // float layer) while the window is up — otherwise they peek through the
