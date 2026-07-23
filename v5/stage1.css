@@ -1162,7 +1162,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
    text is gone — the frame carries it now, exactly as it does for "סיימתי". */
 /* Shared width for the story title + the button centred over it, so the two
    stay in sync if the title is resized. */
-#section-3[data-stage="0"] .roots-widget { --story-w: min(50vw, 680px); }
+#section-3[data-stage="0"] .roots-widget { --story-w: min(56vw, 760px); }
 
 /* "סימנתי, אפשר להמשיך" — sits centred horizontally directly ABOVE the
    "איפה הסיפור שלך מתחיל?" title. Centred with a left/right band + margin auto
