@@ -1521,10 +1521,10 @@ function _renderQuestionImpl(idx){
       if (el) { attachKeyboardTo(el); return; }
       if (tries > 0) setTimeout(() => bindCountryKbd(tries - 1), 200);
     })(20);
-    // Globe stage reached (now stage 2): run its ORIGINAL reveal choreography
-    // (continent dots build-in, title, instruction) — same mechanism as before,
-    // just triggered on entering the stage instead of the dropped opening morph.
-    requestAnimationFrame(() => runStage0Choreography());
+    // Globe stage reached (now stage 2): run its reveal choreography (big title →
+    // shrink → globe). setTimeout (not rAF) so it fires reliably even if rAF is
+    // throttled, and after the widget's title is in the DOM.
+    setTimeout(() => runStage0Choreography(), 60);
   } else if(q.type==='roots-tree'){
     wrap.innerHTML = '';
     wrap.classList.add('roots-tree-active');
