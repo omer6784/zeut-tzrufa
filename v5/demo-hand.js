@@ -18,6 +18,12 @@ const HAND_SVG = `
     <path d="M8.7 11.2 L8.7 13.8"/><path d="M11.5 11 L11.5 13.8"/><path d="M14.3 11.2 L14.3 13.8"/>
     <path d="M6 14.8 Q3.5 14.5 3.7 12.5 Q3.9 11 5.7 11.5"/>
   </g>
+  <g class="dh-point" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="7" y="12" width="10" height="10" rx="3.2"/>
+    <path d="M9 12 L9 2.5"/>
+    <path d="M11.6 12 L11.6 10"/><path d="M14 12 L14 10.2"/>
+    <path d="M7 15 Q4.6 14.7 4.8 12.7 Q5 11.2 6.8 11.7"/>
+  </g>
 </svg>`;
 
 let hand = null, ripple = null, token = 0;
@@ -51,6 +57,12 @@ export function getGhostHand() {
     place(x, y) { const tr = hand.style.transition; hand.style.transition = 'none'; moveTo(x, y); void hand.offsetWidth; hand.style.transition = tr; },
     move(x, y) { moveTo(x, y); },
     async tap() { hand.classList.add('is-grab'); pulse(); await sleep(250); hand.classList.remove('is-grab'); },
+    // Persistent states for the globe demo: hold a fist while dragging, switch to
+    // a pointing finger to "click" a continent.
+    grab(on) { hand.classList.toggle('is-grab', on !== false); if(on !== false) hand.classList.remove('is-point'); },
+    point(on) { hand.classList.toggle('is-point', on !== false); if(on !== false) hand.classList.remove('is-grab'); },
+    open() { hand.classList.remove('is-grab', 'is-point'); },
+    async tapPoint() { hand.classList.add('is-point'); pulse(); await sleep(260); },
   };
 }
 

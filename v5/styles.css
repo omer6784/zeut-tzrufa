@@ -392,10 +392,12 @@ body::-webkit-scrollbar-thumb {
 .demo-hand.is-on { opacity: 0.95; }
 .demo-hand svg { width: 100%; height: 100%; display: block;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45)); }
-.demo-hand .dh-fist { display: none; }
+.demo-hand .dh-fist, .demo-hand .dh-point { display: none; }
 .demo-hand.is-grab .dh-open { display: none; }
 .demo-hand.is-grab .dh-fist { display: block; }
 .demo-hand.is-grab { transform: translate(-28%, -18%) scale(0.88); }  /* press-in */
+.demo-hand.is-point .dh-open, .demo-hand.is-point .dh-fist { display: none; }
+.demo-hand.is-point .dh-point { display: block; }
 .demo-ripple {
   position: absolute; left: 30%; top: 22%; width: 8px; height: 8px; margin: -4px;
   border-radius: 50%; border: 1.5px solid currentColor; opacity: 0;

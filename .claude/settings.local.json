@@ -332,7 +332,8 @@
       "Bash(git commit -q -m 'Globe choreography: schedule via setTimeout not rAF, so it reliably runs \\(single rAF was being deferred → big-title intro never played, title stayed at rest\\) *)",
       "Bash(git commit --allow-empty -q -m 'Redeploy nudge: retrigger Netlify build for the latest commits \\(globe intro\\) *)",
       "Bash(git commit -q -m 'Resting story-title larger \\(--story-w 50vw/680 → 56vw/760\\) so its dots read bigger/clearer at rest *)",
-      "Bash(git commit -q -m 'Globe stage: raise story title so line 2 clears the bottom grid line; nudge globe left \\(right 780→870\\) *)"
+      "Bash(git commit -q -m 'Globe stage: raise story title so line 2 clears the bottom grid line; nudge globe left \\(right 780→870\\) *)",
+      "Bash(git commit -q -m 'Globe stage ghost-hand demo: open hand glides in → fist spins the globe to Asia → pointing finger taps it \\(marks black\\) → open hand presses סימנתי; plays once, resets, cancels on real touch *)"
     ]
   },
   "hooks": {

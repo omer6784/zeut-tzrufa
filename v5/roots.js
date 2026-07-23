@@ -1100,4 +1100,29 @@ export function initRootsWidget(container, opts){
     requestAnimationFrame(frame);
   }
   frame();
+
+  /* ── Demo hooks (questionnaire.js drives the ghost-hand globe demo) ── */
+  return {
+    demo: {
+      isGlobe(){ return state.phase === 'globe'; },
+      hold(on){ state.dragging = !!on; },   // pause the idle auto-spin while driving
+      spinBy(rad){ state.rot += rad; },
+      // Viewport-space centre of a continent now, or null if it's on the far side.
+      continentPos(id){
+        const c = CONTINENTS.find(k => k.id === id);
+        if(!c) return null;
+        const p = project(c.center[0], c.center[1], state.rot, R, cx, cy);
+        if(p.z <= 0.18) return null;
+        const r = canvas.getBoundingClientRect();
+        return { x: r.left + p.x, y: r.top + p.y, z: p.z };
+      },
+      select(id){
+        if(!state.selected.has(id)){
+          state.selected.add(id);
+          doneBtn.classList.toggle('is-dim', state.selected.size === 0);
+        }
+      },
+      clear(){ state.selected.clear(); doneBtn.classList.toggle('is-dim', true); },
+    },
+  };
 }

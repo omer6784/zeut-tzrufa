@@ -8,7 +8,7 @@ import { SYMBOLS_3D } from './symbols-3d.js';
 import { mountTimeWheel } from './time-wheel.js';
 import { mountLightGate } from './light-gate.js';
 import { mountCalibration } from './calibration.js';
-import { playHandDemo, stopHandDemo } from './demo-hand.js';
+import { playHandDemo, stopHandDemo, getGhostHand } from './demo-hand.js';
 import { mountDotTiles } from './dot-tiles.js';
 import { mountDrive } from './drive.js';
 import { mountEditor } from './editor.js';
@@ -1240,6 +1240,8 @@ function _renderQuestionImpl(idx){
   if (st._calibTeardown) { try { st._calibTeardown(); } catch (_) {} st._calibTeardown = null; }
   if (st._driveTeardown) { try { st._driveTeardown(); } catch (_) {} st._driveTeardown = null; }
   if (st._originBandPoll) { clearInterval(st._originBandPoll); st._originBandPoll = null; }
+  st._globeDemoToken = (st._globeDemoToken || 0) + 1;   // kill any running globe demo
+  st._roots = null;
   st._calib = null;
   // Clear the "מה השעה שלך" live sky tint so it never lingers on other stages
   // (it's an inline background on the shared #section-3). The time stage re-sets
@@ -1465,7 +1467,7 @@ function _renderQuestionImpl(idx){
       if(listEl) listEl.textContent = st.roots.join(', ');
     };
     updateSelectedOriginsList();
-    initRootsWidget(document.getElementById('roots-host'),{
+    st._roots = initRootsWidget(document.getElementById('roots-host'),{
       targetEl: document.getElementById('artifact-canvas'),
       onAdd:(name)=>{
         if(!st.roots.includes(name)){
@@ -1721,9 +1723,83 @@ function runStage0Choreography(){
       if(s1pTitle){ s1pTitle.style.transition = 'opacity 0.4s ease'; s1pTitle.style.opacity = ''; }
       window.dispatchEvent(new CustomEvent('globe-reveal-dots'));
       setTimeout(() => railDots[st.current] && railDots[st.current].classList.add('is-current'), 400);
+      setTimeout(() => runGlobeDemo(), 1700);   // once the globe has filled in, play the ghost-hand demo
     }, TITLE_MS + 950);
   }, SETTLE);
 }
+
+/* Ghost-hand demo for the globe stage: an OPEN hand glides in, closes to a FIST
+   and spins the globe until Asia faces front, opens to a POINTING finger and taps
+   Asia (it marks black), then the open hand presses "סימנתי". Plays once; a real
+   touch cancels it. */
+function runGlobeDemo(){
+  const rd = st._roots && st._roots.demo;
+  if(!rd || !rd.isGlobe()) return;
+  const my = st._globeDemoToken = (st._globeDemoToken || 0) + 1;
+  const sec = document.getElementById('section-3');
+  const cancel = (e) => { if(e && e.isTrusted === false) return; st._globeDemoToken++; };
+  sec && sec.addEventListener('pointerdown', cancel, { capture: true });
+  const cleanup = () => sec && sec.removeEventListener('pointerdown', cancel, { capture: true });
+
+  (async () => {
+    const gh = getGhostHand();
+    const dead = () => my !== st._globeDemoToken || !rd.isGlobe();
+    const abort = () => { try { rd.hold(false); } catch (_) {} gh.hide(); cleanup(); };   // user cut in — leave state
+    await gh.sleep(200);
+    if(dead()) return abort();
+    const canvas = document.querySelector('.roots-canvas-wrap canvas');
+    if(!canvas) return abort();
+    const cr = canvas.getBoundingClientRect();
+    const gcx = cr.left + cr.width * 0.5, gcy = cr.top + cr.height * 0.5;
+
+    // 1. open hand glides in from below onto the globe
+    gh.open();
+    gh.place(gcx + 40, (window.innerHeight || 900) + 60);
+    gh.show('dark');
+    await gh.sleep(90); if(dead()) return abort();
+    gh.move(gcx + cr.width * 0.26, gcy);
+    await gh.sleep(720); if(dead()) return abort();
+
+    // 2. fist → spin the globe (dragging left) until Asia faces the front
+    gh.grab(true);
+    rd.hold(true);
+    let guard = 0;
+    while(!dead() && guard < 360){
+      const p = rd.continentPos('asia');
+      if(p && p.z > 0.62) break;
+      rd.spinBy(-0.03);
+      gh.move(gcx + cr.width * 0.26 - Math.min(cr.width * 0.52, guard * 3), gcy);
+      guard++;
+      await gh.sleep(16);
+    }
+    rd.hold(false);
+    if(dead()) return abort();
+    await gh.sleep(350);
+
+    // 3. open → pointing finger → tap Asia (it marks black)
+    const ap = rd.continentPos('asia') || { x: gcx, y: gcy };
+    gh.point(true);
+    gh.move(ap.x, ap.y);
+    await gh.sleep(650); if(dead()) return abort();
+    await gh.tapPoint();
+    rd.select('asia');
+    await gh.sleep(800); if(dead()) return abort();
+
+    // 4. open hand presses "סימנתי" below
+    gh.open();
+    const btn = document.querySelector('.stage-band .sb-btn');
+    if(btn){
+      const b = btn.getBoundingClientRect();
+      gh.move(b.left + b.width / 2, b.top + b.height / 2);
+      await gh.sleep(720); if(dead()) return abort();
+      await gh.tap();
+    }
+    await gh.sleep(500);
+    // Normal end: hide the hand and reset the demo's Asia pick so the visitor starts clean.
+    gh.hide(); try { rd.hold(false); rd.clear(); } catch (_) {} cleanup();
+  })();
+}
+
 window.addEventListener('opening-morph-start', () => {
   document.getElementById('section-3')?.classList.add('intro-chrome-hidden');
 });
