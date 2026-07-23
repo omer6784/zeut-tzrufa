@@ -1498,7 +1498,11 @@ function _renderQuestionImpl(idx){
       // Phase changed (mark → finish) → un-press so the band accepts the next tap.
       if (liveId !== st._originLastLive) { sb.btn.classList.remove('is-pressed'); st._originLastLive = liveId; }
       sb.btn.classList.toggle('is-disabled', !live);
-      sb.btn.textContent = (live && live.id === 'roots-finish') ? 'סיימתי' : 'סימנתי';
+      // After "סימנתי" the map/keyboard phase begins: the note becomes the
+      // country prompt and the button reads "הזנתי, אפשר להמשיך".
+      const inputPhase = !!document.querySelector('.roots-widget.state-input');
+      sb.btn.textContent = inputPhase ? 'הזנתי, אפשר להמשיך' : 'סימנתי';
+      sb.note.textContent = inputPhase ? 'הזן את ארצות המוצא' : (INSTRUCTIONS.origin || '');
     }, 200);
     // Virtual Hebrew keyboard — attaches once the country input is mounted
     // (the roots widget shows it lazily on phase change), so retry briefly.

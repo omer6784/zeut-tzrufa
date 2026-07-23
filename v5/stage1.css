@@ -651,7 +651,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      continents fill the upper region and clear the keyboard). --kb-band is the
      keyboard/text band height; 46px = keyboard's 26px lift + 20px gap. */
   width: calc(100vw - 200 * var(--sx)) !important;
-  height: calc((706 - 85) * var(--sy) - 46px - var(--kb-band)) !important;
+  height: calc((656 - 85) * var(--sy) - 46px - var(--kb-band)) !important;
   left: calc(100 * var(--sx)) !important;
   right: auto !important;
   bottom: auto !important;
@@ -672,7 +672,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   left: calc(100 * var(--sx)) !important;
   right: calc(100 * var(--sx) + (100vw - 200 * var(--sx)) * 0.66 + 28px) !important;
   top: auto !important;
-  bottom: calc(100vh - 706 * var(--sy) + 26px) !important;   /* keyboard bottom line */
+  bottom: calc(100vh - 656 * var(--sy) + 26px) !important;   /* keyboard bottom line */
   height: var(--kb-band) !important;   /* ≈ keyboard height */
   width: auto !important;
   max-width: none !important;
@@ -695,14 +695,14 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      size/spacing as the fixed grid. */
   right: calc(100 * var(--sx) + (100vw - 200 * var(--sx)) * 0.66 + 14px) !important;
   left: auto !important;
-  top: calc(706 * var(--sy) - 46px - var(--kb-band)) !important;
+  top: calc(656 * var(--sy) - 46px - var(--kb-band)) !important;
   height: calc(46px + var(--kb-band)) !important;
   bottom: auto !important;
   width: var(--grid-dot-size) !important;
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
   background-size: var(--grid-dot-size) var(--grid-dot-gap) !important;
   /* Global Y phase: offset by −own top so dots land on the shared lattice. */
-  background-position: center calc(-1 * (706 * var(--sy) - 46px - var(--kb-band))) !important;
+  background-position: center calc(-1 * (656 * var(--sy) - 46px - var(--kb-band))) !important;
   background-repeat: repeat-y !important;
   pointer-events: none !important;
   z-index: 6 !important;
@@ -718,7 +718,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   position: fixed !important;
   left: calc(100 * var(--sx)) !important;
   right: calc(100 * var(--sx)) !important;
-  top: calc(706 * var(--sy) - 46px - var(--kb-band)) !important;
+  top: calc(656 * var(--sy) - 46px - var(--kb-band)) !important;
   height: var(--grid-dot-size) !important;
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
   background-size: var(--grid-dot-gap) var(--grid-dot-size) !important;
@@ -957,6 +957,8 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
 #section-3[data-stage="0"] .roots-widget.state-input .roots-map-note {
   opacity: 1 !important;
 }
+/* The top "הזן את ארצות המוצא" instruction moved into the shared bottom band. */
+#section-3[data-stage="0"] .roots-map-note { display: none !important; }
 body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   filter: invert(1) brightness(2.5);
 }
