@@ -1501,7 +1501,7 @@ html, body {
   left: calc(100 * var(--sx));
   width: calc(100vw - 200 * var(--sx));
   top: calc(155 * var(--sy));                 /* clears the top instruction row */
-  height: calc((686 - 155) * var(--sy));      /* down to the same bottom as before */
+  height: calc((650 - 155) * var(--sy));      /* ends above the raised bottom grid line (656) */
   z-index: 5;
   pointer-events: none;
 }

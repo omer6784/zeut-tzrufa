@@ -6136,7 +6136,7 @@ html:not(.cursor-active) *::after {
   left: calc(100 * var(--sx));
   width: calc(100vw - 200 * var(--sx));
   top: calc(155 * var(--sy));
-  height: calc((686 - 155) * var(--sy));
+  height: calc((650 - 155) * var(--sy));   /* ends above the raised bottom grid line (656) */
   overflow: hidden;
   pointer-events: none;   /* only the dots capture clicks */
   z-index: 4;             /* above the central cell so the dots are clickable */
@@ -6153,6 +6153,14 @@ html:not(.cursor-active) *::after {
   animation: s2-float 7s ease-in-out infinite;
   pointer-events: auto;   /* selectable light-point */
   cursor: pointer;
+}
+/* Enlarge the tiny (4px) dot's HIT target so it's a reliable light-point to grab
+   and drag to the gate — small dots pick a symbol just like the big ones. */
+.s2-float-dot::before {
+  content: '';
+  position: absolute;
+  inset: -8px;            /* ~20px grabbable area around the dot */
+  border-radius: 50%;
 }
 @keyframes s2-float {
   0%, 100% { transform: translate(0, 0); }
