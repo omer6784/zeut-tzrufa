@@ -55,36 +55,43 @@ document.addEventListener('mousemove', (e) => {
   }
 });
 
-/* ─── Touch-screen cursor ─────────────────────────────────────
-   In the exhibition there is no mouse, so there is no cursor at rest. It only
-   appears WHILE the visitor presses/drags: an open hand flashes for ~0.5s, then
-   morphs to the fist (dragging) or the finger (pressing). Works with a mouse for
-   testing. */
+/* ─── Cursor ──────────────────────────────────────────────────
+   MOUSE (testing): the hand is always visible — open while hovering, and on a
+   press/drag it morphs to the finger (press) or fist (drag), back to open on
+   release. TOUCH (exhibition): there is no pointer at rest, so the hand appears
+   only while pressing/dragging and fades out on release. The open→finger/fist
+   morph happens ~0.5s after the press begins either way. */
 (() => {
   const dot = cursorDot;
   if (!dot) return;
-  let downXY = null, isDrag = false, morphT = 0, hideT = 0;
+  let downXY = null, isDrag = false, morphT = 0, hideT = 0, wasMouse = true;
   const setIcon = s => { dot.classList.toggle('cur-fist', s === 'fist'); dot.classList.toggle('cur-finger', s === 'finger'); };
   const place = (x, y) => { dot.style.left = x + 'px'; dot.style.top = y + 'px'; };
+  window.addEventListener('pointermove', e => {
+    place(e.clientX, e.clientY);
+    if (downXY) {
+      if (Math.hypot(e.clientX - downXY.x, e.clientY - downXY.y) > 8) isDrag = true;
+    } else if (e.pointerType === 'mouse') {
+      clearTimeout(hideT);
+      document.documentElement.classList.add('cursor-active');
+      setIcon('open'); dot.classList.add('is-shown');   // mouse hovering → open hand visible
+    }
+  }, true);
   window.addEventListener('pointerdown', e => {
     clearTimeout(hideT); clearTimeout(morphT);
-    document.documentElement.classList.add('cursor-active');   // no OS pointer
+    document.documentElement.classList.add('cursor-active');
+    wasMouse = e.pointerType === 'mouse';
     downXY = { x: e.clientX, y: e.clientY }; isDrag = false;
     place(e.clientX, e.clientY);
-    setIcon('open');
-    dot.classList.add('is-shown');
+    setIcon('open'); dot.classList.add('is-shown');
     morphT = setTimeout(() => setIcon(isDrag ? 'fist' : 'finger'), 500);   // open flash → action icon
-  }, true);
-  window.addEventListener('pointermove', e => {
-    if (!downXY) return;
-    place(e.clientX, e.clientY);
-    if (Math.hypot(e.clientX - downXY.x, e.clientY - downXY.y) > 8) isDrag = true;
   }, true);
   const end = () => {
     clearTimeout(morphT);
     setIcon(isDrag ? 'fist' : 'finger');            // settle on the final icon…
     downXY = null;
-    hideT = setTimeout(() => dot.classList.remove('is-shown', 'cur-fist', 'cur-finger'), 650);   // …then fade out
+    if (wasMouse) hideT = setTimeout(() => setIcon('open'), 400);          // mouse: back to open, stay visible
+    else hideT = setTimeout(() => dot.classList.remove('is-shown', 'cur-fist', 'cur-finger'), 650);  // touch: fade out
   };
   window.addEventListener('pointerup', end, true);
   window.addEventListener('pointercancel', end, true);
