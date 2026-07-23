@@ -1395,7 +1395,7 @@ html, body {
 /* Big dotted prompt — centered in the content area. */
 #section-3[data-stage="1"] .s2-prompt {
   position: fixed;
-  top: calc((85 + 686) / 2 * var(--sy));
+  top: calc((85 + 686) / 2 * var(--sy) - 150px);   /* raised toward the top of the rectangle */
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(72vw, 1000px);

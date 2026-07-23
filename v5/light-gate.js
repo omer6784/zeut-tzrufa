@@ -42,7 +42,7 @@ export function mountLightGate({ arena, dots, onAbsorb, revealDelay = 0 } = {}) 
     // at every viewport size — roughly the old rectangle's footprint.
     const r = Math.max(30, Math.min(52, a.height * 0.072));
     const cx = a.left + a.width / 2;
-    const cy = a.bottom - r - a.height * 0.08;              // clear margin below it
+    const cy = a.bottom - r - a.height * 0.22;              // raised up from the bottom
     gate = { cx, cy, r, x: cx - r, y: cy - r, w: r * 2, h: r * 2 };
     gateEl.setAttribute('cx', cx); gateEl.setAttribute('cy', cy);
     gateEl.setAttribute('r', r);

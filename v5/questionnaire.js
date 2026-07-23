@@ -608,6 +608,10 @@ function updateStageBand(qid){
   }
   setBandNote(INSTRUCTIONS[qid] || '');
   sb.btn.textContent = STAGE_CONTINUE_TEXT[qid] || 'המשך';
+  // The light-point stage has NO continue button — drawing the line to the gate
+  // picks a symbol and opens the symbol window directly (see commitWord). Only the
+  // instruction note shows in its band.
+  sb.btn.style.display = (qid === 'word') ? 'none' : '';
   if(GATED_STAGES.has(qid)){
     // Dimmed until the stage arms it (see armBand, called on the pick).
     sb.btn.classList.add('is-disabled');
@@ -1448,13 +1452,12 @@ function _renderQuestionImpl(idx){
     for (let i = allDots.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [allDots[i], allDots[j]] = [allDots[j], allDots[i]]; }
     allDots.forEach(d => { d.style.opacity = '0'; d.style.transition = 'opacity 0.4s ease'; });
     allDots.forEach((d, i) => lightT(() => { d.style.opacity = ''; }, DOTS_START + i * DOT_STEP));
-    // Title fades in LAST — after every dot has appeared.
+    // Title fades in LAST — after every dot has appeared. The visible title is the
+    // dotted prompt image (.s2-prompt); #q-text is hidden on this stage.
     const TITLE_AT = DOTS_START + allDots.length * DOT_STEP + 250;
     const GATE_AT = DOTS_START + Math.round(allDots.length * DOT_STEP * 0.5);   // gate circle mid-cascade
-    const qTitle = document.getElementById('q-text');
+    const qTitle = document.querySelector('#section-3 .stage2 .s2-prompt');
     if (qTitle) {
-      stopTypewriter(qTitle);
-      qTitle.textContent = q.text.replace(/\n/g, ' ');
       qTitle.style.opacity = '0';
       qTitle.style.transition = 'opacity 0.9s ease';
       lightT(() => { qTitle.style.opacity = '1'; }, TITLE_AT);
@@ -1472,7 +1475,7 @@ function _renderQuestionImpl(idx){
       st.answers.word = word || '';
       st.p5SymbolsByStage = st.p5SymbolsByStage || {};
       if (!st.p5SymbolsByStage[1]) st.p5SymbolsByStage[1] = [getRandomSymbol()];
-      armBand(advance);              // light up "המשך"; the press continues
+      advance();                     // no "המשך" here — the pick opens the symbol window directly
     };
     // Old click-to-advance is superseded; reset the persistent scattered dots.
     document.querySelectorAll('.s2-float-dot').forEach(el => {
