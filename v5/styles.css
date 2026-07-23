@@ -6035,6 +6035,11 @@ html:not(.cursor-active) *::after {
 #section-3[data-stage="1"] #sidebar-tagline {
   color: #f5f5ed;
 }
+/* The frequency stage (q-color-stage) is a dark plate too — otherwise the dark
+   wordmark is invisible on it, so its typewriter reads as "missing". */
+#section-3.q-color-stage[data-stage="0"] #sidebar-tagline {
+  color: #f5f5ed;
+}
 
 /* ─── Word Grid — שלב 3 ─────────────────────────────────── */
 #word-field-container:has(.word-grid) {
