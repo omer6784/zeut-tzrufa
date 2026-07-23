@@ -80,8 +80,8 @@ const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
    jewel (galleryMode off). */
 // Target card size (px). The gallery tiles the WHOLE display at this size, so it
 // fills the full width/height whatever the screen aspect. On the portrait 1080×1920
-// exhibition monitor this works out to exactly 4 cols × 5 rows.
-const GALLERY_CARD_W = 270, GALLERY_CARD_H = 384;
+// exhibition monitor this works out to exactly 4 cols × 4 rows (taller cards).
+const GALLERY_CARD_W = 270, GALLERY_CARD_H = 480;
 const GALLERY_GAP = 0;                                  // cards fill edge-to-edge (no gutter)
 // Per-card background, one entry per cell (idx 0..19, row-major over 5 cols),
 // hand-scattered so no COLUMN repeats a colour — avoids the "column of the same
@@ -118,7 +118,8 @@ const GALLERY_CONFIGS = [
   ['rimon', 'eye', 'horseshoe', 'vegvisir', 'moon', 'anah'],
 ];
 let galleryMode = false;
-let galleryCards = null;   // built lazily; each = { bg, rect, line[], frame[], insts[] }
+let galleryCards = null;   // built lazily; each = { bg, line, frame, insts, a, swap }
+let galleryAlpha = 1;      // per-card fade multiplier applied to symbol dots (swap cross-fade)
 
 let objFiles = {};
 let built = {};            // key -> symbol object (point cloud ready)
@@ -324,9 +325,39 @@ function galleryConfigFor(k) {
   return out;
 }
 const GALLERY_BG_PAL = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark];
+// A big reservoir of talismans to draw from — the fixed 20 plus generated ones —
+// so cells can keep swapping to fresh, different pieces.
+let galleryPool = null;
+function buildGalleryPool() {
+  const pool = GALLERY_CONFIGS.slice();
+  for (let k = pool.length; k < 60; k++) pool.push(galleryConfigFor(k));
+  galleryPool = pool;
+}
+// Build ONE card's content (symbols + centre line + frame) for a cell. `gem`
+// varies the frame. Returns null if no symbols are ready.
+function buildCard(idx, cx, cy, innerW, innerH, bg, keys, gem) {
+  const pal = PALETTE_LIST.filter(x => x !== bg);   // symbols use the other 3 colours
+  const insts = [];
+  keys.forEach((key, i) => { if (built[key]) insts.push(galleryInstance(key, pal[(idx + i) % pal.length])); });
+  if (!insts.length) return null;
+  const n = insts.length, OVERLAP = 1.55;
+  const ly = new Array(n); ly[0] = 0;
+  for (let i = 1; i < n; i++) ly[i] = ly[i - 1] + (insts[i - 1].halfH + insts[i].halfH) * OVERLAP;
+  const top = ly[0] - insts[0].halfH, bottom = ly[n - 1] + insts[n - 1].halfH, mid = (top + bottom) / 2;
+  let maxHW = 0; insts.forEach(s => { maxHW = Math.max(maxHW, s.halfW); });
+  const colH = bottom - top, colW = maxHW * 2;
+  // Symbols fill almost the full frame height (small gap top/bottom).
+  const frameHalfW = innerW * 0.40, frameHalfH = innerH * 0.44;
+  const scale = Math.min((frameHalfW * 2 * 0.72) / (colW || 1), (frameHalfH * 2 * 0.97) / (colH || 1));
+  insts.forEach((s, i) => { s.s = scale; s.x = cx; s.y = cy + (ly[i] - mid) * scale; s.phase = idx * 11.7; });
+  const lineHalf = (colH * 0.5 * scale) + 10;
+  const line = { hex: GALLERY_LINE_ON[bg] || '#f5f5ed', x: cx, y0: cy - lineHalf, y1: cy + lineHalf };
+  const frame = { hex: galleryFrameColor(bg), sx: frameHalfW / 450, sy: frameHalfH / 900, dots: buildOrnament(gem) };
+  return { idx, cx, cy, innerW, innerH, bg, keys, insts, line, frame, a: 1, swap: null };
+}
 function buildGallery() {
-  // Tile the whole (current) canvas with cards at ~the target size, filling the
-  // full width and height for whatever screen aspect the display is.
+  if (!galleryPool) buildGalleryPool();
+  // Tile the whole (current) canvas with cards at ~the target size.
   const W = width, H = height;
   const cols = Math.max(1, Math.round(W / GALLERY_CARD_W));
   const rows = Math.max(1, Math.round(H / GALLERY_CARD_H));
@@ -334,51 +365,59 @@ function buildGallery() {
   const cards = [];
   const TOTAL = cols * rows;
   for (let idx = 0; idx < TOTAL; idx++) {
-    const keys = galleryConfigFor(idx);
     const c = idx % cols, r = Math.floor(idx / cols);
     const cx = -W / 2 + cellW * (c + 0.5);
     const cy = -H / 2 + cellH * (r + 0.5);
     const innerW = cellW - GALLERY_GAP, innerH = cellH - GALLERY_GAP;
     // Scatter the background so no column lines up on one colour.
     const bg = GALLERY_BG_PAL[(c + r * 2 + ((r % 2) ? 1 : 0)) % GALLERY_BG_PAL.length];
-    const pool = PALETTE_LIST.filter(x => x !== bg);   // symbols use the other 3 colours
-
-    // 6 symbols stacked on the axis, coloured from the non-bg palette (cycled).
-    const insts = [];
-    keys.forEach((key, i) => { if (built[key]) insts.push(galleryInstance(key, pool[(idx + i) % pool.length])); });
-    if (!insts.length) continue;
-    const n = insts.length, OVERLAP = 1.55;
-    const ly = new Array(n); ly[0] = 0;
-    for (let i = 1; i < n; i++) ly[i] = ly[i - 1] + (insts[i - 1].halfH + insts[i].halfH) * OVERLAP;
-    const top = ly[0] - insts[0].halfH, bottom = ly[n - 1] + insts[n - 1].halfH, mid = (top + bottom) / 2;
-    let maxHW = 0; insts.forEach(s => { maxHW = Math.max(maxHW, s.halfW); });
-    const colH = bottom - top, colW = maxHW * 2;
-    // Fit the column inside the frame. The symbols fill almost the FULL frame
-    // height so there's only a small gap top/bottom between them and the frame.
-    const frameHalfW = innerW * 0.40, frameHalfH = innerH * 0.44;
-    const scale = Math.min((frameHalfW * 2 * 0.72) / (colW || 1), (frameHalfH * 2 * 0.97) / (colH || 1));
-    insts.forEach((s, i) => { s.s = scale; s.x = cx; s.y = cy + (ly[i] - mid) * scale; s.phase = idx * 11.7; });
-
-    // Centre line — dots down the axis spanning the symbol column.
-    const lineHex = GALLERY_LINE_ON[bg] || '#f5f5ed';
-    const lineHalf = (colH * 0.5 * scale) + 10;
-    const line = { hex: lineHex, x: cx, y0: cy - lineHalf, y1: cy + lineHalf };
-
-    // Frame — the Moroccan dotted ornament, sized to the card; its dot COUNT
-    // (gematria) varies per card so every frame is different ("changes with the name").
-    const gem = 56 + (idx * 11) % 150;
-    const dots = buildOrnament(gem);              // built at the 450×900 reference size
-    const frame = { hex: galleryFrameColor(bg), sx: frameHalfW / 450, sy: frameHalfH / 900, dots };
-
-    cards.push({ cx, cy, innerW, innerH, bg, insts, line, frame });
+    const card = buildCard(idx, cx, cy, innerW, innerH, bg, galleryPool[idx % galleryPool.length], 56 + (idx * 11) % 150);
+    if (card) cards.push(card);
   }
   galleryCards = cards;
+  gallerySwapAt = (typeof millis === 'function') ? millis() : 0;
+}
+// Every few seconds one random card swaps to a different talisman from the pool,
+// cross-fading its content (the coloured card stays put).
+const GALLERY_SWAP_EVERY = 2600, GALLERY_FADE = 480;
+let gallerySwapAt = 0;
+function triggerSwap() {
+  const free = galleryCards.filter(c => !c.swap);
+  if (!free.length) return;
+  const card = free[Math.floor(random(free.length))];
+  const cur = card.keys.join(',');
+  let keys = null;
+  for (let t = 0; t < 12 && !keys; t++) { const cand = galleryPool[Math.floor(random(galleryPool.length))]; if (cand.join(',') !== cur) keys = cand; }
+  if (!keys) return;
+  card.swap = { stage: 'out', t0: millis(), keys, gem: 40 + Math.floor(random(160)) };
+}
+function galleryTick() {
+  if (!galleryCards || !galleryCards.length) return;
+  const now = millis();
+  for (const card of galleryCards) {
+    if (!card.swap) continue;
+    const el = now - card.swap.t0;
+    if (card.swap.stage === 'out') {
+      card.a = Math.max(0, 1 - el / GALLERY_FADE);
+      if (el >= GALLERY_FADE) {
+        const nc = buildCard(card.idx, card.cx, card.cy, card.innerW, card.innerH, card.bg, card.swap.keys, card.swap.gem);
+        if (nc) { card.keys = nc.keys; card.insts = nc.insts; card.line = nc.line; card.frame = nc.frame; }
+        card.a = 0; card.swap.stage = 'in'; card.swap.t0 = now;
+      }
+    } else {
+      card.a = Math.min(1, el / GALLERY_FADE);
+      if (el >= GALLERY_FADE) { card.a = 1; card.swap = null; }
+    }
+  }
+  if (now - gallerySwapAt > GALLERY_SWAP_EVERY) { gallerySwapAt = now; triggerSwap(); }
 }
 function drawGallery() {
   if (!galleryCards) buildGallery();
   if (!galleryCards) return;
+  galleryTick();
   for (const card of galleryCards) {
-    // 1. background card
+    const a = card.a;
+    // 1. background card (stable — never fades, so the mosaic never flickers)
     push();
     translate(card.cx, card.cy, -60);
     noStroke();
@@ -386,10 +425,10 @@ function drawGallery() {
     fill(red(bc), green(bc), blue(bc));
     plane(card.innerW, card.innerH);
     pop();
-    // 2. centre line (dotted)
+    // 2. centre line (dotted) — fades with the card's content
     const lc = color(card.line.hex);
     push();
-    stroke(red(lc), green(lc), blue(lc));
+    stroke(red(lc), green(lc), blue(lc), 255 * a);
     strokeWeight(3.2);
     beginShape(POINTS);
     for (let y = card.line.y0; y <= card.line.y1; y += 11) vertex(card.line.x, y, -40);
@@ -399,14 +438,16 @@ function drawGallery() {
     const fc = color(card.frame.hex);
     push();
     translate(card.cx, card.cy, -40);
-    stroke(red(fc), green(fc), blue(fc));
+    stroke(red(fc), green(fc), blue(fc), 255 * a);
     strokeWeight(2.4);
     beginShape(POINTS);
     for (const d of card.frame.dots) vertex(d.x * card.frame.sx, -d.y * card.frame.sy, 0);
     endShape();
     pop();
-    // 4. the 6 symbols, each with its own motion
+    // 4. the symbols, each with its own motion (faded via galleryAlpha)
+    galleryAlpha = a;
     for (const s of card.insts) drawSymbol(s, tick + s.phase);
+    galleryAlpha = 1;
   }
 }
 
@@ -688,7 +729,7 @@ function drawPointsDepth(s, a) {
     const arr = _depthBuckets[b];
     if (arr.length === 0) continue;
     const t = (b + 0.5) / DEPTH_BUCKETS;
-    stroke(s.cr, s.cg, s.cb, 110 + 145 * t);
+    stroke(s.cr, s.cg, s.cb, (110 + 145 * t) * galleryAlpha);   // galleryAlpha=1 for the single jewel
     strokeWeight(base * (0.6 + 0.75 * t));
     beginShape(POINTS);
     for (let j = 0; j < arr.length; j++) { const pt = arr[j]; vertex(pt.x, -pt.y, pt.z); }
