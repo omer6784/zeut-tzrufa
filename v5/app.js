@@ -1712,7 +1712,25 @@ window.addEventListener('DOMContentLoaded', () => {
   initQuestionnaire();
   initStage2FloatDots();
   initBackgroundMusic();
+  initIdleReset();
 });
+
+/* Kiosk auto-reset: once the experience has started, if nobody touches or presses
+   anything for a minute, return to the opening screen. A full reload gives a clean
+   start and re-broadcasts 'idle' to the display (its gallery comes back). Only armed
+   after "לחץ להתחלה" — the idle opening screen itself never needs resetting. */
+function initIdleReset() {
+  const IDLE_MS = 60000;
+  let timer = null;
+  const arm = () => { clearTimeout(timer); timer = setTimeout(() => location.reload(), IDLE_MS); };
+  window.addEventListener('opening-morph-start', () => {
+    arm();
+    // Any real interaction restarts the countdown. (The auto-demos move a ghost
+    // hand visually and dispatch no pointer events, so they don't reset it.)
+    ['pointerdown', 'touchstart', 'keydown'].forEach(ev =>
+      window.addEventListener(ev, arm, { passive: true, capture: true }));
+  }, { once: true });
+}
 
 /* Ambient background track — "Calm your Nervous System · 432 Hz" — loops forever
    under the whole interface. Browsers block autoplay until a user gesture, so it
