@@ -69,6 +69,27 @@ const PROFILES = {
 };
 const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
 
+/* ---- IDLE GALLERY -------------------------------------------------------
+   While the interface still shows its opening screen (nobody has pressed
+   "לחץ להתחלה"), the display shows a 4×5 grid of 20 fixed, each-different
+   talismans, every one animating with its symbols' own motions. It is one
+   WEBGL canvas: each mini-jewel's grid transform is BAKED into its symbol
+   instances (position + scale), because p5's strokeWeight is screen-space and
+   would NOT shrink with a matrix scale() — baking s.s makes the dots scale too.
+   The moment the interface goes active, the display swaps to the single live
+   jewel (galleryMode off). */
+const GALLERY_COLS = 4, GALLERY_ROWS = 5;
+const GALLERY_PALETTE = [PALETTE.tan, PALETTE.orange, PALETTE.cream]; // never dark → visible on the dark screen
+const GALLERY_CONFIGS = [
+  ['hamsa', 'rimon'],            ['eye', 'lotus', 'fish'],      ['scarab', 'djed'],           ['anah', 'spiral'],
+  ['moon', 'tiltan', 'dharma'],  ['pyramid', 'horseshoe'],      ['vegvisir', 'artichoke'],    ['hamsa', 'eye', 'moon'],
+  ['rimon', 'lotus'],            ['fish', 'spiral', 'anah'],     ['djed', 'pyramid'],          ['scarab', 'tiltan'],
+  ['dharma', 'horseshoe', 'moon'], ['lotus', 'artichoke'],      ['eye', 'hamsa'],             ['spiral', 'vegvisir', 'rimon'],
+  ['moon', 'fish'],              ['tiltan', 'djed', 'eye'],      ['anah', 'lotus', 'horseshoe'], ['pyramid', 'scarab'],
+];
+let galleryMode = false;
+let galleryInstances = null;   // flat list; each carries its baked grid transform
+
 let objFiles = {};
 let built = {};            // key -> symbol object (point cloud ready)
 let buildQueue = [];
@@ -110,7 +131,7 @@ function setup() {
   buildQueue = BUILD_KEYS.slice();
 
   window.__jewel = {
-    setSymbols, reset, setBackground, setGematria, applyEdits,
+    setSymbols, reset, setBackground, setGematria, applyEdits, setGallery,
     isReady: () => finishedBuildingAll
   };
 
@@ -150,6 +171,9 @@ function draw() {
   tick = (millis() - _t0) / FRAME_MS;
   const dtF = Math.min((deltaTime || FRAME_MS) / FRAME_MS, 6); // frames elapsed this draw
   const easeF = 1 - Math.pow(1 - EASE, dtF);
+
+  // Idle gallery (opening screen, nobody touching) → 20 talismans in a grid.
+  if (galleryMode) { drawGallery(); return; }
 
   for (const s of order) {
     if (!s.active) continue;
@@ -227,6 +251,63 @@ function drawOrnament() {
   for (const d of ornamentDots) vertex(d.x, -d.y, 0);
   endShape();
   pop();
+}
+
+/* ---- idle gallery: 20 mini-jewels in a 4×5 grid ------------------------ */
+function setGallery(on) {
+  galleryMode = !!on;
+  if (!on) return;
+  if (finishedBuildingAll && !galleryInstances) buildGallery();  // else built lazily in draw
+}
+// A lightweight symbol instance that reuses a pre-built point cloud (no builder).
+function galleryInstance(key, hex) {
+  const proto = built[key];
+  const col = color(hex);
+  return {
+    key, profile: PROFILES[key], points: proto.points,
+    halfW: proto.halfW, halfH: proto.halfH, halfD: proto.halfD,
+    visible: proto.points.length, x: 0, y: 0, s: 1, lx: 0, ly: 0, phase: 0,
+    cr: red(col), cg: green(col), cb: blue(col),
+    activatedTick: 0, rotOffset: random(1000)
+  };
+}
+// Stack a cell's symbols in a clean vertical column, centred on the cell origin.
+function layoutGalleryCell(insts) {
+  const n = insts.length, OVERLAP = 1.6;
+  const ly = new Array(n); ly[0] = 0;
+  for (let i = 1; i < n; i++) ly[i] = ly[i - 1] + (insts[i - 1].halfH + insts[i].halfH) * OVERLAP;
+  const top = ly[0] - insts[0].halfH, bottom = ly[n - 1] + insts[n - 1].halfH, mid = (top + bottom) / 2;
+  insts.forEach((s, i) => { s.lx = 0; s.ly = ly[i] - mid; });
+}
+function galleryExtent(insts) {
+  let minY = Infinity, maxY = -Infinity, maxHW = 0;
+  insts.forEach(s => { minY = Math.min(minY, s.ly - s.halfH); maxY = Math.max(maxY, s.ly + s.halfH); maxHW = Math.max(maxHW, s.halfW); });
+  return { w: maxHW * 2, h: maxY - minY };
+}
+function buildGallery() {
+  const cellW = CANVAS_W / GALLERY_COLS, cellH = CANVAS_H / GALLERY_ROWS;
+  const all = [];
+  GALLERY_CONFIGS.forEach((keys, idx) => {
+    const c = idx % GALLERY_COLS, r = Math.floor(idx / GALLERY_COLS);
+    const cx = -CANVAS_W / 2 + cellW * (c + 0.5);
+    const cy = -CANVAS_H / 2 + cellH * (r + 0.5);
+    const insts = [];
+    keys.forEach((key, i) => { if (built[key]) insts.push(galleryInstance(key, GALLERY_PALETTE[(idx + i) % GALLERY_PALETTE.length])); });
+    if (!insts.length) return;
+    layoutGalleryCell(insts);
+    const ext = galleryExtent(insts);
+    const scale = Math.min((cellW * 0.80) / (ext.w || 1), (cellH * 0.78) / (ext.h || 1));
+    // Bake the grid transform into each instance (position + scale), so drawSymbol
+    // needs no extra push/scale and the dots shrink WITH the jewel.
+    insts.forEach(s => { s.s = scale; s.x = cx + s.lx * scale; s.y = cy + s.ly * scale; s.phase = idx * 11.7; });
+    all.push(...insts);
+  });
+  galleryInstances = all;
+}
+function drawGallery() {
+  if (!galleryInstances) buildGallery();
+  if (!galleryInstances) return;
+  for (const s of galleryInstances) drawSymbol(s, tick + s.phase);
 }
 
 /* ---- build all point clouds up-front, staged over frames --------------- */

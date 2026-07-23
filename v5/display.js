@@ -8,6 +8,7 @@
 
 const ARTIFACT_CHANNEL = 'zehut-artifact';
 const ARTIFACT_STORAGE_KEY = 'zehut-artifact-data';
+const ACTIVITY_STORAGE_KEY = 'zehut-activity-state';   // 'idle' (opening screen) | 'active'
 
 // Centre-line dot colour per background — the contrast rule that mirrors the
 // interface's background swatches (see LINE_ON in questionnaire.js).
@@ -51,19 +52,34 @@ function applyData(data) {
   }
 }
 
+// Idle vs active: while the interface shows its opening screen (nobody pressed
+// "לחץ להתחלה"), show the 20-talisman gallery; when it goes active, show the
+// single live jewel. Defaults to idle so a freshly-opened display shows the
+// gallery until the interface says otherwise.
+let activity = 'idle';
+try { activity = localStorage.getItem(ACTIVITY_STORAGE_KEY) || 'idle'; } catch (_) { activity = 'idle'; }
+function applyActivity(state) {
+  activity = state;
+  const idle = state !== 'active';
+  document.body.classList.toggle('gallery-on', idle);   // CSS hides the centre line in the gallery
+  if (window.__jewel && window.__jewel.setGallery) window.__jewel.setGallery(idle);
+}
+
 // The engine sets window.__jewel in its p5 setup() and fires 'jewel-loaded'.
 function whenJewelReady(cb) {
   if (window.__jewel) cb();
   else window.addEventListener('jewel-loaded', cb, { once: true });
 }
-whenJewelReady(() => applyData(latest));
+whenJewelReady(() => { applyData(latest); applyActivity(activity); });
 
 // Live updates from the main interface (same-origin, any tab/window).
 try {
   if ('BroadcastChannel' in window) {
     const bc = new BroadcastChannel(ARTIFACT_CHANNEL);
     bc.onmessage = (e) => {
-      if (e.data && e.data.type === 'artifact' && e.data.payload) applyData(e.data.payload);
+      if (!e.data) return;
+      if (e.data.type === 'artifact' && e.data.payload) applyData(e.data.payload);
+      else if (e.data.type === 'activity') applyActivity(e.data.state);
     };
   }
 } catch (_) { /* BroadcastChannel unsupported — storage fallback covers it */ }
@@ -73,5 +89,7 @@ try {
 window.addEventListener('storage', (e) => {
   if (e.key === ARTIFACT_STORAGE_KEY && e.newValue) {
     try { applyData(JSON.parse(e.newValue)); } catch (_) { /* ignore */ }
+  } else if (e.key === ACTIVITY_STORAGE_KEY && e.newValue) {
+    applyActivity(e.newValue);
   }
 });

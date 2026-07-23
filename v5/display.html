@@ -85,6 +85,9 @@
       opacity: 0.9;
       pointer-events: none;
     }
+    /* Idle gallery fills the screen with 20 talismans — the single-jewel centre
+       axis line is not part of it. */
+    body.gallery-on #display-center-line { display: none; }
   </style>
 </head>
 <body>
@@ -92,7 +95,7 @@
   <div id="display-stage" aria-hidden="true"></div>
   <!-- Global p5 + the jewel engine (classic scripts, run before the module). -->
   <script src="/jewel/p5.min.js"></script>
-  <script src="/jewel/jewel-engine.js?v=28"></script>
+  <script src="/jewel/jewel-engine.js?v=29"></script>
   <script type="module" src="display.js"></script>
 </body>
 </html>

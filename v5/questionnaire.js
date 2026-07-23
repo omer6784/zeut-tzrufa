@@ -2347,8 +2347,22 @@ function buildArtifactData(width,height){
    step naturally yields a progressive pendant — no separate logic. */
 const ARTIFACT_CHANNEL = 'zehut-artifact';
 const ARTIFACT_STORAGE_KEY = 'zehut-artifact-data';
+const ACTIVITY_STORAGE_KEY = 'zehut-activity-state';   // 'idle' (opening screen) | 'active'
 let _artifactBC = null;
 try { _artifactBC = ('BroadcastChannel' in window) ? new BroadcastChannel(ARTIFACT_CHANNEL) : null; } catch(_) { _artifactBC = null; }
+
+// Tell the display whether the interface is idle (opening screen, showing the
+// 20-talisman gallery) or active (a visitor pressed "לחץ להתחלה" → single jewel).
+function broadcastActivity(state){
+  try {
+    _artifactBC?.postMessage({ type: 'activity', state });
+    localStorage.setItem(ACTIVITY_STORAGE_KEY, state);
+  } catch(_) { /* best-effort */ }
+}
+// Opening screen is up on load (and after a reload back to it) → gallery.
+broadcastActivity('idle');
+// The visitor pressed "לחץ להתחלה" → the experience begins → single live jewel.
+window.addEventListener('opening-morph-start', () => broadcastActivity('active'));
 
 function broadcastArtifact(){
   try {
