@@ -733,9 +733,9 @@ export function initRootsWidget(container, opts){
   // screen, 3D on the display), driven by onDone → advance(). Inert while dim
   // (no country added yet).
   finishBtn?.addEventListener('click',()=>{
-    if(state.countryDots.length === 0) return;   // still dimmed / disabled
     const raw=inputEl.value.trim();
-    if(raw) addCountry();       // capture a country still in the box
+    if(raw) addCountry();       // capture a country still in the box first
+    if(state.countryDots.length === 0) return;   // nothing entered at all
     onDone && onDone();
   });
 

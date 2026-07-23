@@ -1490,10 +1490,13 @@ function _renderQuestionImpl(idx){
     // map → add countries → "סיימתי" finishes. Drive the shared band from whichever
     // of the (now hidden) widget confirms is currently live, and mirror its wording.
     const originLiveBtn = () => {
+      // A hidden button is NOT live — after phase 1 #roots-done is hidden but keeps
+      // its (non-dim) class, so without the hidden guard the band would click that
+      // stale button instead of #roots-finish and never reach onDone/the symbol window.
       const fin = document.getElementById('roots-finish');
-      if (fin && !fin.classList.contains('is-dim')) return fin;
+      if (fin && !fin.hidden && !fin.classList.contains('is-dim')) return fin;
       const done = document.getElementById('roots-done');
-      if (done && !done.classList.contains('is-dim')) return done;
+      if (done && !done.hidden && !done.classList.contains('is-dim')) return done;
       return null;
     };
     st._stageContinue = () => { const b = originLiveBtn(); if (b) b.click(); };
