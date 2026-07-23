@@ -327,9 +327,10 @@ function buildGallery() {
     const top = ly[0] - insts[0].halfH, bottom = ly[n - 1] + insts[n - 1].halfH, mid = (top + bottom) / 2;
     let maxHW = 0; insts.forEach(s => { maxHW = Math.max(maxHW, s.halfW); });
     const colH = bottom - top, colW = maxHW * 2;
-    // Fit the column inside the frame (frame hugs ~86% of the card).
-    const frameHalfW = innerW * 0.40, frameHalfH = innerH * 0.42;
-    const scale = Math.min((frameHalfW * 2 * 0.62) / (colW || 1), (frameHalfH * 2 * 0.82) / (colH || 1));
+    // Fit the column inside the frame. The symbols fill almost the FULL frame
+    // height so there's only a small gap top/bottom between them and the frame.
+    const frameHalfW = innerW * 0.40, frameHalfH = innerH * 0.44;
+    const scale = Math.min((frameHalfW * 2 * 0.72) / (colW || 1), (frameHalfH * 2 * 0.97) / (colH || 1));
     insts.forEach((s, i) => { s.s = scale; s.x = cx; s.y = cy + (ly[i] - mid) * scale; s.phase = idx * 11.7; });
 
     // Centre line — dots down the axis spanning the symbol column.
