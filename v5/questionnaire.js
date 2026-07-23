@@ -608,10 +608,10 @@ function updateStageBand(qid){
   }
   setBandNote(INSTRUCTIONS[qid] || '');
   sb.btn.textContent = STAGE_CONTINUE_TEXT[qid] || 'המשך';
-  // The light-point stage has NO continue button — drawing the line to the gate
-  // picks a symbol and opens the symbol window directly (see commitWord). Only the
-  // instruction note shows in its band.
-  sb.btn.style.display = (qid === 'word') ? 'none' : '';
+  // These stages have NO continue button — the pick itself opens the symbol window
+  // directly (light-point: line→gate; path: reaching the exit; movement: tapping a
+  // tile). Only the instruction note shows in their band.
+  sb.btn.style.display = (qid === 'word' || qid === 'roots' || qid === 'life-wish') ? 'none' : '';
   if(GATED_STAGES.has(qid)){
     // Dimmed until the stage arms it (see armBand, called on the pick).
     sb.btn.classList.add('is-disabled');
@@ -1584,7 +1584,7 @@ function _renderQuestionImpl(idx){
           st.p5SymbolsByStage[4] = [getRandomSymbol()];
         }
         triggerLayer(5); spawnBurst();
-        setTimeout(() => armBand(advance), 900);   // light up "המשך" once the path lands
+        setTimeout(() => advance(), 900);   // reaching the exit opens the symbol window directly (no "המשך")
       });
     }
   } else if(q.type==='time'){
@@ -1627,7 +1627,7 @@ function _renderQuestionImpl(idx){
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
         st.p5SymbolsByStage[6] = [symbolKey + '.obj'];
         if (st._dotTilesTeardown) { try { st._dotTilesTeardown(); } catch (_) {} st._dotTilesTeardown = null; }
-        armBand(advance);              // light up "המשך"; the press continues
+        advance();                     // no "המשך" — picking a movement opens the symbol window directly
       },
     });
 
