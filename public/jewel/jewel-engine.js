@@ -623,11 +623,11 @@ function layoutSymbols() {
   // The first symbol lands large (a "hero"); every time another symbol joins,
   // the whole group eases down a step — so a new arrival visibly makes room. The
   // per-position SIZE array keeps them from ever being uniform.
-  const HERO_SCALE = 2.6;
-  const SHRINK_PER_ADD = 0.9;
+  const HERO_SCALE = 1.7;    // was 2.6 — the lone first symbol was over-scaled
+  const SHRINK_PER_ADD = 0.94;
   let gs = HERO_SCALE * Math.pow(SHRINK_PER_ADD, n - 1);
 
-  const EXTENT_HALF = 630;   // < the centre line's ±672, so a few line-dots still show above the top + below the bottom symbol
+  const EXTENT_HALF = 650;   // fill more of the centre line (bigger symbols), still ~1–2 line-dots above/below
   const X_LIMIT = 528;
 
   // per-position size / drift / stagger (indexed by add order). Drift + jitter
@@ -638,7 +638,7 @@ function layoutSymbols() {
   const DRIFT = [ 0, 0, 0, 0, 0, 0];
   const YJIT  = [ 0, 0, 0, 0, 0, 0];
 
-  const OVERLAP = 1.65;   // tighter gap than before (was 1.85) — closer + bigger, still clear of overlap
+  const OVERLAP = 1.78;   // clear gap between the (now larger, more uniform) symbols — no overlap
   // Size per symbol: the time-in-stage factor sets the hierarchy when present,
   // otherwise the fixed per-position variation. Order/positions are unchanged.
   const sc = active.map((s, i) => gs * (symbolSizes[i] != null ? symbolSizes[i] : SIZE[i % SIZE.length]));
