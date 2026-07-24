@@ -533,10 +533,7 @@ body::after { display: none !important; }
   background-position: top, bottom, left, right !important;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y !important;
 }
-#virtual-keyboard .vk-key:hover {
-  background-color: #e2bc71 !important;
-  color: #282828 !important;
-}
+/* No :hover on the touch-screen keyboard — a hover colour sticks after a tap. */
 #virtual-keyboard .vk-key.is-pressed {
   background-color: var(--geo-accent) !important;   /* interface orange */
   background-image: none !important;                /* solid fill, drop the dots */

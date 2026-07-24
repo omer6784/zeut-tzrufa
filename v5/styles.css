@@ -6429,7 +6429,7 @@ html:not(.cursor-active) *::after {
    so flip it to cream there. */
 #section-3[data-stage="5"] .stage-band .sb-note { color: #f5f5ed; }
 .stage-band .sb-btn {
-  position: absolute; left: 50%; bottom: calc(60 * var(--sy));    /* ABOVE the bottom grid line (y726) */
+  position: absolute; left: 50%; bottom: calc(80 * var(--sy));    /* ABOVE the bottom grid line (y726) */
   transform: translateX(-50%);
   pointer-events: auto; cursor: pointer;
   font-family: 'ArbelG', sans-serif;
@@ -6690,24 +6690,20 @@ html:not(.cursor-active) *::after {
   color: #f5f5ed !important;
   --grid-dot: rgba(245, 245, 237, 0.7) !important;
 }
-#symbol-window .sw-continue:hover,
-#symbol-window .sw-continue:active,
+/* Press → frame dots + text turn orange (no solid fill). No :hover — touch screen. */
 #symbol-window .sw-continue.is-pressed {
-  background-color: #ff5003 !important;
-  background-image: none !important;   /* solid fill on press — drop the dots */
-  color: #f5f5ed !important;
+  --grid-dot: #ff5003 !important;
+  color: #ff5003 !important;
 }
-/* "אתחול שלב" — the exact same graphic language, in the interface orange. */
+/* "אתחול שלב" — same graphic language; cream frame+text on the dark window,
+   orange on press (matching the shared button mechanism). */
 #symbol-window .sw-restart {
-  color: #fb5716 !important;
-  --grid-dot: rgba(251, 87, 22, 0.75) !important;
-}
-#symbol-window .sw-restart:hover,
-#symbol-window .sw-restart:active,
-#symbol-window .sw-restart.is-pressed {
-  background-color: #fb5716 !important;
-  background-image: none !important;
   color: #f5f5ed !important;
+  --grid-dot: rgba(245, 245, 237, 0.7) !important;
+}
+#symbol-window .sw-restart.is-pressed {
+  --grid-dot: #ff5003 !important;
+  color: #ff5003 !important;
 }
 
 /* Placeholder stages (roots/4, 6, 7) show ONLY the fixed grid — strip the

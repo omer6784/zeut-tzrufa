@@ -1276,23 +1276,15 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
    back on release (driven by JS `.is-pressed`, so it never sticks on a touch
    screen the way :active does). Must out-specify AND follow the shared look
    above, or the dotted frame would paint straight back over the orange fill. */
+/* Press → frame dots + text turn orange (no solid fill), matching the shared
+   button mechanism. --grid-dot cascades to the ::before frame. */
 #section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls .roots-add-country.is-pressed,
 #section-3[data-stage="0"] .roots-widget.state-input .roots-finish.is-pressed,
 #section-3[data-stage="0"] .roots-add-country.is-pressed,
-#section-3[data-stage="0"] .roots-widget.state-input .roots-finish.is-pressed,
 #section-3[data-stage="0"] #roots-done.is-pressed {
-  background-color: #fb5716 !important;
-  background-image: none !important;
-  color: #f5f5ed !important;
+  --grid-dot: #ff5003 !important;
+  color: #ff5003 !important;
   opacity: 1 !important;
-}
-/* The frame moved to ::before, so the pressed state's `background-image: none`
-   no longer reaches it — drop the dots (and the breathing) here instead, or the
-   rectangle would keep pulsing on top of the solid orange fill. */
-#section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls .roots-add-country.is-pressed::before,
-#section-3[data-stage="0"] .roots-widget.state-input .roots-finish.is-pressed::before,
-#section-3[data-stage="0"] #roots-done.is-pressed::before {
-  background-image: none;
 }
 /* Note becomes a two-row stack: the instruction, then "סיימתי" under it,
    both flush to the right edge (RTL). */

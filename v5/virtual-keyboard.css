@@ -60,12 +60,7 @@
   transition: background-color 0.12s ease, color 0.12s ease, transform 0.08s ease;
 }
 
-#virtual-keyboard .vk-key:hover {
-  background: #e2bc71;
-  color: #282828;
-  border-color: #e2bc71;
-}
-
+/* No :hover on the touch screen (would stick after a tap). */
 #virtual-keyboard .vk-key:active {
   background: #976b43;
   color: #1c1c1c;
