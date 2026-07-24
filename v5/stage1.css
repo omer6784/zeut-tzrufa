@@ -741,6 +741,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   align-items: center !important;
   gap: 8px !important;
   position: relative !important;
+  margin-top: 20px !important;   /* writing line lowered 20px */
 }
 /* The orange custom caret was removed — the input's own native (dark) caret is
    the only writing marker now (there used to be two: this orange one + the native). */
@@ -1240,7 +1241,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
    it (left). */
 #section-3[data-stage="0"] .roots-widget.state-input .roots-actions-row {
   position: absolute !important;
-  bottom: 10px !important;
+  bottom: 30px !important;   /* "הוסף" raised 20px */
   left: 0 !important;
   right: 0 !important;
   display: flex !important;

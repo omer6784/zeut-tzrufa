@@ -6474,11 +6474,11 @@ html:not(.cursor-active) *::after {
    be placed freely (the band anchors it to the bottom otherwise). */
 #section-3.origin-input-phase .stage-band .sb-btn {
   position: fixed !important;
-  left: calc(150 * var(--sx)) !important;
+  left: calc(150 * var(--sx) - 10px) !important;   /* 10px left */
   right: auto !important;
   top: auto !important;
-  /* Sit just ABOVE the horizontal map/keyboard divider (726·sy − 46 − --kb-band). */
-  bottom: calc(100vh - (726 * var(--sy) - 46px - var(--kb-band)) + 14px) !important;
+  /* Sit just ABOVE the horizontal map/keyboard divider (726·sy − 46 − --kb-band); +10px up. */
+  bottom: calc(100vh - (726 * var(--sy) - 46px - var(--kb-band)) + 24px) !important;
   transform: none !important;
   z-index: 1002 !important;
 }
