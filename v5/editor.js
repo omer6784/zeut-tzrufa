@@ -169,9 +169,21 @@ export function mountEditor({ st, broadcast, symbolName }) {
     const pad = document.createElement('div');
     pad.className = 'ed-pad';
     const STEP = 45;
-    const nudge = (dx, dy) => { const ed = editAt(selected); ed.dx = (ed.dx || 0) + dx; ed.dy = (ed.dy || 0) + dy; push(); record(); };
+    const nudge = (dx, dy) => {
+      const ed = editAt(selected);
+      ed.dx = (ed.dx || 0) + dx;
+      let ndy = (ed.dy || 0) + dy;
+      // The TOP symbol can't be raised above its place (dy ≥ 0); the BOTTOM can't be
+      // lowered below its place (dy ≤ 0). Keeps them within the centre line so its
+      // dots always show above the top and below the bottom.
+      if (selected === 0) ndy = Math.max(0, ndy);
+      if (selected === symbols.length - 1) ndy = Math.min(0, ndy);
+      ed.dy = ndy;
+      push(); record();
+    };
     const mk = (label, dx, dy) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', () => nudge(dx, dy)); return b; };
-    pad.append(mk('↑', 0, -STEP), mk('↓', 0, STEP), mk('→', STEP, 0), mk('←', -STEP, 0));
+    // Only up/down — symbols stack vertically on the axis, so no left/right.
+    pad.append(mk('↑', 0, -STEP), mk('↓', 0, STEP));
     posWrap.appendChild(pad);
     controls.appendChild(posWrap);
 

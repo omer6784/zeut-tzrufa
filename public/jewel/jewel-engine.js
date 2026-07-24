@@ -627,7 +627,7 @@ function layoutSymbols() {
   const SHRINK_PER_ADD = 0.9;
   let gs = HERO_SCALE * Math.pow(SHRINK_PER_ADD, n - 1);
 
-  const EXTENT_HALF = 740;
+  const EXTENT_HALF = 600;   // < the centre line's ±672, so a few line-dots always show above the top + below the bottom symbol
   const X_LIMIT = 528;
 
   // per-position size / drift / stagger (indexed by add order). Drift + jitter
