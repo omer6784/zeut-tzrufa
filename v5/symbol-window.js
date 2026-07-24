@@ -376,10 +376,8 @@ export function openSymbolWindow(motif, opts = {}) {
   if (contourInstance) { try { contourInstance.remove(); } catch (_) {} contourInstance = null; }
   symbolHost.innerHTML = '';
 
-  // 1. Open — the frame scales up from the centre (CSS). Play the symbol sound in
-  //    sync (the same moment the 3D symbol appears on the display screen).
+  // 1. Open — the frame scales up from the centre (CSS).
   el.classList.add('is-open');
-  playSymbolSound();
 
   // Hide the stage's gold dots (both the clickable layer and the decorative
   // float layer) while the window is up — otherwise they peek through the
@@ -394,6 +392,8 @@ export function openSymbolWindow(motif, opts = {}) {
 
   // 3. Then the symbol contour animates in; 4. its completion types the text.
   seqTimers.push(setTimeout(() => {
+    // Sound starts the moment the symbol begins drawing in 2D on the window.
+    playSymbolSound();
     if (opts.gematria) {                 // gematria mode → the dotted ornament frame
       contourInstance = mountGematriaOrnament(symbolHost, opts.gematria.value);
       revealText(el, info);
