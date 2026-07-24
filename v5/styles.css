@@ -6394,6 +6394,9 @@ html:not(.cursor-active) *::after {
   font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
   direction: rtl; text-align: right;
 }
+/* Path stage sits on the interface ORANGE — the orange note would be invisible,
+   so flip it to cream there. */
+#section-3[data-stage="5"] .stage-band .sb-note { color: #f5f5ed; }
 .stage-band .sb-btn {
   position: absolute; left: 50%; bottom: calc(30 * var(--sy));    /* below the instruction */
   transform: translateX(-50%);
