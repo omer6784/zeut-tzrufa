@@ -740,21 +740,8 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   gap: 8px !important;
   position: relative !important;
 }
-/* The writing line carries no placeholder text now — just a blinking caret that
-   signals "type a country name here". Shown only while the field is empty. */
-#section-3[data-stage="0"] .roots-widget.state-input .roots-input-row:has(.roots-input:placeholder-shown)::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 9px;
-  bottom: 17px;
-  width: 2px;
-  transform: translateX(-50%);
-  background: #fb5716;
-  animation: roots-caret-blink 1.06s steps(1) infinite;
-  pointer-events: none;
-}
-@keyframes roots-caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+/* The orange custom caret was removed — the input's own native (dark) caret is
+   the only writing marker now (there used to be two: this orange one + the native). */
 #section-3[data-stage="0"] #roots-scene,
 #section-3[data-stage="0"] .roots-canvas-wrap canvas,
 #section-3[data-stage="0"] .roots-canvas-wrap svg {

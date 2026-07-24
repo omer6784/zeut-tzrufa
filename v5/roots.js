@@ -975,10 +975,16 @@ export function initRootsWidget(container, opts){
       }
     }
     ctx.fillStyle = '#e2bc71';                  // gold land on the light (cream) plate
+    // The selected-continent dots twinkle gently — a subtle per-dot shimmer in
+    // opacity + size (phase from the dot's own seed) so the map reads as alive.
+    const twNow = performance.now() * 0.001;
     for(const p of pts){
       if(p[2] > state.mapT) continue;           // revealed once mapT passes its threshold
-      ctx.beginPath(); ctx.arc(p[0], p[1], 1.15, 0, Math.PI*2); ctx.fill();
+      const s = Math.sin(twNow * 2.4 + p[2] * 40);   // -1..1, staggered per dot
+      ctx.globalAlpha = 0.78 + 0.22 * s;             // 0.56 .. 1.0
+      ctx.beginPath(); ctx.arc(p[0], p[1], 1.15 * (1 + 0.16 * s), 0, Math.PI*2); ctx.fill();
     }
+    ctx.globalAlpha = 1;
     // Orange markers for the countries typed in via "הוסף מדינה", each with
     // its name written just below its own dot (same font/size/weight as the
     // continent labels).
