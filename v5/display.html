@@ -69,10 +69,11 @@
     #display-center-line {
       position: fixed;
       left: 50%;
-      /* The line spans the "long frame" the symbols hang on — ~70% of the
-         display height, centred vertically (not the full screen). */
-      top: 15%;
-      bottom: 15%;
+      /* The line spans the "long frame" the symbols hang on — extended so it
+         still shows a few dots above the top + below the bottom symbol now that
+         the symbols are much bigger (EXTENT_HALF ±870 of the 960 canvas half). */
+      top: 4%;
+      bottom: 4%;
       width: 3px;
       transform: translateX(-50%);
       z-index: 1;   /* above the plate/glow, BEHIND the jewel */
@@ -95,7 +96,7 @@
   <div id="display-stage" aria-hidden="true"></div>
   <!-- Global p5 + the jewel engine (classic scripts, run before the module). -->
   <script src="/jewel/p5.min.js"></script>
-  <script src="/jewel/jewel-engine.js?v=46"></script>
+  <script src="/jewel/jewel-engine.js?v=49"></script>
   <script type="module" src="display.js"></script>
 </body>
 </html>
