@@ -1246,6 +1246,7 @@ function _renderQuestionImpl(idx){
   if (st._driveTeardown) { try { st._driveTeardown(); } catch (_) {} st._driveTeardown = null; }
   if (st._originBandPoll) { clearInterval(st._originBandPoll); st._originBandPoll = null; }
   if (st._lightEntryTimers) { st._lightEntryTimers.forEach(clearTimeout); st._lightEntryTimers = []; }
+  if (st._pathsEntryTimers) { st._pathsEntryTimers.forEach(clearTimeout); st._pathsEntryTimers = []; }
   st._globeDemoToken = (st._globeDemoToken || 0) + 1;   // kill any running globe demo
   st._roots = null;
   st._calib = null;
@@ -1576,7 +1577,7 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('roots-tree-active');
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
-      midContainer.innerHTML = `<div id="paths-game"></div><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
+      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
@@ -1586,6 +1587,16 @@ function _renderQuestionImpl(idx){
         triggerLayer(5); spawnBurst();
         setTimeout(() => advance(), 900);   // reaching the exit opens the symbol window directly (no "המשך")
       });
+      // Entry choreography: the maze shows LARGE, then shrinks a touch, and the
+      // title "מה המסלול שלך?" rises from beneath it + types in, settling below.
+      const pg = document.getElementById('paths-game');
+      const ptitle = document.querySelector('#section-3 .paths-title');
+      // Until the PNG is added, hide it so no broken-image box shows.
+      if (ptitle) ptitle.addEventListener('error', () => { ptitle.style.display = 'none'; }, { once: true });
+      st._pathsEntryTimers = st._pathsEntryTimers || [];
+      const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
+      pT(() => { if (pg) pg.classList.add('paths-shrunk'); }, 1200);
+      pT(() => { if (ptitle) ptitle.classList.add('is-in'); }, 1950);
     }
   } else if(q.type==='time'){
     wrap.innerHTML = '';

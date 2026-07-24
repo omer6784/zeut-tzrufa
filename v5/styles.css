@@ -2517,8 +2517,36 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   z-index: 3;
 }
 /* Enlarged — the maze fills the whole content rectangle (below the top strip
-   where the shared instruction note sits). Same viewBox aspect → no distortion. */
-#section-3[data-stage="5"] .paths-game-svg { width: 100%; height: 100%; }
+   where the shared instruction note sits). Same viewBox aspect → no distortion.
+   On entry it shows LARGE, then eases down a touch to make room for the title. */
+#section-3[data-stage="5"] .paths-game-svg {
+  width: 100%; height: 100%;
+  transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);
+}
+#section-3[data-stage="5"] #paths-game.paths-shrunk .paths-game-svg {
+  transform: translateY(-6%) scale(0.84);
+}
+/* Title "מה המסלול שלך?" — a light dotted PNG that rises from beneath the maze and
+   TYPES in (stepped clip reveal from the right, RTL), settling below the maze. */
+#section-3[data-stage="5"] .paths-title {
+  position: fixed;
+  left: 50%;
+  top: calc(600 * var(--sy));
+  transform: translate(-50%, 26px);
+  width: min(52vw, 680px);
+  height: auto;
+  z-index: 5;
+  opacity: 0;
+  clip-path: inset(0 0 0 100%);
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+}
+#section-3[data-stage="5"] .paths-title.is-in {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  animation: paths-type 0.8s steps(13, end) 0.3s forwards;
+}
+@keyframes paths-type { to { clip-path: inset(0 0 0 0); } }
 
 /* ── Path stage on the ORANGE background — explicit colour scheme ──
    Outer grid LINES → cream; the stage instruction + restart button → cream. The
