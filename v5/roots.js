@@ -718,13 +718,61 @@ export function initRootsWidget(container, opts){
     const raw=inputEl.value.trim(); if(!raw) return;
     const geo = findCountry(raw);
     if(geo){
-      state.countryDots.push({ lon: geo.lon, lat: geo.lat, name: geo.name });
+      // The marker starts HIDDEN — an orange dotted line first travels from the
+      // writing line up to the country's map position, then vanishes and the dot +
+      // name appear.
+      const dot = { lon: geo.lon, lat: geo.lat, name: geo.name, _pending: true };
+      state.countryDots.push(dot);
+      const inr = inputEl.getBoundingClientRect();
+      const start = { x: inr.left + inr.width / 2, y: inr.top + inr.height / 2 };
+      const end = countryClientPos(geo.lon, geo.lat);
+      animateCountryLine(start, end, () => { dot._pending = false; });
     }
     if (onAdd) onAdd(raw);
     inputEl.value='';
     inputEl.focus();
     // First country added → "סיימתי" lights up (loses .is-dim).
     if(state.countryDots.length >= 1) finishBtn?.classList.remove('is-dim');
+  }
+  // Client-space position of a lon/lat on the settled map (canvas coords → screen).
+  function countryClientPos(lon, lat){
+    const v = state.view, f = mapFit(v);
+    const px = f.ox + (lon - v.lonMin) * f.s;
+    const py = f.oy + (v.latMax - lat) * f.s;
+    const r = canvas.getBoundingClientRect();
+    return { x: r.left + px / W * r.width, y: r.top + py / H * r.height };
+  }
+  // Orange dotted line (interface colour) that draws from `start` to `end`, then
+  // fades; `onDone` fires when it arrives (to reveal the marker).
+  function animateCountryLine(start, end, onDone){
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.style.cssText = 'position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1100;pointer-events:none;overflow:visible;';
+    document.body.appendChild(svg);
+    const dx = end.x - start.x, dy = end.y - start.y, len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len, GAP = 9;
+    const dots = [];
+    for(let d = GAP; d < len; d += GAP){
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', (start.x + ux * d).toFixed(1));
+      c.setAttribute('cy', (start.y + uy * d).toFixed(1));
+      c.setAttribute('r', '1.6'); c.setAttribute('fill', '#fb5716');
+      c.style.opacity = '0';
+      svg.appendChild(c); dots.push({ el: c, dist: d });
+    }
+    const DUR = 620, t0 = performance.now(), ease = t => 1 - Math.pow(1 - t, 2);
+    let raf2 = 0;
+    function step(now){
+      const reached = ease(Math.min((now - t0) / DUR, 1)) * len;
+      for(const dd of dots) if(dd.dist <= reached) dd.el.style.opacity = '1';
+      if(now - t0 < DUR){ raf2 = requestAnimationFrame(step); }
+      else {
+        onDone && onDone();
+        svg.style.transition = 'opacity 0.35s ease'; svg.style.opacity = '0';
+        setTimeout(() => { try { svg.remove(); } catch(_){} }, 400);
+      }
+    }
+    raf2 = requestAnimationFrame(step);
   }
   sendBtn.addEventListener('click',addCountry);
   inputEl.addEventListener('keydown',e=>{ if(e.key==='Enter') addCountry(); });
@@ -990,6 +1038,7 @@ export function initRootsWidget(container, opts){
     // continent labels).
     const isNegC = document.body.classList.contains('theme-negative');
     for(const p of state.countryDots){
+      if(p._pending) continue;   // hidden until the orange line finishes travelling to it
       const px = f.ox+(p.lon-v.lonMin)*f.s;
       const py = f.oy+(v.latMax-p.lat)*f.s;
       ctx.fillStyle='#fb5716';
