@@ -1086,7 +1086,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
     var(--grid-dot-size) var(--grid-dot-gap) !important;
   background-position: top, bottom, left, right !important;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y !important;
-  color: var(--s1-orange) !important;
+  color: var(--grid-dot) !important;   /* frame + text follow the grid-dot: dark on the cream stage */
   font-family: 'ArbelG', sans-serif !important;
   font-size: clamp(10px, 0.85vw, 13px) !important;
   letter-spacing: 0.03em !important;
