@@ -351,7 +351,10 @@
       "Bash(curl -s -I \"http://localhost:5173/sounds/bg-432hz.m4a\")",
       "Bash(curl -s -r 0-1023 -o /dev/null -w \"range status:%{http_code} got:%{size_download} bytes\\\\n\" \"http://localhost:5173/sounds/bg-432hz.m4a\")",
       "Bash(awk -F: '$1>=3900 && $1<=4100')",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "Bash(cp \"design option 4/refernces/stage 4/מה המסלול שלך?.png\" \"public/image/v5-stage5/path-title.png\")",
+      "Bash(sips -g pixelWidth -g pixelHeight \"public/image/v5-stage5/path-title.png\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\\\\n\" \"http://localhost:5173/image/v5-stage5/path-title.png\")"
     ]
   },
   "hooks": {
