@@ -42,6 +42,9 @@ function applyData(data) {
   if (!window.__jewel) return;
   if (data.background) window.__jewel.setBackground(data.background);
   const keys = Array.isArray(data.symbols3d) ? data.symbols3d : [];
+  // Per-symbol size (time-in-stage → hierarchy) BEFORE setSymbols, so the first
+  // layout already uses it.
+  if (window.__jewel.setSymbolSizes) window.__jewel.setSymbolSizes(Array.isArray(data.symbolSizes) ? data.symbolSizes : []);
   window.__jewel.setSymbols(keys);
   // Name's gematria → the dotted Moroccan floral frame around the jewel.
   if (window.__jewel.setGematria) window.__jewel.setGematria(data.gematria || 0);

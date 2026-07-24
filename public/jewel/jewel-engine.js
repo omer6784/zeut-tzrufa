@@ -140,6 +140,10 @@ let ornamentDots = [];     // the Moroccan floral frame — EXACTLY `gematria` d
 // of the auto layout/colour so the display reflects the user's manual edits.
 let symbolEdits = [];
 let frameColorOverride = null;
+// Per-symbol size factor (indexed like `order`), from the time the visitor spent
+// in each stage — longer → bigger, so the sizes set the hierarchy. Replaces the
+// fixed per-position size array when present.
+let symbolSizes = [];
 
 /* ======================================================================= */
 function preload() {
@@ -162,7 +166,7 @@ function setup() {
   buildQueue = BUILD_KEYS.slice();
 
   window.__jewel = {
-    setSymbols, reset, setBackground, setGematria, applyEdits, setGallery,
+    setSymbols, reset, setBackground, setGematria, applyEdits, setGallery, setSymbolSizes,
     isReady: () => finishedBuildingAll
   };
 
@@ -535,6 +539,12 @@ function applyEdits(edits) {
   order.forEach((s, i) => applySymbolColor(s, i));
   layoutSymbols();
 }
+/* Per-symbol size factors (time-in-stage → hierarchy). Re-lays out so the sizes
+   and the collision-free spacing update together. */
+function setSymbolSizes(sizes) {
+  symbolSizes = Array.isArray(sizes) ? sizes.slice() : [];
+  if (finishedBuildingAll) layoutSymbols();
+}
 /* Set s.cr/cg/cb from the per-symbol edit colour if present, else its auto colour. */
 function applySymbolColor(s, i) {
   const hex = (symbolEdits[i] && symbolEdits[i].color) || s.assignedColor;
@@ -629,7 +639,9 @@ function layoutSymbols() {
   const YJIT  = [ 0, 0, 0, 0, 0, 0];
 
   const OVERLAP = 1.85;   // clear gap between symbols so their (animated) shapes never touch
-  const sc = active.map((s, i) => gs * SIZE[i % SIZE.length]);
+  // Size per symbol: the time-in-stage factor sets the hierarchy when present,
+  // otherwise the fixed per-position variation. Order/positions are unchanged.
+  const sc = active.map((s, i) => gs * (symbolSizes[i] != null ? symbolSizes[i] : SIZE[i % SIZE.length]));
 
   const cy = new Array(n);
   cy[0] = 0;

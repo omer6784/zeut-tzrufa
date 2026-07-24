@@ -1260,6 +1260,7 @@ function _renderQuestionImpl(idx){
   const dotsContainer = document.getElementById('s2-dots-container');
   if (dotsContainer) dotsContainer.innerHTML = '';
   st.current=idx;
+  st._stageEnteredAt = performance.now();   // for time-based symbol sizing (advance)
   updateLoadBar();
   updateV5StepProgress(idx);
   document.getElementById('section-3')?.setAttribute('data-stage', (q.styleStage!=null ? q.styleStage : idx));
@@ -1945,7 +1946,10 @@ function restartStage(){
   if (id === 'background') st.background = null;
   if (id === 'life-wish') st.lifeWishSymbol = null;
   // Drop any symbols this stage had already added to the accumulating stack.
-  if (st.chosenBaseline != null) st.chosenSymbols = (st.chosenSymbols || []).slice(0, st.chosenBaseline);
+  if (st.chosenBaseline != null) {
+    st.chosenSymbols = (st.chosenSymbols || []).slice(0, st.chosenBaseline);
+    st.chosenSymbolSizes = (st.chosenSymbolSizes || []).slice(0, st.chosenBaseline);
+  }
   renderQuestion(st.current);
   broadcastArtifact();   // push the reverted pendant to the external display
 }
@@ -2083,6 +2087,12 @@ function applyTimeSky(hf){
   sec.classList.toggle('tw-daylight', a >= 0.5);   // day → dark content, night → light
 }
 
+/* Map time-spent-in-a-stage (ms) → a symbol size factor. Longer → bigger, clamped
+   so the smallest and largest still read together and never dominate. */
+function timeToSymbolSize(dt){
+  const s = 0.8 + (dt || 0) / 12000;   // +1.0 over ~12s in the stage
+  return Math.max(0.78, Math.min(1.7, s));
+}
 function advance(){
   const qid = QUESTIONS[st.current].id;
   triggerLayer(LAYER_BY_ID[qid]); spawnBurst();
@@ -2109,7 +2119,15 @@ function advance(){
     const alt = pickRandomSymbol();
     if(alt) sym = alt;
   }
-  if(sym) st.chosenSymbols.push(sym);
+  if(sym){
+    st.chosenSymbols.push(sym);
+    // Size this symbol by how long the visitor spent in THIS stage — longer → bigger,
+    // so the times set the hierarchy (positions/order unchanged; layout keeps them
+    // from overlapping). Aligned with chosenSymbols.
+    st.chosenSymbolSizes = st.chosenSymbolSizes || [];
+    const dt = performance.now() - (st._stageEnteredAt || performance.now());
+    st.chosenSymbolSizes.push(timeToSymbolSize(dt));
+  }
   broadcastArtifact();   // 3D display builds in parallel with the window below
 
   // The symbol window opens on the touch screen (grow-in → dotted divider draws →
@@ -2334,6 +2352,8 @@ function buildArtifactData(width,height){
     background: st.background || null,
     // Accumulating stack of the randomly-chosen symbols (one per stage-end).
     symbols3d: (st.chosenSymbols || []).slice(),
+    // Per-symbol size factor from the time spent in each stage (aligned with symbols3d).
+    symbolSizes: (st.chosenSymbolSizes || []).slice(),
     seed:  origins.length ? { origins: origins.map(motifForCountry) } : null,
     sides: sidesMotif ? { motif: sidesMotif, rotation: sideRot } : null,
     stars: (st.answers.stars||[]).slice(),
