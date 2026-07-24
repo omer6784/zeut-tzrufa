@@ -6429,7 +6429,7 @@ html:not(.cursor-active) *::after {
    so flip it to cream there. */
 #section-3[data-stage="5"] .stage-band .sb-note { color: #f5f5ed; }
 .stage-band .sb-btn {
-  position: absolute; left: 50%; bottom: calc(30 * var(--sy));    /* below the instruction */
+  position: absolute; left: 50%; bottom: calc(60 * var(--sy));    /* ABOVE the bottom grid line (y726) */
   transform: translateX(-50%);
   pointer-events: auto; cursor: pointer;
   font-family: 'ArbelG', sans-serif;
