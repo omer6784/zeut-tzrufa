@@ -354,7 +354,9 @@
       "Bash(git fetch *)",
       "Bash(cp \"design option 4/refernces/stage 4/מה המסלול שלך?.png\" \"public/image/v5-stage5/path-title.png\")",
       "Bash(sips -g pixelWidth -g pixelHeight \"public/image/v5-stage5/path-title.png\")",
-      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\\\\n\" \"http://localhost:5173/image/v5-stage5/path-title.png\")"
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type}\\\\n\" \"http://localhost:5173/image/v5-stage5/path-title.png\")",
+      "Bash(sed -i '' -e 's/656 \\\\* var\\(--sy\\)/726 * var\\(--sy\\)/g' -e 's/\\(656 - 85\\)/\\(726 - 85\\)/g' v5/stage1.css)",
+      "Bash(sed -i '' 's/656 \\\\* var\\(--sy\\)/726 * var\\(--sy\\)/g' v5/virtual-keyboard.css)"
     ]
   },
   "hooks": {

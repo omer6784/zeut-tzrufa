@@ -6459,6 +6459,18 @@ html:not(.cursor-active) *::after {
 .stage-band .sb-btn.is-disabled {
   opacity: 0.32; pointer-events: none; cursor: default;
 }
+/* Origin INPUT phase only: the "הזנתי, אפשר להמשיך" button moves to the empty
+   area on the LEFT (below the map), not the centred bottom slot. Fixed so it can
+   be placed freely (the band anchors it to the bottom otherwise). */
+#section-3.origin-input-phase .stage-band .sb-btn {
+  position: fixed !important;
+  left: calc(150 * var(--sx)) !important;
+  right: auto !important;
+  top: calc(490 * var(--sy)) !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 1002 !important;
+}
 
 /* The per-stage instruction now lives in the bottom band, not the top slot. */
 #q-instruction { display: none !important; }

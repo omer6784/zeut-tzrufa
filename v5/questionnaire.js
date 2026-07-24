@@ -1245,6 +1245,7 @@ function _renderQuestionImpl(idx){
   if (st._calibTeardown) { try { st._calibTeardown(); } catch (_) {} st._calibTeardown = null; }
   if (st._driveTeardown) { try { st._driveTeardown(); } catch (_) {} st._driveTeardown = null; }
   if (st._originBandPoll) { clearInterval(st._originBandPoll); st._originBandPoll = null; }
+  document.getElementById('section-3')?.classList.remove('origin-input-phase');
   if (st._lightEntryTimers) { st._lightEntryTimers.forEach(clearTimeout); st._lightEntryTimers = []; }
   if (st._pathsEntryTimers) { st._pathsEntryTimers.forEach(clearTimeout); st._pathsEntryTimers = []; }
   st._globeDemoToken = (st._globeDemoToken || 0) + 1;   // kill any running globe demo
@@ -1561,6 +1562,9 @@ function _renderQuestionImpl(idx){
       const inputPhase = !!document.querySelector('.roots-widget.state-input');
       sb.btn.textContent = inputPhase ? 'הזנתי, אפשר להמשיך' : 'סימנתי';
       setBandNote(inputPhase ? 'הזן את ארצות המוצא' : (INSTRUCTIONS.origin || ''));
+      // Flag the input phase so CSS can move the band button ("הזנתי") to the
+      // empty area on the LEFT (only there — not the earlier "סימנתי" placement).
+      document.getElementById('section-3')?.classList.toggle('origin-input-phase', inputPhase);
     }, 200);
     // Virtual Hebrew keyboard — attaches once the country input is mounted
     // (the roots widget shows it lazily on phase change), so retry briefly.

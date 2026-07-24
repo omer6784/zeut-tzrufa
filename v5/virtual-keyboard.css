@@ -10,7 +10,7 @@
      remaining width to its LEFT. */
   right: calc(100 * var(--sx));
   left: auto;
-  bottom: calc(100vh - 656 * var(--sy) + 26px);
+  bottom: calc(100vh - 726 * var(--sy) + 26px);
   transform: translateY(0);
   width: calc((100vw - 200 * var(--sx)) * 0.66);
   z-index: 1000;
