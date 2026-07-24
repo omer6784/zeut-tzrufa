@@ -545,7 +545,7 @@ const INSTRUCTIONS = {
   background: 'בחר צבע רקע לתכשיט שלך',
   origin: 'בחר את היבשות מהן הגיעו בני משפחתך',
   word: 'מתח קו בין הנקודה לעיגול',
-  roots: '',   /* shown in-panel at the top of the maze instead (#paths-instruction) */
+  roots: 'גררו את הנקודה במסלול שאתם בוחרים',
   stars: 'גללו ובחרו את השעה הרצויה.',
   personal: 'בחרו את הכוח שמוביל אתכם:',
 };
@@ -1576,7 +1576,7 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('roots-tree-active');
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
-      midContainer.innerHTML = `<div id="paths-instruction">גררו את הנקודה במסלול שאתם בוחרים</div><div id="paths-game"></div><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
+      midContainer.innerHTML = `<div id="paths-game"></div><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
@@ -3903,9 +3903,10 @@ function buildPathsGame(host, onSelect){
   const exitNode = getNode(NX - 1, MID); exitNode.isSink = true;
   const sinks = [exitNode];
   exitNode.symbol = PATHS_SYMBOL_POOL[Math.floor(Math.random() * PATHS_SYMBOL_POOL.length)];
-  // A straight dotted line directly from the entry to the exit (both on the MID
-  // row) — a real edge, so it renders as a dotted rail and is traceable too.
-  mkEdge(source, exitNode, 'direct');
+  // ONE clean straight corridor along the MID row from entry to exit. Built via
+  // unitEdge so any segment the maze already carved there is REUSED (deduped) —
+  // no overlapping/doubled dots, and the tracer passes cleanly.
+  for (let c = 0; c < NX - 1; c++) unitEdge(c, MID, c + 1, MID);
   nodes.forEach(n => { n.isJunction = false; });        // no prominent junction dots
 
   // Flip horizontally so the ENTRY (source) is on the RIGHT and the EXIT on the

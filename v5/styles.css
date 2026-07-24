@@ -2516,24 +2516,9 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   justify-content: center;
   z-index: 3;
 }
-/* Enlarged — the maze fills the whole content rectangle (below the instruction).
-   Same viewBox aspect (built from the host) → no distortion. */
+/* Enlarged — the maze fills the whole content rectangle (below the top strip
+   where the shared instruction note sits). Same viewBox aspect → no distortion. */
 #section-3[data-stage="5"] .paths-game-svg { width: 100%; height: 100%; }
-/* Instruction text at the TOP of the content rectangle. */
-#section-3[data-stage="5"] #paths-instruction {
-  position: fixed;
-  left: calc(100 * var(--sx));
-  right: calc(100 * var(--sx));
-  top: calc(102 * var(--sy));
-  text-align: center;
-  direction: rtl;
-  font-family: 'ArbelG', sans-serif;
-  font-size: clamp(14px, 1.15vw, 18px);
-  letter-spacing: 0.02em;
-  color: #f5f5ed;
-  z-index: 4;
-  pointer-events: none;
-}
 
 /* ── Path stage on the ORANGE background — explicit colour scheme ──
    Outer grid LINES → cream; the stage instruction + restart button → cream. The
