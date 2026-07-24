@@ -390,10 +390,12 @@ export function openSymbolWindow(motif, opts = {}) {
   // 2. Divider draws top→bottom.
   seqTimers.push(setTimeout(() => divider.classList.add('is-drawn'), 320));
 
+  // Sound starts a touch AFTER the contour mounts, so it lands with the symbol
+  // visibly beginning to draw (not the instant the mount is scheduled).
+  seqTimers.push(setTimeout(playSymbolSound, 1150));
+
   // 3. Then the symbol contour animates in; 4. its completion types the text.
   seqTimers.push(setTimeout(() => {
-    // Sound starts the moment the symbol begins drawing in 2D on the window.
-    playSymbolSound();
     if (opts.gematria) {                 // gematria mode → the dotted ornament frame
       contourInstance = mountGematriaOrnament(symbolHost, opts.gematria.value);
       revealText(el, info);
