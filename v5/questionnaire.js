@@ -2094,10 +2094,9 @@ function applyTimeSky(hf){
 /* Map time-spent-in-a-stage (ms) → a symbol size factor. Longer → bigger, clamped
    so the smallest and largest still read together and never dominate. */
 function timeToSymbolSize(dt){
-  // Minimum size = ~the rimon in the reference (floor 1.3); longer dwell → bigger,
-  // up to ~1.8× that. So no symbol is ever tiny, and the hierarchy still reads.
-  const s = 1.2 + (dt || 0) / 7000;    // +1.0 per ~7s
-  return Math.max(1.3, Math.min(2.3, s));
+  // Minimum size = 2 (no symbol is ever small); longer dwell → bigger, up to 3.
+  const s = 1.8 + (dt || 0) / 6000;    // +1.0 per ~6s
+  return Math.max(2.0, Math.min(3.0, s));
 }
 function advance(){
   const qid = QUESTIONS[st.current].id;

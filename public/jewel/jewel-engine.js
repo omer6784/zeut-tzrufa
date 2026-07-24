@@ -627,7 +627,7 @@ function layoutSymbols() {
   const SHRINK_PER_ADD = 0.94;
   let gs = HERO_SCALE * Math.pow(SHRINK_PER_ADD, n - 1);
 
-  const EXTENT_HALF = 905;   // much taller column → the symbols end up far bigger (fills most of the canvas height)
+  const EXTENT_HALF = 920;   // fills most of the canvas height → the symbols are as big as fits
   const X_LIMIT = 528;
 
   // per-position size / drift / stagger (indexed by add order). Drift + jitter

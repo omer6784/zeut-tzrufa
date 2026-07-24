@@ -6436,6 +6436,7 @@ html:not(.cursor-active) *::after {
   font-size: clamp(13px, 0.95vw, 16px); letter-spacing: 0.02em;
   color: var(--grid-dot) !important;   /* beat the generic #section-3 button colour */
   padding: 0.5em 2.3em; border: none; background-color: transparent;
+  border-radius: 0 !important;   /* square corners — the dotted frame is a right angle, not rounded */
   background-image:
     radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
     radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)),
@@ -6459,6 +6460,15 @@ html:not(.cursor-active) *::after {
 .stage-band .sb-btn.is-disabled {
   opacity: 0.32; pointer-events: none; cursor: default;
 }
+/* When ENABLED (not disabled) the button breathes — grows/shrinks like the globe
+   "הוסף" button. The keyframe keeps the centring translateX(-50%) so it stays put. */
+.stage-band .sb-btn:not(.is-disabled) {
+  animation: sb-btn-breathe 1.8s ease-in-out infinite;
+}
+@keyframes sb-btn-breathe {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.06); }
+}
 /* Origin INPUT phase only: the "הזנתי, אפשר להמשיך" button moves to the empty
    area on the LEFT (below the map), not the centred bottom slot. Fixed so it can
    be placed freely (the band anchors it to the bottom otherwise). */
@@ -6471,6 +6481,10 @@ html:not(.cursor-active) *::after {
   bottom: calc(100vh - (726 * var(--sy) - 46px - var(--kb-band)) + 14px) !important;
   transform: none !important;
   z-index: 1002 !important;
+}
+/* Left-anchored (no centring translate) → plain scale breathe when enabled. */
+#section-3.origin-input-phase .stage-band .sb-btn:not(.is-disabled) {
+  animation: dotted-frame-breathe 1.8s ease-in-out infinite;
 }
 
 /* The per-stage instruction now lives in the bottom band, not the top slot. */
@@ -6687,6 +6701,7 @@ html:not(.cursor-active) *::after {
      browser/length-dependent). --grid-dot is set per button below. */
   background-color: transparent !important;
   border: none !important;
+  border-radius: 0 !important;   /* square corners — right-angle dotted frame */
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)), radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)), radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)), radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px)) !important;
   background-size:
     var(--grid-dot-gap) var(--grid-dot-size),
