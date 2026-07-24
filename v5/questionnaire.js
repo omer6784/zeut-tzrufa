@@ -2090,8 +2090,8 @@ function applyTimeSky(hf){
 /* Map time-spent-in-a-stage (ms) → a symbol size factor. Longer → bigger, clamped
    so the smallest and largest still read together and never dominate. */
 function timeToSymbolSize(dt){
-  const s = 0.6 + (dt || 0) / 6000;    // +1.0 per ~6s; ~3.5× spread across the clamp
-  return Math.max(0.6, Math.min(2.1, s));
+  const s = 0.55 + (dt || 0) / 4500;   // steeper: +1.0 per ~4.5s → even a few sec' dwell reads as clearly bigger
+  return Math.max(0.55, Math.min(2.4, s));   // ~4.4× spread → strong hierarchy
 }
 function advance(){
   const qid = QUESTIONS[st.current].id;
