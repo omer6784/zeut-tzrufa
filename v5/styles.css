@@ -6466,8 +6466,9 @@ html:not(.cursor-active) *::after {
   position: fixed !important;
   left: calc(150 * var(--sx)) !important;
   right: auto !important;
-  top: calc(490 * var(--sy)) !important;
-  bottom: auto !important;
+  top: auto !important;
+  /* Sit just ABOVE the horizontal map/keyboard divider (726·sy − 46 − --kb-band). */
+  bottom: calc(100vh - (726 * var(--sy) - 46px - var(--kb-band)) + 14px) !important;
   transform: none !important;
   z-index: 1002 !important;
 }

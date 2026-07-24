@@ -678,7 +678,9 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   max-width: none !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: flex-end !important;   /* so "הוסף" bottom lands on the keyboard's bottom line */
+  /* Writing line rises to the TOP of the band; "הוסף" stays on the keyboard's
+     bottom line — so the writing line sits clearly ABOVE the button. */
+  justify-content: space-between !important;
   align-items: stretch !important;
   gap: 16px !important;
   z-index: 1001 !important;   /* above the keyboard */
