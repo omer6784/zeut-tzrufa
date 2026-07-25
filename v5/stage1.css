@@ -1227,8 +1227,8 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   background-color: #282828;   /* dotted outline (dark on the light plate) */
 }
 #section-3[data-stage="0"] .roots-widget .roots-story-line::after {
-  background-image: radial-gradient(circle, #ff5003 30%, transparent 34%);
-  background-size: 5px 5px;     /* smaller, denser dots */
+  background-image: radial-gradient(circle, #282828 30%, transparent 34%);
+  background-size: 3.5px 3.5px;     /* dark, denser dots (more of them) */
   background-repeat: repeat;
   opacity: 0;                  /* revealed by .dots-filled once typed in */
   transition: opacity 0.6s ease;
