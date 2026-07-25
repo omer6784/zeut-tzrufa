@@ -1511,6 +1511,7 @@ function _renderQuestionImpl(idx){
       if(listEl) listEl.textContent = st.roots.join(', ');
     };
     updateSelectedOriginsList();
+    st._inputDemoStarted = false;   // arm the input-phase demo once per stage mount
     st._roots = initRootsWidget(document.getElementById('roots-host'),{
       targetEl: document.getElementById('artifact-canvas'),
       onAdd:(name)=>{
@@ -1565,6 +1566,12 @@ function _renderQuestionImpl(idx){
       // Flag the input phase so CSS can move the band button ("הזנתי") to the
       // empty area on the LEFT (only there — not the earlier "סימנתי" placement).
       document.getElementById('section-3')?.classList.toggle('origin-input-phase', inputPhase);
+      // First time we reach the input phase → play the ghost-hand country-typing
+      // demo (types a country from a chosen continent, presses "הוסף", then "הזנתי").
+      if (inputPhase && !st._inputDemoStarted) {
+        st._inputDemoStarted = true;
+        setTimeout(() => runInputDemo(), 900);   // let the keyboard + box settle in
+      }
     }, 200);
     // Virtual Hebrew keyboard — attaches once the country input is mounted
     // (the roots widget shows it lazily on phase change), so retry briefly.
@@ -1770,9 +1777,11 @@ function runStage0Choreography(){
       void rootsTitle.offsetWidth;
       rootsTitle.classList.add('story-go');   // arm the stepped clip reveal (types in big)
     }
-    // ── 2. Shrink the title down to its resting corner. ──
+    // ── 2. Once fully typed in, the letters FILL with orange dots; then the title
+    //    shrinks down to its resting corner. ──
     setTimeout(() => {
       if(rootsTitle){
+        rootsTitle.classList.add('dots-filled');   // dark letters → orange dotted fill
         rootsTitle.style.transition = 'transform 0.85s cubic-bezier(0.4, 0, 0.15, 1)';
         rootsTitle.style.transform = 'none';
       }
@@ -1879,6 +1888,95 @@ function runGlobeDemo(){
     // Normal end: hide the hand and reset the demo's Asia pick so the visitor starts clean.
     if(btn) btn.classList.remove('is-pressed');
     gh.hide(); try { rd.hold(false); rd.clear(); } catch (_) {} cleanup();
+  })();
+}
+
+/* Ghost-hand demo for the country-registration (input) phase: once the chosen
+   continents have spread to a map, an open hand types a sample country from one of
+   the selected continents on the on-screen keyboard, presses "הוסף" (a marker + the
+   orange line play), then presses "הזנתי, אפשר להמשיך". It then clears itself so the
+   visitor starts with an empty box. Plays once; a real touch cancels it. */
+const DEMO_COUNTRY_BY_CONTINENT = {
+  namerica: 'קנדה', samerica: 'ברזיל', europe: 'צרפת',
+  africa: 'מרוקו', asia: 'הודו', oceania: 'אוסטרליה',
+};
+function runInputDemo(){
+  const rd = st._roots && st._roots.demo;
+  if(!rd || !rd.isInput || !rd.isInput()) return;
+  const ids = rd.selectedIds ? rd.selectedIds() : [];
+  let word = null;
+  for(const id of ids){ if(DEMO_COUNTRY_BY_CONTINENT[id]){ word = DEMO_COUNTRY_BY_CONTINENT[id]; break; } }
+  if(!word) return;   // no recognised continent → skip the demo
+
+  const my = st._inputDemoToken = (st._inputDemoToken || 0) + 1;
+  const sec = document.getElementById('section-3');
+  const cancel = (e) => { if(e && e.isTrusted === false) return; st._inputDemoToken++; };
+  sec && sec.addEventListener('pointerdown', cancel, { capture: true });
+  const cleanup = () => sec && sec.removeEventListener('pointerdown', cancel, { capture: true });
+
+  (async () => {
+    const gh = getGhostHand();
+    const dead = () => my !== st._inputDemoToken || !(rd.isInput && rd.isInput());
+    const clearPress = () => document.querySelectorAll('.vk-key.is-pressed, .roots-add-country.is-pressed, .stage-band .sb-btn.is-pressed')
+      .forEach(el => el.classList.remove('is-pressed'));
+    const abort = () => { clearPress(); gh.hide(); cleanup(); };
+    const input = document.getElementById('roots-country-input');
+    const kb = document.getElementById('virtual-keyboard');
+    if(!input || !kb) return abort();
+
+    input.value = ''; try { input.dispatchEvent(new Event('input', { bubbles: true })); } catch(_){}
+    await gh.sleep(500); if(dead()) return abort();
+    gh.open(); gh.show('dark');
+
+    // 1. type the country, one key at a time, on the on-screen keyboard
+    for(const ch of word){
+      if(dead()) return abort();
+      const key = ch === ' '
+        ? kb.querySelector('[data-action="space"]')
+        : kb.querySelector('.vk-key[data-key="' + ch + '"]');
+      if(!key) continue;
+      const r = key.getBoundingClientRect();
+      gh.point(true);
+      gh.move(r.left + r.width / 2, r.top + r.height / 2);
+      await gh.sleep(330); if(dead()) return abort();
+      key.classList.add('is-pressed');
+      await gh.tapPoint();
+      key.click();                       // inserts the letter into the box
+      key.classList.remove('is-pressed');
+      await gh.sleep(130);
+    }
+    await gh.sleep(420); if(dead()) return abort();
+
+    // 2. press "הוסף" — geocodes the country: the orange dotted line + marker play,
+    //    and "הזנתי" lights up.
+    gh.open();
+    const add = document.getElementById('roots-send');
+    if(add){
+      const b = add.getBoundingClientRect();
+      gh.move(b.left + b.width / 2, b.top + b.height / 2);
+      await gh.sleep(650); if(dead()) return abort();
+      add.classList.add('is-pressed');
+      await gh.tap();
+      add.click();                       // addCountry()
+      add.classList.remove('is-pressed');
+    }
+    await gh.sleep(1250); if(dead()) return abort();   // let the line animate + "הזנתי" un-dim
+
+    // 3. press "הזנתי, אפשר להמשיך" (illustrative — does not actually advance)
+    const cont = document.querySelector('.stage-band .sb-btn');
+    if(cont){
+      const b = cont.getBoundingClientRect();
+      gh.move(b.left + b.width / 2, b.top + b.height / 2);
+      await gh.sleep(720); if(dead()) return abort();
+      cont.classList.add('is-pressed');
+      await gh.tap();
+      cont.classList.remove('is-pressed');
+    }
+    await gh.sleep(450);
+    // Reset so the visitor starts clean: drop the demo country + empty the box.
+    clearPress();
+    try { rd.resetInput && rd.resetInput(); } catch(_){}
+    gh.hide(); cleanup();
   })();
 }
 

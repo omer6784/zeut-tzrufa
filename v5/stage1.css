@@ -1225,6 +1225,17 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   animation: story-type 0.66s steps(10, end) 0.95s forwards;
 }
 @keyframes story-type { to { clip-path: inset(0 0 0 0); } }
+/* Once the title has fully typed in, its letters FILL with orange dots: swap the
+   solid dark fill for a tiled orange dot pattern (the letter PNG still masks it, so
+   the dots only show inside the letter silhouettes). The dark fades out under the
+   dots for a soft "fill" reveal. */
+#section-3[data-stage="0"] .roots-widget .roots-story-title.dots-filled .roots-story-line {
+  background-color: transparent !important;
+  background-image: radial-gradient(circle, #ff5003 42%, transparent 46%) !important;
+  background-size: 8px 8px !important;
+  background-repeat: repeat !important;
+  transition: background-color 0.6s ease !important;
+}
 @media (prefers-reduced-motion: reduce) {
   #section-3[data-stage="0"] .roots-widget .roots-story-line {
     clip-path: none;

@@ -1160,6 +1160,18 @@ export function initRootsWidget(container, opts){
   return {
     demo: {
       isGlobe(){ return state.phase === 'globe'; },
+      // Input (map) phase: the chosen continents have spread to a flat map and the
+      // country text box + keyboard are live.
+      isInput(){ return state.phase === 'map'; },
+      selectedIds(){ return [...state.selected]; },
+      // Undo everything the input-phase demo did so the visitor starts clean:
+      // clear the box, drop the demo country marker, re-dim "סיימתי"/"הזנתי".
+      resetInput(){
+        inputEl.value = '';
+        try { inputEl.dispatchEvent(new Event('input', { bubbles: true })); } catch (_) {}
+        state.countryDots.length = 0;
+        finishBtn && finishBtn.classList.add('is-dim');
+      },
       hold(on){ state.dragging = !!on; },   // pause the idle auto-spin while driving
       spinBy(rad){ state.rot += rad; },
       // Viewport-space centre of a continent now, or null if it's on the far side.

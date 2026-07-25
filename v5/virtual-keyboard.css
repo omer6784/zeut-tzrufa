@@ -67,6 +67,14 @@
   border-color: #ff601a;
   transform: translateY(1px);
 }
+/* Demo press — the ghost-hand country-typing demo lights each tapped key ORANGE,
+   the same press feedback used across the interface. */
+#virtual-keyboard .vk-key.is-pressed {
+  background: #ff5003;
+  color: #fffae6;
+  border-color: #ff5003;
+  transform: translateY(1px);
+}
 
 #virtual-keyboard .vk-key-ctrl {
   flex: 0.9 1 0;
