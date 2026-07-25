@@ -1460,7 +1460,10 @@ function _renderQuestionImpl(idx){
     allDots.forEach((d, i) => lightT(() => { d.style.opacity = ''; }, DOTS_START + i * DOT_STEP));
     // Title fades in LAST — after every dot has appeared. The visible title is the
     // dotted prompt image (.s2-prompt); #q-text is hidden on this stage.
-    const TITLE_AT = DOTS_START + allDots.length * DOT_STEP + 250;
+    // Only reveal the title AFTER the whole dot field is fully in: the last dot
+    // starts fading at DOTS_START + (n-1)*DOT_STEP and its fade takes 400ms, so
+    // clear that (+400) plus a small beat (+250).
+    const TITLE_AT = DOTS_START + allDots.length * DOT_STEP + 400 + 250;
     const GATE_AT = DOTS_START + Math.round(allDots.length * DOT_STEP * 0.5);   // gate circle mid-cascade
     const qTitle = document.querySelector('#section-3 .stage2 .s2-prompt');
     if (qTitle) {
