@@ -5,6 +5,10 @@
 ═══════════════════════════════════════════════════════════════ */
 
 import './symbol-library.css';
+// Single source of truth for WHICH symbols exist + their authored text: the
+// interface's own symbol-info (the 16 motifs built in 3D + 2D, keyed by motif).
+// The library shows exactly these — nothing the interface can't actually build.
+import { SYMBOL_INFO as IFACE_INFO } from '../v5/symbol-info.js';
 
 /* ── SVG artwork for each symbol — redesigned for true-to-life recognizability.
    All symbols use viewBox 0 0 40 40 and currentColor for theming. ── */
@@ -385,6 +389,14 @@ const MOTIF_SVG = {
             }
             return s;
           })(),
+
+  // ── Djed pillar (Egyptian) — column with four crossbars near the top + a base
+  djed:     '<line x1="20" y1="5" x2="20" y2="35" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>'
+          + '<line x1="12" y1="10" x2="28" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+          + '<line x1="12" y1="14" x2="28" y2="14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+          + '<line x1="13" y1="18" x2="27" y2="18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+          + '<line x1="14" y1="22" x2="26" y2="22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+          + '<line x1="15" y1="35" x2="25" y2="35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
 };
 
 /* ── Symbol metadata ── */
@@ -437,14 +449,28 @@ const SYMBOL_INFO = {
   triskele_spiral:{ name: 'טריסקל ספירלי',      tradition: 'המסורת הקלטית',                         meaning: 'תנועה מתמדת, התקדמות ואיזון' },
 };
 
-/* ── Curated grid order (6×5 = 30 symbols) — matches the reference sheet ── */
-const GRID_ORDER = [
-  'hamsa',        'eye',         'triskele',      'spiral',      'enso',            'gankyil',
-  'triple_moon',  'valknut',     'vegvisir',      'wheel',       'dharmachakra',    'lotus',
-  'om',           'infinity',    'tree_of_life',  'flower',      'pentagram',       'shatkona',
-  'anah',         'scarab',      'ichthys',       'pomegranate', 'triquetra',       'endless_knot',
-  'celtic_cross', 'thunderbird', 'medicine_wheel','zia_sun',     'triskele_spiral', 'aztec_diamond',
-  'artichoke',    'horseshoe',  'moon',          'tiltan',
+/* ── The symbols BUILT in the interface (3D .obj + 2D contour), keyed by their
+   interface motif key (see v5/symbol-window.js MOTIF_OBJ / symbol-info.js). The
+   library shows exactly these 16 — each paired with the library's line-art icon.
+   `svg` is the MOTIF_SVG key to draw (a few interface keys use a differently-named
+   icon; pyramid reads as a triangle in 2D). ── */
+const BUILT = [
+  { key: 'hamsa',     svg: 'hamsa' },
+  { key: 'eye',       svg: 'eye' },
+  { key: 'scarab',    svg: 'scarab' },
+  { key: 'anah',      svg: 'anah' },
+  { key: 'djed',      svg: 'djed' },
+  { key: 'lotus',     svg: 'lotus' },
+  { key: 'dharma',    svg: 'dharmachakra' },
+  { key: 'vegvisir',  svg: 'vegvisir' },
+  { key: 'pyramid',   svg: 'triangle' },
+  { key: 'rimon',     svg: 'pomegranate' },
+  { key: 'fish',      svg: 'ichthys' },
+  { key: 'artichoke', svg: 'artichoke' },
+  { key: 'horseshoe', svg: 'horseshoe' },
+  { key: 'spiral',    svg: 'spiral' },
+  { key: 'moon',      svg: 'moon' },
+  { key: 'tiltan',    svg: 'tiltan' },
 ];
 
 /* ── Build the grid ── */
@@ -452,9 +478,9 @@ function buildGrid() {
   const grid = document.getElementById('symbol-grid');
   if (!grid) return;
 
-  GRID_ORDER.forEach((key, idx) => {
-    const info = SYMBOL_INFO[key];
-    const svg  = MOTIF_SVG[key];
+  BUILT.forEach(({ key, svg: svgKey }, idx) => {
+    const info = IFACE_INFO[key];       // authoritative name / origin / meaning
+    const svg  = MOTIF_SVG[svgKey];
     if (!info || !svg) return;
 
     const cell = document.createElement('div');
@@ -462,12 +488,12 @@ function buildGrid() {
     cell.style.animationDelay = `${idx * 35}ms`;
     cell.id = `symbol-${key}`;
 
-    // Info panel (visible on hover)
+    // Info panel (visible on hover) — text synced from the interface's symbol-info.
     const infoPanel = document.createElement('div');
     infoPanel.className = 'symbol-info';
     infoPanel.innerHTML = `
       <div class="info-name">${info.name}</div>
-      <div class="info-tradition">${info.tradition}</div>
+      <div class="info-tradition">${info.origin}</div>
       <div class="info-sep"></div>
       <div class="info-meaning">${info.meaning}</div>
     `;
