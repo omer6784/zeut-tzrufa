@@ -85,12 +85,15 @@ export function mountCompletion({ } = {}) {
   async function captureGifBase64() {
     const win = jewel.contentWindow;
     await waitFor(() => win && win.__jewel && win.__jewel.isReady && win.__jewel.isReady(), 15000);
+    // Let the per-symbol entry reveal (~1s) finish so we capture ONLY the settled
+    // talisman's spin/pulse, not the dots flying in.
+    await new Promise(r => setTimeout(r, 1800));
     const frames = [];
     await new Promise((resolve, reject) => {
       let settled = false;
       const to = setTimeout(() => { if (!settled) { settled = true; reject(new Error('capture timeout')); } }, 15000);
       win.__jewel.captureFrames({
-        count: 50, everyN: 2, size: 480,
+        count: 50, everyN: 2, size: 600,
         onFrame: (data, w, h) => { frames.push({ data: new Uint8ClampedArray(data), w, h }); },
         onDone: () => { if (!settled) { settled = true; clearTimeout(to); resolve(); } },
       });
