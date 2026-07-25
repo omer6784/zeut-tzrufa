@@ -1884,7 +1884,7 @@ html, body {
 .tw-confirm {
   position: absolute;
   right: calc(var(--tw-right) + 26px);
-  top: calc(100% - var(--tw-wheelh) + 176px);    /* under the (raised) prompt */
+  top: calc(100% - var(--tw-wheelh) + 76px);    /* under the (raised) prompt, raised 100px with it */
   left: auto; bottom: auto;
   background: transparent !important;
   border: none !important;
@@ -1926,6 +1926,11 @@ html, body {
 #section-3[data-stage="3"].tw-daylight .tw-confirm:hover { color: #ff5003 !important; --grid-dot: #ff5003 !important; }
 @media (prefers-reduced-motion: reduce) { .tw-confirm { animation: none !important; } }
 
+/* Show the wheel's OWN "זו השעה שלי" (below the prompt) and hide the shared bottom
+   band button here, so the single confirm sits right under the title. */
+#section-3[data-stage="3"] .tw-confirm { display: block !important; }
+#section-3[data-stage="3"] .stage-band .sb-btn { display: none !important; }
+
 /* ── Prompt artwork, right of the digit band (per the reference). Measured off
    the band (--tw-wheelh) rather than the container, so it stays locked to the
    line as the band resizes. The instruction line lives in the shared
@@ -1933,7 +1938,7 @@ html, body {
 .tw-question {
   position: absolute;
   right: calc(var(--tw-right) + 26px);           /* nudged left */
-  top: calc(100% - var(--tw-wheelh) + 58px);     /* nudged up */
+  top: calc(100% - var(--tw-wheelh) - 42px);     /* raised 100px */
   width: clamp(190px, 20vw, 330px);
   height: auto;
   display: block;
