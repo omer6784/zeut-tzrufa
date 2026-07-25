@@ -13,15 +13,17 @@
    the rectangle. Each frequency owns one interface colour:
      orange · gold · cream · charcoal (drawn in cream, saved as #282828). */
 
+// Order is LEFT→RIGHT on screen, so the row reads (right→left): orange, gold,
+// cream, dark — i.e. dark is leftmost, orange rightmost.
 const TILES = [
-  { rgb: [255, 80, 3],    hex: '#ff5003', anim: 'pulse'   }, // orange
-  { rgb: [226, 188, 113], hex: '#e2bc71', anim: 'squares' }, // gold
-  { rgb: [245, 245, 237], hex: '#f5f5ed', anim: 'vortex'  }, // cream
   // The dark option is INVERTED: #282828 dots on a cream panel, so the dominant
   // colour (#282828) itself is what you see — clearly the dark choice.
-  { rgb: [40, 40, 40],    hex: '#282828', anim: 'diamond', invert: true },
+  { rgb: [40, 40, 40],    hex: '#282828', anim: 'diamond', invert: true }, // dark  (leftmost)
+  { rgb: [245, 245, 237], hex: '#f5f5ed', anim: 'vortex'  }, // cream
+  { rgb: [226, 188, 113], hex: '#e2bc71', anim: 'squares' }, // gold
+  { rgb: [255, 80, 3],    hex: '#ff5003', anim: 'pulse'   }, // orange (rightmost)
 ];
-const TILE_BG  = [22, 22, 22];      // near-black panel (the coloured-dot tiles)
+const TILE_BG  = [40, 40, 40];      // #282828 panel (the coloured-dot tiles)
 const CREAM_BG = [240, 236, 228];   // cream panel for the inverted (#282828) tile
 const GRID_DOT = '245,245,237';     // cream — the grid colour on the dark plate
 const GRID_R = 0.8, GRID_PITCH = 5.5; // match the fixed interface grid (Ø1.6 / 5.5)
@@ -325,14 +327,15 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     try {
       active = -1; updateContinue();
       // Glide the hand IN from below the frame (outside → in), never a sudden pop.
-      let p = tileCenter(0);
+      const demoIdx = TILES.length - 1;            // the ORANGE tile (rightmost)
+      let p = tileCenter(demoIdx);
       gh.place(p.x + 24, (window.innerHeight || H) + 60);
       gh.show('light');
       await gh.sleep(90); if (my !== demoToken) return gh.hide();
-      gh.move(p.x, p.y);                           // slides up onto the first square
+      gh.move(p.x, p.y);                           // slides up onto the orange square
       await gh.sleep(820); if (my !== demoToken) return gh.hide();
       await gh.tap();
-      select(0);                                   // orange appears large + selection cue + "המשך" enables
+      select(demoIdx);                             // orange appears large + selection cue + "המשך" enables
       await gh.sleep(850); if (my !== demoToken) return gh.hide();
       p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
       if (cont) cont.classList.add('is-pressed');  // the button lights ORANGE, like a real press
