@@ -321,10 +321,12 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     select(0);                                     // orange appears large + selection cue + "המשך" enables
     await gh.sleep(850); if (my !== demoToken) return gh.hide();
     p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
+    if (cont) cont.classList.add('is-pressed');   // the button lights ORANGE, like a real press
     await gh.tap();
     await gh.sleep(550);
     gh.hide();
     // Reset to the clean empty state so the visitor makes their own choice.
+    if (cont) cont.classList.remove('is-pressed');
     if (my === demoToken && !committed) { active = -1; updateContinue(); }
   }
   runDemo();

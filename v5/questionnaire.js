@@ -1872,10 +1872,12 @@ function runGlobeDemo(){
       const b = btn.getBoundingClientRect();
       gh.move(b.left + b.width / 2, b.top + b.height / 2);
       await gh.sleep(720); if(dead()) return abort();
+      btn.classList.add('is-pressed');   // the button lights ORANGE, like a real press
       await gh.tap();
     }
     await gh.sleep(500);
     // Normal end: hide the hand and reset the demo's Asia pick so the visitor starts clean.
+    if(btn) btn.classList.remove('is-pressed');
     gh.hide(); try { rd.hold(false); rd.clear(); } catch (_) {} cleanup();
   })();
 }
