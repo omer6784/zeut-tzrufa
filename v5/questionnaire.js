@@ -2018,9 +2018,8 @@ function runTilesDemo(){
     gh.move(c.x, c.y);
     await gh.sleep(650); if(dead()) return abort();
     await gh.tapPoint();
-    dt.selectTile(demoIdx);           // programmatic "tap"
-    await gh.sleep(850); if(dead()) return abort();
-    dt.stopActive();
+    dt.selectTile(demoIdx);           // programmatic "tap" → the tile starts moving
+    await gh.sleep(950); if(dead()) return abort();
 
     // 2. move to "המשך" and press it (illustrative — does not actually advance)
     gh.open();

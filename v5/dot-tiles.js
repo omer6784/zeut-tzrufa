@@ -10,8 +10,8 @@
    a short confirmation, then onChoose(index, meaning) fires. Each tile carries
    an internal meaning (never shown) that the caller maps to a symbol. */
 
-const DOT = 1.6;   // dot DIAMETER (matches --grid-dot-size)
-const GAP = 5.5;   // centre-to-centre pitch (matches --grid-dot-gap)
+const DOT = 2.0;   // dot DIAMETER — bolder dots so each tile reads fuller
+const GAP = 4.6;   // centre-to-centre pitch — denser grid → richer shapes per tile
 const TAU = Math.PI * 2;
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
 const P = x => 0.5 + 0.5 * Math.sin(x);   // 0..1 oscillator
@@ -332,7 +332,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   const sizeAll = () => tiles.forEach(sizeTile);
   sizeAll();
 
-  let selected = -1, active = -1, chosen = -1, chosenAt = 0, done = false, raf = 0, t0 = performance.now();
+  let selected = -1, chosen = -1, chosenAt = 0, done = false, raf = 0, t0 = performance.now();
 
   function setSelected(i) {
     if (chosen >= 0) return;
@@ -360,8 +360,9 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       ctx.clearRect(0, 0, tl.W, tl.H);
       ctx.globalAlpha = tl.alpha;
       ctx.fillStyle = tl.dotColor;   // dark dots on the yellow plate
-      // STATIC unless this tile is hovered/touched (active) or being confirmed.
-      const animated = (tl.i === active || tl.i === chosen);
+      // STATIC by default; only the tile the visitor TAPPED (selected) shows its
+      // movement — no hover. The confirming tile also animates.
+      const animated = (tl.i === selected || tl.i === chosen);
       const localT = tl.frozen ? tl.frozenT : (animated ? t : STATIC_T);
       TILES[tl.i].draw(ctx, tl, localT);
       if (tl.i === chosen && tl.confirmT >= 0) { ctx.globalAlpha = tl.alpha; drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS)); }
@@ -371,19 +372,14 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   }
   raf = requestAnimationFrame(frame);
 
-  // Hover / touch → that tile animates; a tap SELECTS it (does not advance — the
-  // visitor confirms with the "המשך" band button).
+  // No hover. A TAP selects the tile — it starts moving (so the visitor sees the
+  // movement they picked) and the others dim; "המשך" confirms it.
   tiles.forEach(tl => {
-    tl.cell.addEventListener('pointerenter', () => { if (chosen < 0) active = tl.i; });
-    tl.cell.addEventListener('pointerleave', () => { if (active === tl.i) active = -1; });
     tl.cell.addEventListener('pointerdown', e => {
       if (chosen >= 0) return;
       e.preventDefault();
-      active = tl.i;          // show its motion while touched
       setSelected(tl.i);
     });
-    tl.cell.addEventListener('pointerup', () => { if (active === tl.i) active = -1; });
-    tl.cell.addEventListener('pointercancel', () => { if (active === tl.i) active = -1; });
   });
 
   // Confirm the selected tile ("המשך") — play the ring, then fire onConfirm.
@@ -403,9 +399,9 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   return {
     teardown() { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); try { gridEl.remove(); } catch (_) {} },
     confirm,
-    // Demo helpers: programmatic "tap" + reset, and a tile's screen centre.
-    selectTile(i) { active = i; setSelected(i); },
-    stopActive() { active = -1; },
+    // Demo helpers: programmatic "tap" (selects → the tile starts moving) + reset,
+    // and a tile's screen centre.
+    selectTile(i) { setSelected(i); },
     deselect,
     tileCenter(i) { const tl = tiles[i]; if (!tl) return null; const r = tl.cell.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; },
     count: tiles.length,
