@@ -1795,11 +1795,9 @@ function runStage0Choreography(){
       void rootsTitle.offsetWidth;
       rootsTitle.classList.add('story-go');   // arm the stepped clip reveal (types in big)
     }
-    // ── 2. Once fully typed in, the letters FILL with orange dots; then the title
-    //    shrinks down to its resting corner. ──
+    // ── 2. Once fully typed in, the title shrinks down to its resting corner. ──
     setTimeout(() => {
       if(rootsTitle){
-        rootsTitle.classList.add('dots-filled');   // dark letters → orange dotted fill
         rootsTitle.style.transition = 'transform 0.85s cubic-bezier(0.4, 0, 0.15, 1)';
         rootsTitle.style.transform = 'none';
       }

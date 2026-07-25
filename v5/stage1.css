@@ -1215,24 +1215,14 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
      to the left, in letter-sized steps. */
   clip-path: inset(0 0 0 100%);
 }
-#section-3[data-stage="0"] .roots-widget .roots-story-line::before,
-#section-3[data-stage="0"] .roots-widget .roots-story-line::after {
+#section-3[data-stage="0"] .roots-widget .roots-story-line::before {
   content: '';
   position: absolute;
   inset: 0;
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-mask-position: center; mask-position: center;
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-}
-#section-3[data-stage="0"] .roots-widget .roots-story-line::before {
-  background-color: #282828;   /* dotted outline (dark on the light plate) */
-}
-#section-3[data-stage="0"] .roots-widget .roots-story-line::after {
-  background-image: radial-gradient(circle, #282828 30%, transparent 34%);
-  background-size: 3.5px 3.5px;     /* dark, denser dots (more of them) */
-  background-repeat: repeat;
-  opacity: 0;                  /* revealed by .dots-filled once typed in */
-  transition: opacity 0.6s ease;
+  background-color: #282828;   /* dotted outline (dark on the light plate) — no fill */
 }
 #section-3[data-stage="0"] .roots-widget .rsl-1 {
   width: calc(var(--story-w) * 0.985 * 0.85) !important;   /* both lines shrunk ~15% */
@@ -1241,10 +1231,6 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
 #section-3[data-stage="0"] .roots-widget .rsl-1::before {
   -webkit-mask-image: url(/image/v5-stage1/story-line1.png?v=5);
   mask-image: url(/image/v5-stage1/story-line1.png?v=5);
-}
-#section-3[data-stage="0"] .roots-widget .rsl-1::after {
-  -webkit-mask-image: url(/image/v5-stage1/story-line1-fill.png?v=2);
-  mask-image: url(/image/v5-stage1/story-line1-fill.png?v=2);
 }
 #section-3[data-stage="0"] .roots-widget .rsl-2 {
   width: calc(var(--story-w) * 0.85) !important;
@@ -1259,10 +1245,6 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   -webkit-mask-image: url(/image/v5-stage1/story-line2.png?v=5);
   mask-image: url(/image/v5-stage1/story-line2.png?v=5);
 }
-#section-3[data-stage="0"] .roots-widget .rsl-2::after {
-  -webkit-mask-image: url(/image/v5-stage1/story-line2-fill.png?v=2);
-  mask-image: url(/image/v5-stage1/story-line2-fill.png?v=2);
-}
 /* The stepped clip reveal plays only once the choreography arms it (.story-go),
    so it can type in while the title is held BIG + centred (see runStage0Choreography). */
 #section-3[data-stage="0"] .roots-widget .roots-story-title.story-go .rsl-1 {
@@ -1272,10 +1254,6 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   animation: story-type 0.66s steps(10, end) 0.95s forwards;
 }
 @keyframes story-type { to { clip-path: inset(0 0 0 0); } }
-/* Once fully typed in: the orange-dot body fill fades in inside the letters. */
-#section-3[data-stage="0"] .roots-widget .roots-story-title.dots-filled .roots-story-line::after {
-  opacity: 1;
-}
 @media (prefers-reduced-motion: reduce) {
   #section-3[data-stage="0"] .roots-widget .roots-story-line {
     clip-path: none;

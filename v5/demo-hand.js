@@ -110,7 +110,7 @@ export function stopHandDemo() {
    wheel/click at the document's capture phase — the demo's own actions are
    programmatic (isTrusted === false), so they pass through untouched. */
 let _lockRelease = null;
-const _LOCK_TYPES = ['pointerdown', 'pointerup', 'pointermove', 'touchstart', 'touchmove', 'touchend', 'wheel', 'click', 'contextmenu'];
+const _LOCK_TYPES = ['pointerdown', 'pointerup', 'pointermove', 'touchstart', 'touchmove', 'touchend', 'wheel', 'click', 'contextmenu', 'keydown', 'keypress', 'keyup', 'input', 'beforeinput'];
 export function lockInput() {
   if (_lockRelease) return;
   const swallow = (e) => { if (e.isTrusted) { e.preventDefault(); e.stopImmediatePropagation(); } };
