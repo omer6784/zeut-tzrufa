@@ -4608,13 +4608,20 @@ function buildPathsGame(host, onSelect){
   // ── Demo API — drives a WINDING source→exit trace (+ the real white trail) for
   //    the ghost-hand stage demo. Purely visual; resetDemo() clears it after. ──
   function _neighbours(node){ const nb = []; node.edgesOut.forEach(e => nb.push(e.to)); node.edgesIn.forEach(e => nb.push(e.from)); return nb; }
-  // Shortest source→exit route (BFS, fewest hops).
+  // Shortest source→exit route (BFS, fewest hops) that is NOT the straight middle
+  // corridor — moves along the MID row (MID→adjacent MID) are forbidden, so the
+  // path must dip off the middle at least once.
   function _shortestRoute(){
+    const midY = source.y;
+    const onMid = n => Math.abs(n.y - midY) < 1;
     const q = [source], prev = new Map([[source, null]]);
     while(q.length){
       const node = q.shift();
       if(node === exitNode) break;
-      for(const nb of _neighbours(node)){ if(!prev.has(nb)){ prev.set(nb, node); q.push(nb); } }
+      for(const nb of _neighbours(node)){
+        if(onMid(node) && onMid(nb)) continue;   // skip the straight MID corridor
+        if(!prev.has(nb)){ prev.set(nb, node); q.push(nb); }
+      }
     }
     if(!prev.has(exitNode)) return null;
     const path = [];
