@@ -1595,7 +1595,7 @@ function _renderQuestionImpl(idx){
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
       midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
-      buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
+      st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
         if (!st.p5SymbolsByStage[4]) {
@@ -2133,33 +2133,42 @@ function runWordDemo(){
   })();
 }
 
-/* Ghost-hand demo for the MAZE stage: grab the source dot and drag toward the exit
-   ring (illustrative — does not solve/advance). Input is locked. */
+/* Ghost-hand demo for the MAZE stage: grab the source dot and trace a WINDING
+   route to the exit, drawing the real white ink-trail as it goes (illustrative —
+   it resets afterwards, never commits/advances). Input is locked. */
 function runMazeDemo(){
-  const src = document.querySelector('.paths-source');
-  const exit = document.querySelector('.paths-exit-ring') || document.querySelector('.paths-exit');
-  if(!src || !exit) return;
+  const md = st._pathsDemo;
+  if(!md || !md.demoRoute || !document.querySelector('.paths-source')) return;
+  const pts = md.demoRoute();
+  if(!pts || pts.length < 2) return;
   const my = st._mazeDemoToken = (st._mazeDemoToken || 0) + 1;
   lockInput();
   const cleanup = () => unlockInput();
   (async () => {
     const gh = getGhostHand();
     const dead = () => my !== st._mazeDemoToken || !document.querySelector('.paths-source');
-    const abort = () => { gh.hide(); cleanup(); };
-    const sc = _center(src), ec = _center(exit);
+    const abort = () => { try { md.resetDemo(); } catch(_){} gh.hide(); cleanup(); };
+    const s0 = md.svgToScreen(pts[0]);
     await gh.sleep(300); if(dead()) return abort();
-    gh.open(); gh.place(sc.x + 24, (window.innerHeight || 900) + 60); gh.show('dark');   // orange bg → dark hand
+    gh.open(); gh.place(s0.x + 20, (window.innerHeight || 900) + 60); gh.show('dark');   // orange bg → dark hand
     await gh.sleep(90); if(dead()) return abort();
-    gh.point(true); gh.move(sc.x, sc.y);
+    gh.point(true); gh.move(s0.x, s0.y);
     await gh.sleep(650); if(dead()) return abort();
     gh.grab(true);                                   // grab the source dot
-    await gh.sleep(300); if(dead()) return abort();
-    const N = 22;
-    for(let i = 1; i <= N && !dead(); i++){ const f = i / N; gh.place(sc.x + (ec.x - sc.x) * f, sc.y + (ec.y - sc.y) * f + Math.sin(f * Math.PI) * 22); await gh.sleep(50); }
+    md.setTrail(pts, 0);
+    await gh.sleep(280); if(dead()) return abort();
+    // step the hand + the white trail + tracer along the winding route
+    for(let i = 1; i < pts.length && !dead(); i++){
+      md.setTrail(pts, i);
+      const s = md.svgToScreen(pts[i]);
+      gh.place(s.x, s.y);
+      await gh.sleep(42);
+    }
     if(dead()) return abort();
-    await gh.sleep(300);
+    await gh.sleep(500);
     gh.open();
-    await gh.sleep(450);
+    await gh.sleep(320);
+    md.resetDemo();                                  // clear the trail — the visitor starts clean
     gh.hide(); cleanup();
   })();
 }
@@ -4590,6 +4599,51 @@ function buildPathsGame(host, onSelect){
     stopTracing();
     try { svg.releasePointerCapture(e.pointerId); } catch(_) {}
   });
+
+  // ── Demo API — drives a WINDING source→exit trace (+ the real white trail) for
+  //    the ghost-hand stage demo. Purely visual; resetDemo() clears it after. ──
+  function _neighbours(node){ const nb = []; node.edgesOut.forEach(e => nb.push(e.to)); node.edgesIn.forEach(e => nb.push(e.from)); return nb; }
+  function _windingRoute(){
+    for(let attempt = 0; attempt < 12; attempt++){
+      const visited = new Set(), path = []; let ok = false;
+      (function dfs(node){
+        if(ok) return;
+        visited.add(node); path.push(node);
+        if(node === exitNode){ ok = true; return; }
+        const nbs = _neighbours(node).filter(n => !visited.has(n));
+        nbs.sort((a, b) => (b.x - a.x) + (Math.random() - 0.5) * 90);   // progress right, but wander
+        if(node === source) nbs.sort((a, b) => Math.abs(b.y - source.y) - Math.abs(a.y - source.y));   // leave the MID row first
+        for(const n of nbs){ if(ok) break; dfs(n); }
+        if(!ok) path.pop();
+      })(source);
+      if(ok){ const winds = path.some(n => Math.abs(n.y - source.y) > 1); if(winds || attempt === 11) return path; }
+    }
+    return null;
+  }
+  function _routeSamples(nodePath){
+    const pts = [{ x: source.x, y: source.y }];
+    for(let i = 0; i < nodePath.length - 1; i++){
+      const a = nodePath[i], b = nodePath[i + 1];
+      let e = a.edgesOut.find(ed => ed.to === b), samp;
+      if(e) samp = e.samples;
+      else { e = a.edgesIn.find(ed => ed.from === b); if(e) samp = e.samples.slice().reverse(); }
+      if(!samp) continue;
+      for(let k = 1; k < samp.length; k++) pts.push({ x: samp[k].x, y: samp[k].y });
+    }
+    return pts;
+  }
+  return {
+    demoRoute(){ const np = _windingRoute(); return np ? _routeSamples(np) : null; },
+    svgToScreen(p){ const m = svg.getScreenCTM(); return { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f }; },
+    setTrail(pts, upto){
+      svg.classList.add('tracing', 'paths-began');
+      state.trailPoints = pts.slice(0, upto + 1).map(p => ({ x: p.x, y: p.y }));
+      updateTrailSvg();
+      const last = pts[Math.min(upto, pts.length - 1)];
+      setTracerPos(last.x, last.y); tracer.style.opacity = '1';
+    },
+    resetDemo(){ resetToSource(); },
+  };
 }
 
 export function updateV5StepProgress(stageNum) {
