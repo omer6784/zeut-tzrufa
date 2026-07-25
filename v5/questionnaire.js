@@ -2149,25 +2149,30 @@ function runMazeDemo(){
     const dead = () => my !== st._mazeDemoToken || !document.querySelector('.paths-source');
     const abort = () => { try { md.resetDemo(); } catch(_){} gh.hide(); cleanup(); };
     const s0 = md.svgToScreen(pts[0]);
-    await gh.sleep(300); if(dead()) return abort();
+    await gh.sleep(200); if(dead()) return abort();
     gh.open(); gh.place(s0.x + 20, (window.innerHeight || 900) + 60); gh.show('dark');   // orange bg → dark hand
-    await gh.sleep(90); if(dead()) return abort();
+    await gh.sleep(80); if(dead()) return abort();
     gh.point(true); gh.move(s0.x, s0.y);
-    await gh.sleep(650); if(dead()) return abort();
+    await gh.sleep(420); if(dead()) return abort();
     gh.grab(true);                                   // grab the source dot
     md.setTrail(pts, 0);
-    await gh.sleep(280); if(dead()) return abort();
-    // step the hand + the white trail + tracer along the winding route
-    for(let i = 1; i < pts.length && !dead(); i++){
+    await gh.sleep(150); if(dead()) return abort();
+    // Step the hand + tracer along the route, subsampled to ≤ ~44 hops so the whole
+    // trace stays ~1.2s regardless of length; the white trail still draws at full
+    // resolution (setTrail includes every point up to i), so the line stays smooth.
+    const HOP = Math.max(1, Math.ceil(pts.length / 44));
+    for(let i = HOP; i < pts.length && !dead(); i += HOP){
       md.setTrail(pts, i);
       const s = md.svgToScreen(pts[i]);
       gh.place(s.x, s.y);
-      await gh.sleep(42);
+      await gh.sleep(28);
     }
     if(dead()) return abort();
-    await gh.sleep(500);
+    md.setTrail(pts, pts.length - 1);                // finish exactly on the exit
+    { const s = md.svgToScreen(pts[pts.length - 1]); gh.place(s.x, s.y); }
+    await gh.sleep(250);
     gh.open();
-    await gh.sleep(320);
+    await gh.sleep(150);
     md.resetDemo();                                  // clear the trail — the visitor starts clean
     gh.hide(); cleanup();
   })();
@@ -4611,7 +4616,7 @@ function buildPathsGame(host, onSelect){
         visited.add(node); path.push(node);
         if(node === exitNode){ ok = true; return; }
         const nbs = _neighbours(node).filter(n => !visited.has(n));
-        nbs.sort((a, b) => (b.x - a.x) + (Math.random() - 0.5) * 90);   // progress right, but wander
+        nbs.sort((a, b) => (b.x - a.x) + (Math.random() - 0.5) * 30);   // progress right, small wander (shorter route)
         if(node === source) nbs.sort((a, b) => Math.abs(b.y - source.y) - Math.abs(a.y - source.y));   // leave the MID row first
         for(const n of nbs){ if(ok) break; dfs(n); }
         if(!ok) path.pop();
