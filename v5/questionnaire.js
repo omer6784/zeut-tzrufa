@@ -11,6 +11,7 @@ import { mountCalibration } from './calibration.js';
 import { playHandDemo, stopHandDemo, getGhostHand } from './demo-hand.js';
 import { mountDotTiles } from './dot-tiles.js';
 import { mountDrive } from './drive.js';
+import { mountProfessionCards } from './profession-cards.js';
 import { mountEditor } from './editor.js';
 
 // Dev hook — lets us open the symbol window from the preview while we dial in
@@ -535,7 +536,7 @@ const QUESTIONS = [
   /* Stages 6–7 are placeholders for now (fixed grid stays, no middle content):
      6 = "שעה" (not built yet), 7 = empty. The former stars stage is retired. */
   { id:'stars',     label:'שעה',        text:'',                              type:'time',        styleStage:3 },
-  { id:'personal',  label:'כוח',        text:'מה מניע\nאותך?',                type:'drive',       styleStage:4 },
+  { id:'personal',  label:'עיסוק',      text:'מה תחום\nהעיסוק שלך?',           type:'drive',       styleStage:4 },
   { id:'name',      label:'שם',         text:'איך קוראים לך?',                 type:'text',   placeholder:'כתבי את שמך...', styleStage:6 },
 ];
 
@@ -547,7 +548,7 @@ const INSTRUCTIONS = {
   word: 'מתח קו בין הנקודה לעיגול',
   roots: 'גררו את הנקודה במסלול שאתם בוחרים',
   stars: 'גללו ובחרו את השעה הרצויה.',
-  personal: 'בחרו את הכוח שמוביל אתכם:',
+  personal: 'בחרו את תחום העיסוק שלכם',
   'life-wish': 'בחרו את האופן בו תרצו לנוע',
 };
 
@@ -1665,18 +1666,17 @@ function _renderQuestionImpl(idx){
     setTimeout(() => runTilesDemo(), st._dotTiles.appearMs + 500);
 
   } else if(q.type==='drive'){
-    // "מה מניע אותך?" — floating words; a tap picks the driving force, which maps
-    // (via drive-words.js) to a jewel symbol. onSelect stores the answer + the
-    // mapped symbol, then advance() builds that symbol onto the pendant and opens
-    // the symbol window (advance uses st._forcedSymbol instead of a random pick).
+    // "מה תחום העיסוק שלך?" — 8 profession-category cards; a tap picks the field,
+    // which maps to a jewel symbol. onSelect stores the answer + the forced symbol,
+    // then "המשך" → advance() builds that symbol onto the pendant.
     // MUST live inside this type-chain: the trailing `else` (text/textarea) would
     // otherwise overwrite the mounted field.
     wrap.classList.add('drive-active');
     wrap.innerHTML = '';
-    st._driveTeardown = mountDrive(wrap, {
-      onSelect: (word, symbol) => {
+    st._driveTeardown = mountProfessionCards(wrap, {
+      onSelect: (label, symbol) => {
         st.answers = st.answers || {};
-        st.answers.personal = word;
+        st.answers.personal = label;
         st._forcedSymbol = symbol;
         armBand(advance);              // light up "המשך"; the press continues
       },

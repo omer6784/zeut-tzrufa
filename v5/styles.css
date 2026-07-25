@@ -1324,6 +1324,44 @@ body::-webkit-scrollbar-thumb {
 }
 /* Selected (tapped) tile — pops slightly above the rest, which dim (canvas alpha). */
 .dot-tile.is-selected { transform: scale(1.05); z-index: 2; }
+
+/* ── "מה תחום העיסוק שלך?" — 8 profession-category cards (profession-cards.js) ──
+   Cream plates with a dotted animated icon + label, pinned inside the content
+   rectangle over the gold stage. */
+.prof-grid {
+  position: fixed;
+  left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
+  top: calc(85 * var(--sy)); bottom: calc(100vh - 726 * var(--sy));
+  display: flex; align-items: center; justify-content: center;
+  z-index: 8; pointer-events: none;
+}
+.prof-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(10px, 1.4vw, 24px);
+  width: 100%; height: 86%; max-height: 560px;
+}
+.prof-card {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+  background: #f5f5ed;
+  cursor: pointer; pointer-events: auto;
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease;
+  box-shadow: 0 0 0 1px rgba(40, 40, 40, 0.12);
+}
+.prof-card.is-in { opacity: 1; transform: translateY(0); }
+.prof-icon { width: 60%; aspect-ratio: 1 / 1; display: block; }
+.prof-label {
+  font-family: 'ArbelG', sans-serif; color: #282828;
+  font-size: clamp(12px, 1.1vw, 17px); letter-spacing: 0.02em;
+  direction: rtl; text-align: center;
+}
+.prof-card.is-dimmed { opacity: 0.42; }
+.prof-card.is-selected { transform: translateY(0) scale(1.05); z-index: 2; box-shadow: 0 0 0 2px #ff5003; }
+.prof-card.is-selected .prof-label { color: #ff5003; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {

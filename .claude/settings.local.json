@@ -364,7 +364,9 @@
       "Bash(node --check dot-tiles.js)",
       "Bash(node -e \"import\\('./v5/dot-tiles.js'\\).then\\(m=>console.log\\('meanings:', m.TILE_MEANINGS.length\\)\\)\")",
       "Bash(awk '{print $NF}')",
-      "Bash(awk '/#sidebar-tagline \\\\{/,/\\\\}/' styles.css)"
+      "Bash(awk '/#sidebar-tagline \\\\{/,/\\\\}/' styles.css)",
+      "Bash(node --check v5/profession-cards.js)",
+      "Bash(sed -i '' 's/styles.css?v=127/styles.css?v=128/' v5/index.html)"
     ]
   },
   "hooks": {
