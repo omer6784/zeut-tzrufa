@@ -1290,9 +1290,7 @@ body::-webkit-scrollbar-thumb {
    the tiles never spill past the grid. No cards, borders or rounding. */
 .dot-tiles-grid {
   /* Fills the content area (rising over the empty 90px top strip so it spans the
-     host cell top→bottom) and RIGHT-anchored, so the 4×7 block spans the whole
-     height of the content rectangle and sits on the right — the left stays open
-     for the stage title. */
+     host cell top→bottom); the 7×4 landscape block fills it, centred. */
   position: absolute;
   left: 0; right: 0;
   top: -90px;
@@ -1301,20 +1299,18 @@ body::-webkit-scrollbar-thumb {
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
-  justify-content: flex-end;   /* right-anchored… */
-  transform: translateX(-200px);   /* …then shifted 200px left */
+  justify-content: center;   /* centred inside the content rectangle */
 }
-/* 4 columns × 7 rows (28 tiles). aspect-ratio 4/7 at full content height gives
-   square cells as large as the rectangle allows. */
+/* 7 columns × 4 rows (28 tiles) — landscape. Fills the content area, so the tiles
+   are as large as the rectangle allows. */
 .dot-tiles-inner {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(7, 1fr);
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: 5px;
   box-sizing: border-box;
+  width: 100%;
   height: 100%;
-  aspect-ratio: 4 / 7;
-  width: auto;
 }
 .dot-tile {
   position: relative;
