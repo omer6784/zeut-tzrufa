@@ -1301,7 +1301,8 @@ body::-webkit-scrollbar-thumb {
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
-  justify-content: flex-end;   /* moved to the RIGHT */
+  justify-content: flex-end;   /* right-anchored… */
+  transform: translateX(-200px);   /* …then shifted 200px left */
 }
 /* 4 columns × 7 rows (28 tiles). aspect-ratio 4/7 at full content height gives
    square cells as large as the rectangle allows. */
