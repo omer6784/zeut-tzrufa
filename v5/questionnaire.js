@@ -13,6 +13,7 @@ import { mountDotTiles } from './dot-tiles.js';
 import { mountDrive } from './drive.js';
 import { mountProfessionCards } from './profession-cards.js';
 import { mountEditor } from './editor.js';
+import { mountCompletion } from './completion.js';
 
 // Dev hook — lets us open the symbol window from the preview while we dial in
 // its look/proportions before wiring the real per-stage triggers.
@@ -2545,6 +2546,7 @@ function finishQuestionnaire(){
    colour, and change the background + frame colour; every change re-broadcasts so
    the display (and the embedded jewel) update live. */
 let _editorTeardown = null;
+let _completionTeardown = null;
 function enterEditor(){
   broadcastArtifact();   // make sure the displays hold the final artifact first
   if (_editorTeardown) { try { _editorTeardown(); } catch (_) {} }
@@ -2552,7 +2554,14 @@ function enterEditor(){
     st,
     broadcast: broadcastArtifact,
     symbolName: (key) => (SYMBOL_INFO_2D[key] && SYMBOL_INFO_2D[key].name) || key,
+    onDone: enterCompletion,
   });
+}
+/* "סיימתי" on the editor → the final completion page (back to opening / GIF-to-email). */
+function enterCompletion(){
+  if (_editorTeardown) { try { _editorTeardown(); } catch (_) {} _editorTeardown = null; }
+  if (_completionTeardown) { try { _completionTeardown(); } catch (_) {} }
+  _completionTeardown = mountCompletion({ /* onSendGif wired in Part B (GIF capture + email service) */ });
 }
 export function setStage(stageNum) {
   const stepsRow = document.querySelector('.q-header-steps-row');

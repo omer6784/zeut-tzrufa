@@ -21,7 +21,7 @@ const PALETTE = [
 ];
 const TAGLINE = 'זהות צרופה - עיצוב התכשיט האישי שלך';
 
-export function mountEditor({ st, broadcast, symbolName }) {
+export function mountEditor({ st, broadcast, symbolName, onDone }) {
   document.getElementById('editor-view')?.remove();
   st.artifactEdits = st.artifactEdits || [];
   const symbols = (st.chosenSymbols || []).slice();
@@ -208,6 +208,14 @@ export function mountEditor({ st, broadcast, symbolName }) {
     pos += deleting ? -1 : 1;
     twTimer = setTimeout(typeLoop, deleting ? 45 : 105);
   })();
+
+  // "סיימתי" — leaves the editor and shows the final completion page.
+  const doneBtn = document.createElement('button');
+  doneBtn.type = 'button';
+  doneBtn.className = 'ed-done';
+  doneBtn.textContent = 'סיימתי';
+  doneBtn.addEventListener('click', () => { onDone && onDone(); });
+  view.appendChild(doneBtn);
 
   return () => { if (twTimer) clearTimeout(twTimer); try { view.remove(); } catch (_) {} };
 }

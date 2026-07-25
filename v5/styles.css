@@ -6949,3 +6949,79 @@ html:not(.cursor-active) *::after {
 #editor-view .ed-hint { font-family: 'ArbelG', sans-serif; font-size: 12px; opacity: 0.6; }
 
 #editor-view .ed-panel { display: flex; flex-direction: column; gap: clamp(14px, 2.4vh, 26px); }
+
+/* ── Completion page (completion.js) — shown after the editor. Interface orange
+   plate + dotted grid; a message and two dotted-frame buttons; an email modal. ── */
+#completion-view {
+  position: fixed; inset: 0; z-index: 60;
+  background: #ff5003;
+  --grid-dot: #f5f5ed;
+  color: #f5f5ed;
+  font-family: 'ArbelG', sans-serif;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+#completion-view .cv-grid { position: absolute; inset: 0; pointer-events: none; }
+#completion-view .cv-text {
+  direction: rtl; text-align: center;
+  font-size: clamp(15px, 1.35vw, 21px); letter-spacing: 0.05em; line-height: 1.75;
+  margin-bottom: clamp(120px, 18vh, 220px);
+}
+#completion-view .cv-actions {
+  position: absolute; top: 56%;
+  display: flex; direction: rtl; gap: clamp(24px, 4vw, 72px);
+}
+.cv-btn {
+  --b: #f5f5ed;
+  position: relative;
+  padding: 13px 30px;
+  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 1vw, 15px); letter-spacing: 0.03em;
+  color: var(--b); background: transparent; border: none; border-radius: 0; cursor: pointer;
+  background-image:
+    radial-gradient(circle, var(--b) 0.8px, transparent 1.1px),
+    radial-gradient(circle, var(--b) 0.8px, transparent 1.1px),
+    radial-gradient(circle, var(--b) 0.8px, transparent 1.1px),
+    radial-gradient(circle, var(--b) 0.8px, transparent 1.1px);
+  background-size: 6px 1.6px, 6px 1.6px, 1.6px 6px, 1.6px 6px;
+  background-position: top, bottom, left, right;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+}
+.cv-btn-dark { --b: #282828; }
+
+/* Email modal */
+#completion-view .cv-modal {
+  position: absolute; inset: 0; z-index: 70;
+  background: rgba(40, 40, 40, 0.55);
+  display: flex; align-items: center; justify-content: center;
+}
+#completion-view .cv-modal[hidden] { display: none; }
+#completion-view .cv-modal-box {
+  background: #f5f5ed; color: #282828;
+  padding: 28px 34px; min-width: min(360px, 82vw);
+  direction: rtl; text-align: center;
+  display: flex; flex-direction: column; gap: 16px;
+}
+#completion-view .cv-modal-title { font-size: clamp(14px, 1.2vw, 18px); letter-spacing: 0.03em; }
+#completion-view .cv-modal-input {
+  padding: 11px 12px; border: 1px solid #282828; background: transparent; color: #282828;
+  direction: rtl; text-align: right; font-family: 'ArbelG', sans-serif; font-size: 15px;
+  border-radius: 0; outline: none;
+}
+#completion-view .cv-modal-actions { display: flex; gap: 18px; justify-content: center; }
+#completion-view .cv-modal-msg { font-size: 12px; letter-spacing: 0.02em; min-height: 16px; color: #282828; }
+
+/* Editor "סיימתי" button — bottom-centre, leads to the completion page. */
+#editor-view .ed-done {
+  position: fixed; left: 50%; bottom: calc(38 * var(--sy)); transform: translateX(-50%);
+  z-index: 40; cursor: pointer;
+  padding: 13px 34px; border: none; border-radius: 0; background: transparent;
+  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 1vw, 15px); letter-spacing: 0.03em;
+  color: #282828;
+  background-image:
+    radial-gradient(circle, #282828 0.8px, transparent 1.1px),
+    radial-gradient(circle, #282828 0.8px, transparent 1.1px),
+    radial-gradient(circle, #282828 0.8px, transparent 1.1px),
+    radial-gradient(circle, #282828 0.8px, transparent 1.1px);
+  background-size: 6px 1.6px, 6px 1.6px, 1.6px 6px, 1.6px 6px;
+  background-position: top, bottom, left, right;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+}

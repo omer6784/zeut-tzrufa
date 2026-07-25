@@ -371,7 +371,10 @@
       "Bash(node --check v5/questionnaire.js)",
       "Bash(awk 'NR>=4143 && /^function buildPathsGame/{f=1} f&&/^}/{print NR\": end\"; exit}' questionnaire.js)",
       "Bash(awk 'NR>=4143 && /^function buildPathsGame/{f=1} f{print NR\": \"$0} f&&/^}/{exit}' questionnaire.js)",
-      "Bash(node --check v5/calibration.js)"
+      "Bash(node --check v5/calibration.js)",
+      "Bash(node --check v5/completion.js)",
+      "Bash(node --check v5/editor.js)",
+      "Bash(sed -i '' 's/styles.css?v=130/styles.css?v=131/' v5/index.html)"
     ]
   },
   "hooks": {
