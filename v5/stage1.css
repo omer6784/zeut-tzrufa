@@ -1755,9 +1755,7 @@ html, body {
   position: absolute;
   top: calc(100% - var(--tw-wheelh));
   left: 0;
-  /* Ends at the LEFT edge of the right-hand title, so the segment under the
-     "מה השעה שלכם ביום" sentence is removed. */
-  right: calc(100 * var(--sx) - 8vw + 66px + clamp(190px, 20vw, 330px));
+  right: calc(100 * var(--sx) - 8vw);
   height: var(--grid-dot-size);
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
   background-size: var(--grid-dot-gap) var(--grid-dot-size);
@@ -1887,7 +1885,7 @@ html, body {
 .tw-confirm {
   position: absolute;
   right: calc(var(--tw-right) + 76px);          /* 50px left */
-  top: calc(100% - var(--tw-wheelh) + 176px);   /* 100px down */
+  top: calc(100% - var(--tw-wheelh) + 156px);   /* 20px up */
   left: auto; bottom: auto;
   background: transparent !important;
   border: none !important;
@@ -1941,7 +1939,7 @@ html, body {
 .tw-question {
   position: absolute;
   right: calc(var(--tw-right) + 26px);           /* nudged left */
-  top: calc(100% - var(--tw-wheelh) - 42px);     /* raised 100px */
+  top: calc(100% - var(--tw-wheelh) - 242px);    /* raised 100 + 200px */
   width: clamp(190px, 20vw, 330px);
   height: auto;
   display: block;
