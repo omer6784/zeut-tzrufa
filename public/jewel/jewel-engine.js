@@ -208,17 +208,42 @@ function captureFrames(opts = {}) {
   const w = ar >= 1 ? size : Math.max(2, Math.round(size * ar));
   const h = ar >= 1 ? Math.max(2, Math.round(size / ar)) : size;
   const off = document.createElement('canvas'); off.width = w; off.height = h;
+  const octx = off.getContext('2d', { willReadFrequently: true });
+  octx.imageSmoothingEnabled = true; octx.imageSmoothingQuality = 'high';   // smoother downscale
+  // The transparent WebGL canvas sits on top of TWO display-page layers the capture
+  // must recreate so the GIF matches the screen (not black): the chosen background
+  // colour (body) and the cream dotted centre line (#display-center-line). Read both
+  // from the live display DOM once.
+  let bgCol = '#282828', lineCol = '#f5f5ed';
+  try {
+    const b = getComputedStyle(document.body).backgroundColor;
+    if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') bgCol = b;
+    const l = getComputedStyle(document.documentElement).getPropertyValue('--center-line-color').trim();
+    if (l) lineCol = l;
+  } catch (_) {}
+  const gap = 9 * h / (window.innerHeight || 640);   // centre-line dot spacing (mirrors the CSS 9px)
   _cap = { count: opts.count || 30, everyN: Math.max(1, opts.everyN || 2), n: 0, taken: 0, w, h,
-    octx: off.getContext('2d', { willReadFrequently: true }), onFrame: opts.onFrame, onDone: opts.onDone };
+    octx, bgCol, lineCol, gap, onFrame: opts.onFrame, onDone: opts.onDone };
 }
 function _captureTick() {
   if (!_cap) return;
   if ((_cap.n++ % _cap.everyN) !== 0) return;
   try {
-    _cap.octx.clearRect(0, 0, _cap.w, _cap.h);
-    _cap.octx.drawImage(mainCanvasEl, 0, 0, _cap.w, _cap.h);
-    const img = _cap.octx.getImageData(0, 0, _cap.w, _cap.h);
-    _cap.onFrame && _cap.onFrame(img.data, _cap.w, _cap.h);
+    const { octx, w, h, gap } = _cap;
+    // 1. chosen background plate
+    octx.globalAlpha = 1;
+    octx.fillStyle = _cap.bgCol;
+    octx.fillRect(0, 0, w, h);
+    // 2. cream dotted centre line (x = centre, 2%…98% of height — like #display-center-line)
+    octx.fillStyle = _cap.lineCol;
+    octx.globalAlpha = 0.9;
+    const cx = w / 2, r = Math.max(0.7, gap * 0.11);
+    for (let y = h * 0.02; y <= h * 0.98; y += gap) { octx.beginPath(); octx.arc(cx, y, r, 0, Math.PI * 2); octx.fill(); }
+    octx.globalAlpha = 1;
+    // 3. the transparent jewel canvas on top
+    octx.drawImage(mainCanvasEl, 0, 0, w, h);
+    const img = octx.getImageData(0, 0, w, h);
+    _cap.onFrame && _cap.onFrame(img.data, w, h);
   } catch (_) {}
   if (++_cap.taken >= _cap.count) { const done = _cap.onDone; _cap = null; done && done(); }
 }
