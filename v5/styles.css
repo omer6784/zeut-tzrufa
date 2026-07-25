@@ -6307,7 +6307,7 @@ html:not(.cursor-active) *::after {
   left: calc(100 * var(--sx)) !important;
   right: calc(100 * var(--sx)) !important;
   top: calc(85 * var(--sy)) !important;
-  bottom: calc(100vh - 656 * var(--sy)) !important;   /* end at the raised bottom line */
+  bottom: calc(100vh - 726 * var(--sy)) !important;   /* extend down to the bottom grid line (lowers the thumb row) */
   width: auto !important; height: auto !important;
   display: flex !important; flex-direction: column;
   /* Above #q-header (z-index 10), which otherwise covers the right frequency
