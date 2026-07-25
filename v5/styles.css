@@ -6479,23 +6479,12 @@ html:not(.cursor-active) *::after {
   0%, 100% { transform: translateX(-50%) scale(1); }
   50%      { transform: translateX(-50%) scale(1.06); }
 }
-/* Origin INPUT phase only: the "הזנתי, אפשר להמשיך" button moves to the empty
-   area on the LEFT (below the map), not the centred bottom slot. Fixed so it can
-   be placed freely (the band anchors it to the bottom otherwise). */
+/* Origin INPUT phase only: "הזנתי, אפשר להמשיך" is drawn by the widget's OWN
+   #roots-finish button, which sits in one row beside "הוסף" directly under the
+   writing line (see stage1.css .roots-actions-row). The shared band button is
+   hidden here so the two buttons share one identical style + row. */
 #section-3.origin-input-phase .stage-band .sb-btn {
-  position: fixed !important;
-  /* To the LEFT of "הוסף": near the left grid line, on the same row as the
-     actions row (which sits at bottom:30px inside the keyboard band at 726·sy−26). */
-  left: calc(100 * var(--sx) + 8px) !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: calc(100vh - 726 * var(--sy) + 56px) !important;
-  transform: none !important;
-  z-index: 1002 !important;
-}
-/* Left-anchored (no centring translate) → plain scale breathe when enabled. */
-#section-3.origin-input-phase .stage-band .sb-btn:not(.is-disabled) {
-  animation: dotted-frame-breathe 1.8s ease-in-out infinite;
+  display: none !important;
 }
 
 /* The per-stage instruction now lives in the bottom band, not the top slot. */

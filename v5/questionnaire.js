@@ -1547,24 +1547,25 @@ function _renderQuestionImpl(idx){
     clearInterval(st._originBandPoll);
     st._originBandPoll = setInterval(() => {
       const sb = ensureStageBand(); if (!sb) return;
-      // Hide the widget's own confirms inline (a stage rule out-specifies the
-      // stylesheet hide); the band drives them from behind the scenes.
-      ['roots-done', 'roots-finish'].forEach(id => {
-        const b = document.getElementById(id);
-        if (b && b.style.display !== 'none') b.style.setProperty('display', 'none', 'important');
-      });
-      const live = originLiveBtn();
-      const liveId = live ? live.id : null;
-      // Phase changed (mark → finish) → un-press so the band accepts the next tap.
-      if (liveId !== st._originLastLive) { sb.btn.classList.remove('is-pressed'); st._originLastLive = liveId; }
-      sb.btn.classList.toggle('is-disabled', !live);
-      // After "סימנתי" the map/keyboard phase begins: the note becomes the
-      // country prompt and the button reads "הזנתי, אפשר להמשיך".
       const inputPhase = !!document.querySelector('.roots-widget.state-input');
-      sb.btn.textContent = inputPhase ? 'הזנתי, אפשר להמשיך' : 'סימנתי';
+      // Marking phase → the shared band button IS "סימנתי" and drives #roots-done.
+      // Input phase → "הזנתי" is the widget's OWN #roots-finish, shown in the row
+      // beside "הוסף" under the writing line; the band button is hidden by CSS.
+      const done = document.getElementById('roots-done');
+      if (done && done.style.display !== 'none') done.style.setProperty('display', 'none', 'important');
+      const fin = document.getElementById('roots-finish');
+      if (inputPhase) {
+        if (fin) fin.style.removeProperty('display');   // let the widget finish show
+      } else {
+        if (fin && fin.style.display !== 'none') fin.style.setProperty('display', 'none', 'important');
+        const live = originLiveBtn();
+        const liveId = live ? live.id : null;
+        // Phase changed → un-press so the band accepts the next tap.
+        if (liveId !== st._originLastLive) { sb.btn.classList.remove('is-pressed'); st._originLastLive = liveId; }
+        sb.btn.classList.toggle('is-disabled', !live);
+        sb.btn.textContent = 'סימנתי';
+      }
       setBandNote(inputPhase ? 'הזן את ארצות המוצא' : (INSTRUCTIONS.origin || ''));
-      // Flag the input phase so CSS can move the band button ("הזנתי") to the
-      // empty area on the LEFT (only there — not the earlier "סימנתי" placement).
       document.getElementById('section-3')?.classList.toggle('origin-input-phase', inputPhase);
       // First time we reach the input phase → play the ghost-hand country-typing
       // demo (types a country from a chosen continent, presses "הוסף", then "הזנתי").
@@ -1917,7 +1918,7 @@ function runInputDemo(){
   (async () => {
     const gh = getGhostHand();
     const dead = () => my !== st._inputDemoToken || !(rd.isInput && rd.isInput());
-    const clearPress = () => document.querySelectorAll('.vk-key.is-pressed, .roots-add-country.is-pressed, .stage-band .sb-btn.is-pressed')
+    const clearPress = () => document.querySelectorAll('.vk-key.is-pressed, .roots-add-country.is-pressed, .roots-finish.is-pressed')
       .forEach(el => el.classList.remove('is-pressed'));
     const abort = () => { clearPress(); gh.hide(); cleanup(); };
     const input = document.getElementById('roots-country-input');
@@ -1963,7 +1964,7 @@ function runInputDemo(){
     await gh.sleep(1250); if(dead()) return abort();   // let the line animate + "הזנתי" un-dim
 
     // 3. press "הזנתי, אפשר להמשיך" (illustrative — does not actually advance)
-    const cont = document.querySelector('.stage-band .sb-btn');
+    const cont = document.getElementById('roots-finish');
     if(cont){
       const b = cont.getBoundingClientRect();
       gh.move(b.left + b.width / 2, b.top + b.height / 2);

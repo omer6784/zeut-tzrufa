@@ -678,11 +678,13 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   max-width: none !important;
   display: flex !important;
   flex-direction: column !important;
-  /* Writing line rises to the TOP of the band; "הוסף" stays on the keyboard's
-     bottom line — so the writing line sits clearly ABOVE the button. */
-  justify-content: space-between !important;
-  align-items: stretch !important;
-  gap: 16px !important;
+  /* Writing line at the top of the band; the two buttons ("הוסף" + "הזנתי") sit in
+     one row directly below it — both share the width --input-w so their outer edges
+     line up with the writing line and neither runs past it. */
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 10px !important;
+  --input-w: min(340px, 96%) !important;
   z-index: 1001 !important;   /* above the keyboard */
 }
 /* Dotted vertical divider in the gap between the keyboard and this input
@@ -741,6 +743,8 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   align-items: center !important;
   gap: 8px !important;
   position: relative !important;
+  align-self: center !important;
+  width: var(--input-w) !important;   /* line spans the same width as the button row below */
   margin-top: 20px !important;   /* writing line lowered 20px */
 }
 /* The orange custom caret was removed — the input's own native (dark) caret is
@@ -1052,10 +1056,11 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   padding: 6px 4px 12px !important;   /* text sits above the line */
   font-size: clamp(30px, 2.4vw, 40px) !important;
   font-family: 'ArbelG', sans-serif !important;
-  /* Shorter dotted line, centred in the cell (the row is justify-content:center). */
+  /* The line spans the full shared width (--input-w) so it sits exactly above the
+     button row below it. */
   min-width: 0 !important;
-  flex: 0 1 auto !important;
-  width: 48% !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
   text-align: center !important;
 }
 /* "הוסף מדינה" — a plain text button to the right of the box. */
@@ -1107,6 +1112,11 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   font-size: clamp(10px, 0.85vw, 13px) !important;
   letter-spacing: 0.03em !important;
   text-decoration: none !important;
+  text-align: center !important;
+  white-space: nowrap !important;   /* keep each label on one line (equal height) */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer !important;
   pointer-events: auto !important;
   transition: background-color 0.15s ease, color 0.15s ease !important;
@@ -1275,20 +1285,21 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   display: none !important;
 }
 
-/* "הוסף" (right) + "סיימתי" (left) share one row below the writing line, at the
-   bottom of the input column so the row's dotted rectangles line up with the
-   keyboard's bottom key row. direction:rtl → הוסף first (right), סיימתי after
-   it (left). */
+/* "הוסף" (right) + "הזנתי, אפשר להמשיך" (left) share one row DIRECTLY below the
+   writing line. The row spans the same width as the line (--input-w) and the two
+   buttons justify to its ends, so their outer edges line up with the line and
+   neither runs past it. align-items:stretch → both buttons the same height.
+   direction:rtl → הוסף first (right), הזנתי after it (left). */
 #section-3[data-stage="0"] .roots-widget.state-input .roots-actions-row {
-  position: absolute !important;
-  bottom: 30px !important;   /* "הוסף" raised 20px */
-  left: 0 !important;
-  right: 0 !important;
+  position: static !important;   /* flows right under the writing line */
+  align-self: center !important;
+  width: var(--input-w) !important;
+  margin-top: 6px !important;
   display: flex !important;
   direction: rtl !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: clamp(10px, 1vw, 18px) !important;
+  justify-content: space-between !important;
+  align-items: stretch !important;   /* equal height for both buttons */
+  gap: 12px !important;
 }
 
 /* Dimmed / "off" state — quiet and inert until unlocked. "סיימתי" is dim until

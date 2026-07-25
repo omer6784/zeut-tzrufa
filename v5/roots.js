@@ -479,7 +479,7 @@ export function initRootsWidget(container, opts){
              is added. -->
         <div class="roots-actions-row">
           <button class="roots-add-country" id="roots-send">הוסף</button>
-          <button class="roots-finish is-dim" id="roots-finish" type="button">סיימתי</button>
+          <button class="roots-finish is-dim" id="roots-finish" type="button">הזנתי, אפשר להמשיך</button>
         </div>
       </div>
       <div class="roots-map-note" id="roots-map-note">
