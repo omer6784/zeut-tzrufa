@@ -41,7 +41,7 @@
 }
 
 html {
-  background: #efede9;
+  background: #f5f5ed;
   scroll-behavior: smooth;
 }
 
@@ -49,7 +49,7 @@ body {
   width: 100%;
   min-height: 100vh;
   font-family: 'ArbelG', 'Georgia', serif;
-  background: #efede9;
+  background: #f5f5ed;
   color: #282828;
   overflow-x: hidden;
   overflow-y: auto;
@@ -59,7 +59,7 @@ body {
 }
 
 body::-webkit-scrollbar { width: 4px; }
-body::-webkit-scrollbar-track { background: #efede9; }
+body::-webkit-scrollbar-track { background: #f5f5ed; }
 body::-webkit-scrollbar-thumb {
   background: rgba(48, 46, 46, 0.15);
   border-radius: 2px;
@@ -114,7 +114,7 @@ body::-webkit-scrollbar-thumb {
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: #efede9;
+  background: #f5f5ed;
   border-bottom: 1px solid rgba(48, 46, 46, 0.08);
   direction: ltr;
 }
@@ -221,24 +221,9 @@ body::-webkit-scrollbar-thumb {
   border: 1px solid #282828;
   margin: -0.5px;
   overflow: hidden;
-  background: #efede9;
+  background: #f5f5ed;
+  cursor: pointer;
   transition: background-color 0.25s ease, border-color 0.25s ease;
-}
-
-/* ─── Hover overlay ──────────────────────────────────────── */
-.symbol-cell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: #fb5716;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.symbol-cell:hover::before {
-  opacity: 1;
 }
 
 /* ─── SVG symbol artwork ─────────────────────────────────── */
@@ -262,25 +247,31 @@ body::-webkit-scrollbar-thumb {
   display: block;
   transition: color 0.25s ease;
 }
-
-.symbol-cell:hover .symbol-artwork {
-  transform: scale(0.82) translateY(18%);
-  opacity: 0.65;
+/* Dotted outlines — every stroked shape becomes evenly-spaced round dots. */
+.symbol-artwork svg :is(path, line, polygon, polyline, rect, circle, ellipse) {
+  stroke-dasharray: 0.001 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.symbol-cell:hover .symbol-artwork svg {
-  color: #f5f5ed;
+/* Clicked (active) symbol → orange dots; the artwork lifts to make room for the
+   text below it. */
+.symbol-cell.is-active .symbol-artwork {
+  transform: translateY(-20%) scale(0.82);
+}
+.symbol-cell.is-active .symbol-artwork svg {
+  color: #fb5716;
 }
 
-/* ─── Info panel (appears on hover) ──────────────────────── */
+/* ─── Info panel — shows BELOW the symbol when the cell is clicked ──────── */
 .symbol-info {
   position: absolute;
-  top: 10%;
-  left: 12%;
-  right: 12%;
+  left: 8%;
+  right: 8%;
+  bottom: 7%;
   z-index: 3;
   direction: rtl;
-  text-align: right;
+  text-align: center;
   opacity: 0;
   transform: translateY(6px);
   transition: opacity 0.25s ease 0.05s,
@@ -288,7 +279,7 @@ body::-webkit-scrollbar-thumb {
   pointer-events: none;
 }
 
-.symbol-cell:hover .symbol-info {
+.symbol-cell.is-active .symbol-info {
   opacity: 1;
   transform: translateY(0);
 }
@@ -297,7 +288,7 @@ body::-webkit-scrollbar-thumb {
   font-family: 'Shofar', 'ArbelG', sans-serif;
   font-size: clamp(13px, 1.3vw, 18px);
   font-weight: 400;
-  color: #f5f5ed;
+  color: #282828;
   line-height: 1.2;
   margin-bottom: 6px;
   letter-spacing: -0.01em;
@@ -307,7 +298,7 @@ body::-webkit-scrollbar-thumb {
   font-family: 'ArbelG', sans-serif;
   font-size: clamp(8px, 0.72vw, 10px);
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(40, 40, 40, 0.65);
   letter-spacing: 0.03em;
   line-height: 1.4;
   margin-bottom: 4px;
@@ -317,7 +308,7 @@ body::-webkit-scrollbar-thumb {
   font-family: 'ArbelG', sans-serif;
   font-size: clamp(8.5px, 0.78vw, 11px);
   font-weight: 400;
-  color: #f5f5ed;
+  color: #282828;
   line-height: 1.55;
   letter-spacing: 0.01em;
 }
@@ -326,8 +317,8 @@ body::-webkit-scrollbar-thumb {
 .info-sep {
   width: 16px;
   height: 0;
-  border-top: 0.8px solid rgba(255, 255, 255, 0.4);
-  margin: 5px 0 5px auto;
+  border-top: 0.8px solid rgba(40, 40, 40, 0.3);
+  margin: 5px auto;
 }
 
 /* ─── Cell index number (quiet, archival) ────────────────── */

@@ -512,6 +512,14 @@ function buildGrid() {
     cell.appendChild(artwork);
     cell.appendChild(index);
     grid.appendChild(cell);
+
+    // Click → this symbol's dots turn orange + its info shows below (one active
+    // at a time; click again to close).
+    cell.addEventListener('click', () => {
+      const wasActive = cell.classList.contains('is-active');
+      grid.querySelectorAll('.symbol-cell.is-active').forEach(c => c.classList.remove('is-active'));
+      if (!wasActive) cell.classList.add('is-active');
+    });
   });
 }
 
