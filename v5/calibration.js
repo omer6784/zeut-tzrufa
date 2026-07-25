@@ -94,19 +94,24 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     const n = TILES.length;
     // Four frequency squares in a ROW along the bottom; the big selected view
     // fills the full width above them.
-    const tw = (W - 2 * g - (n - 1) * g) / n;             // thumb CELL width across the row
-    const rowH = Math.min(tw, (botY - mainY) * 0.32);     // thumb CELL height
-    const rowY = botY - rowH;
-    // Shrink every frequency field a touch (the big preview AND the thumbnails),
-    // centred within its cell — leaves a small margin, cells/dividers unchanged.
+    const tw0 = (W - 2 * g - (n - 1) * g) / n;            // full cell width
+    const rowH0 = Math.min(tw0, (botY - mainY) * 0.32);   // full row height
+    const rowY = botY - rowH0;
+    // The big preview, the thumbnail row AND the dotted divider above them all share
+    // ONE shrunk width Wt (≈0.9 of the inset width), centred — so their left/right
+    // edges line up exactly.
     const SH = 0.9;
-    const shrink = (r) => ({ x: r.x + r.w * (1 - SH) / 2, y: r.y + r.h * (1 - SH) / 2, w: r.w * SH, h: r.h * SH });
-    big = shrink({ x: g, y: mainY, w: W - 2 * g, h: rowY - g - mainY });
+    const Wt = (W - 2 * g) * SH;
+    const x0 = (W - Wt) / 2;
+    const bigH = rowY - g - mainY;
+    big = { x: x0, y: mainY + bigH * (1 - SH) / 2, w: Wt, h: bigH * SH };
 
-    thumbs = TILES.map((_, i) => shrink({ x: g + i * (tw + g), y: rowY, w: tw, h: rowH }));
-    rowDivY = rowY - g / 2;                                // horizontal rule between big view and the row
+    const tw = (Wt - (n - 1) * g) / n;                    // thumb width so the row fills Wt
+    const rowH = rowH0 * SH;
+    thumbs = TILES.map((_, i) => ({ x: x0 + i * (tw + g), y: rowY + (rowH0 - rowH) / 2, w: tw, h: rowH }));
+    rowDivY = rowY - g / 2;                                // horizontal rule between big view and the row (spans Wt)
     thumbDivs = [];                                        // vertical rules between the four squares
-    for (let i = 1; i < n; i++) thumbDivs.push(g + i * (tw + g) - g / 2);
+    for (let i = 1; i < n; i++) thumbDivs.push(x0 + i * (tw + g) - g / 2);
 
     gridBig = makeGrid(big.w, big.h);
     gridThumb = makeGrid(thumbs[0].w, thumbs[0].h);
