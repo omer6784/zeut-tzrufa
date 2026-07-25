@@ -1755,7 +1755,9 @@ html, body {
   position: absolute;
   top: calc(100% - var(--tw-wheelh));
   left: 0;
-  right: calc(100 * var(--sx) - 8vw);
+  /* Ends at the LEFT edge of the right-hand title, so the segment under the
+     "מה השעה שלכם ביום" sentence is removed. */
+  right: calc(100 * var(--sx) - 8vw + 66px + clamp(190px, 20vw, 330px));
   height: var(--grid-dot-size);
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
   background-size: var(--grid-dot-gap) var(--grid-dot-size);
@@ -1781,6 +1783,7 @@ html, body {
 .tw-sun {
   position: absolute;
   border-radius: 50%;
+  margin-left: -100px;   /* shifted 100px left */
   will-change: transform;
   /* The sky stays click-through; only the disc itself is grabbable, so dragging
      or scrolling ON the sun drives the hour. border-radius clips hit-testing, so
@@ -1883,8 +1886,8 @@ html, body {
    bright day sky. */
 .tw-confirm {
   position: absolute;
-  right: calc(var(--tw-right) + 26px);
-  top: calc(100% - var(--tw-wheelh) + 76px);    /* under the (raised) prompt, raised 100px with it */
+  right: calc(var(--tw-right) + 76px);          /* 50px left */
+  top: calc(100% - var(--tw-wheelh) + 176px);   /* 100px down */
   left: auto; bottom: auto;
   background: transparent !important;
   border: none !important;
