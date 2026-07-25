@@ -8,7 +8,7 @@ import { SYMBOLS_3D } from './symbols-3d.js';
 import { mountTimeWheel } from './time-wheel.js';
 import { mountLightGate } from './light-gate.js';
 import { mountCalibration } from './calibration.js';
-import { playHandDemo, stopHandDemo, getGhostHand } from './demo-hand.js';
+import { playHandDemo, stopHandDemo, getGhostHand, lockInput, unlockInput } from './demo-hand.js';
 import { mountDotTiles } from './dot-tiles.js';
 import { mountDrive } from './drive.js';
 import { mountProfessionCards } from './profession-cards.js';
@@ -1681,6 +1681,7 @@ function _renderQuestionImpl(idx){
         armBand(advance);              // light up "המשך"; the press continues
       },
     });
+    setTimeout(() => runProfDemo(), 1400);   // after the cards have entered
   } else if(q.type==='placeholder'){
     // Empty placeholder stage — the shared grid/frame stays, no middle content.
     wrap.innerHTML='';
@@ -1816,9 +1817,8 @@ function runGlobeDemo(){
   if(!rd || !rd.isGlobe()) return;
   const my = st._globeDemoToken = (st._globeDemoToken || 0) + 1;
   const sec = document.getElementById('section-3');
-  const cancel = (e) => { if(e && e.isTrusted === false) return; st._globeDemoToken++; };
-  sec && sec.addEventListener('pointerdown', cancel, { capture: true });
-  const cleanup = () => sec && sec.removeEventListener('pointerdown', cancel, { capture: true });
+  lockInput();   // block visitor input until the demo finishes (no rotating the globe mid-demo)
+  const cleanup = () => unlockInput();
 
   (async () => {
     const gh = getGhostHand();
@@ -1920,9 +1920,8 @@ function runInputDemo(){
 
   const my = st._inputDemoToken = (st._inputDemoToken || 0) + 1;
   const sec = document.getElementById('section-3');
-  const cancel = (e) => { if(e && e.isTrusted === false) return; st._inputDemoToken++; };
-  sec && sec.addEventListener('pointerdown', cancel, { capture: true });
-  const cleanup = () => sec && sec.removeEventListener('pointerdown', cancel, { capture: true });
+  lockInput();   // block visitor input until the demo finishes
+  const cleanup = () => unlockInput();
 
   (async () => {
     const gh = getGhostHand();
@@ -2000,9 +1999,8 @@ function runTilesDemo(){
   const demoIdx = 10;   // a calm, legible tile (ORBIT / harmony)
   const my = st._tilesDemoToken = (st._tilesDemoToken || 0) + 1;
   const sec = document.getElementById('section-3');
-  const cancel = (e) => { if(e && e.isTrusted === false) return; st._tilesDemoToken++; };
-  sec && sec.addEventListener('pointerdown', cancel, { capture: true });
-  const cleanup = () => sec && sec.removeEventListener('pointerdown', cancel, { capture: true });
+  lockInput();   // block visitor input until the demo finishes
+  const cleanup = () => unlockInput();
 
   (async () => {
     const gh = getGhostHand();
@@ -2038,6 +2036,57 @@ function runTilesDemo(){
     dt.deselect();
     const sb = ensureStageBand();
     if(sb){ sb.btn.classList.add('is-disabled'); st._stageContinue = null; }
+    gh.hide(); cleanup();
+  })();
+}
+
+/* Ghost-hand demo for the profession stage: an open hand points to a category
+   card and taps it (it selects, others dim, "המשך" lights), then presses "המשך".
+   It resets the pick afterwards so the visitor starts clean. Input is locked for
+   its duration (lockInput). */
+function runProfDemo(){
+  const pc = st._driveTeardown;
+  if(!pc || !pc.cardCenter || !document.querySelector('.prof-grid')) return;
+  const idx = 6;   // "בנייה והנדסה" — the gear reads clearly
+  const my = st._profDemoToken = (st._profDemoToken || 0) + 1;
+  lockInput();
+  const cleanup = () => unlockInput();
+
+  (async () => {
+    const gh = getGhostHand();
+    const dead = () => my !== st._profDemoToken || !document.querySelector('.prof-grid');
+    const abort = () => { gh.hide(); cleanup(); };
+    const c = pc.cardCenter(idx);
+    if(!c) return abort();
+    await gh.sleep(300); if(dead()) return abort();
+    gh.open(); gh.place(c.x, (window.innerHeight || 900) + 60); gh.show('dark');
+    await gh.sleep(90); if(dead()) return abort();
+
+    // 1. point to a card and tap it → it selects (others dim, "המשך" lights)
+    gh.point(true);
+    gh.move(c.x, c.y);
+    await gh.sleep(650); if(dead()) return abort();
+    await gh.tapPoint();
+    pc.selectCard(idx);
+    await gh.sleep(900); if(dead()) return abort();
+
+    // 2. move to "המשך" and press it (illustrative — does not actually advance)
+    gh.open();
+    const btn = document.querySelector('.stage-band .sb-btn');
+    if(btn){
+      const b = btn.getBoundingClientRect();
+      gh.move(b.left + b.width / 2, b.top + b.height / 2);
+      await gh.sleep(700); if(dead()) return abort();
+      btn.classList.add('is-pressed');
+      await gh.tap();
+      btn.classList.remove('is-pressed');
+    }
+    await gh.sleep(450);
+    // Reset so the visitor starts clean: clear the pick + re-dim "המשך".
+    pc.deselect();
+    const sb = ensureStageBand();
+    if(sb){ sb.btn.classList.add('is-disabled'); st._stageContinue = null; }
+    st._forcedSymbol = null;
     gh.hide(); cleanup();
   })();
 }

@@ -146,16 +146,28 @@ export function mountProfessionCards(host, { onSelect } = {}) {
   }
   requestAnimationFrame(() => { sizeAll(); raf = requestAnimationFrame(frame); });
 
+  function select(i) {
+    selected = i;
+    cards.forEach(o => { o.card.classList.toggle('is-selected', o.i === selected); o.card.classList.toggle('is-dimmed', o.i !== selected); });
+    onSelect && onSelect(CATS[i].label, CATS[i].symbol);
+  }
+  function deselect() {
+    selected = -1;
+    cards.forEach(o => o.card.classList.remove('is-selected', 'is-dimmed'));
+  }
   cards.forEach(c => {
-    c.card.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      selected = c.i;
-      cards.forEach(o => { o.card.classList.toggle('is-selected', o.i === selected); o.card.classList.toggle('is-dimmed', o.i !== selected); });
-      onSelect && onSelect(CATS[c.i].label, CATS[c.i].symbol);
-    });
+    c.card.addEventListener('pointerdown', e => { e.preventDefault(); select(c.i); });
   });
 
   const onResize = () => sizeAll();
   window.addEventListener('resize', onResize);
-  return function teardown() { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); try { grid.remove(); } catch (_) {} };
+
+  // Return the teardown fn with demo hooks attached (programmatic "tap" + a card's
+  // screen centre) so the ghost-hand demo can drive the stage.
+  function teardown() { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); try { grid.remove(); } catch (_) {} }
+  teardown.selectCard = select;
+  teardown.deselect = deselect;
+  teardown.cardCenter = (i) => { const c = cards[i]; if (!c) return null; const r = c.card.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };
+  teardown.count = cards.length;
+  return teardown;
 }

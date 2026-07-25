@@ -103,3 +103,21 @@ export function stopHandDemo() {
   token++;
   if (hand) hand.classList.remove('is-on', 'is-grab');
 }
+
+/* ── Input lock during a demo ──────────────────────────────────────────────
+   While a stage's ghost-hand demo plays, the visitor must NOT be able to click,
+   drag (e.g. rotate the globe) or scroll. We swallow every TRUSTED pointer/touch/
+   wheel/click at the document's capture phase — the demo's own actions are
+   programmatic (isTrusted === false), so they pass through untouched. */
+let _lockRelease = null;
+const _LOCK_TYPES = ['pointerdown', 'pointerup', 'pointermove', 'touchstart', 'touchmove', 'touchend', 'wheel', 'click', 'contextmenu'];
+export function lockInput() {
+  if (_lockRelease) return;
+  const swallow = (e) => { if (e.isTrusted) { e.preventDefault(); e.stopImmediatePropagation(); } };
+  const opts = { capture: true, passive: false };
+  _LOCK_TYPES.forEach(t => document.addEventListener(t, swallow, opts));
+  _lockRelease = () => _LOCK_TYPES.forEach(t => document.removeEventListener(t, swallow, opts));
+}
+export function unlockInput() {
+  if (_lockRelease) { _lockRelease(); _lockRelease = null; }
+}

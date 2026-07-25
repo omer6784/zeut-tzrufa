@@ -28,7 +28,7 @@ const GRID_R = 0.8, GRID_PITCH = 5.5; // match the fixed interface grid (Ø1.6 /
 const LOCK_DUR = 0.7;   // commit → grow the picked frequency → hand off to the globe
 const TAU = Math.PI * 2;
 
-import { getGhostHand } from './demo-hand.js';
+import { getGhostHand, lockInput, unlockInput } from './demo-hand.js';
 
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
 const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
@@ -293,7 +293,7 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
   //    → tap "המשך". Plays ONCE, 1.5s after the stage is actually on screen. ──
   function tileCenter(i) { const r = canvas.getBoundingClientRect(); const rc = thumbs[i]; return { x: r.left + rc.x + rc.w / 2, y: r.top + rc.y + rc.h / 2 }; }
   function contCenter() { const r = (cont || canvas).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
-  function stopDemo() { demoToken++; try { getGhostHand().hide(); } catch (_) {} }
+  function stopDemo() { demoToken++; try { getGhostHand().hide(); } catch (_) {} unlockInput(); }
   // Calibration is pre-mounted while the intro is still up (its host sits inside a
   // faded-out section), so gate the demo on the stage being genuinely visible.
   function stageVisible() {
@@ -312,25 +312,30 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     if (my !== demoToken || committed) return;
     await gh.sleep(1500);                          // let the visitor settle in first
     if (my !== demoToken || committed) return;
-    active = -1; updateContinue();
-    // Glide the hand IN from below the frame (outside → in), never a sudden pop.
-    let p = tileCenter(0);
-    gh.place(p.x + 24, (window.innerHeight || H) + 60);
-    gh.show('light');
-    await gh.sleep(90); if (my !== demoToken) return gh.hide();
-    gh.move(p.x, p.y);                             // slides up onto the first square
-    await gh.sleep(820); if (my !== demoToken) return gh.hide();
-    await gh.tap();
-    select(0);                                     // orange appears large + selection cue + "המשך" enables
-    await gh.sleep(850); if (my !== demoToken) return gh.hide();
-    p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
-    if (cont) cont.classList.add('is-pressed');   // the button lights ORANGE, like a real press
-    await gh.tap();
-    await gh.sleep(550);
-    gh.hide();
-    // Reset to the clean empty state so the visitor makes their own choice.
-    if (cont) cont.classList.remove('is-pressed');
-    if (my === demoToken && !committed) { active = -1; updateContinue(); }
+    lockInput();                                   // block visitor input until the demo finishes
+    try {
+      active = -1; updateContinue();
+      // Glide the hand IN from below the frame (outside → in), never a sudden pop.
+      let p = tileCenter(0);
+      gh.place(p.x + 24, (window.innerHeight || H) + 60);
+      gh.show('light');
+      await gh.sleep(90); if (my !== demoToken) return gh.hide();
+      gh.move(p.x, p.y);                           // slides up onto the first square
+      await gh.sleep(820); if (my !== demoToken) return gh.hide();
+      await gh.tap();
+      select(0);                                   // orange appears large + selection cue + "המשך" enables
+      await gh.sleep(850); if (my !== demoToken) return gh.hide();
+      p = contCenter(); gh.move(p.x, p.y); await gh.sleep(850); if (my !== demoToken) return gh.hide();
+      if (cont) cont.classList.add('is-pressed');  // the button lights ORANGE, like a real press
+      await gh.tap();
+      await gh.sleep(550);
+      gh.hide();
+      // Reset to the clean empty state so the visitor makes their own choice.
+      if (cont) cont.classList.remove('is-pressed');
+      if (my === demoToken && !committed) { active = -1; updateContinue(); }
+    } finally {
+      unlockInput();
+    }
   }
   runDemo();
 
