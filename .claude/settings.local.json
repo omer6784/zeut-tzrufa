@@ -374,7 +374,15 @@
       "Bash(node --check v5/calibration.js)",
       "Bash(node --check v5/completion.js)",
       "Bash(node --check v5/editor.js)",
-      "Bash(sed -i '' 's/styles.css?v=130/styles.css?v=131/' v5/index.html)"
+      "Bash(sed -i '' 's/styles.css?v=130/styles.css?v=131/' v5/index.html)",
+      "Bash(node -e \"import\\('gifenc'\\).then\\(m=>console.log\\('gifenc OK:', Object.keys\\(m\\).join\\(','\\)\\)\\)\")",
+      "Bash(node -e \"const g=require\\('gifenc'\\); console.log\\('names:', Object.keys\\(g\\).join\\(','\\)\\)\")",
+      "Bash(awk '/^function draw\\\\\\(\\\\\\)/{f=1} f{print NR\": \"$0} f&&/^}/{c++; if\\(c==1\\)exit}' public/jewel/jewel-engine.js)",
+      "Bash(awk '/^function draw\\\\\\(\\\\\\)/{f=1} f{buf[NR]=$0} f&&/^}/{last=NR} END{for\\(i=last-4;i<=last;i++\\) if\\(buf[i]\\) print i\": \"buf[i]}' public/jewel/jewel-engine.js)",
+      "Bash(awk 'NR>=196 && NR<=281 && /^}/{print NR\": \"$0}' public/jewel/jewel-engine.js)",
+      "Bash(sed -i '' 's/jewel-engine.js?v=50/jewel-engine.js?v=51/' v5/display.html)",
+      "Bash(node --check netlify/functions/send-gif.js)",
+      "Bash(node --check public/jewel/jewel-engine.js)"
     ]
   },
   "hooks": {

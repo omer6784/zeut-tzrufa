@@ -2,10 +2,30 @@
    ─────────────────────────────────────────────────────────────────────
    Interface-orange plate with the dotted grid frame, a short message, and two
    dotted-frame buttons: back to the opening screen, and "send me as a GIF"
-   (which opens an email modal). The actual GIF capture + email send is wired via
-   the optional `onSendGif(email)` hook (Part B). */
+   (which opens an email modal). "שלח" captures the animated talisman from a
+   hidden display iframe, encodes it to a GIF (gifenc), and POSTs it to the
+   Netlify function that emails it via Resend. */
 
-export function mountCompletion({ onSendGif } = {}) {
+/* Poll `cond` until true or timeout (ms). */
+function waitFor(cond, timeout) {
+  return new Promise((resolve, reject) => {
+    const t0 = Date.now();
+    (function tick() {
+      try { if (cond()) return resolve(); } catch (_) {}
+      if (Date.now() - t0 > timeout) return reject(new Error('timeout'));
+      setTimeout(tick, 150);
+    })();
+  });
+}
+/* Base64-encode a Uint8Array in chunks (avoids call-stack overflow on big GIFs). */
+function bytesToBase64(bytes) {
+  let bin = '';
+  const CH = 0x8000;
+  for (let i = 0; i < bytes.length; i += CH) bin += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i + CH, bytes.length)));
+  return btoa(bin);
+}
+
+export function mountCompletion({ } = {}) {
   document.getElementById('completion-view')?.remove();
 
   const view = document.createElement('div');
@@ -38,9 +58,20 @@ export function mountCompletion({ onSendGif } = {}) {
     </div>`;
   document.body.appendChild(view);
 
+  // Hidden, off-screen display iframe that renders the final talisman — the frame
+  // capture reads from ITS canvas (via window.__jewel). Kept present (not
+  // display:none) so p5's draw loop runs and the WebGL buffer stays fresh.
+  const jewel = document.createElement('iframe');
+  jewel.id = 'cv-jewel';
+  jewel.src = '/v5/display.html';
+  jewel.setAttribute('aria-hidden', 'true');
+  jewel.style.cssText = 'position:fixed; left:-10000px; top:0; width:360px; height:640px; border:0; pointer-events:none;';
+  document.body.appendChild(jewel);
+
   const modal = view.querySelector('#cv-modal');
   const emailEl = view.querySelector('#cv-email');
   const msgEl = view.querySelector('#cv-msg');
+  const sendBtn = view.querySelector('#cv-send');
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   view.querySelector('#cv-home').addEventListener('click', () => location.reload());
@@ -50,17 +81,52 @@ export function mountCompletion({ onSendGif } = {}) {
     setTimeout(() => emailEl.focus(), 50);
   });
   view.querySelector('#cv-cancel').addEventListener('click', () => { modal.hidden = true; });
-  view.querySelector('#cv-send').addEventListener('click', async () => {
+
+  async function captureGifBase64() {
+    const win = jewel.contentWindow;
+    await waitFor(() => win && win.__jewel && win.__jewel.isReady && win.__jewel.isReady(), 15000);
+    const frames = [];
+    await new Promise((resolve, reject) => {
+      let settled = false;
+      const to = setTimeout(() => { if (!settled) { settled = true; reject(new Error('capture timeout')); } }, 15000);
+      win.__jewel.captureFrames({
+        count: 24, everyN: 2, size: 300,
+        onFrame: (data, w, h) => { frames.push({ data: new Uint8ClampedArray(data), w, h }); },
+        onDone: () => { if (!settled) { settled = true; clearTimeout(to); resolve(); } },
+      });
+    });
+    if (!frames.length) throw new Error('no frames');
+    const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
+    const enc = GIFEncoder();
+    for (const f of frames) {
+      const palette = quantize(f.data, 256);
+      const index = applyPalette(f.data, palette);
+      enc.writeFrame(index, f.w, f.h, { palette, delay: 90 });
+    }
+    enc.finish();
+    return bytesToBase64(enc.bytes());
+  }
+
+  sendBtn.addEventListener('click', async () => {
     const email = emailEl.value.trim();
     if (!EMAIL_RE.test(email)) { msgEl.textContent = 'כתובת מייל לא תקינה'; return; }
-    msgEl.textContent = 'שולח…';
+    sendBtn.disabled = true;
+    msgEl.textContent = 'מכין את ה-GIF…';
     try {
-      if (onSendGif) { await onSendGif(email); msgEl.textContent = 'נשלח! בדקו את תיבת המייל שלכם'; }
-      else { msgEl.textContent = 'שליחת ה-GIF תופעל בקרוב'; }   // Part B not wired yet
+      const gif = await captureGifBase64();
+      msgEl.textContent = 'שולח…';
+      const res = await fetch('/.netlify/functions/send-gif', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, gif }),
+      });
+      if (!res.ok) throw new Error('send failed');
+      msgEl.textContent = 'נשלח! בדקו את תיבת המייל שלכם';
     } catch (_) {
       msgEl.textContent = 'השליחה נכשלה, נסו שוב';
+    } finally {
+      sendBtn.disabled = false;
     }
   });
 
-  return function teardown() { try { view.remove(); } catch (_) {} };
+  return function teardown() { try { jewel.remove(); } catch (_) {} try { view.remove(); } catch (_) {} };
 }

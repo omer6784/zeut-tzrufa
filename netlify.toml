@@ -12,3 +12,8 @@
   from = "/"
   to = "/v5/"
   status = 302
+
+# Serverless functions (e.g. send-gif → emails the talisman GIF via Resend).
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

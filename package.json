@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "gifenc": "^1.0.3",
     "lenis": "^1.3.23",
     "p5": "^1.11.7",
     "three": "^0.184.0"

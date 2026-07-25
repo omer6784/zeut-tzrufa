@@ -156,6 +156,7 @@ function setup() {
   // one that p5 keeps drawing to (invisible). p5's default WEBGL canvas already
   // has alpha, so clear() gives the transparent background over the plate.
   const c = createCanvas(CANVAS_W, CANVAS_H, WEBGL);
+  mainCanvasEl = c.elt;
   if (document.getElementById("display-stage")) c.parent("display-stage");
   c.elt.style.height = "100%";
   c.elt.style.width = "auto";
@@ -167,7 +168,8 @@ function setup() {
 
   window.__jewel = {
     setSymbols, reset, setBackground, setGematria, applyEdits, setGallery, setSymbolSizes,
-    isReady: () => finishedBuildingAll
+    isReady: () => finishedBuildingAll,
+    captureFrames
   };
 
   // The staged point-cloud build normally runs inside draw() (one chunk per
@@ -191,6 +193,34 @@ function setup() {
 
   setBackground(PALETTE.dark);   // default: dark-grey background + cream centre line
   window.dispatchEvent(new Event("jewel-loaded"));
+}
+
+// ── Frame capture (for the "send me as GIF" export) ─────────────────────────
+// WebGL has no preserveDrawingBuffer here, so frames are grabbed at the END of
+// draw() (same tick, buffer still intact) by drawing the canvas into a small 2D
+// canvas and reading its pixels back as RGBA.
+let mainCanvasEl = null;
+let _cap = null;
+function captureFrames(opts = {}) {
+  if (!mainCanvasEl) { opts.onDone && opts.onDone(); return; }
+  const size = opts.size || 320;
+  const ar = mainCanvasEl.width / mainCanvasEl.height;
+  const w = ar >= 1 ? size : Math.max(2, Math.round(size * ar));
+  const h = ar >= 1 ? Math.max(2, Math.round(size / ar)) : size;
+  const off = document.createElement('canvas'); off.width = w; off.height = h;
+  _cap = { count: opts.count || 30, everyN: Math.max(1, opts.everyN || 2), n: 0, taken: 0, w, h,
+    octx: off.getContext('2d', { willReadFrequently: true }), onFrame: opts.onFrame, onDone: opts.onDone };
+}
+function _captureTick() {
+  if (!_cap) return;
+  if ((_cap.n++ % _cap.everyN) !== 0) return;
+  try {
+    _cap.octx.clearRect(0, 0, _cap.w, _cap.h);
+    _cap.octx.drawImage(mainCanvasEl, 0, 0, _cap.w, _cap.h);
+    const img = _cap.octx.getImageData(0, 0, _cap.w, _cap.h);
+    _cap.onFrame && _cap.onFrame(img.data, _cap.w, _cap.h);
+  } catch (_) {}
+  if (++_cap.taken >= _cap.count) { const done = _cap.onDone; _cap = null; done && done(); }
 }
 
 function draw() {
@@ -222,6 +252,7 @@ function draw() {
   }
 
   drawOrnament();
+  if (_cap) _captureTick();
 }
 
 /* ---- Moroccan floral dot-ornament that frames the jewel --------------------
