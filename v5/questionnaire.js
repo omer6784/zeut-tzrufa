@@ -530,8 +530,8 @@ const QUESTIONS = [
   /* 3 = light-point ("נקודת אור" — scattered gold dots you click; type 'words'),
      4 = path — a placeholder for now (fixed grid only, no content),
      5 = word selection (the yellow letter grid; type 'word-grid'). */
-  { id:'word',      label:'מילה',       text:'מהי נקודת האור\nשלך?',           type:'words',       styleStage:1 },
   { id:'roots',     label:'מסלול',      text:'',                              type:'roots-tree', styleStage:5 },
+  { id:'word',      label:'מילה',       text:'מהי נקודת האור\nשלך?',           type:'words',       styleStage:1 },
   { id:'life-wish', label:'משאלה',      text:'איזו תנועה\nמושכת אותך?',       type:'word-grid',   styleStage:2 },
   /* Stages 6–7 are placeholders for now (fixed grid stays, no middle content):
      6 = "שעה" (not built yet), 7 = empty. The former stars stage is retired. */
