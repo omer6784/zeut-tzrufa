@@ -367,7 +367,8 @@
       "Bash(awk '/#sidebar-tagline \\\\{/,/\\\\}/' styles.css)",
       "Bash(node --check v5/profession-cards.js)",
       "Bash(sed -i '' 's/styles.css?v=127/styles.css?v=128/' v5/index.html)",
-      "Bash(awk 'NR>=1996 && /^function runTilesDemo/{f=1} f&&/^}/{print NR\": \"$0; exit}' questionnaire.js)"
+      "Bash(awk 'NR>=1996 && /^function runTilesDemo/{f=1} f&&/^}/{print NR\": \"$0; exit}' questionnaire.js)",
+      "Bash(node --check v5/questionnaire.js)"
     ]
   },
   "hooks": {

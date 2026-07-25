@@ -1496,6 +1496,7 @@ function _renderQuestionImpl(idx){
       onAbsorb: (dotEl) => commitWord(dotEl),
       revealDelay: GATE_AT,          // the dotted gate circle fades in with the build
     });
+    setTimeout(() => runWordDemo(), 2600);   // ghost-hand demo once the dots + gate are in
   } else if(q.type==='choice'){
     wrap.innerHTML=`<div id="q-choices">${q.choices.map(c=>`<button class="choice-btn" data-value="${c}">${c}</button>`).join('')}</div>`;
     document.querySelectorAll('.choice-btn').forEach(btn=>{
@@ -1613,6 +1614,7 @@ function _renderQuestionImpl(idx){
       const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
       pT(() => { if (pg) pg.classList.add('paths-shrunk'); }, 1200);
       pT(() => { if (ptitle) ptitle.classList.add('is-in'); }, 1950);
+      pT(() => runMazeDemo(), 2400);   // ghost-hand demo once the maze has settled
     }
   } else if(q.type==='time'){
     wrap.innerHTML = '';
@@ -1633,6 +1635,7 @@ function _renderQuestionImpl(idx){
       // An hour is always selected → the band button is ready at once; it drives
       // the wheel's (now hidden) "זו השעה שלי" confirm.
       armBand(() => document.querySelector('.tw-confirm')?.click());
+      setTimeout(() => runTimeDemo(), 1500);   // ghost-hand demo once the wheel settles
     }
   } else if(q.type==='word-grid'){
     // Replaced the yellow letter grid with 8 animated dot tiles — the user picks
@@ -2087,6 +2090,114 @@ function runProfDemo(){
     const sb = ensureStageBand();
     if(sb){ sb.btn.classList.add('is-disabled'); st._stageContinue = null; }
     st._forcedSymbol = null;
+    gh.hide(); cleanup();
+  })();
+}
+
+/* Screen-space centre of a DOM/SVG element. */
+function _center(el){ if(!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+
+/* Ghost-hand demo for the LIGHT-POINT stage: an open hand grabs a light-dot and
+   drags it toward the gate circle, then releases (purely illustrative — completing
+   the drag would commit, so the demo only shows the gesture). Input is locked. */
+function runWordDemo(){
+  const gate = document.querySelector('.s2-gate-rect');
+  const dots = document.querySelectorAll('.s2-float-dot, .gold-dot-pick');
+  if(!gate || !dots.length) return;
+  const my = st._wordDemoToken = (st._wordDemoToken || 0) + 1;
+  lockInput();
+  const cleanup = () => unlockInput();
+  (async () => {
+    const gh = getGhostHand();
+    const dead = () => my !== st._wordDemoToken || !document.querySelector('.s2-gate-rect');
+    const abort = () => { gh.hide(); cleanup(); };
+    const gc = _center(gate);
+    // pick a dot a comfortable distance from the gate
+    let dEl = dots[0], best = -1;
+    dots.forEach(d => { const c = _center(d); const dist = Math.hypot(c.x - gc.x, c.y - gc.y); if(dist > best && dist < 620){ best = dist; dEl = d; } });
+    const dc = _center(dEl);
+    await gh.sleep(300); if(dead()) return abort();
+    gh.open(); gh.place(dc.x + 28, (window.innerHeight || 900) + 60); gh.show('light');
+    await gh.sleep(90); if(dead()) return abort();
+    gh.point(true); gh.move(dc.x, dc.y);
+    await gh.sleep(650); if(dead()) return abort();
+    gh.grab(true);                                   // press the dot
+    await gh.sleep(300); if(dead()) return abort();
+    const N = 16;
+    for(let i = 1; i <= N && !dead(); i++){ const f = i / N; gh.place(dc.x + (gc.x - dc.x) * f, dc.y + (gc.y - dc.y) * f); await gh.sleep(48); }
+    if(dead()) return abort();
+    await gh.sleep(300);
+    gh.open();                                        // release near the gate (does NOT commit)
+    await gh.sleep(450);
+    gh.hide(); cleanup();
+  })();
+}
+
+/* Ghost-hand demo for the MAZE stage: grab the source dot and drag toward the exit
+   ring (illustrative — does not solve/advance). Input is locked. */
+function runMazeDemo(){
+  const src = document.querySelector('.paths-source');
+  const exit = document.querySelector('.paths-exit-ring') || document.querySelector('.paths-exit');
+  if(!src || !exit) return;
+  const my = st._mazeDemoToken = (st._mazeDemoToken || 0) + 1;
+  lockInput();
+  const cleanup = () => unlockInput();
+  (async () => {
+    const gh = getGhostHand();
+    const dead = () => my !== st._mazeDemoToken || !document.querySelector('.paths-source');
+    const abort = () => { gh.hide(); cleanup(); };
+    const sc = _center(src), ec = _center(exit);
+    await gh.sleep(300); if(dead()) return abort();
+    gh.open(); gh.place(sc.x + 24, (window.innerHeight || 900) + 60); gh.show('dark');   // orange bg → dark hand
+    await gh.sleep(90); if(dead()) return abort();
+    gh.point(true); gh.move(sc.x, sc.y);
+    await gh.sleep(650); if(dead()) return abort();
+    gh.grab(true);                                   // grab the source dot
+    await gh.sleep(300); if(dead()) return abort();
+    const N = 22;
+    for(let i = 1; i <= N && !dead(); i++){ const f = i / N; gh.place(sc.x + (ec.x - sc.x) * f, sc.y + (ec.y - sc.y) * f + Math.sin(f * Math.PI) * 22); await gh.sleep(50); }
+    if(dead()) return abort();
+    await gh.sleep(300);
+    gh.open();
+    await gh.sleep(450);
+    gh.hide(); cleanup();
+  })();
+}
+
+/* Ghost-hand demo for the TIME stage: grab the sun and drag it up (scroll the
+   hour), then tap "זו השעה שלי". Input is locked. */
+function runTimeDemo(){
+  const sun = document.querySelector('.tw-sun');
+  if(!sun) return;
+  const my = st._timeDemoToken = (st._timeDemoToken || 0) + 1;
+  lockInput();
+  const cleanup = () => unlockInput();
+  (async () => {
+    const gh = getGhostHand();
+    const dead = () => my !== st._timeDemoToken || !document.querySelector('.tw-sun');
+    const abort = () => { gh.hide(); cleanup(); };
+    const sc = _center(sun);
+    const day = document.getElementById('section-3')?.classList.contains('tw-daylight');
+    await gh.sleep(300); if(dead()) return abort();
+    gh.open(); gh.place(sc.x, (window.innerHeight || 900) + 60); gh.show(day ? 'dark' : 'light');
+    await gh.sleep(90); if(dead()) return abort();
+    gh.point(true); gh.move(sc.x, sc.y);
+    await gh.sleep(600); if(dead()) return abort();
+    gh.grab(true);                                   // grab the sun
+    await gh.sleep(260); if(dead()) return abort();
+    const N = 12;
+    for(let i = 1; i <= N && !dead(); i++){ gh.place(sc.x, sc.y - 90 * (i / N)); await gh.sleep(55); }   // scroll up
+    if(dead()) return abort();
+    await gh.sleep(260);
+    gh.open();
+    const conf = document.querySelector('.tw-confirm');
+    if(conf){
+      const cc = _center(conf);
+      gh.move(cc.x, cc.y);
+      await gh.sleep(650); if(dead()) return abort();
+      await gh.tap();                                // illustrative — does not advance
+    }
+    await gh.sleep(450);
     gh.hide(); cleanup();
   })();
 }
