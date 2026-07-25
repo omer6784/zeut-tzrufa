@@ -6475,10 +6475,19 @@ html:not(.cursor-active) *::after {
    mirrors calibration.js's layout: canvas width W = 100vw−200·sx, gap g = 14px, the
    right column = clamp(170, W·0.24, 300); the big view spans g→W−14−colw, so its
    centre is 100·sx + (W − 14 − colw)/2. translateX(−50%) (inherited) centres on it. */
+/* "המשך" sits at the TOP-LEFT of the content rectangle, on the same row as the
+   instruction text (.sb-note, which is top-right). */
 #section-3.q-color-stage[data-stage="0"] .stage-band .sb-btn {
-  --calib-w: calc(100vw - 200 * var(--sx));
-  --calib-colw: clamp(170px, calc(var(--calib-w) * 0.24), 300px);
-  left: calc(100 * var(--sx) + (var(--calib-w) - 14px - var(--calib-colw)) / 2) !important;
+  position: fixed !important;
+  top: calc(85 * var(--sy) + 12px) !important;
+  bottom: auto !important;
+  left: calc(100 * var(--sx) + 20px) !important;
+  transform: none !important;
+  z-index: 1002 !important;
+}
+/* Top-left anchored (no centring translate) → plain scale breathe when enabled. */
+#section-3.q-color-stage[data-stage="0"] .stage-band .sb-btn:not(.is-disabled) {
+  animation: dotted-frame-breathe 1.8s ease-in-out infinite !important;
 }
 @keyframes sb-btn-breathe {
   0%, 100% { transform: translateX(-50%) scale(1); }

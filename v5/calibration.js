@@ -75,7 +75,7 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
   }
 
   // ── Layout (rebuilt on resize) ──
-  let W = 0, H = 0, big = null, thumbs = [], vLineX = 0, colX = 0, thumbDivs = [], gridBig = null, gridThumb = null;
+  let W = 0, H = 0, big = null, thumbs = [], vLineX = 0, colX = 0, thumbDivs = [], gridBig = null, gridThumb = null, rowDivY = 0;
   function layout() {
     const rect = host.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -91,19 +91,21 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     // paint over it. This also shortens every element (smaller big view + tiles).
     const mainY = 58;                  // top inset that clears the instruction line
     const botY = H - g;                // live in the shared bottom band below it
-    const colW = Math.max(170, Math.min(300, W * 0.24));
-    colX = W - g - colW;               // column inset one gap from the right grid
-    vLineX = colX - g / 2;             // dotted rule centred in the big↔column gap
-    big = { x: g, y: mainY, w: colX - 2 * g, h: botY - mainY };
-
     const n = TILES.length;
-    const th = (botY - mainY - (n - 1) * g) / n;
-    thumbs = TILES.map((_, i) => ({ x: colX, y: mainY + i * (th + g), w: colW, h: th }));
-    thumbDivs = [];
-    for (let i = 1; i < n; i++) thumbDivs.push(mainY + i * (th + g) - g / 2);
+    // Four frequency squares in a ROW along the bottom; the big selected view
+    // fills the full width above them.
+    const tw = (W - 2 * g - (n - 1) * g) / n;             // thumb width across the row
+    const rowH = Math.min(tw, (botY - mainY) * 0.32);     // thumb row height
+    const rowY = botY - rowH;
+    big = { x: g, y: mainY, w: W - 2 * g, h: rowY - g - mainY };
+
+    thumbs = TILES.map((_, i) => ({ x: g + i * (tw + g), y: rowY, w: tw, h: rowH }));
+    rowDivY = rowY - g / 2;                                // horizontal rule between big view and the row
+    thumbDivs = [];                                        // vertical rules between the four squares
+    for (let i = 1; i < n; i++) thumbDivs.push(g + i * (tw + g) - g / 2);
 
     gridBig = makeGrid(big.w, big.h);
-    gridThumb = makeGrid(colW, th);
+    gridThumb = makeGrid(tw, rowH);
   }
   layout();
 
@@ -178,9 +180,10 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     if (chromeA > 0.01) {
       for (let i = 0; i < thumbs.length; i++) drawField(ctx, thumbs[i], gridThumb, TILES[i], (i === active ? 1 : 0.62) * chromeA);
       ctx.globalAlpha = chromeA;
-      dottedV(vLineX, big.y, big.y + big.h);                   // between the big view and the column
-      const cr = thumbs.length ? thumbs[0].x + thumbs[0].w : W;
-      for (const y of thumbDivs) dottedH(colX, cr, y);         // between the four squares
+      dottedH(big.x, big.x + big.w, rowDivY);                  // between the big view and the row
+      const rowH = thumbs.length ? thumbs[0].h : 0;
+      const rowY = thumbs.length ? thumbs[0].y : 0;
+      for (const x of thumbDivs) dottedV(x, rowY, rowY + rowH);// between the four squares
       ctx.globalAlpha = 1;
     }
 
