@@ -90,7 +90,7 @@ export function mountCompletion({ } = {}) {
       let settled = false;
       const to = setTimeout(() => { if (!settled) { settled = true; reject(new Error('capture timeout')); } }, 15000);
       win.__jewel.captureFrames({
-        count: 24, everyN: 2, size: 300,
+        count: 50, everyN: 2, size: 480,
         onFrame: (data, w, h) => { frames.push({ data: new Uint8ClampedArray(data), w, h }); },
         onDone: () => { if (!settled) { settled = true; clearTimeout(to); resolve(); } },
       });
@@ -101,7 +101,7 @@ export function mountCompletion({ } = {}) {
     for (const f of frames) {
       const palette = quantize(f.data, 256);
       const index = applyPalette(f.data, palette);
-      enc.writeFrame(index, f.w, f.h, { palette, delay: 90 });
+      enc.writeFrame(index, f.w, f.h, { palette, delay: 66 });
     }
     enc.finish();
     return bytesToBase64(enc.bytes());
