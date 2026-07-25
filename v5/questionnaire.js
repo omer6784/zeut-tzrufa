@@ -2240,7 +2240,7 @@ const TIME_DAY   = [245, 245, 237]; // #f5f5ed — cream (interface day plate)
 function daylightForHour(hf){
   const h = ((hf % 24) + 24) % 24;
   if(h >= 6 && h <= 18) return 1;                    // 06:00–18:00 full day
-  if(h >= 4 && h < 6)   return (h - 4) / 2;          // 04:00–06:00 night → day
+  if(h >= 4 && h < 6)   return 1;                    // 04:00–06:00 → cream (no grey ramp)
   if(h > 18 && h < 20.5) return 1 - (h - 18) / 2.5;  // 18:00–20:30 day → night
   return 0;                                           // 20:30–04:00 full night
 }

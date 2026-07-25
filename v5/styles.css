@@ -6072,6 +6072,11 @@ html:not(.cursor-active) *::after {
 #section-3.q-color-stage[data-stage="0"] #sidebar-tagline {
   color: #f5f5ed;
 }
+/* Time stage: when the sky is dark (night — no .tw-daylight), the wordmark turns
+   cream so it stays readable. */
+#section-3[data-stage="3"]:not(.tw-daylight) #sidebar-tagline {
+  color: #f5f5ed !important;
+}
 
 /* ─── Word Grid — שלב 3 ─────────────────────────────────── */
 #word-field-container:has(.word-grid) {
