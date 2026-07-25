@@ -548,6 +548,7 @@ const INSTRUCTIONS = {
   roots: 'גררו את הנקודה במסלול שאתם בוחרים',
   stars: 'גללו ובחרו את השעה הרצויה.',
   personal: 'בחרו את הכוח שמוביל אתכם:',
+  'life-wish': 'בחרו את האופן בו תרצו לנוע',
 };
 
 /* The frequency stage's own cue text (shown in the shared band's note slot). */
