@@ -4608,22 +4608,18 @@ function buildPathsGame(host, onSelect){
   // ── Demo API — drives a WINDING source→exit trace (+ the real white trail) for
   //    the ghost-hand stage demo. Purely visual; resetDemo() clears it after. ──
   function _neighbours(node){ const nb = []; node.edgesOut.forEach(e => nb.push(e.to)); node.edgesIn.forEach(e => nb.push(e.from)); return nb; }
-  function _windingRoute(){
-    for(let attempt = 0; attempt < 12; attempt++){
-      const visited = new Set(), path = []; let ok = false;
-      (function dfs(node){
-        if(ok) return;
-        visited.add(node); path.push(node);
-        if(node === exitNode){ ok = true; return; }
-        const nbs = _neighbours(node).filter(n => !visited.has(n));
-        nbs.sort((a, b) => (b.x - a.x) + (Math.random() - 0.5) * 30);   // progress right, small wander (shorter route)
-        if(node === source) nbs.sort((a, b) => Math.abs(b.y - source.y) - Math.abs(a.y - source.y));   // leave the MID row first
-        for(const n of nbs){ if(ok) break; dfs(n); }
-        if(!ok) path.pop();
-      })(source);
-      if(ok){ const winds = path.some(n => Math.abs(n.y - source.y) > 1); if(winds || attempt === 11) return path; }
+  // Shortest source→exit route (BFS, fewest hops).
+  function _shortestRoute(){
+    const q = [source], prev = new Map([[source, null]]);
+    while(q.length){
+      const node = q.shift();
+      if(node === exitNode) break;
+      for(const nb of _neighbours(node)){ if(!prev.has(nb)){ prev.set(nb, node); q.push(nb); } }
     }
-    return null;
+    if(!prev.has(exitNode)) return null;
+    const path = [];
+    for(let n = exitNode; n; n = prev.get(n)) path.push(n);
+    return path.reverse();
   }
   function _routeSamples(nodePath){
     const pts = [{ x: source.x, y: source.y }];
@@ -4638,7 +4634,7 @@ function buildPathsGame(host, onSelect){
     return pts;
   }
   return {
-    demoRoute(){ const np = _windingRoute(); return np ? _routeSamples(np) : null; },
+    demoRoute(){ const np = _shortestRoute(); return np ? _routeSamples(np) : null; },
     svgToScreen(p){ const m = svg.getScreenCTM(); return { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f }; },
     setTrail(pts, upto){
       svg.classList.add('tracing', 'paths-began');
