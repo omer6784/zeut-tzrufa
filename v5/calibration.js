@@ -16,15 +16,14 @@
 // Order is LEFT→RIGHT on screen, so the row reads (right→left): orange, gold,
 // cream, dark — i.e. dark is leftmost, orange rightmost.
 const TILES = [
-  // The dark option is INVERTED: #282828 dots on a cream panel, so the dominant
-  // colour (#282828) itself is what you see — clearly the dark choice.
-  { rgb: [40, 40, 40],    hex: '#282828', anim: 'diamond', invert: true }, // dark  (leftmost)
+  // The dark option: ALMOST-BLACK dots on the same #282828 panel (a quiet, deep
+  // field). The locked/saved colour is still #282828 (hex), the dark choice.
+  { rgb: [10, 10, 10],    hex: '#282828', anim: 'diamond', invert: true }, // dark  (leftmost)
   { rgb: [245, 245, 237], hex: '#f5f5ed', anim: 'vortex'  }, // cream
   { rgb: [226, 188, 113], hex: '#e2bc71', anim: 'squares' }, // gold
   { rgb: [255, 80, 3],    hex: '#ff5003', anim: 'pulse'   }, // orange (rightmost)
 ];
 const TILE_BG  = [40, 40, 40];      // #282828 panel (the coloured-dot tiles)
-const CREAM_BG = [240, 236, 228];   // cream panel for the inverted (#282828) tile
 const GRID_DOT = '245,245,237';     // cream — the grid colour on the dark plate
 const GRID_R = 0.8, GRID_PITCH = 5.5; // match the fixed interface grid (Ø1.6 / 5.5)
 const LOCK_DUR = 0.7;   // commit → grow the picked frequency → hand off to the globe
@@ -130,7 +129,7 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
   function drawField(tctx, rect, grid, tile, alpha) {
     if (alpha <= 0.001) return;
     const field = FIELD[tile.anim], isTunnel = tile.anim === 'tunnel';
-    const panel = tile.invert ? CREAM_BG : TILE_BG;
+    const panel = TILE_BG;   // every tile (incl. the dark one) on the #282828 panel
     tctx.globalAlpha = alpha;
     tctx.fillStyle = `rgb(${panel[0]},${panel[1]},${panel[2]})`;
     tctx.fillRect(rect.x, rect.y, rect.w, rect.h);
@@ -204,7 +203,7 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
       const rc = thumbs[selIdx];
       const cx = rc.x + rc.w / 2, cy = rc.y + rc.h / 2;
       const p = selAge / 0.62;                               // 0 → 1
-      const ring = TILES[selIdx].invert ? '40,40,40' : '245,245,237';
+      const ring = '245,245,237';   // cream ring reads on every #282828 panel
       ctx.save();
       ctx.strokeStyle = `rgba(${ring},${(1 - p) * 0.85})`;
       ctx.lineWidth = 1 + 2.2 * (1 - p);

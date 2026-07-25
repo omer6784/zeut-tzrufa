@@ -2165,7 +2165,7 @@ function runMazeDemo(){
       md.setTrail(pts, i);
       const s = md.svgToScreen(pts[i]);
       gh.place(s.x, s.y);
-      await gh.sleep(28);
+      await gh.sleep(56);   // half speed
     }
     if(dead()) return abort();
     md.setTrail(pts, pts.length - 1);                // finish exactly on the exit
