@@ -360,7 +360,8 @@
       "Bash(python3 -c \"import PIL, numpy; print\\('PIL', PIL.__version__, 'numpy', numpy.__version__\\)\")",
       "Bash(pip install *)",
       "Bash(python3 \"/private/tmp/claude-501/-Users-omershushan-Desktop-final-project-code/735f8bf4-aac0-4325-8d9f-4289db549a5a/scratchpad/measure.py\")",
-      "Bash(python3 -m pip install scipy --quiet)"
+      "Bash(python3 -m pip install scipy --quiet)",
+      "Bash(node --check dot-tiles.js)"
     ]
   },
   "hooks": {

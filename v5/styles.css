@@ -1290,28 +1290,31 @@ body::-webkit-scrollbar-thumb {
    the tiles never spill past the grid. No cards, borders or rounding. */
 .dot-tiles-grid {
   position: absolute;
-  left: 0; right: 0;
-  /* Fill the whole content area: rise over the (empty) 90px top strip so the
-     grid spans q-main-cell top→bottom, and inset horizontally to the frame's
-     side lines. */
+  /* A tall 4×8 block on the LEFT of the content rectangle. Fills the content
+     height (rising over the empty 90px top strip so it spans top→bottom) and is
+     left-anchored to the frame's left side line; its width follows from the
+     square cells, leaving the right of the rectangle open. */
+  left: calc(100 * var(--sx));
+  right: auto;
   top: -90px;
   height: calc(100% + 90px);
-  padding: 0 calc(100 * var(--sx));
+  padding: 6px 0;
   box-sizing: border-box;
-  display: block;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
 }
-/* 8 columns × 4 rows filling the content area, with a small 8px gap between tiles
-   (tighter than before) and a 12px inset to every edge. Tiles fill their cells
-   (near-square), so the whole grid reads full and closely packed. */
+/* 4 columns × 8 rows — a portrait medallion grid. aspect-ratio 4/8 with full
+   height gives square cells; width derives from that (left-anchored). */
 .dot-tiles-inner {
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: 8px;
-  padding: 12px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 6px;
   box-sizing: border-box;
-  width: 100%;
   height: 100%;
+  aspect-ratio: 4 / 8;
+  width: auto;
 }
 .dot-tile {
   position: relative;
