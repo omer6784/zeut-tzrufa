@@ -1693,6 +1693,12 @@ html, body {
 #section-3[data-stage="4"] { --grid-dot: #f5f5ed !important; }
 #section-3[data-stage="4"] .stage-band .sb-note { color: #f5f5ed; }
 #section-3[data-stage="4"] #step-rail li.is-current { background: #f5f5ed !important; }
+/* No Shofar title + no horizontal grid lines on this stage. */
+#section-3[data-stage="4"] #q-text { display: none !important; }
+#section-3[data-stage="4"] .stage-grid .sg-h { display: none !important; }
+/* Logo + "מאגר הסמלים" button → interface dark (like the maze's logo). */
+#section-3[data-stage="4"] .grid-logo img { filter: brightness(0) invert(0.157) !important; }
+#section-3[data-stage="4"] #q-btn-symbol-library { color: #282828 !important; }
 
 /* Drop the leftover chrome divider lines on the maze stage (sidebar
    border-right from geometric.css, content border-top from styles.css) so the
