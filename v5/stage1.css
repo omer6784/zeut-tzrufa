@@ -746,6 +746,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   align-self: center !important;
   width: var(--input-w) !important;   /* line spans the same width as the button row below */
   margin-top: 20px !important;   /* writing line lowered 20px */
+  transform: translateY(50px) !important;   /* …lowered another 50px */
 }
 /* The orange custom caret was removed — the input's own native (dark) caret is
    the only writing marker now (there used to be two: this orange one + the native). */
@@ -1295,11 +1296,12 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   align-self: center !important;
   width: var(--input-w) !important;
   margin-top: 6px !important;
+  transform: translateY(100px) !important;   /* buttons lowered 100px */
   display: flex !important;
   direction: rtl !important;
-  justify-content: space-between !important;
+  justify-content: center !important;   /* the two buttons cluster close together */
   align-items: stretch !important;   /* equal height for both buttons */
-  gap: 12px !important;
+  gap: 16px !important;
 }
 
 /* Dimmed / "off" state — quiet and inert until unlocked. "סיימתי" is dim until
