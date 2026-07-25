@@ -1187,34 +1187,70 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
    silhouette (the source art is orange text on transparent), so the title reads
    clearly on the light plate (gold-on-cream would be too low-contrast) while
    keeping the typewriter reveal. */
+/* Each title line is drawn as TWO stacked layers, both masked to the letter art:
+   · ::before = the dotted OUTLINE (story-lineN.png), painted dark — the letter
+     contour that types in.
+   · ::after  = the letter BODY fill (story-lineN-fill.png, a solid silhouette
+     derived from the outline), painted as a tiled ORANGE DOT field. It starts
+     hidden and fades in once the title has typed in (.dots-filled) — the letters
+     "fill" with orange dots. The element itself carries the size + the typewriter
+     clip (which clips both layers together). */
 #section-3[data-stage="0"] .roots-widget .roots-story-line {
+  position: relative !important;
   display: block !important;
   height: auto !important;
   margin-left: auto !important;   /* push to the right edge (RTL) */
-  background-color: #282828 !important;
-  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-  -webkit-mask-position: center; mask-position: center;
-  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   /* Typewriter reveal: a clip that opens from the RIGHT (first Hebrew letter)
      to the left, in letter-sized steps. */
   clip-path: inset(0 0 0 100%);
 }
+#section-3[data-stage="0"] .roots-widget .roots-story-line::before,
+#section-3[data-stage="0"] .roots-widget .roots-story-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+}
+#section-3[data-stage="0"] .roots-widget .roots-story-line::before {
+  background-color: #282828;   /* dotted outline (dark on the light plate) */
+}
+#section-3[data-stage="0"] .roots-widget .roots-story-line::after {
+  background-image: radial-gradient(circle, #ff5003 42%, transparent 46%);
+  background-size: 8px 8px;
+  background-repeat: repeat;
+  opacity: 0;                  /* revealed by .dots-filled once typed in */
+  transition: opacity 0.6s ease;
+}
 #section-3[data-stage="0"] .roots-widget .rsl-1 {
   width: calc(var(--story-w) * 0.985 * 0.85) !important;   /* both lines shrunk ~15% */
   aspect-ratio: 3239 / 740;   /* source PNG size, so height follows width */
+}
+#section-3[data-stage="0"] .roots-widget .rsl-1::before {
   -webkit-mask-image: url(/image/v5-stage1/story-line1.png?v=5);
   mask-image: url(/image/v5-stage1/story-line1.png?v=5);
+}
+#section-3[data-stage="0"] .roots-widget .rsl-1::after {
+  -webkit-mask-image: url(/image/v5-stage1/story-line1-fill.png?v=1);
+  mask-image: url(/image/v5-stage1/story-line1-fill.png?v=1);
 }
 #section-3[data-stage="0"] .roots-widget .rsl-2 {
   width: calc(var(--story-w) * 0.85) !important;
   aspect-ratio: 3278 / 840;   /* source PNG size, so height follows width */
-  -webkit-mask-image: url(/image/v5-stage1/story-line2.png?v=5);
-  mask-image: url(/image/v5-stage1/story-line2.png?v=5);
   margin-top: calc(6 * var(--sy) - 14px) !important;   /* nudged up a touch */
   /* "שלך מתחיל?" holds its position; only line 1 ("איפה הסיפור") took the 50px
      drop, so pull line 2 back up by the same 50px — then nudge it 10px down + 15px
      left of that. */
   transform: translateX(-85px) translateY(-40px) !important;
+}
+#section-3[data-stage="0"] .roots-widget .rsl-2::before {
+  -webkit-mask-image: url(/image/v5-stage1/story-line2.png?v=5);
+  mask-image: url(/image/v5-stage1/story-line2.png?v=5);
+}
+#section-3[data-stage="0"] .roots-widget .rsl-2::after {
+  -webkit-mask-image: url(/image/v5-stage1/story-line2-fill.png?v=1);
+  mask-image: url(/image/v5-stage1/story-line2-fill.png?v=1);
 }
 /* The stepped clip reveal plays only once the choreography arms it (.story-go),
    so it can type in while the title is held BIG + centred (see runStage0Choreography). */
@@ -1225,16 +1261,9 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   animation: story-type 0.66s steps(10, end) 0.95s forwards;
 }
 @keyframes story-type { to { clip-path: inset(0 0 0 0); } }
-/* Once the title has fully typed in, its letters FILL with orange dots: swap the
-   solid dark fill for a tiled orange dot pattern (the letter PNG still masks it, so
-   the dots only show inside the letter silhouettes). The dark fades out under the
-   dots for a soft "fill" reveal. */
-#section-3[data-stage="0"] .roots-widget .roots-story-title.dots-filled .roots-story-line {
-  background-color: transparent !important;
-  background-image: radial-gradient(circle, #ff5003 42%, transparent 46%) !important;
-  background-size: 8px 8px !important;
-  background-repeat: repeat !important;
-  transition: background-color 0.6s ease !important;
+/* Once fully typed in: the orange-dot body fill fades in inside the letters. */
+#section-3[data-stage="0"] .roots-widget .roots-story-title.dots-filled .roots-story-line::after {
+  opacity: 1;
 }
 @media (prefers-reduced-motion: reduce) {
   #section-3[data-stage="0"] .roots-widget .roots-story-line {
