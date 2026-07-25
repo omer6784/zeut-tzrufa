@@ -1687,6 +1687,13 @@ html, body {
    cascade (same trick as the gold stage-4 rule in geometric.css). */
 #section-3[data-stage="2"][data-stage] { background: #e2bc71 !important; --stage-plate: #e2bc71; }
 
+/* Profession (עיסוק) stage — interface ORANGE plate like the maze; chrome flips
+   to cream so nothing is swallowed. Doubled [data-stage] beats the gold rule. */
+#section-3[data-stage="4"][data-stage] { background: #ff5003 !important; --stage-plate: #ff5003; }
+#section-3[data-stage="4"] { --grid-dot: #f5f5ed !important; }
+#section-3[data-stage="4"] .stage-band .sb-note { color: #f5f5ed; }
+#section-3[data-stage="4"] #step-rail li.is-current { background: #f5f5ed !important; }
+
 /* Drop the leftover chrome divider lines on the maze stage (sidebar
    border-right from geometric.css, content border-top from styles.css) so the
    whole board is a clean field for the path network. Here because stage1.css is

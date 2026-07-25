@@ -7,7 +7,7 @@
    language (dark #282828 dots) and palette. */
 
 const TAU = Math.PI * 2;
-const DOTC = '#282828';
+const DOTC = '#f5f5ed';   // cream dots — the stage plate is interface orange
 
 function dot(ctx, x, y, r) { if (r <= 0.05) return; ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, TAU); }
 function ring(D, cx, cy, R, n, ph) { for (let i = 0; i < n; i++) { const a = (ph || 0) + i / n * TAU; D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R }); } }

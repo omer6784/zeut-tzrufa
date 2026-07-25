@@ -1346,22 +1346,20 @@ body::-webkit-scrollbar-thumb {
   position: relative;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 4px;
-  background: #f5f5ed;
+  /* No plate — the cards float directly on the orange stage. */
   cursor: pointer; pointer-events: auto;
   opacity: 0; transform: translateY(14px);
-  transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s ease;
-  box-shadow: 0 0 0 1px rgba(40, 40, 40, 0.12);
+  transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .prof-card.is-in { opacity: 1; transform: translateY(0); }
 .prof-icon { width: 60%; aspect-ratio: 1 / 1; display: block; }
 .prof-label {
-  font-family: 'ArbelG', sans-serif; color: #282828;
+  font-family: 'ArbelG', sans-serif; color: #f5f5ed;
   font-size: clamp(12px, 1.1vw, 17px); letter-spacing: 0.02em;
   direction: rtl; text-align: center;
 }
 .prof-card.is-dimmed { opacity: 0.42; }
-.prof-card.is-selected { transform: translateY(0) scale(1.05); z-index: 2; box-shadow: 0 0 0 2px #ff5003; }
-.prof-card.is-selected .prof-label { color: #ff5003; }
+.prof-card.is-selected { transform: translateY(0) scale(1.1); z-index: 2; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {
