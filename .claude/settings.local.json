@@ -361,7 +361,8 @@
       "Bash(pip install *)",
       "Bash(python3 \"/private/tmp/claude-501/-Users-omershushan-Desktop-final-project-code/735f8bf4-aac0-4325-8d9f-4289db549a5a/scratchpad/measure.py\")",
       "Bash(python3 -m pip install scipy --quiet)",
-      "Bash(node --check dot-tiles.js)"
+      "Bash(node --check dot-tiles.js)",
+      "Bash(node -e \"import\\('./v5/dot-tiles.js'\\).then\\(m=>console.log\\('meanings:', m.TILE_MEANINGS.length\\)\\)\")"
     ]
   },
   "hooks": {

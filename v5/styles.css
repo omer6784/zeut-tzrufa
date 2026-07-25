@@ -1298,22 +1298,22 @@ body::-webkit-scrollbar-thumb {
   right: auto;
   top: -90px;
   height: calc(100% + 90px);
-  padding: 6px 0;
+  padding: 2px 0;
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
   justify-content: flex-start;
 }
-/* 4 columns × 8 rows — a portrait medallion grid. aspect-ratio 4/8 with full
-   height gives square cells; width derives from that (left-anchored). */
+/* 4 columns × 7 rows — a portrait medallion grid (28 tiles). aspect-ratio 4/7
+   with full height gives square cells, a touch larger than the old 4×8. */
 .dot-tiles-inner {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(8, 1fr);
-  gap: 6px;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 5px;
   box-sizing: border-box;
   height: 100%;
-  aspect-ratio: 4 / 8;
+  aspect-ratio: 4 / 7;
   width: auto;
 }
 .dot-tile {

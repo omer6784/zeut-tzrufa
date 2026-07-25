@@ -62,11 +62,9 @@ function paint(ctx, dots) {
 }
 
 /* ── Ornamental "azulejo"-style tiles, rendered entirely in DOTS ──────────────
-   Each tile is a symmetric medallion — a dotted border framing a central motif
-   (rosette · starburst · mandala rings · cross+diamonds · floral cross · pinwheel
-   · nested squares · sunflower) with N-fold symmetry — and each carries its OWN
-   gentle animation (breathe · spin · bloom · twinkle · pulse). The per-tile
-   `meaning` (index → symbol) is unchanged. */
+   Each tile is a symmetric medallion — a dotted border framing one of 14 distinct
+   central motifs — with its OWN base rotation, symmetry and animation, so no two
+   tiles read alike. The per-tile `meaning` (index → symbol) is unchanged. */
 const A_TAU = Math.PI * 2;
 
 // Dotted border, `ins` in from each edge; `dbl` adds a second inner line.
@@ -100,60 +98,103 @@ function squareRing(D, cx, cy, R, r, ph) {
     for (let j = 0; j < n; j++) D.push({ x: x1 + (x2 - x1) * j / n, y: y1 + (y2 - y1) * j / n, r });
   }
 }
+function smallDiamond(D, cx, cy, R, r) {
+  [[0, -R], [R, 0], [0, R], [-R, 0]].forEach(([dx, dy]) => D.push({ x: cx + dx, y: cy + dy, r }));
+}
+// Almond/leaf petal OUTLINE (two mirrored edges) pointing along angle `a`.
+function petalOutline(D, cx, cy, a, R0, R1, wid, r) {
+  const ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux, N = 6;
+  for (let s = 0; s <= N; s++) {
+    const f = s / N, R = R0 + (R1 - R0) * f, w = Math.sin(f * Math.PI) * wid;
+    D.push({ x: cx + ux * R + px * w, y: cy + uy * R + py * w, r });
+    D.push({ x: cx + ux * R - px * w, y: cy + uy * R - py * w, r });
+  }
+}
 
-// One composer draws every tile; `cfg.style` (0..7) selects the motif, varied by
-// symmetry, animation, border and corner accents.
+// One composer draws every tile; `cfg.style` (0..13) selects the motif. `P0` is the
+// tile's base rotation (spin animation + a per-tile seed offset) so twins differ.
 function drawAzulejo(ctx, tl, t, cfg) {
   const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
   const D = [];
   const breathe = 0.82 + 0.26 * Math.sin(t * 1.2 + cfg.seed);
   const spin = cfg.anim === 'spin' ? t * 0.35 : cfg.anim === 'spin2' ? t * 0.55 : 0;
   const bloom = cfg.anim === 'bloom' ? 1 + 0.12 * Math.sin(t * 1.1) : 1;
-  const sym = cfg.sym;
+  const sym = cfg.sym, P0 = spin + cfg.seed;   // base rotation → distinct orientation per tile
 
-  if (cfg.frame) frameDots(D, tl.W, tl.H, S * 0.09, b, cfg.frame === 2);
+  if (cfg.frame) frameDots(D, tl.W, tl.H, S * 0.08, b, cfg.frame === 2);
   if (cfg.corner) {
-    const o = S * 0.24;
+    const o = S * 0.22;
     [[o, o], [tl.W - o, o], [o, tl.H - o], [tl.W - o, tl.H - o]].forEach(([x, y]) =>
-      ringDots(D, x, y, S * 0.07, cfg.corner === 2 ? 4 : 1, b, spin));
+      ringDots(D, x, y, S * 0.07, cfg.corner === 2 ? 4 : 1, b, P0));
   }
 
   const s = cfg.style;
-  if (s === 0) {                     // 8-petal rosette
-    ringDots(D, cx, cy, S * 0.14, sym, b, spin);
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, spin + i / sym * A_TAU, S * 0.24, S * 0.6 * bloom, b);
-    ringDots(D, cx, cy, S * 0.72, sym * 2, b, -spin);
+  if (s === 0) {                     // rosette — petal rays + outer bead ring
+    ringDots(D, cx, cy, S * 0.15, sym, b, P0);
+    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.26, S * 0.66 * bloom, b);
+    ringDots(D, cx, cy, S * 0.8, sym * 2, b, -P0);
     D.push({ x: cx, y: cy, r: b * 1.5 });
   } else if (s === 1) {              // star burst
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, spin + i / sym * A_TAU, S * 0.12, S * 0.82 * bloom, b);
-    ringDots(D, cx, cy, S * 0.4, sym, b, spin + Math.PI / sym);
-    ringDots(D, cx, cy, S * 0.2, sym, b, spin);
+    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.12, S * 0.86 * bloom, b);
+    ringDots(D, cx, cy, S * 0.44, sym, b, P0 + Math.PI / sym);
+    ringDots(D, cx, cy, S * 0.22, sym, b, P0);
     D.push({ x: cx, y: cy, r: b * 1.6 });
   } else if (s === 2) {              // concentric mandala rings
-    [0.22, 0.4, 0.58, 0.74].forEach((f, k) => ringDots(D, cx, cy, S * f * (k % 2 ? bloom : 1), sym * (k + 1), b, spin * (k % 2 ? 1 : -1)));
+    [0.24, 0.44, 0.62, 0.8].forEach((f, k) => ringDots(D, cx, cy, S * f * (k % 2 ? bloom : 1), sym * (k + 1), b, P0 * (k % 2 ? 1 : -1)));
     D.push({ x: cx, y: cy, r: b * 1.7 });
   } else if (s === 3) {              // cross + corner diamonds
-    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, spin + i / 4 * A_TAU, S * 0.1, S * 0.8 * bloom, b);
-    for (let i = 0; i < 4; i++) { const a = spin + i / 4 * A_TAU + Math.PI / 4; ringDots(D, cx + Math.cos(a) * S * 0.42, cy + Math.sin(a) * S * 0.42, S * 0.09, 4, b, a); }
-    ringDots(D, cx, cy, S * 0.22, 8, b, spin);
+    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU, S * 0.1, S * 0.84 * bloom, b);
+    for (let i = 0; i < 4; i++) { const a = P0 + i / 4 * A_TAU + Math.PI / 4; smallDiamond(D, cx + Math.cos(a) * S * 0.46, cy + Math.sin(a) * S * 0.46, S * 0.1, b); }
+    ringDots(D, cx, cy, S * 0.24, 8, b, P0);
     D.push({ x: cx, y: cy, r: b * 1.6 });
   } else if (s === 4) {              // floral cross — big cardinal + small diagonal petals
-    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, spin + i / 4 * A_TAU, S * 0.14, S * 0.66 * bloom, b);
-    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, spin + i / 4 * A_TAU + Math.PI / 4, S * 0.14, S * 0.42, b);
-    ringDots(D, cx, cy, S * 0.72, 8, b, spin);
-    ringDots(D, cx, cy, S * 0.16, 8, b, -spin);
+    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU, S * 0.14, S * 0.7 * bloom, b);
+    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU + Math.PI / 4, S * 0.14, S * 0.46, b);
+    ringDots(D, cx, cy, S * 0.8, 8, b, P0);
+    ringDots(D, cx, cy, S * 0.18, 8, b, -P0);
   } else if (s === 5) {              // pinwheel — curved rays
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, spin + i / sym * A_TAU, S * 0.1, S * 0.78, b, 0.9);
-    ringDots(D, cx, cy, S * 0.5, sym * 2, b, -spin);
+    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.1, S * 0.82, b, 0.95);
+    ringDots(D, cx, cy, S * 0.55, sym * 2, b, -P0);
     D.push({ x: cx, y: cy, r: b * 1.5 });
   } else if (s === 6) {              // nested rotated squares (lattice medallion)
-    [0.72, 0.5, 0.3].forEach((f, k) => squareRing(D, cx, cy, S * f, b, spin + (k % 2 ? Math.PI / 4 : 0)));
-    ringDots(D, cx, cy, S * 0.14, 4, b, spin + Math.PI / 4);
+    [0.8, 0.56, 0.32].forEach((f, k) => squareRing(D, cx, cy, S * f, b, P0 + (k % 2 ? Math.PI / 4 : 0)));
+    smallDiamond(D, cx, cy, S * 0.14, b);
     D.push({ x: cx, y: cy, r: b * 1.6 });
-  } else {                           // s === 7 · dense sunflower (two offset petal rings)
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, spin + i / sym * A_TAU, S * 0.28, S * 0.72 * bloom, b);
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, spin + (i + 0.5) / sym * A_TAU, S * 0.16, S * 0.44, b);
-    ringDots(D, cx, cy, S * 0.12, sym, b, spin);
+  } else if (s === 7) {              // dense sunflower (two offset petal-ray rings)
+    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.3, S * 0.8 * bloom, b);
+    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + (i + 0.5) / sym * A_TAU, S * 0.16, S * 0.5, b);
+    ringDots(D, cx, cy, S * 0.12, sym, b, P0);
+    D.push({ x: cx, y: cy, r: b * 1.5 });
+  } else if (s === 8) {              // compass star — two crossed squares + points
+    squareRing(D, cx, cy, S * 0.6, b, P0);
+    squareRing(D, cx, cy, S * 0.6, b, P0 + Math.PI / 4);
+    for (let i = 0; i < 8; i++) rayDots(D, cx, cy, P0 + i / 8 * A_TAU, S * 0.6, S * 0.86 * bloom, b);
+    ringDots(D, cx, cy, S * 0.3, 8, b, P0);
+    D.push({ x: cx, y: cy, r: b * 1.6 });
+  } else if (s === 9) {              // concentric aligned squares + center plus
+    [0.82, 0.58, 0.34].forEach(f => squareRing(D, cx, cy, S * f, b, P0));
+    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU, 0, S * 0.24 * bloom, b);
+    D.push({ x: cx, y: cy, r: b * 1.6 });
+  } else if (s === 10) {             // all-over diamond lattice (repeating geometric)
+    const m = S * 0.16, step = GAP * 3.4;
+    let row = 0;
+    for (let y = m; y <= tl.H - m + 0.1; y += step, row++) {
+      const off = (row % 2) * step / 2;
+      for (let x = m + off; x <= tl.W - m + 0.1; x += step) smallDiamond(D, x, y, GAP * 0.9, b);
+    }
+  } else if (s === 11) {             // petal blossom — leaf-outline petals
+    for (let i = 0; i < sym; i++) petalOutline(D, cx, cy, P0 + i / sym * A_TAU, S * 0.16, S * 0.82 * bloom, S * 0.15, b);
+    ringDots(D, cx, cy, S * 0.1, sym, b, P0);
+    D.push({ x: cx, y: cy, r: b * 1.5 });
+  } else if (s === 12) {             // double spiral arms
+    for (let arm = 0; arm < 2; arm++) {
+      for (let i = 0; i <= 46; i++) { const th = i / 46 * 3 * A_TAU + P0 + arm * Math.PI, R = S * 0.06 + i / 46 * S * 0.82; D.push({ x: cx + Math.cos(th) * R, y: cy + Math.sin(th) * R, r: b }); }
+    }
+    D.push({ x: cx, y: cy, r: b * 1.6 });
+  } else {                           // s === 13 · ring of diamonds + inner rosette
+    for (let i = 0; i < sym; i++) { const a = P0 + i / sym * A_TAU; smallDiamond(D, cx + Math.cos(a) * S * 0.64, cy + Math.sin(a) * S * 0.64, S * 0.09, b); }
+    ringDots(D, cx, cy, S * 0.36, sym, b, P0 + Math.PI / sym);
+    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.12, S * 0.28, b);
     D.push({ x: cx, y: cy, r: b * 1.5 });
   }
 
@@ -171,19 +212,20 @@ function drawAzulejo(ctx, tl, t, cfg) {
   ctx.fill();
 }
 
-/* The 32 tiles: a fixed meaning per index (index → symbol), each dressed as a
-   distinct ornamental medallion by cycling style / symmetry / animation. */
-const A_MEANINGS = ['healing', 'abundance', 'growth', 'flow', 'balance', 'cleansing', 'continuity', 'journey', 'renewal', 'protection', 'harmony', 'energy', 'ascent', 'aspiration', 'guidance', 'fertility', 'connection', 'luck', 'freedom', 'exploration', 'community', 'vitality', 'roots', 'strength', 'wisdom', 'eternity', 'rebirth', 'unity', 'passage', 'radiance', 'shelter', 'serenity'];
-const A_SYMS = [8, 6, 4, 12, 8, 6, 4, 8];
+/* 28 tiles (4×7). Fixed meaning per index (index → symbol); each is dressed as a
+   distinct ornamental medallion — 14 motifs, with symmetry / animation / frame /
+   corner and a per-tile rotation seed all varied so none look alike. */
+const A_MEANINGS = ['healing', 'abundance', 'growth', 'flow', 'balance', 'cleansing', 'continuity', 'journey', 'renewal', 'protection', 'harmony', 'energy', 'ascent', 'aspiration', 'guidance', 'fertility', 'connection', 'luck', 'freedom', 'exploration', 'community', 'vitality', 'roots', 'strength', 'wisdom', 'eternity', 'rebirth', 'unity'];
+const A_SYMS = [8, 6, 12, 5, 8, 6, 10, 4, 8, 7];
 const A_ANIMS = ['breathe', 'spin', 'bloom', 'twinkle', 'pulse', 'spin2'];
 const TILES = A_MEANINGS.map((meaning, i) => {
   const cfg = {
-    style: i % 8,
+    style: i % 14,
     sym: A_SYMS[i % A_SYMS.length],
     anim: A_ANIMS[i % A_ANIMS.length],
-    frame: (i % 5 === 0 ? 2 : 1),
+    frame: (i % 4 === 0 ? 2 : 1),
     corner: (i % 3),
-    seed: i * 1.7,
+    seed: i * 0.9,
   };
   return { meaning, draw(ctx, tl, t) { drawAzulejo(ctx, tl, t, cfg); } };
 });
