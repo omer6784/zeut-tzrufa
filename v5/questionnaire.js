@@ -609,9 +609,10 @@ function updateStageBand(qid){
   setBandNote(INSTRUCTIONS[qid] || '');
   sb.btn.textContent = STAGE_CONTINUE_TEXT[qid] || 'המשך';
   // These stages have NO continue button — the pick itself opens the symbol window
-  // directly (light-point: line→gate; path: reaching the exit; movement: tapping a
-  // tile). Only the instruction note shows in their band.
-  sb.btn.style.display = (qid === 'word' || qid === 'roots' || qid === 'life-wish') ? 'none' : '';
+  // directly (light-point: line→gate; path: reaching the exit). Only the
+  // instruction note shows in their band. (movement/life-wish now DOES use "המשך":
+  // tap a tile to select, then press "המשך" to confirm.)
+  sb.btn.style.display = (qid === 'word' || qid === 'roots') ? 'none' : '';
   if(GATED_STAGES.has(qid)){
     // Dimmed until the stage arms it (see armBand, called on the pick).
     sb.btn.classList.add('is-disabled');
@@ -1640,20 +1641,27 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('tile-grid-active');
     wrap.innerHTML = '';
 
-    if (st._dotTilesTeardown) { try { st._dotTilesTeardown(); } catch (_) {} st._dotTilesTeardown = null; }
+    if (st._dotTiles) { try { st._dotTiles.teardown(); } catch (_) {} st._dotTiles = null; }
     let picked = false;
-    st._dotTilesTeardown = mountDotTiles(midContainer, {
-      onChoose: (index, meaning) => {
-        if (picked) return; picked = true;
+    st._dotTiles = mountDotTiles(midContainer, {
+      // Tapping a tile SELECTS it (no auto-advance) and lights up "המשך".
+      onSelect: (index, meaning) => {
         const symbolKey = pickTileSymbol(meaning);
         st.answers['life-wish'] = meaning;      // internal meaning (never shown)
         st.lifeWishSymbol = symbolKey;          // mapped symbol, revealed later
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
         st.p5SymbolsByStage[6] = [symbolKey + '.obj'];
-        if (st._dotTilesTeardown) { try { st._dotTilesTeardown(); } catch (_) {} st._dotTilesTeardown = null; }
-        advance();                     // no "המשך" — picking a movement opens the symbol window directly
+        armBand(() => st._dotTiles && st._dotTiles.confirm());   // "המשך" confirms the pick
+      },
+      // "המשך" pressed → the tile plays its confirmation, then we advance.
+      onConfirm: () => {
+        if (picked) return; picked = true;
+        if (st._dotTiles) { try { st._dotTiles.teardown(); } catch (_) {} st._dotTiles = null; }
+        advance();
       },
     });
+    // Entrance stagger finishes, then the ghost-hand demo plays (tap a tile → "המשך").
+    setTimeout(() => runTilesDemo(), st._dotTiles.appearMs + 500);
 
   } else if(q.type==='drive'){
     // "מה מניע אותך?" — floating words; a tap picks the driving force, which maps
@@ -1977,6 +1985,59 @@ function runInputDemo(){
     // Reset so the visitor starts clean: drop the demo country + empty the box.
     clearPress();
     try { rd.resetInput && rd.resetInput(); } catch(_){}
+    gh.hide(); cleanup();
+  })();
+}
+
+/* Ghost-hand demo for the movement (life-wish) stage: after the tiles have entered
+   one-by-one, an open hand points to a tile and taps it (it selects — the others
+   dim — and "המשך" lights up), then moves to "המשך" and presses it. It resets the
+   selection afterwards so the visitor starts clean. Plays once; a real touch cancels. */
+function runTilesDemo(){
+  const dt = st._dotTiles;
+  if(!dt || !document.querySelector('.dot-tiles-grid')) return;
+  const demoIdx = 10;   // a calm, legible tile (ORBIT / harmony)
+  const my = st._tilesDemoToken = (st._tilesDemoToken || 0) + 1;
+  const sec = document.getElementById('section-3');
+  const cancel = (e) => { if(e && e.isTrusted === false) return; st._tilesDemoToken++; };
+  sec && sec.addEventListener('pointerdown', cancel, { capture: true });
+  const cleanup = () => sec && sec.removeEventListener('pointerdown', cancel, { capture: true });
+
+  (async () => {
+    const gh = getGhostHand();
+    const dead = () => my !== st._tilesDemoToken || !st._dotTiles;
+    const abort = () => { gh.hide(); cleanup(); };
+    const c = dt.tileCenter(demoIdx);
+    if(!c) return abort();
+    await gh.sleep(200); if(dead()) return abort();
+    gh.open(); gh.place(c.x, (window.innerHeight || 900) + 60); gh.show('dark');
+    await gh.sleep(90); if(dead()) return abort();
+
+    // 1. point to the tile and tap it → it selects (others dim, "המשך" lights)
+    gh.point(true);
+    gh.move(c.x, c.y);
+    await gh.sleep(650); if(dead()) return abort();
+    await gh.tapPoint();
+    dt.selectTile(demoIdx);           // programmatic "tap"
+    await gh.sleep(850); if(dead()) return abort();
+    dt.stopActive();
+
+    // 2. move to "המשך" and press it (illustrative — does not actually advance)
+    gh.open();
+    const btn = document.querySelector('.stage-band .sb-btn');
+    if(btn){
+      const b = btn.getBoundingClientRect();
+      gh.move(b.left + b.width / 2, b.top + b.height / 2);
+      await gh.sleep(700); if(dead()) return abort();
+      btn.classList.add('is-pressed');
+      await gh.tap();
+      btn.classList.remove('is-pressed');
+    }
+    await gh.sleep(450);
+    // Reset so the visitor starts clean: clear the pick and re-dim "המשך".
+    dt.deselect();
+    const sb = ensureStageBand();
+    if(sb){ sb.btn.classList.add('is-disabled'); st._stageContinue = null; }
     gh.hide(); cleanup();
   })();
 }

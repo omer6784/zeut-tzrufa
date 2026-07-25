@@ -1300,15 +1300,15 @@ body::-webkit-scrollbar-thumb {
   box-sizing: border-box;
   display: block;
 }
-/* 8 columns × 4 rows filling the content area, with a uniform 20px gap between
-   tiles AND a 20px inset to every edge (top/bottom/left/right). Tiles fill their
-   cells (near-square), so the whole grid reads full and evenly spaced. */
+/* 8 columns × 4 rows filling the content area, with a small 8px gap between tiles
+   (tighter than before) and a 12px inset to every edge. Tiles fill their cells
+   (near-square), so the whole grid reads full and closely packed. */
 .dot-tiles-inner {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 20px;
-  padding: 20px;
+  gap: 8px;
+  padding: 12px;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
@@ -1320,8 +1320,10 @@ body::-webkit-scrollbar-thumb {
   min-width: 0;
   min-height: 0;
   cursor: pointer;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.4s ease, transform 0.25s ease;
 }
+/* Selected (tapped) tile — pops slightly above the rest, which dim (canvas alpha). */
+.dot-tile.is-selected { transform: scale(1.05); z-index: 2; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {

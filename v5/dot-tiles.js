@@ -286,8 +286,16 @@ function drawConfirm(ctx, tl, ce) {
   ctx.fill();
 }
 
-export function mountDotTiles(host, { onChoose } = {}) {
-  if (!host) return () => {};
+// Every tile shares ONE look now: the interface yellow (gold) plate with dark
+// #282828 dots on top (per request — no more per-tile colour schemes).
+const TILE_BG = '#e2bc71', TILE_DOT = '#282828';
+// Tiles are STATIC — drawn at this frozen frame — and only animate while the
+// pointer is over them (hover / touch). STAGGER = per-tile entrance delay.
+const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
+
+export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
+  const noop = () => {};
+  if (!host) return { teardown: noop, confirm: noop, selectTile: noop, stopActive: noop, deselect: noop, tileCenter: () => null, count: 0, appearMs: 0 };
 
   const gridEl = document.createElement('div');
   gridEl.className = 'dot-tiles-grid';
@@ -301,18 +309,16 @@ export function mountDotTiles(host, { onChoose } = {}) {
     const cell = document.createElement('div');
     cell.className = 'dot-tile';
     cell.dataset.index = String(i);
-    // Solid plate + contrasting dot colour, shifted +2 schemes per row so no two
-    // neighbours (across or down) share a scheme.
-    const scheme = SCHEMES[(i + Math.floor(i / 8) * 3) % SCHEMES.length];
-    cell.style.backgroundColor = scheme.bg;
+    cell.style.backgroundColor = TILE_BG;
     const canvas = document.createElement('canvas');
     canvas.className = 'dot-tile-canvas';
     cell.appendChild(canvas);
     innerEl.appendChild(cell);
     tiles.push({ i, cell, canvas, ctx: canvas.getContext('2d'), W: 0, H: 0,
-      bgColor: scheme.bg, dotColor: scheme.dot,
-      rnd: mulberry32(1000 + i * 7919), inten: 0.45, alpha: 1,
-      frozen: false, frozenT: 0, confirmT: -1, cache: null });
+      bgColor: TILE_BG, dotColor: TILE_DOT,
+      rnd: mulberry32(1000 + i * 7919), inten: 0.45, alpha: 0,
+      frozen: false, frozenT: 0, confirmT: -1, cache: null,
+      appearAt: i * STAGGER });   // enter one after another
   }
 
   function sizeTile(tl) {
@@ -326,17 +332,38 @@ export function mountDotTiles(host, { onChoose } = {}) {
   const sizeAll = () => tiles.forEach(sizeTile);
   sizeAll();
 
-  let chosen = -1, chosenAt = 0, done = false, raf = 0, t0 = performance.now();
+  let selected = -1, active = -1, chosen = -1, chosenAt = 0, done = false, raf = 0, t0 = performance.now();
+
+  function setSelected(i) {
+    if (chosen >= 0) return;
+    selected = i;
+    tiles.forEach(o => o.cell.classList.toggle('is-selected', o.i === i));
+    if (onSelect) onSelect(i, TILES[i].meaning);
+  }
+  function deselect() {
+    if (chosen >= 0) return;
+    selected = -1;
+    tiles.forEach(o => o.cell.classList.remove('is-selected'));
+  }
+
   function frame(now) {
     const t = (now - t0) / 1000;
     for (const tl of tiles) {
-      const aTarget = chosen < 0 ? 1 : (tl.i === chosen ? 1 : 0.16);
-      tl.alpha += (aTarget - tl.alpha) * 0.14;
+      const appeared = (now - t0) >= tl.appearAt;
+      let aTarget;
+      if (!appeared) aTarget = 0;                                  // not yet entered
+      else if (chosen >= 0) aTarget = (tl.i === chosen ? 1 : 0.16);
+      else if (selected >= 0) aTarget = (tl.i === selected ? 1 : 0.4);   // dim the rest
+      else aTarget = 1;
+      tl.alpha += (aTarget - tl.alpha) * 0.16;
       const ctx = tl.ctx;
       ctx.clearRect(0, 0, tl.W, tl.H);
       ctx.globalAlpha = tl.alpha;
-      ctx.fillStyle = tl.dotColor;   // single dot colour on the tile's solid plate
-      TILES[tl.i].draw(ctx, tl, tl.frozen ? tl.frozenT : t);
+      ctx.fillStyle = tl.dotColor;   // dark dots on the yellow plate
+      // STATIC unless this tile is hovered/touched (active) or being confirmed.
+      const animated = (tl.i === active || tl.i === chosen);
+      const localT = tl.frozen ? tl.frozenT : (animated ? t : STATIC_T);
+      TILES[tl.i].draw(ctx, tl, localT);
       if (tl.i === chosen && tl.confirmT >= 0) { ctx.globalAlpha = tl.alpha; drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS)); }
       ctx.globalAlpha = 1;
     }
@@ -344,24 +371,44 @@ export function mountDotTiles(host, { onChoose } = {}) {
   }
   raf = requestAnimationFrame(frame);
 
+  // Hover / touch → that tile animates; a tap SELECTS it (does not advance — the
+  // visitor confirms with the "המשך" band button).
   tiles.forEach(tl => {
+    tl.cell.addEventListener('pointerenter', () => { if (chosen < 0) active = tl.i; });
+    tl.cell.addEventListener('pointerleave', () => { if (active === tl.i) active = -1; });
     tl.cell.addEventListener('pointerdown', e => {
       if (chosen >= 0) return;
       e.preventDefault();
-      chosen = tl.i; chosenAt = performance.now();
-      tl.frozen = true; tl.frozenT = (chosenAt - t0) / 1000; tl.confirmT = 0;
-      tl.cell.classList.add('is-chosen');
-      tiles.forEach(o => { if (o.i !== chosen) o.cell.classList.add('is-dimmed'); });
-      setTimeout(() => { if (done) return; done = true; onChoose && onChoose(tl.i, TILES[tl.i].meaning); }, CONFIRM_MS + 120);
+      active = tl.i;          // show its motion while touched
+      setSelected(tl.i);
     });
+    tl.cell.addEventListener('pointerup', () => { if (active === tl.i) active = -1; });
+    tl.cell.addEventListener('pointercancel', () => { if (active === tl.i) active = -1; });
   });
+
+  // Confirm the selected tile ("המשך") — play the ring, then fire onConfirm.
+  function confirm() {
+    if (chosen >= 0 || selected < 0) return;
+    chosen = selected; chosenAt = performance.now();
+    const tl = tiles[chosen];
+    tl.frozen = true; tl.frozenT = (chosenAt - t0) / 1000; tl.confirmT = 0;
+    tl.cell.classList.add('is-chosen');
+    tiles.forEach(o => { if (o.i !== chosen) o.cell.classList.add('is-dimmed'); });
+    setTimeout(() => { if (done) return; done = true; onConfirm && onConfirm(chosen, TILES[chosen].meaning); }, CONFIRM_MS + 120);
+  }
 
   const onResize = () => sizeAll();
   window.addEventListener('resize', onResize);
 
-  return function teardown() {
-    cancelAnimationFrame(raf);
-    window.removeEventListener('resize', onResize);
-    try { gridEl.remove(); } catch (_) {}
+  return {
+    teardown() { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); try { gridEl.remove(); } catch (_) {} },
+    confirm,
+    // Demo helpers: programmatic "tap" + reset, and a tile's screen centre.
+    selectTile(i) { active = i; setSelected(i); },
+    stopActive() { active = -1; },
+    deselect,
+    tileCenter(i) { const tl = tiles[i]; if (!tl) return null; const r = tl.cell.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; },
+    count: tiles.length,
+    appearMs: tiles.length * STAGGER + APPEAR_MS,
   };
 }
