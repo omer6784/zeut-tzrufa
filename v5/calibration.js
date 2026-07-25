@@ -94,18 +94,22 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     const n = TILES.length;
     // Four frequency squares in a ROW along the bottom; the big selected view
     // fills the full width above them.
-    const tw = (W - 2 * g - (n - 1) * g) / n;             // thumb width across the row
-    const rowH = Math.min(tw, (botY - mainY) * 0.32);     // thumb row height
+    const tw = (W - 2 * g - (n - 1) * g) / n;             // thumb CELL width across the row
+    const rowH = Math.min(tw, (botY - mainY) * 0.32);     // thumb CELL height
     const rowY = botY - rowH;
-    big = { x: g, y: mainY, w: W - 2 * g, h: rowY - g - mainY };
+    // Shrink every frequency field a touch (the big preview AND the thumbnails),
+    // centred within its cell — leaves a small margin, cells/dividers unchanged.
+    const SH = 0.9;
+    const shrink = (r) => ({ x: r.x + r.w * (1 - SH) / 2, y: r.y + r.h * (1 - SH) / 2, w: r.w * SH, h: r.h * SH });
+    big = shrink({ x: g, y: mainY, w: W - 2 * g, h: rowY - g - mainY });
 
-    thumbs = TILES.map((_, i) => ({ x: g + i * (tw + g), y: rowY, w: tw, h: rowH }));
+    thumbs = TILES.map((_, i) => shrink({ x: g + i * (tw + g), y: rowY, w: tw, h: rowH }));
     rowDivY = rowY - g / 2;                                // horizontal rule between big view and the row
     thumbDivs = [];                                        // vertical rules between the four squares
     for (let i = 1; i < n; i++) thumbDivs.push(g + i * (tw + g) - g / 2);
 
     gridBig = makeGrid(big.w, big.h);
-    gridThumb = makeGrid(tw, rowH);
+    gridThumb = makeGrid(thumbs[0].w, thumbs[0].h);
   }
   layout();
 
