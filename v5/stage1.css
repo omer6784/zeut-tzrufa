@@ -1682,6 +1682,11 @@ html, body {
    AFTER geometric.css (whose #section-3 / .screen-panel bg rules would else win). */
 #section-3[data-stage="5"] { background: #ff5003 !important; }
 
+/* Movement (life-wish / tiles) stage — interface YELLOW plate behind the CREAM
+   dotted tiles. Doubled [data-stage] attribute to out-specify the base cream
+   cascade (same trick as the gold stage-4 rule in geometric.css). */
+#section-3[data-stage="2"][data-stage] { background: #e2bc71 !important; --stage-plate: #e2bc71; }
+
 /* Drop the leftover chrome divider lines on the maze stage (sidebar
    border-right from geometric.css, content border-top from styles.css) so the
    whole board is a clean field for the path network. Here because stage1.css is

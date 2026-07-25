@@ -240,9 +240,9 @@ function drawConfirm(ctx, tl, ce) {
   ctx.fill();
 }
 
-// Every tile shares ONE look now: the interface yellow (gold) plate with dark
-// #282828 dots on top (per request — no more per-tile colour schemes).
-const TILE_BG = '#e2bc71', TILE_DOT = '#282828';
+// Every tile shares ONE look: the interface CREAM plate with dark #282828 dots
+// (the stage background behind them is the interface yellow — see styles.css).
+const TILE_BG = '#f5f5ed', TILE_DOT = '#282828';
 // Tiles are STATIC — drawn at this frozen frame — and only animate while the
 // pointer is over them (hover / touch). STAGGER = per-tile entrance delay.
 const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;

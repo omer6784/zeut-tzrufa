@@ -1289,23 +1289,22 @@ body::-webkit-scrollbar-thumb {
    side, 85·sy → 706·sy top/bottom — the same rectangle the grid lines draw), so
    the tiles never spill past the grid. No cards, borders or rounding. */
 .dot-tiles-grid {
+  /* Fills the content area (rising over the empty 90px top strip so it spans the
+     host cell top→bottom) and RIGHT-anchored, so the 4×7 block spans the whole
+     height of the content rectangle and sits on the right — the left stays open
+     for the stage title. */
   position: absolute;
-  /* A tall 4×8 block on the LEFT of the content rectangle. Fills the content
-     height (rising over the empty 90px top strip so it spans top→bottom) and is
-     left-anchored to the frame's left side line; its width follows from the
-     square cells, leaving the right of the rectangle open. */
-  left: calc(100 * var(--sx));
-  right: auto;
+  left: 0; right: 0;
   top: -90px;
   height: calc(100% + 90px);
   padding: 2px 0;
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
-  justify-content: flex-start;
+  justify-content: flex-end;   /* moved to the RIGHT */
 }
-/* 4 columns × 7 rows — a portrait medallion grid (28 tiles). aspect-ratio 4/7
-   with full height gives square cells, a touch larger than the old 4×8. */
+/* 4 columns × 7 rows (28 tiles). aspect-ratio 4/7 at full content height gives
+   square cells as large as the rectangle allows. */
 .dot-tiles-inner {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
