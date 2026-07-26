@@ -701,7 +701,7 @@ function layoutSymbols() {
   // never under HALF the largest, a clear-to-the-eye hierarchy. Map it to the
   // internal scale factor (size 100 → FMAX, size 50 → FMAX/2). Without a value
   // (shouldn't happen in practice) fall back to the fixed per-position variation.
-  const FMAX = 2.6;   // scale factor at size 100 — starting anchor, calibrated by eye
+  const FMAX = 1.3;   // scale factor at size 100 — halved (was 2.6): the first/biggest symbol was too large
   const sizeToFactor = (v) => (v / 100) * FMAX;
   const sc = active.map((s, i) => gs * (symbolSizes[i] != null ? sizeToFactor(symbolSizes[i]) : SIZE[i % SIZE.length]));
 
