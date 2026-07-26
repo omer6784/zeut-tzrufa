@@ -403,7 +403,8 @@
       "Bash(python3 /tmp/mkband.py 30)",
       "Bash(python3 /tmp/mkband.py 22)",
       "Bash(sed -i '' 's|path-title-fill.png?v=2|path-title-fill.png?v=3|g' v5/styles.css)",
-      "Bash(sed -i '' 's|styles.css?v=142|styles.css?v=143|' v5/index.html)"
+      "Bash(sed -i '' 's|styles.css?v=142|styles.css?v=143|' v5/index.html)",
+      "Bash(awk '/A_MEANINGS\\\\s*=/{f=1} f{print} f&&/\\\\];/{exit}' v5/dot-tiles.js)"
     ]
   },
   "hooks": {

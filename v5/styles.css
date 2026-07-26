@@ -1303,7 +1303,7 @@ body::-webkit-scrollbar-thumb {
   left: 0; right: 0;
   top: 0;
   height: 100%;
-  padding: 2px 0;
+  padding: 0;                /* was 2px 0 — reclaim the inset for bigger tiles */
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
@@ -1315,11 +1315,10 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 5px;
+  gap: 3px;                 /* tighter gap → bigger tiles (was 5px) */
   box-sizing: border-box;
   height: 100%;
-  aspect-ratio: 7 / 4;
-  width: auto;
+  width: 100%;              /* fill the FULL content rectangle (was aspect-bound 7/4, which left side margins) → larger tiles */
 }
 .dot-tile {
   position: relative;
@@ -6568,6 +6567,20 @@ html:not(.cursor-active) *::after {
 }
 /* Top-left anchored (no centring translate) → plain scale breathe when enabled. */
 #section-3.q-color-stage[data-stage="0"] .stage-band .sb-btn:not(.is-disabled) {
+  animation: dotted-frame-breathe 1.8s ease-in-out infinite !important;
+}
+/* Tiles stage (life-wish, data-stage 2): put "המשך" at the TOP-LEFT of the content
+   rectangle, on the instruction line — same placement as the frequency stage above
+   (it otherwise defaulted to the centred bottom band). */
+#section-3[data-stage="2"] .stage-band .sb-btn {
+  position: fixed !important;
+  top: calc(85 * var(--sy) + 12px) !important;
+  bottom: auto !important;
+  left: calc(100 * var(--sx) + 20px) !important;
+  transform: none !important;
+  z-index: 1002 !important;
+}
+#section-3[data-stage="2"] .stage-band .sb-btn:not(.is-disabled) {
   animation: dotted-frame-breathe 1.8s ease-in-out infinite !important;
 }
 @keyframes sb-btn-breathe {
