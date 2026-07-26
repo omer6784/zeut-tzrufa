@@ -366,15 +366,23 @@ function findLabelPos(c) {
   const norm = (lon) => ((lon + 180) % 360 + 360) % 360 - 180;
   const clampLat = (lat) => Math.max(-80, Math.min(80, lat));
   const ocean = (lon, lat) => !getContinentAt(norm(lon), clampLat(lat));
-  for (let rad = 9; rad <= 50; rad += 3) {
-    for (let k = 0; k < 24; k++) {
-      const a = (k / 24) * Math.PI * 2;
-      const lon = clon + Math.cos(a) * rad;
-      const lat = clat + Math.sin(a) * rad * 0.72;   // sphere squashes latitude
-      // require the anchor AND a little further out to be ocean → clearance
-      if (ocean(lon, lat) && ocean(lon + Math.cos(a) * 4, lat + Math.sin(a) * 4 * 0.72)) {
-        c._labelPos = { lon: norm(lon), lat: clampLat(lat) };
-        return c._labelPos;
+  // Keep the anchor in the mid-latitude band first (|lat| ≤ 45): a name anchored in
+  // the far-north ocean (N. America / Europe used to land in the Arctic at ~60°N)
+  // rides the top limb of the sphere when its continent faces front, where edgeFade
+  // drives it to zero and the name vanishes. Pass 1 enforces the cap; pass 2 falls
+  // back to any ocean so no continent is left without an anchor.
+  for (const latCap of [45, 90]) {
+    for (let rad = 9; rad <= 50; rad += 3) {
+      for (let k = 0; k < 24; k++) {
+        const a = (k / 24) * Math.PI * 2;
+        const lon = clon + Math.cos(a) * rad;
+        const lat = clat + Math.sin(a) * rad * 0.72;   // sphere squashes latitude
+        if (Math.abs(clampLat(lat)) > latCap) continue;
+        // require the anchor AND a little further out to be ocean → clearance
+        if (ocean(lon, lat) && ocean(lon + Math.cos(a) * 4, lat + Math.sin(a) * 4 * 0.72)) {
+          c._labelPos = { lon: norm(lon), lat: clampLat(lat) };
+          return c._labelPos;
+        }
       }
     }
   }
