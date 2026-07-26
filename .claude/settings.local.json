@@ -407,7 +407,9 @@
       "Bash(awk '/A_MEANINGS\\\\s*=/{f=1} f{print} f&&/\\\\];/{exit}' v5/dot-tiles.js)",
       "Bash(awk '/\\\\.tw-sky[ ,{]/,/\\\\}/' v5/stage1.css)",
       "Bash(awk -F: '$1>=4290 && $1<=4370')",
-      "Bash(node --check v5/stage-morph.js)"
+      "Bash(node --check v5/stage-morph.js)",
+      "Bash(awk -F: '$1>=1244 && $1<=1330')",
+      "Bash(node --check v5/stage-crossfade.js)"
     ]
   },
   "hooks": {

@@ -10,7 +10,7 @@ import { mountLightGate } from './light-gate.js';
 import { mountCalibration } from './calibration.js';
 import { playHandDemo, stopHandDemo, getGhostHand, lockInput, unlockInput } from './demo-hand.js';
 import { mountDotTiles } from './dot-tiles.js';
-import { playStageMorph } from './stage-morph.js';
+import { crossfadeStage } from './stage-crossfade.js';
 import { mountDrive } from './drive.js';
 import { mountProfessionCards } from './profession-cards.js';
 import { mountEditor } from './editor.js';
@@ -1129,14 +1129,11 @@ function buildHatchSVG(){
 }
 
 function renderQuestion(idx){
-  // Wrap the DOM updates in a View Transition so grid cells smoothly
-  // morph between their old and new positions instead of jump-cutting.
-  // Falls back to a plain call on browsers that don't implement it.
-  if (typeof document.startViewTransition === 'function') {
-    document.startViewTransition(() => _renderQuestionImpl(idx));
-  } else {
-    _renderQuestionImpl(idx);
-  }
+  // Plain swap — NO View-Transition crossfade. Stage-to-stage transitions are
+  // handled solely by the unified colour crossfade (crossfadeStage), which swaps
+  // the content itself; a browser screen-crossfade here would be a second, generic
+  // transition and is exactly what the one-language rule forbids.
+  _renderQuestionImpl(idx);
 }
 /* ── Sidebar tagline typewriter loop ──────────────────────── */
 function startSidebarTaglineLoop() {
@@ -2553,6 +2550,21 @@ function goPrev(){
   }
 }
 function goSkip(){ if(st.current<QUESTIONS.length-1) transitionQuestion(st.current+1); }
+/* Rough per-stage palette (by QUESTION index) — only the phase-A DIRECTION of the
+   colour crossfade. The exact target is read live from the stage itself at the swap
+   (85%) and the melt finishes onto that, so these need not be pixel-exact; they just
+   keep the first ~85% heading the right way (esp. for the JS-tinted time stage).
+   { bg, grid } mirror each stage's background + --grid-dot. */
+const STAGE_PALETTE = {
+  0: { bg: '#f5f5ed', grid: '#282828' },   // background — cream plate, dark grid
+  1: { bg: '#f5f5ed', grid: '#282828' },   // origin (globe) — cream, dark grid
+  2: { bg: '#ff601a', grid: '#f5f5ed' },   // roots (maze) — orange, cream grid
+  3: { bg: '#282828', grid: '#f5f5ed' },   // word (light-point) — dark, cream grid
+  4: { bg: '#e2bc71', grid: '#282828' },   // life-wish (tiles) — gold, dark grid
+  5: { bg: '#222020', grid: '#f5f5ed' },   // stars (time) — dark sky base, cream grid
+  6: { bg: '#ff5003', grid: '#f5f5ed' },   // personal (profession) — orange, cream grid
+  7: { bg: '#282828', grid: '#f5f5ed' },   // name — dark, cream grid
+};
 function transitionQuestion(next){
   // Snapshot how many symbols the jewel carries as we ENTER the next stage, so a
   // "restart stage" can roll the display back to exactly this point (see
@@ -2563,46 +2575,24 @@ function transitionQuestion(next){
   // next stage.
   hideSymbolInfo();
   closeSymbolWindow();
-  // Vertical inner-track transition: the fixed outer frame stays put while the
-  // central content travels along a vertical track. Moving forward (descending
-  // the track) the current content exits upward and the next enters from below;
-  // moving back (ascending) it reverses.
-  const mid = document.getElementById('middle-q-container');
-  if(!mid){ renderQuestion(next); return; }
-  const descending = next > st.current;
-  // POC — coherent dot morph for globe (origin, idx 1) ↔ maze (roots, idx 2):
-  // the content dissolves into the grid lattice, the dots reflow along the track +
-  // recolour, then condense into the next stage. Every other pair keeps the
-  // existing vertical track-slide for now.
-  const isMorphPair = (st.current === 1 && next === 2) || (st.current === 2 && next === 1);
-  if(isMorphPair){
-    st.paused = true;
-    playStageMorph({
-      descending,
-      swap: () => renderQuestion(next),
-      duration: 900,
-      onDone: () => { setTimeout(() => { st.paused = false; }, 200); },
-    });
-    return;
-  }
-  // Pause the canvas animation loop during the transition + the first ~600ms of
-  // the next question so the typewriter and textarea focus land cleanly.
-  st.paused = true;
-  mid.classList.remove('q-track-enter-up','q-track-enter-down');
-  mid.classList.add(descending ? 'q-track-exit-up' : 'q-track-exit-down');
-  setTimeout(()=>{
-    // renderQuestion resets #middle-q-container.className (to q-layout-<id>),
-    // which clears the exit class; re-grab and apply the matching enter slide.
-    renderQuestion(next);
-    const mid2 = document.getElementById('middle-q-container');
-    if(mid2){
-      const enterCls = descending ? 'q-track-enter-up' : 'q-track-enter-down';
-      mid2.classList.add(enterCls);
-      setTimeout(()=>mid2.classList.remove(enterCls), 640);
-    }
-    // Resume canvas drawing after the new question text + input are in.
-    setTimeout(()=>{ st.paused = false; }, 600);
-  },320);
+  // ── The ONE, unified stage transition ──────────────────────────────────
+  // The grid and every fixed element stay exactly in place. The only thing that
+  // animates is the colour language: the background and grid colour crossfade
+  // (true per-frame lerp), in sync, from this stage's palette to the next. Only
+  // once the colour melt is ~85% done does the content swap in via its own entry
+  // animation. Identical for every pair, forwards and back. (Replaces the old
+  // vertical track-slide + the View-Transition crossfade.)
+  const sec = document.getElementById('section-3');
+  if(!sec){ renderQuestion(next); return; }
+  crossfadeStage({
+    sec,
+    estimate: STAGE_PALETTE[next],   // rough phase-A direction; the real colour is read + corrected at the swap
+    applyContent: () => renderQuestion(next),
+    duration: 900,
+    contentAt: 0.85,
+    onStart: () => { st.paused = true; },
+    onDone: () => { setTimeout(() => { st.paused = false; }, 100); },
+  });
 }
 function finishQuestionnaire(){
   // Pendant is complete — go straight to the tools/editor page (the extra page
