@@ -22,7 +22,7 @@ const EDGE_POWER = 8;          // matches `pow(1 - |zNorm|, 8)`
 
 const canvas = document.getElementById('cv');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(window.__renderDPR || Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setClearColor(new THREE.Color(BG[0]/255, BG[1]/255, BG[2]/255), 1);
 

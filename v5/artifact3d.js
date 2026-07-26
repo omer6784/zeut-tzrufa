@@ -1093,7 +1093,7 @@ export function mountArtifactDisplay(container, data){
   // for a static exhibition screen (no occasional black frames on some
   // drivers / when the compositor samples between renders).
   _renderer=new THREE.WebGLRenderer({ canvas:_canvas, antialias:true, alpha:true, preserveDrawingBuffer:true });
-  _renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+  _renderer.setPixelRatio(window.__renderDPR || Math.min(window.devicePixelRatio||1, 2));
   _renderer.setSize(w, h, false);
   _renderer.setClearColor(0x000000, 0);
 
@@ -1148,7 +1148,7 @@ export function mountArtifact3D(container, data){
   container.appendChild(_canvas);
 
   _renderer=new THREE.WebGLRenderer({ canvas:_canvas, antialias:true, alpha:true });
-  _renderer.setPixelRatio(window.devicePixelRatio||1);
+  _renderer.setPixelRatio(window.__renderDPR || (window.devicePixelRatio||1));
   _renderer.setSize(data.width, data.height, false);
   _renderer.setClearColor(0x000000, 0);
 

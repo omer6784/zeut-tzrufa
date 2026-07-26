@@ -197,7 +197,10 @@ export function mountTimeWheel(host, { onDone, onHour } = {}){
     let dragging = false, lastY = 0, lastT = 0, vel = 0;
     const onMove = e => {
       if(!dragging) return;
-      const y = e.clientY, dPos = (lastY - y) / itemH;
+      // clientY is real-viewport px; itemH is LOGICAL px. Divide the drag by the
+      // letterbox scale so a finger tracks the same number of wheel rows on every
+      // screen (1 at native 1360×768).
+      const y = e.clientY, dPos = (lastY - y) / (itemH * (window.__appScale || 1));
       if(isMinutes){ absMinutes += dPos; hRender += (hourTarget() - hRender) * 0.3; }
       else { hourManual += dPos; hRender = hourTarget(); }
       const now = performance.now(), dt = now - lastT;
@@ -232,7 +235,7 @@ export function mountTimeWheel(host, { onDone, onHour } = {}){
       let dy = e.deltaY;
       if(e.deltaMode === 1) dy *= 16;            // lines → px
       else if(e.deltaMode === 2) dy *= skyH;     // pages → px
-      const dPos = dy / itemH;                   // scroll down → later time
+      const dPos = dy / (itemH * (window.__appScale || 1));   // scroll down → later time (scale-aware)
       if(isMinutes){ absMinutes += dPos; hRender += (hourTarget() - hRender) * 0.3; }
       else { hourManual += dPos; hRender = hourTarget(); }
       frameUpdate();

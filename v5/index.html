@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spatial Interface — v5 geometric</title>
-  <link rel="stylesheet" href="styles.css?v=133" />
+  <link rel="stylesheet" href="styles.css?v=134" />
   <!-- v5 override layer: redraws the visual surface as outlines + nodes
        on top of v4's full functionality. styles.css stays first so its
        cascade order is preserved; geometric.css wins by being later. -->
-  <link rel="stylesheet" href="geometric.css?v=30" />
-  <link rel="stylesheet" href="stage1.css?v=181" />
+  <link rel="stylesheet" href="geometric.css?v=31" />
+  <link rel="stylesheet" href="stage1.css?v=182" />
   <!-- Portrait Story recording layout (opening screen only). Loaded LAST and
        scoped to html.story-mode; inert for the exhibition. -->
   <link rel="stylesheet" href="story.css?v=18" />
@@ -21,9 +21,40 @@
     // Story/recording frame (demo.html) loads this page with ?story=1 to reflow
     // the landing for a 1280×2560 portrait Story. Exhibition (no flag) untouched.
     if (/[?&]story=1\b/.test(location.search)) document.documentElement.classList.add('story-mode');
+
+    // Fixed-aspect fit: the interface is a 1360×768 logical canvas (#app-viewport)
+    // scaled UNIFORMLY (same factor on both axes) to fit the real screen and centred,
+    // so it never distorts on 1920×1200 / 1512×982 / any aspect. Set before first
+    // paint and kept in sync on resize. Story mode keeps its own portrait layout.
+    (function () {
+      if (/[?&]story=1\b/.test(location.search)) return;
+      var root = document.documentElement;
+      function fit() {
+        var s = Math.min(window.innerWidth / 1360, window.innerHeight / 768);
+        root.style.setProperty('--app-scale', s);
+        // Exposed for JS that must convert between real-viewport and logical space
+        // (gesture deltas, entry-animation targets). 1 at 1360×768.
+        window.__appScale = s;
+        // Effective device-pixel ratio for canvases/renderers sized from LOGICAL
+        // dimensions: the wrapper scales them up by `s`, so render the backing store
+        // that much denser to stay crisp at the real screen resolution (capped).
+        window.__renderDPR = Math.min((window.devicePixelRatio || 1) * s, 2.5);
+      }
+      fit();
+      window.addEventListener('resize', fit);
+      if (window.ResizeObserver) new ResizeObserver(fit).observe(root);
+    })();
   </script>
 </head>
 <body>
+
+  <!-- ═══ Fixed-aspect letterbox wrapper ═══════════════════════════════
+       The whole interface is authored against a fixed 1360×768 logical canvas.
+       This wrapper is that exact size and is uniformly scaled + centred by
+       --app-scale (see the inline head script), so nothing ever stretches or
+       distorts on a differently-proportioned screen (e.g. 1920×1200). The
+       cursor + JS pointer overlays live OUTSIDE it, in real viewport space. -->
+  <div id="app-viewport">
 
   <!-- Global restart button -->
   <button id="btn-restart" onclick="location.reload()">
@@ -38,11 +69,11 @@
          transition; only its colour morphs. Rendered white here to read on the
          orange landing background. -->
     <div class="stage-grid" aria-hidden="true">
-      <span class="sg-v" style="--x: calc(100vw - 200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --h: 85;"></span>
       <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 85;"></span>
       <span class="sg-h" style="--y: calc(85 * var(--sy));"></span>
       <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
-      <span class="sg-v" style="--x: calc(100vw - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
       <span class="sg-h" style="--y: calc(706 * var(--sy));"></span>
     </div>
 
@@ -98,13 +129,13 @@
     <div class="stage-grid" aria-hidden="true">
       <!-- Top short verticals (y:0, height 85). --sx/--sy are lengths
            (≈1px at base), so positions/lengths are unitless-number × scale. -->
-      <span class="sg-v" style="--x: calc(100vw - 200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --h: 85;"></span>
       <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 85;"></span>
       <!-- Top horizontal (y:85, full width) -->
       <span class="sg-h" style="--y: calc(85 * var(--sy));"></span>
       <!-- Center verticals (y:85, height 668) -->
       <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
-      <span class="sg-v" style="--x: calc(100vw - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
       <!-- Bottom horizontal (y706 → y656 → y676 → lowered ~50 → y726) -->
       <span class="sg-h" style="--y: calc(726 * var(--sy));"></span>
     </div>
@@ -257,6 +288,8 @@
   <!-- Global theme toggle button -->
   <button id="theme-toggle-btn" aria-label="החלף ניגודיות"></button>
 
+  </div><!-- /#app-viewport -->
+
   <div id="cursor" aria-hidden="true">
     <svg viewBox="0 0 22 26" xmlns="http://www.w3.org/2000/svg">
       <!-- Open hand — the default pointer -->
@@ -287,6 +320,8 @@
     </svg>
   </div>
   <script type="module" src="app.js"></script>
+  <!-- Keep the fixed-aspect letterbox margins matching the active stage colour. -->
+  <script type="module" src="letterbox-bg.js"></script>
   <script type="module">
     import { mountHamsaPendulum } from './hamsa-pendulum.js';
     const host = document.getElementById('hamsa-pendulum');

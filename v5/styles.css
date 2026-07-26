@@ -98,8 +98,8 @@ html { overflow: hidden; }
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 1360px;
+  height: 768px;
   z-index: 10;
   overflow: hidden;
   will-change: transform;
@@ -122,8 +122,8 @@ body::-webkit-scrollbar-thumb {
 .screen-panel {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 1360px;
+  height: 768px;
   overflow: hidden;
 }
 
@@ -200,8 +200,8 @@ body::-webkit-scrollbar-thumb {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(960px, 76vw);
-  height: min(560px, 68vh);
+  width: min(960px, 1033.6px);
+  height: min(560px, 522.24px);
   display: grid;
   grid-template-columns: 38px 1fr 38px;
   grid-template-rows: 32px 1fr 32px;
@@ -239,7 +239,7 @@ body::-webkit-scrollbar-thumb {
   top: 32px;
   left: 50%;
   transform: translateX(-50%);
-  width: 70vw;
+  width: 952px;
   pointer-events: all;
 }
 
@@ -699,7 +699,7 @@ body::-webkit-scrollbar-thumb {
 /* ─── Questionnaire Layout ────────────────────────────────── */
 #section-3 {
   background: #fffae6;
-  height: 100vh;
+  height: 768px;
   overflow: hidden;
 }
 
@@ -840,7 +840,7 @@ body::-webkit-scrollbar-thumb {
 #q-text {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(2rem, 4.2vw, 3.8rem);
+  font-size: clamp(2rem, 57.12px, 3.8rem);
   color: #1c1c1c;
   line-height: 1.18;
   direction: rtl;
@@ -851,7 +851,7 @@ body::-webkit-scrollbar-thumb {
 #q-text[data-q="0"] {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+  font-size: clamp(2.2rem, 61.2px, 4.2rem);
   letter-spacing: -0.01em;
 }
 
@@ -859,7 +859,7 @@ body::-webkit-scrollbar-thumb {
 #q-text[data-q="1"] {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(2.4rem, 5vw, 4.8rem);
+  font-size: clamp(2.4rem, 68px, 4.8rem);
   letter-spacing: 0.01em;
 }
 
@@ -867,7 +867,7 @@ body::-webkit-scrollbar-thumb {
 #q-text[data-q="2"] {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(2rem, 4.2vw, 4rem);
+  font-size: clamp(2rem, 57.12px, 4rem);
   letter-spacing: 0.01em;
 }
 
@@ -875,7 +875,7 @@ body::-webkit-scrollbar-thumb {
 #q-text[data-q="3"] {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(1.8rem, 3.6vw, 3.4rem);
+  font-size: clamp(1.8rem, 48.96px, 3.4rem);
   letter-spacing: -0.02em;
 }
 
@@ -883,7 +883,7 @@ body::-webkit-scrollbar-thumb {
 #q-text[data-q="4"] {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+  font-size: clamp(2.2rem, 61.2px, 4.2rem);
   color: #1c1c1c;
   letter-spacing: 0.04em;
 }
@@ -892,7 +892,7 @@ body::-webkit-scrollbar-thumb {
 #q-text[data-q="5"] {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  font-size: clamp(2.4rem, 68px, 4.6rem);
   color: #1c1c1c;
 }
 
@@ -1331,7 +1331,7 @@ body::-webkit-scrollbar-thumb {
 .prof-grid {
   position: fixed;
   left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
-  top: calc(85 * var(--sy)); bottom: calc(100vh - 726 * var(--sy));
+  top: calc(85 * var(--sy)); bottom: calc(768px - 726 * var(--sy));
   display: flex; align-items: center; justify-content: center;
   z-index: 8; pointer-events: none;
 }
@@ -1339,7 +1339,7 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: clamp(8px, 1vw, 18px);
+  gap: clamp(8px, 13.6px, 18px);
   width: 100%; height: 86%; max-height: 560px;
 }
 .prof-card {
@@ -1355,7 +1355,7 @@ body::-webkit-scrollbar-thumb {
 .prof-icon { width: 46%; aspect-ratio: 1 / 1; display: block; }
 .prof-label {
   font-family: 'ArbelG', sans-serif; color: #f5f5ed;
-  font-size: clamp(12px, 1.1vw, 17px); letter-spacing: 0.02em;
+  font-size: clamp(12px, 14.96px, 17px); letter-spacing: 0.02em;
   direction: rtl; text-align: center;
 }
 .prof-card.is-dimmed { opacity: 0.42; }
@@ -1527,10 +1527,10 @@ body::-webkit-scrollbar-thumb {
    inset within the fixed grid frame so words never reach the nav / frame. */
 #drive-field {
   position: fixed;
-  left: 14vw;
-  width: 72vw;
-  top: 22vh;
-  height: 56vh;
+  left: 190.4px;
+  width: 979.2px;
+  top: 168.96px;
+  height: 430.08px;
   direction: rtl;
   overflow: visible;
   z-index: 6;
@@ -1679,8 +1679,8 @@ body::-webkit-scrollbar-thumb {
 }
 
 .roots-canvas-wrap {
-  width: min(420px, 50vh);
-  height: min(420px, 50vh);
+  width: min(420px, 384px);
+  height: min(420px, 384px);
   flex-shrink: 0;
   border: 1px solid rgba(28, 28, 28,0.12);
   border-radius: 50%;
@@ -1886,16 +1886,16 @@ body::-webkit-scrollbar-thumb {
   --q-metal:    #282828;
   --q-load:     #fb5716;
   --q-active-soft: rgba(251, 87, 22, 0.15);
-  --q-header-top-h: clamp(75px, 9.5vh, 105px);
-  --q-header-steps-h: clamp(40px, 4.5vh, 50px);
+  --q-header-top-h: clamp(75px, 72.96px, 105px);
+  --q-header-steps-h: clamp(40px, 34.56px, 50px);
   --q-metal-h: 14px;
   --q-top-total: calc(var(--q-header-top-h) + var(--q-header-steps-h) + var(--q-metal-h) * 2);
-  --q-side-w:   clamp(240px, 23vw, 340px);
-  --q-stamp-w:  clamp(130px, 12vw, 180px);
-  --q-stamp-inset-x: clamp(16px, 1.8vw, 32px);
-  --q-stamp-inset-y: clamp(8px, 1.2vh, 18px);
-  --q-rcol-w:   clamp(260px, 24vw, 380px);
-  --q-gap-x:    clamp(24px, 3vw, 44px);
+  --q-side-w:   clamp(240px, 312.8px, 340px);
+  --q-stamp-w:  clamp(130px, 163.2px, 180px);
+  --q-stamp-inset-x: clamp(16px, 24.48px, 32px);
+  --q-stamp-inset-y: clamp(8px, 9.216px, 18px);
+  --q-rcol-w:   clamp(260px, 326.4px, 380px);
+  --q-gap-x:    clamp(24px, 40.8px, 44px);
 }
 
 /* ─── Questionnaire Header (v2: dark + metallic) ──────────── */
@@ -2020,7 +2020,7 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 clamp(16px, 1.8vw, 32px);
+  padding: 0 clamp(16px, 24.48px, 32px);
 }
 
 /* Right side steps (Color, Background, Jewelry) */
@@ -2071,7 +2071,7 @@ body::-webkit-scrollbar-thumb {
   align-items: center;
   justify-content: stretch;
   gap: 0;
-  padding: 0 clamp(16px, 2vw, 32px);
+  padding: 0 clamp(16px, 27.2px, 32px);
   direction: rtl;
   font-family: 'ArbelG', sans-serif;
 }
@@ -2079,7 +2079,7 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: clamp(6px, 0.6vw, 10px);
+  gap: clamp(6px, 8.16px, 10px);
   flex: 1 1 0;
 }
 .q-progress-section[data-section="design"] {
@@ -2090,7 +2090,7 @@ body::-webkit-scrollbar-thumb {
   flex: 1 1 0;
 }
 .q-progress-label {
-  font-size: clamp(10px, 0.8vw, 11.5px);
+  font-size: clamp(10px, 10.88px, 11.5px);
   font-weight: 500;
   letter-spacing: 0.02em;
   color: var(--q-ink);
@@ -2115,16 +2115,16 @@ body::-webkit-scrollbar-thumb {
   content: '';
   position: absolute;
   top: 50%;
-  left: clamp(3px, 0.35vw, 5px);
-  right: clamp(3px, 0.35vw, 5px);
+  left: clamp(3px, 4.76px, 5px);
+  right: clamp(3px, 4.76px, 5px);
   height: 0;
   border-top: 1px solid rgba(28, 28, 28, 0.18);
   pointer-events: none;
 }
 /* Each dot circle */
 .q-progress-dot {
-  width: clamp(6px, 0.7vw, 9px);
-  height: clamp(6px, 0.7vw, 9px);
+  width: clamp(6px, 9.52px, 9px);
+  height: clamp(6px, 9.52px, 9px);
   border-radius: 50%;
   border: 1px solid var(--q-ink);
   background: var(--q-cream, #fffae6);
@@ -2149,7 +2149,7 @@ body::-webkit-scrollbar-thumb {
   height: 22px;
   background: rgba(28, 28, 28, 0.18);
   flex-shrink: 0;
-  margin: 0 clamp(8px, 1vw, 16px);
+  margin: 0 clamp(8px, 13.6px, 16px);
 }
 body.theme-negative .q-progress-dot { border-color: #fffae6; }
 body.theme-negative .q-progress-dot.is-filled,
@@ -2165,7 +2165,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 /* ─── Layout container — sits inside the chrome inset ─────── */
 #section-3 {
   background: var(--q-cream);
-  height: 100vh;
+  height: 768px;
   overflow: hidden;
   transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s,
               transform 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s,
@@ -2173,8 +2173,8 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 }
 #questionnaire-layout {
   padding-top: var(--q-top-total);
-  height: 100vh;
-  width: 100vw;
+  height: 768px;
+  width: 1360px;
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -2207,8 +2207,8 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 .q-chrome-side-spine {
   position: absolute;
   left: 50%;
-  top: clamp(40px, 7vh, 72px);
-  bottom: clamp(40px, 7vh, 72px);
+  top: clamp(40px, 53.76px, 72px);
+  bottom: clamp(40px, 53.76px, 72px);
   width: 0;
   border-left: 0.7px dashed rgba(28, 28, 28, 0.45);
   transform: translateX(-50%);
@@ -2258,13 +2258,13 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   flex: 0 0 auto;
   height: 100%;
   margin-left: auto;
-  padding: clamp(14px, 2vh, 24px) clamp(20px, 2.2vw, 36px) clamp(16px, 2.5vh, 28px);
+  padding: clamp(14px, 15.36px, 24px) clamp(20px, 29.92px, 36px) clamp(16px, 19.2px, 28px);
   border-left: 1px solid rgba(28, 28, 28, 0.08);
   background: transparent;
   position: static;
   overflow: hidden;
   justify-content: flex-start;
-  gap: clamp(12px, 2vh, 24px);
+  gap: clamp(12px, 15.36px, 24px);
 }
 
 /* ─── Question header (counter row) ───────────────────────── */
@@ -2276,7 +2276,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
      on the right, the question text (second child) flows to its left. */
   flex-direction: row;
   align-items: baseline;
-  gap: clamp(12px, 1.4vw, 24px);
+  gap: clamp(12px, 19.04px, 24px);
 }
 #q-header #q-text {
   flex: 1;
@@ -2302,7 +2302,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #q-content {
   align-self: stretch;
   max-width: none;
-  gap: clamp(14px, 2.4vh, 28px);
+  gap: clamp(14px, 18.432px, 28px);
   flex: 1 1 auto;
   justify-content: flex-start;
   overflow: hidden;
@@ -2311,18 +2311,18 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #q-text {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(1.4rem, 2.5vw, 2.3rem);
+  font-size: clamp(1.4rem, 34px, 2.3rem);
   color: #1c1c1c;
   line-height: 1.12;
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
-#q-text[data-q="0"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.5rem, 2.6vw, 2.4rem); }
-#q-text[data-q="1"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.6rem, 2.8vw, 2.6rem); }
-#q-text[data-q="2"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.4rem, 2.4vw, 2.2rem); }
-#q-text[data-q="3"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.3rem, 2.2vw, 2rem); }
-#q-text[data-q="4"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.5rem, 2.5vw, 2.3rem); }
-#q-text[data-q="5"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.6rem, 2.7vw, 2.5rem); }
+#q-text[data-q="0"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.5rem, 35.36px, 2.4rem); }
+#q-text[data-q="1"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.6rem, 38.08px, 2.6rem); }
+#q-text[data-q="2"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.4rem, 32.64px, 2.2rem); }
+#q-text[data-q="3"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.3rem, 29.92px, 2rem); }
+#q-text[data-q="4"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.5rem, 34px, 2.3rem); }
+#q-text[data-q="5"] { font-family: 'Shofar', sans-serif; font-weight: 400; font-size: clamp(1.6rem, 36.72px, 2.5rem); }
 
 /* ─── Input frame — bordered square, replaces underline ───── */
 #q-input-wrap {
@@ -2331,7 +2331,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   border-radius: 0;
   background: transparent;
   padding: 18px 18px 14px;
-  min-height: clamp(150px, 28vh, 260px);
+  min-height: clamp(150px, 215.04px, 260px);
   flex: 0 0 auto;
   display: flex;
   align-items: flex-start;
@@ -2399,10 +2399,10 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
    the original onAdd → triggerLayer(4) flow is untouched. */
 #q-input-wrap.roots-active {
   position: absolute;
-  top: calc(var(--q-top-total) + clamp(24px, 5vh, 64px));
-  bottom: clamp(24px, 5vh, 64px);
-  left: calc(var(--q-side-w) + clamp(24px, 3vw, 56px));
-  right: calc(var(--q-rcol-w) + clamp(24px, 3vw, 56px));
+  top: calc(var(--q-top-total) + clamp(24px, 38.4px, 64px));
+  bottom: clamp(24px, 38.4px, 64px);
+  left: calc(var(--q-side-w) + clamp(24px, 40.8px, 56px));
+  right: calc(var(--q-rcol-w) + clamp(24px, 40.8px, 56px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2413,8 +2413,8 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 }
 #q-input-wrap.roots-active > * { pointer-events: auto; }
 #q-input-wrap.roots-active .roots-canvas-wrap {
-  width: min(90vh, 720px) !important;
-  height: min(90vh, 720px) !important;
+  width: min(691.2px, 720px) !important;
+  height: min(691.2px, 720px) !important;
   max-width: 100%;
   max-height: 100%;
   transform: translateX(140px) !important;
@@ -2544,7 +2544,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] #paths-game {
   position: fixed;
   left: calc(100 * var(--sx));
-  width: calc(100vw - 200 * var(--sx));
+  width: calc(1360px - 200 * var(--sx));
   top: calc(150 * var(--sy));                 /* below the instruction strip */
   height: calc((676 - 150) * var(--sy));      /* down to the bottom grid line */
   max-width: none;
@@ -2571,10 +2571,10 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
   left: 50%;
-  bottom: calc(100vh - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
+  bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
   top: auto;
   transform: translate(-50%, 26px);
-  width: min(42vw, 540px);
+  width: min(571.2px, 540px);
   height: auto;
   z-index: 5;
   opacity: 0;
@@ -3201,7 +3201,7 @@ body.theme-negative #section-1::before {
   display: block;
   flex: 1;
   font-family: 'Shofar', 'ArbelG', sans-serif;
-  font-size: clamp(18px, 2.2vw, 28px);
+  font-size: clamp(18px, 29.92px, 28px);
   font-weight: 400;
   color: #1c1c1c;
   line-height: 1.25;
@@ -3274,7 +3274,7 @@ body.theme-negative #section-1::before {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  padding-top: 5vh;
+  padding-top: 38.4px;
 }
 /* 1. Origin Layout (Step 1) - Horizontal Split */
 .q-layout-origin #middle-q-container {
@@ -3298,7 +3298,7 @@ body.theme-negative #section-1::before {
 }
 .q-layout-origin #q-text {
   font-family: 'Shofar', sans-serif;
-  font-size: clamp(2.2rem, 3.8vw, 3.6rem) !important;
+  font-size: clamp(2.2rem, 51.68px, 3.6rem) !important;
   text-align: right !important;
   line-height: 1.15 !important;
   margin-bottom: 0 !important;
@@ -3325,8 +3325,8 @@ body.theme-negative #section-1::before {
   margin-top: 10px;
 }
 .q-layout-origin .roots-canvas-wrap {
-  width: min(90vh, 760px) !important;
-  height: min(90vh, 760px) !important;
+  width: min(691.2px, 760px) !important;
+  height: min(691.2px, 760px) !important;
 }
 
 /* 2. Floating Words Layout (Step 2) */
@@ -3338,7 +3338,7 @@ body.theme-negative #section-1::before {
 }
 .q-layout-word #q-text {
   font-family: 'Shofar', sans-serif;
-  font-size: clamp(3.8rem, 6.5vw, 6rem) !important;
+  font-size: clamp(3.8rem, 88.4px, 6rem) !important;
   text-align: center !important;
   line-height: 1.05 !important;
   color: #1c1c1c;
@@ -3362,7 +3362,7 @@ body.theme-negative #section-1::before {
 }
 .q-layout-stars #q-header {
   position: absolute !important;
-  top: 2vh !important;
+  top: 15.36px !important;
   left: 0 !important;
   max-width: 320px !important;
   text-align: left !important;
@@ -3370,7 +3370,7 @@ body.theme-negative #section-1::before {
 }
 .q-layout-stars #q-text {
   font-family: 'Shofar', sans-serif;
-  font-size: clamp(1.4rem, 2vw, 1.8rem) !important;
+  font-size: clamp(1.4rem, 27.2px, 1.8rem) !important;
   text-align: left !important;
   line-height: 1.3 !important;
   font-weight: 300 !important;
@@ -3404,7 +3404,7 @@ body.theme-negative #section-1::before {
 }
 .q-layout-personal #q-text {
   font-family: 'Shofar', sans-serif;
-  font-size: clamp(2.4rem, 3.8vw, 3.6rem) !important;
+  font-size: clamp(2.4rem, 51.68px, 3.6rem) !important;
   text-align: center !important;
   line-height: 1.25;
   margin-bottom: 40px;
@@ -3433,7 +3433,7 @@ body.theme-negative #section-1::before {
   border: none;
   background: transparent;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(2.2rem, 4vw, 3.2rem) !important;
+  font-size: clamp(2.2rem, 54.4px, 3.2rem) !important;
   color: #1c1c1c;
   text-align: center !important;
   outline: none;
@@ -3473,7 +3473,7 @@ body.theme-negative #section-1::before {
 }
 .q-layout-roots #q-text {
   font-family: 'Shofar', sans-serif;
-  font-size: clamp(1.8rem, 2.8vw, 2.6rem) !important;
+  font-size: clamp(1.8rem, 38.08px, 2.6rem) !important;
   text-align: right !important;
   line-height: 1.25 !important;
   font-weight: 400 !important;
@@ -3497,7 +3497,7 @@ body.theme-negative #section-1::before {
   flex-direction: column !important;
   justify-content: space-between !important;
   height: 100% !important;
-  padding: 6vh 0 !important;
+  padding: 46.08px 0 !important;
   position: relative !important;
 }
 .q-layout-name #q-header {
@@ -3508,7 +3508,7 @@ body.theme-negative #section-1::before {
 }
 .q-layout-name #q-text {
   font-family: 'Shofar', sans-serif;
-  font-size: clamp(2.8rem, 4.5vw, 4.2rem) !important;
+  font-size: clamp(2.8rem, 61.2px, 4.2rem) !important;
   text-align: right !important;
   line-height: 1.1 !important;
   font-weight: 700 !important;
@@ -3540,7 +3540,7 @@ body.theme-negative #section-1::before {
   border: none;
   background: transparent;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(2rem, 3.5vw, 2.8rem) !important;
+  font-size: clamp(2rem, 47.6px, 2.8rem) !important;
   color: #1c1c1c;
   text-align: right !important;
   outline: none;
@@ -3559,10 +3559,10 @@ body.theme-negative #section-1::before {
 }
 #gematria-watermark {
   position: absolute;
-  bottom: 8vh;
+  bottom: 61.44px;
   left: 0;
   font-family: 'Shofar', sans-serif;
-  font-size: clamp(8rem, 15vw, 15rem);
+  font-size: clamp(8rem, 204px, 15rem);
   font-weight: 700;
   color: #1c1c1c;
   opacity: 0.04;
@@ -3621,8 +3621,8 @@ body.theme-negative {
   display: grid !important;
   grid-template-columns: var(--col-1) var(--col-2) var(--col-3) !important;
   grid-template-rows: var(--row-1) var(--row-2) var(--row-3) !important;
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 1360px !important;
+  height: 768px !important;
   padding-top: 0 !important;
   padding-left: 0 !important;
   margin: 0 !important;
@@ -3790,18 +3790,18 @@ body.theme-negative {
 
 /* Stage-specific column and row track definitions */
 #section-3 {
-  --col-1: clamp(280px, 24vw, 360px);
+  --col-1: clamp(280px, 326.4px, 360px);
   --col-2: 1fr;
-  --col-3: clamp(240px, 22vw, 340px);
+  --col-3: clamp(240px, 299.2px, 340px);
   --row-1: var(--q-top-total);
   --row-2: 1fr;
-  --row-3: clamp(110px, 13vh, 150px);
+  --row-3: clamp(110px, 99.84px, 150px);
 }
 #section-3.stage-2-view,
 #section-3.stage-2-active {
-  --col-1: 100vw !important;
-  --col-2: 0vw !important;
-  --col-3: 0vw !important;
+  --col-1: 1360px !important;
+  --col-2: 0px !important;
+  --col-3: 0px !important;
   --row-1: 0px !important;
   --row-2: 1fr !important;
   --row-3: 0px !important;
@@ -3817,12 +3817,12 @@ body.theme-negative {
    Only the central content area composition changes per stage. ─── */
 #section-3,
 #section-3[data-stage] {
-  --col-1: clamp(280px, 24vw, 360px);   /* jewelry panel — locked */
+  --col-1: clamp(280px, 326.4px, 360px);   /* jewelry panel — locked */
   --col-2: 1fr;                          /* main content — fills remaining */
-  --col-3: clamp(240px, 22vw, 340px);   /* right deco/yellow — locked */
+  --col-3: clamp(240px, 299.2px, 340px);   /* right deco/yellow — locked */
   --row-1: var(--q-top-total);
   --row-2: 1fr;
-  --row-3: clamp(110px, 13vh, 150px);   /* nav row — locked */
+  --row-3: clamp(110px, 99.84px, 150px);   /* nav row — locked */
 }
 
 /* Cell-specific element adjustments */
@@ -3830,8 +3830,8 @@ body.theme-negative {
 /* Cell 1 & 2: Header modifications (removing split styles, restoring logo row & steps row) */
 #questionnaire-layout #q-btn-back-home {
   position: absolute !important;
-  top: clamp(22px, 2.6vh, 32px) !important;
-  right: clamp(20px, 2.4vw, 36px) !important;
+  top: clamp(22px, 19.968px, 32px) !important;
+  right: clamp(20px, 32.64px, 36px) !important;
   left: auto !important;
   z-index: 20 !important;
   background: none !important;
@@ -3910,7 +3910,7 @@ body.theme-negative {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: stretch !important;
-  padding: clamp(24px, 4vh, 48px) clamp(32px, 5vw, 64px) !important;
+  padding: clamp(24px, 30.72px, 48px) clamp(32px, 68px, 64px) !important;
   z-index: 2 !important;
   overflow: hidden !important;
   background: transparent !important;
@@ -3952,7 +3952,7 @@ body.theme-negative {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: flex-start !important;
-  padding: clamp(16px, 3vh, 32px) !important;
+  padding: clamp(16px, 23.04px, 32px) !important;
   direction: ltr !important;
   gap: 6px !important;
 }
@@ -3987,8 +3987,8 @@ body.theme-negative {
 }
 .deco-circle-badge {
   position: relative !important;
-  width: clamp(75px, 9vh, 90px) !important;
-  height: clamp(75px, 9vh, 90px) !important;
+  width: clamp(75px, 69.12px, 90px) !important;
+  height: clamp(75px, 69.12px, 90px) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -4062,7 +4062,7 @@ body.theme-negative {
 #questionnaire-layout .deco-number-val {
   font-family: 'ArbelG', sans-serif !important;
   font-weight: 700 !important;
-  font-size: clamp(40px, 5.5vh, 64px) !important;
+  font-size: clamp(40px, 42.24px, 64px) !important;
   line-height: 1 !important;
   color: transparent !important;
   -webkit-text-stroke: 1.5px #ff601a !important;
@@ -4117,7 +4117,7 @@ body.theme-negative {
   padding: 0 !important;
   display: grid !important;
   grid-template-columns: 1fr !important;
-  grid-template-rows: clamp(140px, 20vh, 200px) 1fr !important;
+  grid-template-rows: clamp(140px, 153.6px, 200px) 1fr !important;
   overflow: hidden !important;
   border-right: 1px solid var(--q-grid-border);
 }
@@ -4128,7 +4128,7 @@ body.theme-negative {
   background: #976b43;
   font-family: 'ArbelG', sans-serif;
   font-weight: 700;
-  font-size: clamp(70px, 11vh, 130px);
+  font-size: clamp(70px, 84.48px, 130px);
   color: transparent;
   -webkit-text-stroke: 2.5px var(--q-dark);
   letter-spacing: -0.02em;
@@ -4136,7 +4136,7 @@ body.theme-negative {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 clamp(20px, 3vw, 40px);
+  padding: 0 clamp(20px, 40.8px, 40px);
   border-bottom: 1px solid var(--q-grid-border);
   grid-row: 1;
   grid-column: 1;
@@ -4149,7 +4149,7 @@ body.theme-negative {
   position: relative !important;
   width: 100% !important;
   height: 100% !important;
-  padding: clamp(28px, 5vh, 60px) clamp(28px, 4vw, 56px) !important;
+  padding: clamp(28px, 38.4px, 60px) clamp(28px, 54.4px, 56px) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -4171,7 +4171,7 @@ body.theme-negative {
 }
 #section-3[data-stage="1"] #middle-q-container #q-header #q-text {
   font-family: 'Shofar', 'ArbelG', sans-serif !important;
-  font-size: clamp(2.6rem, 5.2vw, 4.8rem) !important;
+  font-size: clamp(2.6rem, 70.72px, 4.8rem) !important;
   text-align: right !important;
   line-height: 1.05 !important;
   color: var(--q-ink) !important;
@@ -4205,7 +4205,7 @@ body.theme-negative {
    with floating words. Specificity bumped via `body` to win against
    the `#section-3[data-stage]` rule that sets the default tracks. */
 body #section-3[data-stage="1"] {
-  --col-2: clamp(380px, 38vw, 560px) !important;
+  --col-2: clamp(380px, 516.8px, 560px) !important;
   --col-3: 1fr !important;
 }
 
@@ -4272,7 +4272,7 @@ body #section-3[data-stage="1"] {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: flex-start !important;
-  padding: 20px clamp(24px, 3vw, 40px) !important;
+  padding: 20px clamp(24px, 40.8px, 40px) !important;
   box-sizing: border-box !important;
   border-bottom: 1px solid var(--q-grid-border) !important;
   border-right: none !important;
@@ -4303,7 +4303,7 @@ body #section-3[data-stage="1"] {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: flex-start !important;
-  padding: clamp(28px, 5vh, 56px) clamp(24px, 3vw, 40px) !important;
+  padding: clamp(28px, 38.4px, 56px) clamp(24px, 40.8px, 40px) !important;
   border-left: none !important;
   pointer-events: auto !important;
   gap: 16px !important;
@@ -4316,7 +4316,7 @@ body #section-3[data-stage="1"] {
 /* --- Question text: large editorial typography --- */
 #section-3[data-stage="0"] #q-text {
   font-family: 'Shofar', sans-serif !important;
-  font-size: clamp(2.4rem, 4.2vw, 4rem) !important;
+  font-size: clamp(2.4rem, 57.12px, 4rem) !important;
   line-height: 1.1 !important;
   font-weight: 400 !important;
   text-align: right !important;
@@ -4388,7 +4388,7 @@ body #section-3[data-stage="1"] {
   flex-direction: row-reverse !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: clamp(24px, 4vw, 64px) !important;
+  gap: clamp(24px, 54.4px, 64px) !important;
   position: relative !important;
 }
 /* Vertical grid divider sitting in the gap between the globe (right)
@@ -4408,8 +4408,8 @@ body #section-3[data-stage="1"] {
    the design3 300px, to keep the globe legible without dominating. */
 #section-3[data-stage="0"] .roots-canvas-wrap,
 #section-3[data-stage="0"] #q-input-wrap.roots-active .roots-canvas-wrap {
-  width: min(90vh, 760px) !important;
-  height: min(90vh, 760px) !important;
+  width: min(691.2px, 760px) !important;
+  height: min(691.2px, 760px) !important;
   max-width: none !important;
   max-height: none !important;
   flex-shrink: 0 !important;
@@ -4418,8 +4418,8 @@ body #section-3[data-stage="1"] {
    doesn't crowd the canvas. */
 #section-3[data-stage="0"] .roots-controls,
 #section-3[data-stage="0"] .roots-map-controls {
-  width: clamp(220px, 24vw, 320px) !important;
-  max-width: clamp(220px, 24vw, 320px) !important;
+  width: clamp(220px, 326.4px, 320px) !important;
+  max-width: clamp(220px, 326.4px, 320px) !important;
   flex-shrink: 0 !important;
   align-items: stretch !important;
 }
@@ -4530,7 +4530,7 @@ body #section-3[data-stage="1"] {
 /* Three-pane content area: col 1 sidebar + col 2 scribble + col 3 question */
 body #section-3[data-stage="4"] {
   --col-2: 1fr !important;
-  --col-3: clamp(320px, 30vw, 460px) !important;
+  --col-3: clamp(320px, 408px, 460px) !important;
 }
 
 #section-3[data-stage="4"] #q-main-cell {
@@ -4540,7 +4540,7 @@ body #section-3[data-stage="4"] {
   padding: 0 !important;
   background: var(--q-cream) !important;
   display: grid !important;
-  grid-template-rows: clamp(36px, 5vh, 56px) 1fr !important;
+  grid-template-rows: clamp(36px, 38.4px, 56px) 1fr !important;
   overflow: hidden !important;
   border-right: 1px solid var(--q-grid-border) !important;
 }
@@ -4586,7 +4586,7 @@ body #section-3[data-stage="4"] {
   flex-direction: column !important;
   align-items: stretch !important;
   justify-content: flex-start !important;
-  padding: clamp(80px, 14vh, 160px) clamp(28px, 3vw, 56px) 0 clamp(28px, 3vw, 56px) !important;
+  padding: clamp(80px, 107.52px, 160px) clamp(28px, 40.8px, 56px) 0 clamp(28px, 40.8px, 56px) !important;
   direction: rtl !important;
   background: var(--q-cream) !important;
 }
@@ -4599,7 +4599,7 @@ body #section-3[data-stage="4"] {
 #section-3[data-stage="4"] #q-deco-mid-right::before {
   content: 'מהו המסלול שלך?';
   font-family: 'Shofar', 'ArbelG', sans-serif;
-  font-size: clamp(2.4rem, 4.4vw, 4rem);
+  font-size: clamp(2.4rem, 59.84px, 4rem);
   font-weight: 400;
   color: var(--q-ink);
   text-align: right;
@@ -4628,13 +4628,13 @@ body #section-3[data-stage="4"] {
   justify-content: space-between !important;
   width: 100% !important;
   height: 100% !important;
-  padding: 0 clamp(16px, 2vw, 28px) !important;
+  padding: 0 clamp(16px, 27.2px, 28px) !important;
   gap: 14px;
 }
 #section-3[data-stage="4"] #q-deco-bot-right .deco-number-val {
   font-family: 'ArbelG', sans-serif !important;
   font-weight: 900 !important;
-  font-size: clamp(36px, 5vh, 52px) !important;
+  font-size: clamp(36px, 38.4px, 52px) !important;
   color: transparent !important;
   -webkit-text-stroke: 1.5px var(--q-cream) !important;
   line-height: 1 !important;
@@ -4934,8 +4934,8 @@ body.theme-negative .q-help .q-help-tip {
    layout — the globe itself is untouched. */
 #section-3[data-stage="0"] #roots-controls > .q-help {
   position: fixed;
-  top: calc(var(--q-top-total, 124px) + 90px + clamp(10px, 1.5vh, 18px));
-  right: calc(var(--col-3, 280px) + clamp(10px, 1vw, 20px));
+  top: calc(var(--q-top-total, 124px) + 90px + clamp(10px, 11.52px, 18px));
+  right: calc(var(--col-3, 280px) + clamp(10px, 13.6px, 20px));
   left: auto;
   transform: none;
   z-index: 20;
@@ -5022,7 +5022,7 @@ body.theme-negative #section-3[data-stage="0"] .q-help .q-help-tip {
    row 2/3 grid line sits right at the strip's top edge. The orange
    sidebar (row 2) ends precisely on that grid line — no gap, no overlap. */
 body #section-3[data-stage="0"] {
-  --row-3: clamp(70px, 11vh, 130px) !important;
+  --row-3: clamp(70px, 84.48px, 130px) !important;
 }
 #section-3[data-stage="0"] .q-chrome-side-corner-mark,
 #section-3[data-stage="0"] .q-chrome-side-spine {
@@ -5044,7 +5044,7 @@ body #section-3[data-stage="0"] {
   border: none !important;
   display: flex !important;
   align-items: center !important;
-  padding: 0 clamp(20px, 2vw, 32px) !important;
+  padding: 0 clamp(20px, 27.2px, 32px) !important;
 }
 #section-3[data-stage="0"] #q-nav {
   display: flex !important;
@@ -5059,7 +5059,7 @@ body #section-3[data-stage="0"] {
 #section-3[data-stage="0"] #questionnaire-layout::after {
   content: '';
   position: absolute;
-  left: var(--col-1, clamp(280px, 24vw, 360px));
+  left: var(--col-1, clamp(280px, 326.4px, 360px));
   right: 0;
   bottom: 0;
   height: var(--row-3) !important;
@@ -5175,7 +5175,7 @@ body #section-3[data-stage="0"] {
   flex-direction: column !important;
   justify-content: center !important;
   align-items: flex-end !important;
-  padding: 0 clamp(12px, 1.4vw, 22px) !important;
+  padding: 0 clamp(12px, 19.04px, 22px) !important;
   --accent-top: 0;
   --accent-left: 0;
   --accent-w: calc((100% - var(--col-3, 280px)) * 0.36);
@@ -5192,7 +5192,7 @@ body #section-3[data-stage="0"] {
 #section-3[data-stage="0"] .stage-accent.is-brown::before {
   content: 'מידות / DIMENSIONS';
   font-weight: 700;
-  font-size: clamp(9px, 0.78vw, 12px);
+  font-size: clamp(9px, 10.608px, 12px);
   letter-spacing: 0.05em;
   color: #fffae6;
   white-space: nowrap;
@@ -5230,9 +5230,9 @@ body:has(#section-3[data-stage="0"]) #s0-hero-img {
   /* Sit flush with the bottom of the header — the hero "box" is the
      entire col-3 area, top to its natural bottom. The brown DIMENSIONS
      segment lives to the left of col-3, never above the hero text. */
-  top: calc(var(--q-top-total, 124px) + clamp(8px, 1.4vh, 18px));
-  right: clamp(20px, 1.6vw, 32px);
-  width: clamp(200px, 19vw, 300px);
+  top: calc(var(--q-top-total, 124px) + clamp(8px, 10.752px, 18px));
+  right: clamp(20px, 21.76px, 32px);
+  width: clamp(200px, 258.4px, 300px);
   height: auto;
   z-index: 12;
   pointer-events: none;
@@ -5251,8 +5251,8 @@ body:has(#section-3[data-stage="0"]) #s0-hero-img {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(clamp(8px, 1.4vh, 18px) + clamp(200px, 19vw, 300px) * 0.9838 + 31px);
-  bottom: clamp(45px, 6.5vh, 85px);
+  top: calc(clamp(8px, 10.752px, 18px) + clamp(200px, 258.4px, 300px) * 0.9838 + 31px);
+  bottom: clamp(45px, 49.92px, 85px);
   background-image:
     none,
     none,
@@ -5264,7 +5264,7 @@ body:has(#section-3[data-stage="0"]) #s0-hero-img {
     0% calc(22% - 2px),
     0% calc(22% - 2px);
   pointer-events: none;
-  padding: clamp(14px, 2vh, 22px) clamp(16px, 2vw, 28px) 0 clamp(16px, 2vw, 28px);
+  padding: clamp(14px, 15.36px, 22px) clamp(16px, 27.2px, 28px) 0 clamp(16px, 27.2px, 28px);
   background-origin: content-box;
   background-clip: content-box;
   overflow: hidden;
@@ -5459,7 +5459,7 @@ body:has(#section-3[data-stage="0"]) #s0-hero-img {
   border: none !important;
   display: flex !important;
   align-items: center !important;
-  padding: 0 clamp(20px, 2vw, 32px) !important;
+  padding: 0 clamp(20px, 27.2px, 32px) !important;
   z-index: 5 !important;
 }
 #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"]) #q-nav {
@@ -5476,12 +5476,12 @@ body:has(#section-3[data-stage="0"]) #s0-hero-img {
 
 /* -- 4. Bottom brown gradient strip on cols 2-3 / row 3 ----------- */
 body #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"]) {
-  --row-3: clamp(70px, 11vh, 130px) !important;
+  --row-3: clamp(70px, 84.48px, 130px) !important;
 }
 #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"]) #questionnaire-layout::after {
   content: '';
   position: absolute;
-  left: var(--col-1, clamp(280px, 24vw, 360px));
+  left: var(--col-1, clamp(280px, 326.4px, 360px));
   right: 0;
   bottom: 0;
   height: var(--row-3) !important;
@@ -5533,7 +5533,7 @@ body #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-s
   justify-content: center;
   font-family: 'ArbelG', sans-serif;
   font-weight: 900;
-  font-size: clamp(28px, 3.6vw, 48px);
+  font-size: clamp(28px, 48.96px, 48px);
   color: #fffae6;
   letter-spacing: -0.02em;
 }
@@ -5562,7 +5562,7 @@ body #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-s
   flex-direction: column !important;
   justify-content: center !important;
   align-items: flex-end !important;
-  padding: 0 clamp(12px, 1.4vw, 22px) !important;
+  padding: 0 clamp(12px, 19.04px, 22px) !important;
   --accent-top: 0;
   --accent-left: 0;
   --accent-w: calc((100% - var(--col-3, 280px)) * 0.36);
@@ -5580,7 +5580,7 @@ body #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-s
 #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-stage="4"], [data-stage="5"]) .stage-accent.is-brown::before {
   content: 'מידות / DIMENSIONS';
   font-weight: 700;
-  font-size: clamp(9px, 0.78vw, 12px);
+  font-size: clamp(9px, 10.608px, 12px);
   letter-spacing: 0.05em;
   color: #fffae6;
   white-space: nowrap;
@@ -5638,7 +5638,7 @@ body #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-s
   grid-row: 3 !important;
   align-self: stretch !important;
   justify-self: stretch !important;
-  padding: clamp(16px, 2.5vh, 32px) clamp(24px, 3vw, 48px) !important;
+  padding: clamp(16px, 19.2px, 32px) clamp(24px, 40.8px, 48px) !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -5654,14 +5654,14 @@ body #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-s
 /* Stage 1 — wide visual cell on top, generous text band on bottom. */
 #section-3[data-stage="1"] #q-main-cell {
   grid-template-columns: 1fr 0fr !important;
-  grid-template-rows: 90px 1fr clamp(140px, 18vh, 220px) !important;
+  grid-template-rows: 90px 1fr clamp(140px, 138.24px, 220px) !important;
 }
 
 /* Stage 2 — visual cell stretched tall, text band squashed to a sliver.
    Same topology — row 3 shrinks toward 0, row 2 dominates. */
 #section-3[data-stage="2"] #q-main-cell {
   grid-template-columns: 1fr 0fr !important;
-  grid-template-rows: 90px 1fr clamp(70px, 9vh, 110px) !important;
+  grid-template-rows: 90px 1fr clamp(70px, 69.12px, 110px) !important;
 }
 
 /* Stage 3 — balanced split. Visual and text band share the height
@@ -5675,13 +5675,13 @@ body #section-3:is([data-stage="1"], [data-stage="2"], [data-stage="3"], [data-s
    Same topology, just different track ratios. */
 #section-3[data-stage="4"] #q-main-cell {
   grid-template-columns: 1fr 0fr !important;
-  grid-template-rows: 90px 2fr clamp(120px, 16vh, 180px) !important;
+  grid-template-rows: 90px 2fr clamp(120px, 122.88px, 180px) !important;
 }
 
 /* Stage 5 — text band swells to dominate, visual cell compresses. */
 #section-3[data-stage="5"] #q-main-cell {
   grid-template-columns: 1fr 0fr !important;
-  grid-template-rows: 90px clamp(180px, 28vh, 320px) 1fr !important;
+  grid-template-rows: 90px clamp(180px, 215.04px, 320px) 1fr !important;
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -5859,8 +5859,8 @@ body.theme-negative #section-3[data-stage="2"] {
 /* Globe canvas wrapper default size & positioning
    v5: large but fully inside the frame, anchored on the left. */
 #section-3[data-stage="0"] .roots-canvas-wrap {
-  width: min(90vh, 720px) !important;
-  height: min(90vh, 720px) !important;
+  width: min(691.2px, 720px) !important;
+  height: min(691.2px, 720px) !important;
   max-width: none !important;
   max-height: none !important;
   transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1), height 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
@@ -5871,8 +5871,8 @@ body.theme-negative #section-3[data-stage="2"] {
 /* Globe when input state is active (shrunk slightly & shifted right) */
 #section-3[data-stage="0"] .roots-widget.state-input .roots-canvas-wrap,
 #q-input-wrap.roots-active .roots-widget.state-input .roots-canvas-wrap {
-  width: min(300px, 35vh) !important;
-  height: min(300px, 35vh) !important;
+  width: min(300px, 268.8px) !important;
+  height: min(300px, 268.8px) !important;
   transform: translateX(0) !important;
 }
 
@@ -6046,7 +6046,7 @@ body.theme-negative .finish-blink {
   position: absolute !important;
   inset: 0 !important;
   background: url('/image/v5-landing-glow.png') no-repeat center center !important;
-  background-size: 100vw auto !important;
+  background-size: 1360px auto !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   pointer-events: none !important;
@@ -6082,7 +6082,7 @@ html:not(.cursor-active) *::after {
   direction: rtl;
   white-space: nowrap;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(11px, 0.85vw, 13px);
+  font-size: clamp(11px, 11.56px, 13px);
   letter-spacing: 0.14em;
   color: var(--q-dark, #282828);
   opacity: 0.85;
@@ -6129,11 +6129,11 @@ html:not(.cursor-active) *::after {
 .word-grid {
   font-family: 'Shofar', sans-serif;
   font-weight: 400;
-  font-size: clamp(13px, 1.5vw, 22px);
+  font-size: clamp(13px, 20.4px, 22px);
   color: var(--q-ink);
   user-select: none;
   direction: rtl;
-  padding: clamp(20px, 3vh, 40px) clamp(6px, 1vw, 14px);
+  padding: clamp(20px, 23.04px, 40px) clamp(6px, 13.6px, 14px);
   width: 100%;
   height: 100%;
   /* Fill the whole central rectangle: rows spread top-to-bottom. */
@@ -6212,7 +6212,7 @@ html:not(.cursor-active) *::after {
      instruction row; overflow:hidden clips any dot that would spill past it. */
   position: fixed;
   left: calc(100 * var(--sx));
-  width: calc(100vw - 200 * var(--sx));
+  width: calc(1360px - 200 * var(--sx));
   top: calc(155 * var(--sy));
   height: calc((650 - 155) * var(--sy));   /* ends above the raised bottom grid line (656) */
   overflow: hidden;
@@ -6294,8 +6294,8 @@ html:not(.cursor-active) *::after {
 .s2-float-dot.s2-fade, .gold-dot-pick.s2-fade { opacity: 0; transition: opacity 0.8s ease; }
 
 /* ── Background-colour choice stage (four tall colour panels) ──────────── */
-#q-input-wrap.bg-choice-active { display:flex !important; width:100%; height:100%; min-height:62vh; padding:0; }
-.bg-swatches { display:flex; gap:3.2%; width:100%; height:100%; min-height:62vh; align-items:stretch; justify-content:center; }
+#q-input-wrap.bg-choice-active { display:flex !important; width:100%; height:100%; min-height:476.16px; padding:0; }
+.bg-swatches { display:flex; gap:3.2%; width:100%; height:100%; min-height:476.16px; align-items:stretch; justify-content:center; }
 .bg-swatch {
   flex:1 1 0; position:relative; background:var(--sw);
   border:0; padding:0; margin:0; cursor:pointer; display:block; outline:none;
@@ -6349,7 +6349,7 @@ html:not(.cursor-active) *::after {
   left: calc(100 * var(--sx)) !important;
   right: calc(100 * var(--sx)) !important;
   top: calc(85 * var(--sy)) !important;
-  bottom: calc(100vh - 726 * var(--sy)) !important;   /* extend down to the bottom grid line (lowers the thumb row) */
+  bottom: calc(768px - 726 * var(--sy)) !important;   /* extend down to the bottom grid line (lowers the thumb row) */
   width: auto !important; height: auto !important;
   display: flex !important; flex-direction: column;
   /* Above #q-header (z-index 10), which otherwise covers the right frequency
@@ -6386,7 +6386,7 @@ html:not(.cursor-active) *::after {
 .calib-hint {
   position: absolute; left: 0; right: 0; top: 10px; text-align: center;
   font-family: 'ArbelG', sans-serif; direction: rtl;
-  font-size: clamp(12px, 1vw, 14px); letter-spacing: 0.03em; color: #ff5003;
+  font-size: clamp(12px, 13.6px, 14px); letter-spacing: 0.03em; color: #ff5003;
   pointer-events: none; transition: opacity 0.3s ease; z-index: 2;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
 }
@@ -6402,7 +6402,7 @@ html:not(.cursor-active) *::after {
   opacity: 0; pointer-events: none;
   padding: 0.5em 2.3em;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(13px, 0.95vw, 16px); letter-spacing: 0.02em;
+  font-size: clamp(13px, 12.92px, 16px); letter-spacing: 0.02em;
   color: #f5f5ed !important;
   --grid-dot: rgba(245, 245, 237, 0.7);
   background-color: transparent !important;
@@ -6463,9 +6463,9 @@ html:not(.cursor-active) *::after {
   top: calc(85 * var(--sy) + 20px);
   right: calc(100 * var(--sx) + 20px);
   left: auto; bottom: auto;
-  max-width: 46vw;
+  max-width: 625.6px;
   font-family: 'ArbelG', sans-serif; color: #ff5003;
-  font-size: clamp(11px, 0.9vw, 13px); letter-spacing: 0.03em;
+  font-size: clamp(11px, 12.24px, 13px); letter-spacing: 0.03em;
   direction: rtl; text-align: right;
 }
 /* Path stage sits on the interface ORANGE — the orange note would be invisible,
@@ -6476,7 +6476,7 @@ html:not(.cursor-active) *::after {
   transform: translateX(-50%);
   pointer-events: auto; cursor: pointer;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(13px, 0.95vw, 16px); letter-spacing: 0.02em;
+  font-size: clamp(13px, 12.92px, 16px); letter-spacing: 0.02em;
   color: var(--grid-dot) !important;   /* beat the generic #section-3 button colour */
   padding: 0.5em 2.3em; border: none; background-color: transparent;
   border-radius: 0 !important;   /* square corners — the dotted frame is a right angle, not rounded */
@@ -6510,7 +6510,7 @@ html:not(.cursor-active) *::after {
 }
 /* Frequency stage: "המשך" sits centred under the BIG selected-frequency preview on
    the LEFT (not the whole screen). Same row/height — only its X changes. The x
-   mirrors calibration.js's layout: canvas width W = 100vw−200·sx, gap g = 14px, the
+   mirrors calibration.js's layout: canvas width W = 1360px−200·sx, gap g = 14px, the
    right column = clamp(170, W·0.24, 300); the big view spans g→W−14−colw, so its
    centre is 100·sx + (W − 14 − colw)/2. translateX(−50%) (inherited) centres on it. */
 /* "המשך" sits at the TOP-LEFT of the content rectangle, on the same row as the
@@ -6716,14 +6716,14 @@ html:not(.cursor-active) *::after {
   font-family: 'ArbelG', sans-serif;
   font-weight: 700;
   color: #f5f5ed;
-  font-size: clamp(15px, 1.15vw, 21px);
+  font-size: clamp(15px, 15.64px, 21px);
   margin-bottom: 0.55em;
 }
 #symbol-window .sw-value {
   display: block;
   font-family: 'ArbelG', sans-serif;
   color: #f5f5ed;
-  font-size: clamp(13px, 1.0vw, 18px);
+  font-size: clamp(13px, 13.6px, 18px);
   line-height: 1.5;
 }
 
@@ -6739,13 +6739,13 @@ html:not(.cursor-active) *::after {
   display: flex;
   direction: rtl;            /* first child (restart) lands on the right */
   align-items: center;
-  gap: clamp(12px, 1.4vw, 22px);
+  gap: clamp(12px, 19.04px, 22px);
 }
 #symbol-window .sw-continue,
 #symbol-window .sw-restart {
   padding: 0.65em 2.6em;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(14px, 1.05vw, 18px);
+  font-size: clamp(14px, 14.28px, 18px);
   letter-spacing: 0.02em;
   /* !important — the interface has aggressive generic button styles
      (#section-3 … button) that otherwise force dark-on-dark text/border.
@@ -6834,7 +6834,7 @@ html:not(.cursor-active) *::after {
    underline, top-left). */
 #editor-view .ed-lib {
   position: absolute; top: calc(34 * var(--sy)); left: calc(85 * var(--sx));
-  font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 0.9vw, 13px);
+  font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 12.24px, 13px);
   color: #ff5003; text-decoration: none; letter-spacing: 0.04em;
   padding-bottom: 3px; border-bottom: 1px solid currentColor; z-index: 6;
   transition: opacity 0.2s ease;
@@ -6848,7 +6848,7 @@ html:not(.cursor-active) *::after {
   position: absolute; left: calc(48 * var(--sx)); top: 50%;
   transform: translateY(-50%) rotate(180deg); writing-mode: vertical-rl;
   direction: rtl; white-space: nowrap;
-  font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 0.85vw, 13px);
+  font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 11.56px, 13px);
   letter-spacing: 0.14em; color: #282828; opacity: 0.85; z-index: 6; pointer-events: none;
 }
 #editor-view .ed-side::after {
@@ -6859,7 +6859,7 @@ html:not(.cursor-active) *::after {
 /* Jewel — an iframe of the display page, framed inside the grid on the LEFT. */
 #editor-view .ed-jewel {
   position: absolute; left: calc(120 * var(--sx)); top: calc(105 * var(--sy));
-  width: 34vw; bottom: calc(105 * var(--sy)); z-index: 2;
+  width: 462.4px; bottom: calc(105 * var(--sy)); z-index: 2;
   display: flex; align-items: center; justify-content: center;
 }
 #editor-view .ed-jewel-frame {
@@ -6870,13 +6870,13 @@ html:not(.cursor-active) *::after {
 /* Tools — right of the jewel. */
 #editor-view .ed-tools {
   position: absolute; right: calc(120 * var(--sx)); top: calc(120 * var(--sy));
-  bottom: calc(120 * var(--sy)); width: min(30vw, 380px); z-index: 3;
-  display: flex; flex-direction: column; gap: clamp(14px, 2.4vh, 26px);
+  bottom: calc(120 * var(--sy)); width: min(408px, 380px); z-index: 3;
+  display: flex; flex-direction: column; gap: clamp(14px, 18.432px, 26px);
   overflow-y: auto; direction: rtl;
 }
 #editor-view .ed-section { display: flex; flex-direction: column; gap: 10px; }
 #editor-view .ed-label {
-  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 1vw, 15px);
+  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 13.6px, 15px);
   letter-spacing: 0.04em; color: #282828;
 }
 #editor-view .ed-swatches { display: flex; gap: 10px; }
@@ -6894,7 +6894,7 @@ html:not(.cursor-active) *::after {
    buttons; --grid-dot drives the dots. */
 #editor-view .ed-chip {
   position: relative;
-  font-family: 'ArbelG', sans-serif; font-size: clamp(10px, 0.85vw, 13px);
+  font-family: 'ArbelG', sans-serif; font-size: clamp(10px, 11.56px, 13px);
   padding: 7px 14px; border: none; border-radius: 0; cursor: pointer;
   background: transparent; color: #282828; --grid-dot: #282828;
   transition: color .12s ease, background .12s ease;
@@ -6926,7 +6926,7 @@ html:not(.cursor-active) *::after {
 #editor-view .ed-act:hover:not(:disabled) { background: #282828; color: #f5f5ed; }
 #editor-view .ed-act:disabled { opacity: 0.3; cursor: default; }
 #editor-view .ed-act.ed-orig {
-  width: auto; padding: 0 14px; font-size: clamp(10px, 0.85vw, 13px);
+  width: auto; padding: 0 14px; font-size: clamp(10px, 11.56px, 13px);
   margin-inline-start: auto; border-color: rgba(255,80,3,0.55); color: #ff5003;
 }
 #editor-view .ed-act.ed-orig:hover:not(:disabled) { background: #ff5003; color: #f5f5ed; }
@@ -6934,7 +6934,7 @@ html:not(.cursor-active) *::after {
 #editor-view .ed-controls { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
 #editor-view .ed-ctrl { display: flex; align-items: center; gap: 12px; }
 #editor-view .ed-ctrl-label {
-  font-family: 'ArbelG', sans-serif; font-size: clamp(10px, 0.85vw, 13px);
+  font-family: 'ArbelG', sans-serif; font-size: clamp(10px, 11.56px, 13px);
   color: #282828; min-width: 44px;
 }
 #editor-view .ed-ctrl input[type="range"] { flex: 1; accent-color: #ff5003; cursor: pointer; }
@@ -6948,7 +6948,7 @@ html:not(.cursor-active) *::after {
 #editor-view .ed-pad .ed-reset { border-color: rgba(255,80,3,0.5); color: #ff5003; }
 #editor-view .ed-hint { font-family: 'ArbelG', sans-serif; font-size: 12px; opacity: 0.6; }
 
-#editor-view .ed-panel { display: flex; flex-direction: column; gap: clamp(14px, 2.4vh, 26px); }
+#editor-view .ed-panel { display: flex; flex-direction: column; gap: clamp(14px, 18.432px, 26px); }
 
 /* ── Completion page (completion.js) — shown after the editor. Interface orange
    plate + dotted grid; a message and two dotted-frame buttons; an email modal. ── */
@@ -6963,18 +6963,18 @@ html:not(.cursor-active) *::after {
 #completion-view .cv-grid { position: absolute; inset: 0; pointer-events: none; }
 #completion-view .cv-text {
   direction: rtl; text-align: center;
-  font-size: clamp(15px, 1.35vw, 21px); letter-spacing: 0.05em; line-height: 1.75;
-  margin-bottom: clamp(120px, 18vh, 220px);
+  font-size: clamp(15px, 18.36px, 21px); letter-spacing: 0.05em; line-height: 1.75;
+  margin-bottom: clamp(120px, 138.24px, 220px);
 }
 #completion-view .cv-actions {
   position: absolute; top: 56%;
-  display: flex; direction: rtl; gap: clamp(24px, 4vw, 72px);
+  display: flex; direction: rtl; gap: clamp(24px, 54.4px, 72px);
 }
 .cv-btn {
   --b: #f5f5ed;
   position: relative;
   padding: 13px 30px;
-  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 1vw, 15px); letter-spacing: 0.03em;
+  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 13.6px, 15px); letter-spacing: 0.03em;
   color: var(--b); background: transparent; border: none; border-radius: 0; cursor: pointer;
   background-image:
     radial-gradient(circle, var(--b) 0.8px, transparent 1.1px),
@@ -6996,11 +6996,11 @@ html:not(.cursor-active) *::after {
 #completion-view .cv-modal[hidden] { display: none; }
 #completion-view .cv-modal-box {
   background: #f5f5ed; color: #282828;
-  padding: 28px 34px; min-width: min(360px, 82vw);
+  padding: 28px 34px; min-width: min(360px, 1115.2px);
   direction: rtl; text-align: center;
   display: flex; flex-direction: column; gap: 16px;
 }
-#completion-view .cv-modal-title { font-size: clamp(14px, 1.2vw, 18px); letter-spacing: 0.03em; }
+#completion-view .cv-modal-title { font-size: clamp(14px, 16.32px, 18px); letter-spacing: 0.03em; }
 #completion-view .cv-modal-input {
   padding: 11px 12px; border: 1px solid #282828; background: transparent; color: #282828;
   direction: rtl; text-align: right; font-family: 'ArbelG', sans-serif; font-size: 15px;
@@ -7014,7 +7014,7 @@ html:not(.cursor-active) *::after {
   position: fixed; left: 50%; bottom: calc(38 * var(--sy)); transform: translateX(-50%);
   z-index: 40; cursor: pointer;
   padding: 13px 34px; border: none; border-radius: 0; background: transparent;
-  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 1vw, 15px); letter-spacing: 0.03em;
+  font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 13.6px, 15px); letter-spacing: 0.03em;
   color: #282828;
   background-image:
     radial-gradient(circle, #282828 0.8px, transparent 1.1px),

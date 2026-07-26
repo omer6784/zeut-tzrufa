@@ -33,11 +33,11 @@ export function mountCompletion({ } = {}) {
   view.dir = 'rtl';
   view.innerHTML = `
     <div class="cv-grid stage-grid" aria-hidden="true">
-      <span class="sg-v" style="--x: calc(100vw - 200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --h: 85;"></span>
       <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 85;"></span>
       <span class="sg-h" style="--y: calc(85 * var(--sy));"></span>
       <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
-      <span class="sg-v" style="--x: calc(100vw - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
       <span class="sg-h" style="--y: calc(726 * var(--sy));"></span>
     </div>
     <div class="cv-text">תהליך היצירה הושלם,<br>והתכשיט שיצרת מוכן.</div>
@@ -56,7 +56,9 @@ export function mountCompletion({ } = {}) {
         <div class="cv-modal-msg" id="cv-msg" aria-live="polite"></div>
       </div>
     </div>`;
-  document.body.appendChild(view);
+  // Mount inside the fixed-aspect wrapper so it shares the 1360×768 logical space
+  // (centred + scaled) instead of the raw viewport.
+  (document.getElementById('app-viewport') || document.body).appendChild(view);
 
   // Hidden, off-screen display iframe that renders the final talisman — the frame
   // capture reads from ITS canvas (via window.__jewel). Kept present (not

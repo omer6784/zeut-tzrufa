@@ -570,7 +570,10 @@ export function initRootsWidget(container, opts){
 
   let W=0,H=0,R=0,cx=0,cy=0;
   function resize(){
-    const w=wrap.clientWidth, h=wrap.clientHeight, dpr=window.devicePixelRatio||1;
+    const w=wrap.clientWidth, h=wrap.clientHeight;
+    // clientWidth is LOGICAL; the letterbox wrapper displays it scaled up, so render
+    // the backing store at that density (__renderDPR = dpr × app-scale) to stay crisp.
+    const dpr=window.__renderDPR || (window.devicePixelRatio||1);
     W=w; H=h;
     canvas.width=w*dpr; canvas.height=h*dpr;
     canvas.style.width=w+'px'; canvas.style.height=h+'px';
@@ -600,10 +603,17 @@ export function initRootsWidget(container, opts){
     }
     return best;
   }
+  // Map a client (real-viewport) point to the globe's DRAWING space (logical W×H;
+  // the sphere/continents are defined in these units). rect.width is the displayed
+  // size, so × W/rect.width divides out the letterbox scale — a touch always hits
+  // the continent drawn under the finger, on any screen.
+  const toCanvas = (cx, cy) => {
+    const r = canvas.getBoundingClientRect();
+    return [ (cx - r.left) * W / r.width, (cy - r.top) * H / r.height ];
+  };
   canvas.addEventListener('mousemove',e=>{
     if(state.phase!=='globe') return;
-    const r=canvas.getBoundingClientRect();
-    const id=visibleHit(e.clientX-r.left,e.clientY-r.top);
+    const id=visibleHit(...toCanvas(e.clientX, e.clientY));
     state.hover=id;
     // The custom line-art hand (#cursor) IS the pointer here — never show the OS
     // cursor on top of it.
@@ -629,7 +639,9 @@ export function initRootsWidget(container, opts){
   });
   canvas.addEventListener('pointermove', e => {
     if(!state.dragging) return;
-    const dx = e.clientX - dragLastX; dragLastX = e.clientX;
+    const r = canvas.getBoundingClientRect();
+    const dx = (e.clientX - dragLastX) * W / r.width;   // viewport delta → logical (drawing) px
+    dragLastX = e.clientX;
     state.rot += dx / (R || 300);                       // ~1:1 with the sphere surface at the equator
     if(Math.abs(e.clientX - dragStartX) > 6) dragMoved = true;
   });
@@ -640,8 +652,7 @@ export function initRootsWidget(container, opts){
     try { canvas.releasePointerCapture(e.pointerId); } catch(_) {}
     if(!dragMoved){
       // A tap, not a drag → toggle the continent under the finger (multi-select).
-      const r = canvas.getBoundingClientRect();
-      const id = visibleHit(e.clientX - r.left, e.clientY - r.top);
+      const id = visibleHit(...toCanvas(e.clientX, e.clientY));
       if(id){
         if(state.selected.has(id)) state.selected.delete(id); else state.selected.add(id);
         doneBtn.classList.toggle('is-dim', state.selected.size === 0);
