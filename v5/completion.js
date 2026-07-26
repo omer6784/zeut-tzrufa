@@ -100,6 +100,22 @@ export function mountCompletion({ } = {}) {
         console.info('[GIF] verified: capturing the exact frozen finalJewelryState.');
       }
     } catch (_) { /* verification is best-effort */ }
+    // Render the EXACT frozen finalJewelryState in the capture iframe — don't rely on
+    // whatever it happened to load (it can come up in the idle gallery, or race the
+    // localStorage write), which is why the GIF didn't match the edited jewel. Apply
+    // the snapshot directly (same steps as display.js), forcing the single jewel.
+    try {
+      const snap = JSON.parse(localStorage.getItem('zehut-final-jewelry') || 'null');
+      const j = win.__jewel;
+      if (snap && j) {
+        if (j.setGallery) j.setGallery(false);
+        if (snap.background && j.setBackground) j.setBackground(snap.background);
+        if (j.setSymbolSizes) j.setSymbolSizes(Array.isArray(snap.symbolSizes) ? snap.symbolSizes : []);
+        j.setSymbols(Array.isArray(snap.symbols3d) ? snap.symbols3d : []);
+        if (j.setGematria) j.setGematria(snap.gematria || 0);
+        if (j.applyEdits && (snap.edits || snap.frameColor)) j.applyEdits({ symbols: snap.edits || [], frameColor: snap.frameColor || null });
+      }
+    } catch (_) { /* fall back to whatever the iframe loaded */ }
     // Let the per-symbol entry reveal (~1s) finish so we capture ONLY the settled
     // talisman's spin/pulse, not the dots flying in.
     await new Promise(r => setTimeout(r, 1800));
@@ -108,7 +124,8 @@ export function mountCompletion({ } = {}) {
       let settled = false;
       const to = setTimeout(() => { if (!settled) { settled = true; reject(new Error('capture timeout')); } }, 15000);
       win.__jewel.captureFrames({
-        count: 50, everyN: 2, size: 600,
+        // 100 frames (was 50) → the exported GIF runs twice as long.
+        count: 100, everyN: 2, size: 600,
         onFrame: (data, w, h) => { frames.push({ data: new Uint8ClampedArray(data), w, h }); },
         onDone: () => { if (!settled) { settled = true; clearTimeout(to); resolve(); } },
       });
