@@ -382,7 +382,10 @@
       "Bash(awk 'NR>=196 && NR<=281 && /^}/{print NR\": \"$0}' public/jewel/jewel-engine.js)",
       "Bash(sed -i '' 's/jewel-engine.js?v=50/jewel-engine.js?v=51/' v5/display.html)",
       "Bash(node --check netlify/functions/send-gif.js)",
-      "Bash(node --check public/jewel/jewel-engine.js)"
+      "Bash(node --check public/jewel/jewel-engine.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/v5/display.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/display.html)"
     ]
   },
   "hooks": {

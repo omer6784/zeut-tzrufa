@@ -676,12 +676,12 @@ function layoutSymbols() {
   const n = active.length;
   if (n === 0) return;
 
-  // The first symbol lands large (a "hero"); every time another symbol joins,
-  // the whole group eases down a step — so a new arrival visibly makes room. The
-  // per-position SIZE array keeps them from ever being uniform.
-  const HERO_SCALE = 1.7;    // was 2.6 — the lone first symbol was over-scaled
-  const SHRINK_PER_ADD = 0.94;
-  let gs = HERO_SCALE * Math.pow(SHRINK_PER_ADD, n - 1);
+  // No group inflation: each symbol renders at its OWN absolute size (the 0–100
+  // scale → factor below), so size 100 is a FIXED size (the opening-eye anchor)
+  // regardless of how many symbols there are — the lone first symbol is never blown
+  // up past 100. The EXTENT clamp further below only ever SHRINKS the stack to fit
+  // the format; it never scales it up.
+  const gs = 1;
 
   const EXTENT_HALF = 860;   // leaves a margin (canvas half = 960) so the biggest symbol never
                              // pokes out of the format while it bobs / pulses / spins in motion
