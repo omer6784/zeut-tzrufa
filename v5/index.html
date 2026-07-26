@@ -8,7 +8,7 @@
   <!-- v5 override layer: redraws the visual surface as outlines + nodes
        on top of v4's full functionality. styles.css stays first so its
        cascade order is preserved; geometric.css wins by being later. -->
-  <link rel="stylesheet" href="geometric.css?v=36" />
+  <link rel="stylesheet" href="geometric.css?v=37" />
   <link rel="stylesheet" href="stage1.css?v=187" />
   <!-- Portrait Story recording layout (opening screen only). Loaded LAST and
        scoped to html.story-mode; inert for the exhibition. -->
@@ -71,8 +71,8 @@
   <div id="grid-bleed" class="stage-grid" aria-hidden="true">
     <!-- Frame sides: keep their original top at y=85 (no line above the top rule) —
          only extend DOWN to the bottom screen edge. -->
-    <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: calc(768 + var(--lb-y) - 85);"></span>
-    <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: calc(768 + var(--lb-y) - 85);"></span>
+    <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy) - 20px); --h: calc(768 + var(--lb-y) - 65);"></span>
+    <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy) - 20px); --h: calc(768 + var(--lb-y) - 65);"></span>
     <!-- Inner top verticals: extend UP to the top screen edge. -->
     <span class="sg-v" style="--x: calc(200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(65 + var(--lb-y));"></span>
     <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(65 + var(--lb-y));"></span>
@@ -94,8 +94,8 @@
       <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --h: 65;"></span>
       <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 65;"></span>
       <span class="sg-h" style="--y: calc(85 * var(--sy) - 20px);"></span>
-      <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 683;"></span>
-      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 683;"></span>
+      <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy) - 20px); --h: 703;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy) - 20px); --h: 703;"></span>
       <span class="sg-h" style="--y: calc(716 * var(--sy));"></span>
     </div>
 
@@ -156,8 +156,8 @@
       <!-- Top horizontal (y:85, full width) -->
       <span class="sg-h" style="--y: calc(85 * var(--sy) - 20px);"></span>
       <!-- Center verticals (y:85, height 668) -->
-      <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 683;"></span>
-      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 683;"></span>
+      <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy) - 20px); --h: 703;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy) - 20px); --h: 703;"></span>
       <!-- Bottom horizontal (y706 → y656 → y676 → lowered ~50 → y726) -->
       <span class="sg-h" style="--y: calc(726 * var(--sy));"></span>
     </div>
