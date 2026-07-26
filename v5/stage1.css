@@ -629,7 +629,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   left: auto !important;
   right: 750px !important;   /* moved 100px right (was 850px) — more of the globe on screen */
   top: calc(var(--q-top-total) + (768px - var(--q-top-total) - clamp(110px, 99.84px, 150px)) / 2) !important;
-  transform: translateY(calc(-50% - 20px)) !important;   /* raised 20px */
+  transform: translateY(calc(-50% - 30px)) !important;   /* raised 30px (was 20) */
   width: min(537.6px, 470px) !important;   /* shrunk a touch (was 520px) */
   height: min(537.6px, 470px) !important;
   z-index: 5 !important;
@@ -1162,7 +1162,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
    text is gone — the frame carries it now, exactly as it does for "סיימתי". */
 /* Shared width for the story title + the button centred over it, so the two
    stay in sync if the title is resized. */
-#section-3[data-stage="0"] .roots-widget { --story-w: min(761.6px, 760px); }
+#section-3[data-stage="0"] .roots-widget { --story-w: min(710px, 710px); }   /* title shrunk ~7% (was 760) */
 
 /* "סימנתי, אפשר להמשיך" — sits centred horizontally directly ABOVE the
    "איפה הסיפור שלך מתחיל?" title. Centred with a left/right band + margin auto
