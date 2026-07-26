@@ -318,7 +318,7 @@ function mountGematriaOrnament(host, N) {
   const frameH = 2 * (ORN_HH + ORN_R2);
   const scale = (S * 0.9) / frameH;
   const r = ORN_DOT * scale;
-  ctx.fillStyle = '#e2bc71';   // gold, matching the display ornament
+  ctx.fillStyle = '#f5f5ed';   // always cream — the gematria explainer is a dark window
   ctx.beginPath();
   for (const d of dots) { const x = S / 2 + d.x * scale, y = S / 2 + d.y * scale; ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, _TAU); }
   ctx.fill();

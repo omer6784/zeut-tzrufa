@@ -23,6 +23,15 @@ const OBJ_BASE = "/jewel/objs/";
 /* ---- palette (the 4 interface colours) --------------------------------- */
 const PALETTE = { tan: "#e2bc71", dark: "#282828", orange: "#ff5003", cream: "#f5f5ed" };
 const PALETTE_LIST = [PALETTE.tan, PALETTE.dark, PALETTE.orange, PALETTE.cream];
+// Frame (ornament) colour chosen for contrast against each talisman background:
+//   orange bg → cream · dark bg → tan(gold) · tan bg → dark · cream bg → dark.
+// Shared by the single display jewel (ornamentColor) and the idle gallery.
+const FRAME_BY_BG = {
+  [PALETTE.orange]: PALETTE.cream,
+  [PALETTE.dark]:   PALETTE.tan,
+  [PALETTE.tan]:    PALETTE.dark,
+  [PALETTE.cream]:  PALETTE.dark,
+};
 
 // Until the "choose background" stage exists, the display keeps its own light
 // plate (#efede9). We render TRANSPARENT over it and simply avoid the near-white
@@ -287,9 +296,7 @@ function draw() {
    scalloped arabesque. It reveals in when the name is submitted, then breathes. */
 function ornamentColor() {
   if (frameColorOverride) return frameColorOverride;   // editor override
-  const order = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark];
-  for (const c of order) if (c !== COLOR_EXCLUDE) return c;
-  return PALETTE.tan;
+  return FRAME_BY_BG[COLOR_EXCLUDE] || PALETTE.tan;    // frame colour matched to the background
 }
 // Point + outward normal at arc-length fraction t∈[0,1) of a centred rectangle.
 function rectAt(t, hw, hh) {
@@ -373,11 +380,9 @@ function galleryInstance(key, hex) {
 }
 // The dot colour of the centre line for a given card background (contrast).
 const GALLERY_LINE_ON = { '#e2bc71': '#282828', '#f5f5ed': '#282828', '#ff5003': '#f5f5ed', '#282828': '#f5f5ed' };
-// Frame colour: first palette colour that is neither the background nor cream-on-cream.
+// Frame colour matched to the card background (same rule as the single jewel).
 function galleryFrameColor(bgHex) {
-  const order = [PALETTE.tan, PALETTE.orange, PALETTE.dark, PALETTE.cream];
-  for (const c of order) if (c !== bgHex) return c;
-  return PALETTE.tan;
+  return FRAME_BY_BG[bgHex] || PALETTE.tan;
 }
 // A distinct 6-symbol config for any cell index: the fixed 20 first, then a
 // deterministic pseudo-random draw for the extra cells (dense-fill mode).
