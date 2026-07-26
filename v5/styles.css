@@ -2562,7 +2562,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);
 }
 #section-3[data-stage="5"] #paths-game.paths-shrunk .paths-game-svg {
-  transform: translateY(-9%) scale(0.74);
+  transform: translateY(-9%) scale(0.84);   /* shrinks LESS when the title joins → bigger maze area */
 }
 /* Title "מה המסלול שלך?" — a light dotted PNG that rises from beneath the maze and
    TYPES in (stepped clip reveal from the right, RTL), settling below the maze.
@@ -2571,7 +2571,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
   left: 50%;
-  bottom: calc(100vh - 668 * var(--sy));
+  bottom: calc(100vh - 668 * var(--sy) - 100px);   /* lowered 100px */
   top: auto;
   transform: translate(-50%, 26px);
   width: min(42vw, 540px);
