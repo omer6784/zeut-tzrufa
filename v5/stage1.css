@@ -58,11 +58,11 @@ html, body {
   bottom: auto !important;
   color: #ff5003 !important;
   font-family: 'ArbelG', sans-serif !important;
-  font-size: clamp(11px, 0.9vw, 13px) !important;
+  font-size: clamp(11px, 12.24px, 13px) !important;
   letter-spacing: 0.03em !important;
   direction: rtl !important;
   text-align: right !important;
-  max-width: 60vw !important;
+  max-width: 816px !important;
   z-index: 8 !important;
   pointer-events: none !important;
 }
@@ -237,7 +237,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
 }
 
 /* ── 2. Main rounded frame around the interface ──────────
-   The v4 grid uses 100vw × 100vh, so a padded parent breaks it.
+   The v4 grid uses 1360px × 768px, so a padded parent breaks it.
    Instead we let the layout fill the viewport and draw the frame
    as an ::after pseudo inset from the edges. ─────────────── */
 #section-3 {
@@ -268,7 +268,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   display: grid !important;
   grid-template-columns: 1fr auto 1fr !important;
   align-items: center !important;
-  padding: 14px clamp(20px, 2vw, 32px) !important;
+  padding: 14px clamp(20px, 27.2px, 32px) !important;
 }
 
 /* back button — outlined pill, left side */
@@ -280,7 +280,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   border-radius: 999px !important;
   padding: 7px 16px !important;
   font-family: 'ArbelG', sans-serif !important;
-  font-size: clamp(10px, 0.9vw, 12px) !important;
+  font-size: clamp(10px, 12.24px, 12px) !important;
   letter-spacing: 0.02em !important;
   cursor: pointer !important;
   transition: background 200ms ease, color 200ms ease !important;
@@ -305,8 +305,8 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   bottom: auto !important;
   right: calc(122 * var(--sx) + 24px) !important;   /* nudged slightly left */
   left: auto !important;
-  max-width: min(360px, 30vw) !important;
-  font-size: clamp(11px, 0.9vw, 14px) !important;
+  max-width: min(360px, 408px) !important;
+  font-size: clamp(11px, 12.24px, 14px) !important;
   line-height: 1.7 !important;
   text-align: right !important;
 }
@@ -317,7 +317,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
-  width: clamp(110px, 9vw, 140px) !important;
+  width: clamp(110px, 122.4px, 140px) !important;
   height: auto !important;
   aspect-ratio: 428 / 190 !important;
   background-image: url('/image/v5-stage1/logo.png') !important;
@@ -420,7 +420,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
 }
 #section-3[data-stage="0"] #q-text {
   font-family: 'Shofar', 'Georgia', serif !important;
-  font-size: clamp(2.2rem, 4.5vw, 4rem) !important;
+  font-size: clamp(2.2rem, 61.2px, 4rem) !important;
   color: var(--s1-dark) !important;
   border: none !important;
   padding: 0 !important;
@@ -515,7 +515,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   right: calc(50px * var(--sx)) !important;
   left: auto !important;
   top: auto !important;
-  bottom: clamp(45px, 6.5vh, 78px) !important;
+  bottom: clamp(45px, 49.92px, 78px) !important;
   transform: none !important;
 }
 
@@ -525,7 +525,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   left: calc(50px * var(--sx)) !important;
   right: auto !important;
   top: auto !important;
-  bottom: clamp(45px, 6.5vh, 78px) !important;
+  bottom: clamp(45px, 49.92px, 78px) !important;
   transform: none !important;
 }
 
@@ -629,10 +629,10 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   position: fixed !important;
   left: auto !important;
   right: 850px !important;   /* nudged 40px right */
-  top: calc(var(--q-top-total) + (100vh - var(--q-top-total) - clamp(110px, 13vh, 150px)) / 2) !important;
+  top: calc(var(--q-top-total) + (768px - var(--q-top-total) - clamp(110px, 99.84px, 150px)) / 2) !important;
   transform: translateY(calc(-50% - 20px)) !important;   /* raised 20px */
-  width: min(70vh, 520px) !important;
-  height: min(70vh, 520px) !important;
+  width: min(537.6px, 520px) !important;
+  height: min(537.6px, 520px) !important;
   z-index: 5 !important;
   pointer-events: auto !important;
   transition: width 0.65s cubic-bezier(0.25, 1, 0.5, 1), height 0.65s cubic-bezier(0.25, 1, 0.5, 1), right 0.65s cubic-bezier(0.25, 1, 0.5, 1), left 0.65s cubic-bezier(0.25, 1, 0.5, 1), top 0.65s cubic-bezier(0.25, 1, 0.5, 1) !important;
@@ -645,12 +645,12 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      true global positions. */
   /* The selected continents sit on the LEFT, just BELOW the top grid line and
      inside the central rectangle — width capped so the right edge never crosses
-     the right vertical grid line (at 100vw − 100·sx). */
+     the right vertical grid line (at 1360px − 100·sx). */
   /* Full rectangle WIDTH; height runs from the top grid line down to the
      horizontal divider that sits just above the keyboard/text band (so the
      continents fill the upper region and clear the keyboard). --kb-band is the
      keyboard/text band height; 46px = keyboard's 26px lift + 20px gap. */
-  width: calc(100vw - 200 * var(--sx)) !important;
+  width: calc(1360px - 200 * var(--sx)) !important;
   height: calc((726 - 85) * var(--sy) - 46px - var(--kb-band)) !important;
   left: calc(100 * var(--sx)) !important;
   right: auto !important;
@@ -670,9 +670,9 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      line to just before the keyboard's left edge. Vertically centred against
      the keyboard band. */
   left: calc(100 * var(--sx)) !important;
-  right: calc(100 * var(--sx) + (100vw - 200 * var(--sx)) * 0.66 + 28px) !important;
+  right: calc(100 * var(--sx) + (1360px - 200 * var(--sx)) * 0.66 + 28px) !important;
   top: auto !important;
-  bottom: calc(100vh - 726 * var(--sy) + 26px) !important;   /* keyboard bottom line */
+  bottom: calc(768px - 726 * var(--sy) + 26px) !important;   /* keyboard bottom line */
   height: var(--kb-band) !important;   /* ≈ keyboard height */
   width: auto !important;
   max-width: none !important;
@@ -697,7 +697,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      --kb-band) down to the bottom grid line (706·sy) — so it separates the
      writing line from the keyboard without reaching up into the map. Same dot
      size/spacing as the fixed grid. */
-  right: calc(100 * var(--sx) + (100vw - 200 * var(--sx)) * 0.66 + 14px) !important;
+  right: calc(100 * var(--sx) + (1360px - 200 * var(--sx)) * 0.66 + 14px) !important;
   left: auto !important;
   top: calc(726 * var(--sy) - 46px - var(--kb-band)) !important;
   height: calc(46px + var(--kb-band)) !important;
@@ -713,7 +713,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
 }
 /* Keyboard/text band height — reused by the map area (excluded from it), the
    controls column, and the horizontal divider below. */
-#section-3 { --kb-band: calc(clamp(38px, 5.5vh, 56px) * 4 + 52px); }
+#section-3 { --kb-band: calc(clamp(38px, 42.24px, 56px) * 4 + 52px); }
 /* Horizontal dotted divider between the map (above) and the keyboard + text
    band (below) — same dot size/spacing/colour as the fixed interface grid,
    spanning the rectangle width. */
@@ -775,7 +775,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   right: calc(100 * var(--sx));
   top: calc(85 * var(--sy));
   height: calc((686 - 85) * var(--sy));
-  width: min(46vw, 610px);   /* sits to the right of the globe, inside the grid */
+  width: min(625.6px, 610px);   /* sits to the right of the globe, inside the grid */
   padding: calc(26 * var(--sy)) calc(24 * var(--sx));
   direction: rtl;
   text-align: right;
@@ -849,7 +849,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
 
 /* Globe slides right + fades (base globe transform is translateY(-50%)). */
 #section-3.roots-exiting[data-stage="0"] #q-input-wrap.roots-active .roots-widget .roots-canvas-wrap {
-  transform: translate(78vw, -50%) !important;
+  transform: translate(1060.8px, -50%) !important;
   opacity: 0 !important;
   transition: transform 0.72s cubic-bezier(0.55, 0, 0.85, 0.25),
               opacity 0.6s ease !important;
@@ -868,22 +868,22 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
               opacity 0.6s ease !important;
 }
 #section-3.roots-exiting[data-stage="0"] #q-instruction {
-  transform: translateX(78vw) !important;
+  transform: translateX(1060.8px) !important;
   opacity: 0 !important;
 }
 #section-3.roots-marked[data-stage="0"] #q-instruction {
-  transform: translateX(78vw) !important;
+  transform: translateX(1060.8px) !important;
   opacity: 0 !important;
   transition: none !important;
 }
 /* The right title panel (the "right decoration") slides right + fades with the
    globe so the world map can fill the whole rectangle edge-to-edge. */
 #section-3.roots-exiting[data-stage="0"] .stage1-panel {
-  transform: translateX(78vw) !important;
+  transform: translateX(1060.8px) !important;
   opacity: 0 !important;
 }
 #section-3.roots-marked[data-stage="0"] .stage1-panel {
-  transform: translateX(78vw) !important;
+  transform: translateX(1060.8px) !important;
   opacity: 0 !important;
   transition: none !important;
   pointer-events: none !important;
@@ -901,7 +901,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   right: calc(122 * var(--sx)) !important;
   color: #ff5003 !important;
   font-family: 'ArbelG', sans-serif !important;
-  font-size: clamp(11px, 0.9vw, 13px) !important;
+  font-size: clamp(11px, 12.24px, 13px) !important;
   letter-spacing: 0.03em !important;
   /* Row: [note text] · [חזרה ליבשות] · [→] (left→right). */
   display: flex !important;
@@ -932,7 +932,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   padding: 0 !important;
   color: #ff5003 !important;
   font-family: 'ArbelG', sans-serif !important;
-  font-size: clamp(11px, 0.9vw, 13px) !important;
+  font-size: clamp(11px, 12.24px, 13px) !important;
   cursor: pointer !important;
   pointer-events: auto !important;
   z-index: 30 !important;
@@ -945,8 +945,8 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
    AFTER the positioning rule above so it wins the same-specificity cascade. */
 #section-3 #stage-restart-btn { display: none !important; }
 #section-3 #stage-restart-btn .stage-restart-icon {
-  width: clamp(14px, 1.1vw, 17px) !important;
-  height: clamp(14px, 1.1vw, 17px) !important;
+  width: clamp(14px, 14.96px, 17px) !important;
+  height: clamp(14px, 14.96px, 17px) !important;
   flex: none !important;
 }
 #section-3[data-stage="0"] .roots-widget.state-input .roots-map-note {
@@ -1020,7 +1020,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
 /* Instruction line (dark). */
 #section-3[data-stage="0"] .stage1-panel .s1p-instruction {
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(13px, 1.05vw, 16px);
+  font-size: clamp(13px, 14.28px, 16px);
   color: var(--s1-dark);
   letter-spacing: 0.02em;
   text-align: center;
@@ -1036,7 +1036,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
 }
 #section-3[data-stage="0"] .stage1-panel .s1p-legend-row {
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(13px, 1.05vw, 16px);
+  font-size: clamp(13px, 14.28px, 16px);
   color: var(--s1-orange);
   letter-spacing: 0.02em;
 }
@@ -1055,7 +1055,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   border-radius: 0 !important;
   color: var(--s1-dark) !important;
   padding: 6px 4px 12px !important;   /* text sits above the line */
-  font-size: clamp(30px, 2.4vw, 40px) !important;
+  font-size: clamp(30px, 32.64px, 40px) !important;
   font-family: 'ArbelG', sans-serif !important;
   /* The line spans the full shared width (--input-w) so it sits exactly above the
      button row below it. */
@@ -1084,7 +1084,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y !important;
   color: var(--grid-dot) !important;   /* frame + text follow the grid-dot: dark on the cream stage */
   font-family: 'ArbelG', sans-serif !important;
-  font-size: clamp(10px, 0.85vw, 13px) !important;
+  font-size: clamp(10px, 11.56px, 13px) !important;
   letter-spacing: 0.03em !important;
   padding: 9px 16px !important;
   cursor: pointer !important;
@@ -1110,7 +1110,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   --grid-dot: #282828 !important;
   font-family: 'ArbelG', sans-serif !important;
   font-weight: 400 !important;
-  font-size: clamp(10px, 0.85vw, 13px) !important;
+  font-size: clamp(10px, 11.56px, 13px) !important;
   letter-spacing: 0.03em !important;
   text-decoration: none !important;
   text-align: center !important;
@@ -1163,7 +1163,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
    text is gone — the frame carries it now, exactly as it does for "סיימתי". */
 /* Shared width for the story title + the button centred over it, so the two
    stay in sync if the title is resized. */
-#section-3[data-stage="0"] .roots-widget { --story-w: min(56vw, 760px); }
+#section-3[data-stage="0"] .roots-widget { --story-w: min(761.6px, 760px); }
 
 /* "סימנתי, אפשר להמשיך" — sits centred horizontally directly ABOVE the
    "איפה הסיפור שלך מתחיל?" title. Centred with a left/right band + margin auto
@@ -1172,7 +1172,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
 #section-3[data-stage="0"] #roots-done {
   position: fixed !important;
   right: calc(122 * var(--sx)) !important;
-  left: calc(100vw - 122 * var(--sx) - var(--story-w)) !important;
+  left: calc(1360px - 122 * var(--sx) - var(--story-w)) !important;
   margin: 0 auto !important;
   width: max-content !important;
   top: calc(100 * var(--sy) + 178px) !important;   /* above the title */
@@ -1411,7 +1411,7 @@ html, body {
   top: calc((85 + 686) / 2 * var(--sy) - 80px);   /* raised toward the top of the rectangle */
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(72vw, 1000px);
+  width: min(979.2px, 1000px);
   height: auto;
   z-index: 3;
   pointer-events: none;
@@ -1427,7 +1427,7 @@ html, body {
   right: calc(140 * var(--sx));
   direction: rtl;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(13px, 1.05vw, 16px);
+  font-size: clamp(13px, 14.28px, 16px);
   letter-spacing: 0.02em;
   color: var(--s2-orange);
   z-index: 4;
@@ -1442,7 +1442,7 @@ html, body {
   writing-mode: vertical-rl;
   direction: rtl;
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(11px, 0.85vw, 13px);
+  font-size: clamp(11px, 11.56px, 13px);
   letter-spacing: 0.14em;
   color: var(--s2-cream);
   opacity: 0.85;
@@ -1502,7 +1502,7 @@ html, body {
 }
 /* Wider prompt to match the reference proportions. */
 #section-3[data-stage="1"] .s2-prompt {
-  width: min(80vw, 1180px);
+  width: min(1088px, 1180px);
 }
 
 /* ── 9. Gold dots constellation for stage 2 (words selection) ── */
@@ -1514,7 +1514,7 @@ html, body {
      so they can never leave the rectangle. NB: `N * var(--sx)` — --sx is a length. */
   position: fixed;
   left: calc(100 * var(--sx));
-  width: calc(100vw - 200 * var(--sx));
+  width: calc(1360px - 200 * var(--sx));
   top: calc(155 * var(--sy));                 /* clears the top instruction row */
   height: calc((650 - 155) * var(--sy));      /* ends above the raised bottom grid line (656) */
   z-index: 5;
@@ -1605,7 +1605,7 @@ html, body {
   background: transparent !important;
   color: #ff5003 !important;   /* orange on the questionnaire (light) stages */
   font-family: 'ArbelG', sans-serif;
-  font-size: clamp(11px, 0.82vw, 13px);   /* nudged up ~15% across every screen */
+  font-size: clamp(11px, 11.152px, 13px);   /* nudged up ~15% across every screen */
   font-weight: 400 !important;
   letter-spacing: 0.04em;
   padding: 0 !important;
@@ -1635,9 +1635,9 @@ html, body {
   position: fixed;
   display: flex;
   align-items: center;
-  gap: clamp(12px, 1.2vw, 20px);
+  gap: clamp(12px, 16.32px, 20px);
   z-index: 2000;   /* above the on-screen keyboard (z 1000) */
-  max-width: min(360px, 30vw);
+  max-width: min(360px, 408px);
   direction: rtl;
   text-align: right;
   opacity: 0;
@@ -1646,17 +1646,17 @@ html, body {
   transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.25, 1, 0.5, 1);
 }
 #symbol-info-panel.is-in { opacity: 1; transform: translateY(0); }
-#symbol-info-panel .sip-symbol { width: clamp(64px, 6.5vw, 96px); height: clamp(64px, 6.5vw, 96px); flex: none; color: #282828; }
+#symbol-info-panel .sip-symbol { width: clamp(64px, 88.4px, 96px); height: clamp(64px, 88.4px, 96px); flex: none; color: #282828; }
 #symbol-info-panel .sip-symbol svg { display: block; width: 100%; height: 100%; }
-#symbol-info-panel .sip-name { font-family: 'Shofar', sans-serif; font-size: clamp(16px, 1.5vw, 24px); color: #282828; margin-bottom: 4px; }
-#symbol-info-panel .sip-origin { font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 0.9vw, 13px); color: #ff5003; letter-spacing: 0.02em; margin-bottom: 6px; }
-#symbol-info-panel .sip-meaning { font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 0.9vw, 13px); color: #282828; line-height: 1.6; }
+#symbol-info-panel .sip-name { font-family: 'Shofar', sans-serif; font-size: clamp(16px, 20.4px, 24px); color: #282828; margin-bottom: 4px; }
+#symbol-info-panel .sip-origin { font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 12.24px, 13px); color: #ff5003; letter-spacing: 0.02em; margin-bottom: 6px; }
+#symbol-info-panel .sip-meaning { font-family: 'ArbelG', sans-serif; font-size: clamp(11px, 12.24px, 13px); color: #282828; line-height: 1.6; }
 
 /* Per-stage position variants. */
-#symbol-info-panel[data-variant="right"]         { top: 24vh; right: calc(150 * var(--sx)); }
-#symbol-info-panel[data-variant="left"]          { top: 24vh; left: calc(150 * var(--sx)); }
-#symbol-info-panel[data-variant="near-question"] { top: 34vh; right: calc(320 * var(--sx)); }
-#symbol-info-panel[data-variant="panel"]         { top: 30vh; right: calc(130 * var(--sx)); }
+#symbol-info-panel[data-variant="right"]         { top: 184.32px; right: calc(150 * var(--sx)); }
+#symbol-info-panel[data-variant="left"]          { top: 184.32px; left: calc(150 * var(--sx)); }
+#symbol-info-panel[data-variant="near-question"] { top: 261.12px; right: calc(320 * var(--sx)); }
+#symbol-info-panel[data-variant="panel"]         { top: 230.4px; right: calc(130 * var(--sx)); }
 #symbol-info-panel[data-variant="bottom"]        { bottom: calc(96 * var(--sy)); left: 50%; transform: translateX(-50%) translateY(14px); }
 #symbol-info-panel[data-variant="bottom"].is-in  { transform: translateX(-50%) translateY(0); }
 
@@ -1731,11 +1731,11 @@ html, body {
    the wheels sit centred — independent of the middle grid cell. */
 #section-3[data-stage="3"] #word-field-container {
   position: fixed !important;
-  /* Bottom anchored EXACTLY to the interface's bottom grid line (726·sy) — was 8vh,
+  /* Bottom anchored EXACTLY to the interface's bottom grid line (726·sy) — was 61.44px,
      which left the digit band + its vertical grid dividers ~19px short of the line
      (they floated, not connected). Now the band reaches the bottom line. */
-  top: 11vh !important; bottom: calc(100vh - 726 * var(--sy)) !important;
-  left: 8vw !important; right: 8vw !important;
+  top: 84.48px !important; bottom: calc(768px - 726 * var(--sy)) !important;
+  left: 108.8px !important; right: 108.8px !important;
   width: auto !important; height: auto !important;
   z-index: 6 !important;
   pointer-events: auto !important;
@@ -1746,12 +1746,12 @@ html, body {
 
 .tw-root {
   position: absolute; inset: 0;
-  --tw-wheelh: clamp(230px, 33vh, 360px);        /* digit band: horizontal line → bottom line */
+  --tw-wheelh: clamp(230px, 253.44px, 360px);        /* digit band: horizontal line → bottom line */
   --tw-item: calc(var(--tw-wheelh) * 0.52);      /* selected digit centred, neighbours clipped */
   /* Right column stops short of the interface's right vertical grid line. That
-     rule sits 100·sx from the VIEWPORT edge while this container ends at 8vw,
+     rule sits 100·sx from the VIEWPORT edge while this container ends at 108.8px,
      hence the difference; +16px keeps the text off the dots rather than on them. */
-  --tw-right: calc(100 * var(--sx) - 8vw + 16px);
+  --tw-right: calc(100 * var(--sx) - 108.8px + 16px);
 }
 
 /* The horizontal rule over the digit band, carried across the full frame so it
@@ -1763,7 +1763,7 @@ html, body {
   position: absolute;
   top: calc(100% - var(--tw-wheelh));
   left: 0;
-  right: calc(100 * var(--sx) - 8vw);
+  right: calc(100 * var(--sx) - 108.8px);
   height: var(--grid-dot-size);
   background-image: radial-gradient(circle, var(--grid-dot) calc(var(--grid-dot-size) / 2), transparent calc(var(--grid-dot-size) / 2 + 0.35px));
   background-size: var(--grid-dot-gap) var(--grid-dot-size);
@@ -1779,7 +1779,7 @@ html, body {
   position: absolute;
   top: 0; bottom: var(--tw-wheelh);              /* fills from the top line down to the digit band */
   left: 50%; transform: translateX(-50%);
-  width: min(920px, 66vw);
+  width: min(920px, 897.6px);
   overflow: hidden;                              /* clips the disc at the top line and at the band */
   /* Scroll / drag anywhere on the sky (background), not just on the sun disc,
      to change the hour — drives the sun + sky recolour (attachDrag(sky)). */
@@ -1814,7 +1814,7 @@ html, body {
   position: relative;
   height: 100%;
   display: flex; align-items: center; justify-content: center;
-  padding: 0 clamp(10px, 1.8vw, 30px);
+  padding: 0 clamp(10px, 24.48px, 30px);
 }
 /* dotted vertical divider between adjacent cells */
 .tw-cell + .tw-cell::before {
@@ -1842,7 +1842,7 @@ html, body {
   user-select: none; -webkit-user-select: none;
 }
 /* four single-digit cells + a narrower colon cell — one digit each, big */
-.tw-ht, .tw-hu, .tw-mt, .tw-mu { width: clamp(74px, 10vw, 158px); }
+.tw-ht, .tw-hu, .tw-mt, .tw-mu { width: clamp(74px, 136px, 158px); }
 .tw-wheel.is-grabbing { cursor: grabbing; }
 /* one single-digit cell — absolutely placed, moved only by transform */
 .tw-num {
@@ -1904,7 +1904,7 @@ html, body {
   /* Same font + size as the other stage buttons (#roots-done / opening CTA). */
   font-family: 'ArbelG', sans-serif;
   font-weight: 400;
-  font-size: clamp(10px, 0.85vw, 13px);
+  font-size: clamp(10px, 11.56px, 13px);
   letter-spacing: 0.03em;
   cursor: pointer;
   transform-origin: center;
@@ -1948,7 +1948,7 @@ html, body {
   position: absolute;
   right: calc(var(--tw-right) + 26px);           /* nudged left */
   top: calc(100% - var(--tw-wheelh) - 242px);    /* raised 100 + 200px */
-  width: clamp(190px, 20vw, 330px);
+  width: clamp(190px, 272px, 330px);
   height: auto;
   display: block;
   pointer-events: none;
@@ -1966,7 +1966,7 @@ html, body {
    ════════════════════════════════════════════════════════════════════ */
 #v5-landing-title {
   position: relative !important;
-  width: min(56vw, 680px) !important;
+  width: min(761.6px, 680px) !important;
   aspect-ratio: 2251 / 1165 !important;
   height: auto !important;
   display: block !important;

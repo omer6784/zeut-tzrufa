@@ -385,7 +385,10 @@
       "Bash(node --check public/jewel/jewel-engine.js)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/v5/display.html)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/display.html)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/display.html)",
+      "Bash(git checkout *)",
+      "Bash(awk '/<body>/,/<\\\\/body>/' v5/index.html)",
+      "Bash(python3 \"/private/tmp/claude-501/-Users-omershushan-Desktop-final-project-code/2ef42dcb-06b2-4935-973c-4a1170402b7d/scratchpad/convert_vwvh.py\")"
     ]
   },
   "hooks": {
