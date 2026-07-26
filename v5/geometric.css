@@ -553,9 +553,8 @@ body::after { display: none !important; }
 }
 /* No :hover on the touch-screen keyboard — a hover colour sticks after a tap. */
 #virtual-keyboard .vk-key.is-pressed {
-  background-color: var(--geo-accent) !important;   /* interface orange */
-  background-image: none !important;                /* solid fill, drop the dots */
-  color: #f5f5ed !important;                         /* cream label */
+  color: var(--geo-accent) !important;        /* label → interface orange */
+  --grid-dot: var(--geo-accent) !important;   /* the dotted outline turns orange (no full fill) */
 }
 
 /* ── 15. Dotted Title Logo on Landing Screen ───────────────── */

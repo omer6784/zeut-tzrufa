@@ -231,9 +231,8 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key:hover {
    then reverts to the cream frame on release (JS clears .is-pressed). Scoped
    here so it out-specifies the gold resting rule above. */
 body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-pressed {
-  background-color: #fb5716 !important;
-  background-image: none !important;
-  color: #f5f5ed !important;
+  color: #fb5716 !important;        /* label → interface orange */
+  --grid-dot: #fb5716 !important;   /* dotted outline → orange (no full fill) */
 }
 
 /* ── 2. Main rounded frame around the interface ──────────
@@ -684,7 +683,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   justify-content: flex-start !important;
   align-items: center !important;
   gap: 10px !important;
-  --input-w: min(340px, 96%) !important;
+  --input-w: min(260px, 96%) !important;   /* shorter writing line (was 340px) */
   z-index: 1001 !important;   /* above the keyboard */
 }
 /* Dotted vertical divider in the gap between the keyboard and this input

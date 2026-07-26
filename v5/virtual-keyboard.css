@@ -10,17 +10,17 @@
      remaining width to its LEFT. */
   right: calc(100 * var(--sx));
   left: auto;
-  bottom: calc(100vh - 726 * var(--sy) + 26px);
+  bottom: calc(768px - 726 * var(--sy) + 26px);
   transform: translateY(0);
-  width: calc((100vw - 200 * var(--sx)) * 0.66);
+  width: calc((1360px - 200 * var(--sx)) * 0.66);
   z-index: 1000;
   background: #e2bc71;
   border: 1px solid #ff601a;
   border-bottom: none;
-  padding: 10px clamp(8px, 1.2vw, 16px);
+  padding: 10px clamp(8px, 16.32px, 16px);
   display: flex;
   flex-direction: column;
-  gap: clamp(4px, 0.6vh, 8px);
+  gap: clamp(4px, 4.608px, 8px);
   direction: ltr;
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
               opacity 0.2s ease;
@@ -38,20 +38,20 @@
   flex-direction: row;
   justify-content: center;
   align-items: stretch;
-  gap: clamp(3px, 0.5vw, 6px);
+  gap: clamp(3px, 6.8px, 6px);
 }
 
 #virtual-keyboard .vk-key {
   flex: 1 1 0;
   min-width: 0;
-  height: clamp(38px, 5.5vh, 56px);
+  height: clamp(38px, 42.24px, 56px);
   background: #fffae6;
   color: #1c1c1c;
   border: 1px solid #ff601a;
   padding: 0;
   font-family: 'ArbelG', 'Georgia', serif;
   font-weight: 400;
-  font-size: clamp(15px, 1.9vw, 22px);
+  font-size: clamp(15px, 25.84px, 22px);
   line-height: 1;
   letter-spacing: 0;
   cursor: none;
@@ -80,19 +80,19 @@
   flex: 0.9 1 0;
   font-family: 'ArbelG', sans-serif;
   font-weight: 700;
-  font-size: clamp(18px, 2vw, 24px);
+  font-size: clamp(18px, 27.2px, 24px);
 }
 
 #virtual-keyboard .vk-key-space {
   flex: 5 1 0;
   font-family: 'ArbelG', sans-serif;
   font-weight: 500;
-  font-size: clamp(13px, 1.4vw, 16px);
+  font-size: clamp(13px, 19.04px, 16px);
   letter-spacing: 0.12em;
 }
 
 #virtual-keyboard .vk-row-controls {
-  margin-top: clamp(2px, 0.4vh, 6px);
+  margin-top: clamp(2px, 3.072px, 6px);
 }
 
 /* Theme — negative mode flips palette */
