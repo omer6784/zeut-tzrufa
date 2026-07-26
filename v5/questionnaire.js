@@ -2099,39 +2099,72 @@ function runProfDemo(){
 /* Screen-space centre of a DOM/SVG element. */
 function _center(el){ if(!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
 
-/* Ghost-hand demo for the LIGHT-POINT stage: an open hand grabs a light-dot and
-   drags it toward the gate circle, then releases (purely illustrative — completing
-   the drag would commit, so the demo only shows the gesture). Input is locked. */
+/* Ghost-hand demo for the LIGHT-POINT stage: an open hand presses a FIXED yellow
+   light-point in the upper field and drags a VISIBLE line (identical to the real
+   drag line) down to the gate circle — the point sits slightly to the side of the
+   gate so the line pulls in at a gentle DIAGONAL, never straight down onto it. It
+   then releases (purely illustrative — completing the drag would commit, so the
+   demo only shows the gesture). Constant every time. Input is locked. */
 function runWordDemo(){
-  const gate = document.querySelector('.s2-gate-rect');
-  const dots = document.querySelectorAll('.s2-float-dot, .gold-dot-pick');
-  if(!gate || !dots.length) return;
+  const gateEl = document.querySelector('.s2-gate-rect');
+  const svg    = document.querySelector('.s2-gate-svg');
+  const arena  = document.getElementById('s2-dots-container');
+  const golds  = document.querySelectorAll('.gold-dot-pick');
+  if(!gateEl || !svg || !arena || !golds.length) return;
   const my = st._wordDemoToken = (st._wordDemoToken || 0) + 1;
   lockInput();
-  const cleanup = () => unlockInput();
+
+  const gc = _center(gateEl);
+  const a  = arena.getBoundingClientRect();
+  // Fixed anchor: upper part of the field, offset SIDEWAYS from the gate's x so the
+  // pull is a gentle diagonal (not straight down onto the circle).
+  const anchor = { x: gc.x - a.width * 0.15, y: a.top + a.height * 0.16 };
+  // The real yellow point nearest that anchor — the per-dot jitter is tiny, so this
+  // resolves to the SAME point every time → the demo is constant.
+  let dEl = golds[0], best = Infinity;
+  golds.forEach(d => { const c = _center(d); const dist = Math.hypot(c.x - anchor.x, c.y - anchor.y); if(dist < best){ best = dist; dEl = d; } });
+  const dc = _center(dEl);
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  let line = null;
+  const removeLine = () => { if(line){ try{ line.remove(); }catch(_){} line = null; } };
+
   (async () => {
     const gh = getGhostHand();
     const dead = () => my !== st._wordDemoToken || !document.querySelector('.s2-gate-rect');
-    const abort = () => { gh.hide(); cleanup(); };
-    const gc = _center(gate);
-    // pick a dot a comfortable distance from the gate
-    let dEl = dots[0], best = -1;
-    dots.forEach(d => { const c = _center(d); const dist = Math.hypot(c.x - gc.x, c.y - gc.y); if(dist > best && dist < 620){ best = dist; dEl = d; } });
-    const dc = _center(dEl);
+    const abort = () => { removeLine(); gh.hide(); unlockInput(); };
+
     await gh.sleep(300); if(dead()) return abort();
-    gh.open(); gh.place(dc.x + 28, (window.innerHeight || 900) + 60); gh.show('light');
+    gh.open(); gh.place(dc.x + 26, (window.innerHeight || 900) + 60); gh.show('light');
     await gh.sleep(90); if(dead()) return abort();
     gh.point(true); gh.move(dc.x, dc.y);
     await gh.sleep(650); if(dead()) return abort();
-    gh.grab(true);                                   // press the dot
-    await gh.sleep(300); if(dead()) return abort();
-    const N = 16;
-    for(let i = 1; i <= N && !dead(); i++){ const f = i / N; gh.place(dc.x + (gc.x - dc.x) * f, dc.y + (gc.y - dc.y) * f); await gh.sleep(48); }
+    gh.grab(true);                                   // press the yellow point
+    await gh.sleep(280); if(dead()) return abort();
+
+    // Draw the line from the point — same class as the real drag line.
+    line = document.createElementNS(SVGNS, 'line');
+    line.setAttribute('class', 's2-drag-line');
+    line.setAttribute('x1', dc.x); line.setAttribute('y1', dc.y);
+    line.setAttribute('x2', dc.x); line.setAttribute('y2', dc.y);
+    svg.appendChild(line);
+
+    // Drag toward the gate — the hand pulls the line's end with it.
+    const N = 22;
+    for(let i = 1; i <= N && !dead(); i++){
+      const f = i / N;
+      const x = dc.x + (gc.x - dc.x) * f, y = dc.y + (gc.y - dc.y) * f;
+      gh.place(x, y);
+      line.setAttribute('x2', x); line.setAttribute('y2', y);
+      await gh.sleep(46);
+    }
     if(dead()) return abort();
-    await gh.sleep(300);
+    await gh.sleep(320);
     gh.open();                                        // release near the gate (does NOT commit)
-    await gh.sleep(450);
-    gh.hide(); cleanup();
+    await gh.sleep(240);
+    removeLine();                                     // the line clears (no travel/absorb in the demo)
+    await gh.sleep(200);
+    gh.hide(); unlockInput();
   })();
 }
 
