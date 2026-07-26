@@ -68,6 +68,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; }
   transform: translate(-50%, -50%) scale(var(--app-scale, 1));
   transform-origin: center center;
 }
+/* Grid-bleed: sits on the wrapper (not inside the clipped screen-panels) so its
+   vertical dot-columns can extend past the panels into the letterbox margins. It
+   only ADDS the missing dots — the in-screen grids are untouched. */
+#grid-bleed { z-index: 1; }
 
 /* ── 1. WIPE every legacy bitmap / coloured panel from v4 ─────── */
 /* Hide PNG decorations the user explicitly told us to drop. */

@@ -8,7 +8,7 @@
   <!-- v5 override layer: redraws the visual surface as outlines + nodes
        on top of v4's full functionality. styles.css stays first so its
        cascade order is preserved; geometric.css wins by being later. -->
-  <link rel="stylesheet" href="geometric.css?v=33" />
+  <link rel="stylesheet" href="geometric.css?v=34" />
   <link rel="stylesheet" href="stage1.css?v=184" />
   <!-- Portrait Story recording layout (opening screen only). Loaded LAST and
        scoped to html.story-mode; inert for the exhibition. -->
@@ -60,6 +60,20 @@
        distorts on a differently-proportioned screen (e.g. 1920×1200). The
        cursor + JS pointer overlays live OUTSIDE it, in real viewport space. -->
   <div id="app-viewport">
+
+  <!-- ═══ Grid bleed — vertical dots into the letterbox margins ═══════════════
+       ADD-ONLY layer (nothing is hidden/replaced): it repeats the construction
+       grid's vertical dot-columns, on the SAME global dot lattice, extended to the
+       physical screen top+bottom. The in-screen grids stay exactly as they are;
+       these dots just continue their vertical lines through the letterbox margins
+       so the grid reaches every edge. --lb-y (head script) = the overflow per side.
+       Colour is synced to the active screen by letterbox-bg.js. -->
+  <div id="grid-bleed" class="stage-grid" aria-hidden="true">
+    <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(768 + 2 * var(--lb-y));"></span>
+    <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(768 + 2 * var(--lb-y));"></span>
+    <span class="sg-v" style="--x: calc(200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(85 + var(--lb-y));"></span>
+    <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(85 + var(--lb-y));"></span>
+  </div>
 
   <!-- Global restart button -->
   <button id="btn-restart" onclick="location.reload()">
