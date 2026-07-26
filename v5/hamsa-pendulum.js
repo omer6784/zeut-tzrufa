@@ -33,6 +33,16 @@ export function mountHamsaPendulum(container) {
       ? '/jewel/objs/eye.obj'
       : SYMBOL_OBJS[Math.floor(Math.random() * SYMBOL_OBJS.length)];
 
+    // Per-symbol base orientation so every OBJ faces the viewer (frontal). Some
+    // OBJs are modelled edge-on / lying flat; a base rotate turns their face to +Z.
+    // Keyed by the filename stem (lower-case). Angles calibrated by eye.
+    const BASE_ROT = {
+      lotus:  { ry: Math.PI / 2 },
+      dharma: { ry: Math.PI / 2 },
+    };
+    const _stem = (fileName.split('/').pop() || '').replace(/\.obj$/i, '').toLowerCase();
+    const baseRot = BASE_ROT[_stem] || {};
+
     const OBJ_SCALE = 560;
     const VIEW_SCALE = 1.0;
     const OBJECT_SIZE = 1.0;
@@ -130,6 +140,10 @@ export function mountHamsaPendulum(container) {
         addPupilSphere();
       }
       buildCordDots();
+      // Re-measure after layout settles — timers fire even when the tab is
+      // backgrounded and its rAF (draw loop) is throttled, so the cord still anchors
+      // to the FINAL grid line rather than an early, premature measurement.
+      [60, 240, 600, 1000].forEach(ms => setTimeout(() => { if (buildCordDots()) cordCalibrated = true; }, ms));
       // Expose the sketch so a recorder can force a render if needed.
       if (STORY_MODE) window.__pend = p;
     };
@@ -160,7 +174,10 @@ export function mountHamsaPendulum(container) {
       p.clear();
       // Anchor the cord to the real grid line as soon as layout is measurable
       // (setup can run a frame before the canvas/grid have their final boxes).
-      if (!cordCalibrated) cordCalibrated = buildCordDots();
+      // Keep re-measuring the cord anchor through the first ~40 frames (not just the
+      // FIRST success): the canvas + grid line settle over a few frames after load, and
+      // locking onto an early measurement left the cord anchored short of the grid line.
+      if (!cordCalibrated || p.frameCount <= 40) { if (buildCordDots()) cordCalibrated = true; }
       // Motion phase. The exhibition runs at ~60fps so frameCount is fine, but a
       // headless recording renders below 60fps — a frameCount phase would then
       // play back in slow motion. In Story mode derive the phase from wall-clock
@@ -190,6 +207,10 @@ export function mountHamsaPendulum(container) {
       // The eye turns on its own axis IN ADDITION to the swing. Scoped to its
       // own push/pop so the cord above it stays hanging straight.
       p.push();
+      // Per-symbol base orientation so the OBJ faces the viewer (frontal).
+      if (baseRot.rx) p.rotateX(baseRot.rx);
+      if (baseRot.ry) p.rotateY(baseRot.ry);
+      if (baseRot.rz) p.rotateZ(baseRot.rz);
       p.rotateY(spin);
       drawDotsDepth(spin);
       if (STORY_MODE) drawBall(spin);
@@ -346,7 +367,9 @@ export function mountHamsaPendulum(container) {
     function buildCordDots() {
       staticCordDots = []; movingCordDots = [];
       const measured = computeCordTopY();
-      cordAttachY = objectMinY - 8;
+      // Attach a touch INTO the symbol's top (objectMinY is the topmost point) so the
+      // cord clearly HOLDS it — no floating gap between the last cord dot and the symbol.
+      cordAttachY = objectMinY + 10;
       cordAnchorY = (measured != null) ? measured : CORD_TOP_Y_FALLBACK;
       cordPivotY = cordAnchorY;
       staticCordDots.push({ x: 0, y: cordAnchorY, z: 0 });
