@@ -1598,7 +1598,7 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('roots-tree-active');
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
-      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
+      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png?v=2" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
@@ -4350,6 +4350,19 @@ function buildPathsGame(host, onSelect){
   // unitEdge so any segment the maze already carved there is REUSED (deduped) —
   // no overlapping/doubled dots, and the tracer passes cleanly.
   for (let c = 0; c < NX - 1; c++) unitEdge(c, MID, c + 1, MID);
+
+  // 3) No dead-ends: every cell must reach ≥2 corridors, so a traced path never
+  //    stops in mid-air — from each degree-1 cell carve one extra edge to a random
+  //    grid neighbour (source/exit are the trace endpoints, left as they are).
+  const degOf = n => n.edgesOut.length + n.edgesIn.length;
+  for(let c = 0; c < NX; c++) for(let r = 0; r < NY; r++){
+    const n = getNode(c, r);
+    if(n === source || n === exitNode || degOf(n) >= 2) continue;
+    const cand = DIRS.map(([dc, dr]) => [c + dc, r + dr]).filter(([nc, nr]) => nc >= 0 && nc < NX && nr >= 0 && nr < NY);
+    for(let i = cand.length - 1; i > 0; i--){ const j = (Math.random() * (i + 1)) | 0; [cand[i], cand[j]] = [cand[j], cand[i]]; }
+    for(const [nc, nr] of cand){ if(degOf(n) >= 2) break; unitEdge(c, r, nc, nr); }
+  }
+
   nodes.forEach(n => { n.isJunction = false; });        // no prominent junction dots
 
   // Flip horizontally so the ENTRY (source) is on the RIGHT and the EXIT on the
