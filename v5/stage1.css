@@ -628,11 +628,11 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   border-radius: 50% !important;
   position: fixed !important;
   left: auto !important;
-  right: 850px !important;   /* nudged 40px right */
+  right: 750px !important;   /* moved 100px right (was 850px) — more of the globe on screen */
   top: calc(var(--q-top-total) + (768px - var(--q-top-total) - clamp(110px, 99.84px, 150px)) / 2) !important;
   transform: translateY(calc(-50% - 20px)) !important;   /* raised 20px */
-  width: min(537.6px, 520px) !important;
-  height: min(537.6px, 520px) !important;
+  width: min(537.6px, 470px) !important;   /* shrunk a touch (was 520px) */
+  height: min(537.6px, 470px) !important;
   z-index: 5 !important;
   pointer-events: auto !important;
   transition: width 0.65s cubic-bezier(0.25, 1, 0.5, 1), height 0.65s cubic-bezier(0.25, 1, 0.5, 1), right 0.65s cubic-bezier(0.25, 1, 0.5, 1), left 0.65s cubic-bezier(0.25, 1, 0.5, 1), top 0.65s cubic-bezier(0.25, 1, 0.5, 1) !important;
@@ -1186,7 +1186,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   position: fixed !important;
   right: calc(122 * var(--sx)) !important;
   left: auto !important;
-  top: calc(100 * var(--sy) + 350px) !important;   /* lowered another 50px */
+  top: calc(100 * var(--sy) + 300px) !important;   /* raised 50px (was +350px) */
   width: var(--story-w) !important;
   height: auto !important;
   z-index: 8 !important;
