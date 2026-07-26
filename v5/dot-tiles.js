@@ -303,11 +303,9 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     const t = (now - t0) / 1000;
     for (const tl of tiles) {
       const appeared = (now - t0) >= tl.appearAt;
-      let aTarget;
-      if (!appeared) aTarget = 0;                                  // not yet entered
-      else if (chosen >= 0) aTarget = (tl.i === chosen ? 1 : 0.16);
-      else if (selected >= 0) aTarget = (tl.i === selected ? 1 : 0.4);   // dim the rest
-      else aTarget = 1;
+      // Never dim the other tiles — every tile stays fully lit whether or not one is
+      // selected/chosen; only its MOTION (not its brightness) marks the pick.
+      const aTarget = appeared ? 1 : 0;
       tl.alpha += (aTarget - tl.alpha) * 0.16;
       const ctx = tl.ctx;
       ctx.clearRect(0, 0, tl.W, tl.H);
@@ -342,7 +340,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     const tl = tiles[chosen];
     tl.frozen = true; tl.frozenT = (chosenAt - t0) / 1000; tl.confirmT = 0;
     tl.cell.classList.add('is-chosen');
-    tiles.forEach(o => { if (o.i !== chosen) o.cell.classList.add('is-dimmed'); });
+    /* No dimming of the other tiles — they stay fully lit. */
     setTimeout(() => { if (done) return; done = true; onConfirm && onConfirm(chosen, TILES[chosen].meaning); }, CONFIRM_MS + 120);
   }
 
