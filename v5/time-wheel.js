@@ -283,5 +283,29 @@ export function mountTimeWheel(host, { onDone, onHour } = {}){
   });
   host.appendChild(confirm);
 
-  return () => { stopAnim(); window.removeEventListener('resize', onResize); };
+  const teardown = () => { stopAnim(); window.removeEventListener('resize', onResize); };
+
+  // ── Demo hooks (for the stage's ghost-hand demo) ─────────────
+  // The demo drives the REAL wheel so the sun, sky colour and the digits all
+  // change exactly as they would under a finger — not just a hand gliding by.
+  teardown.demoSetHour = (h) => { userTouched = false; absMinutes = wmod(h, 24) * 60; hourManual = 0; hRender = hourTarget(); frameUpdate(); };
+  teardown.demoScrollBy = (deltaHours, durMs = 2400, onEnd) => {
+    stopAnim();
+    userTouched = false;
+    const startH = hourManual, targetH = hourManual + deltaHours, t0 = performance.now();
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    const step = (now) => {
+      const k = Math.min((now - t0) / durMs, 1);
+      hourManual = startH + (targetH - startH) * ease(k);
+      hRender = hourTarget();
+      frameUpdate();
+      if(k < 1) raf = requestAnimationFrame(step);
+      else { snap(); onEnd && onEnd(); }
+    };
+    raf = requestAnimationFrame(step);
+  };
+  // Back to the real Israel time (so the visitor starts fresh after the demo).
+  teardown.demoReset = () => { userTouched = false; initAt(); };
+
+  return teardown;
 }

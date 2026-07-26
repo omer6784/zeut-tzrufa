@@ -1731,7 +1731,10 @@ html, body {
    the wheels sit centred — independent of the middle grid cell. */
 #section-3[data-stage="3"] #word-field-container {
   position: fixed !important;
-  top: 11vh !important; bottom: 8vh !important;   /* between the top and bottom frame lines */
+  /* Bottom anchored EXACTLY to the interface's bottom grid line (726·sy) — was 8vh,
+     which left the digit band + its vertical grid dividers ~19px short of the line
+     (they floated, not connected). Now the band reaches the bottom line. */
+  top: 11vh !important; bottom: calc(100vh - 726 * var(--sy)) !important;
   left: 8vw !important; right: 8vw !important;
   width: auto !important; height: auto !important;
   z-index: 6 !important;

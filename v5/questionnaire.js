@@ -2217,6 +2217,7 @@ function runMazeDemo(){
    hour), then tap "זו השעה שלי". Input is locked. */
 function runTimeDemo(){
   const sun = document.querySelector('.tw-sun');
+  const wheel = st._timeTeardown;   // carries the demo hooks (demoSetHour/demoScrollBy/demoReset)
   if(!sun) return;
   const my = st._timeDemoToken = (st._timeDemoToken || 0) + 1;
   lockInput();
@@ -2224,7 +2225,13 @@ function runTimeDemo(){
   (async () => {
     const gh = getGhostHand();
     const dead = () => my !== st._timeDemoToken || !document.querySelector('.tw-sun');
-    const abort = () => { gh.hide(); cleanup(); };
+    const reset = () => { if(wheel && wheel.demoReset) wheel.demoReset(); };
+    const abort = () => { gh.hide(); cleanup(); reset(); };
+    // Start at a fixed afternoon hour (cream sky) so the scroll VISIBLY crosses into
+    // the evening — the sky recolours cream→dark, the sun sinks to a moon, and the
+    // digits roll. Deterministic, so the demo looks the same every time.
+    if(wheel && wheel.demoSetHour) wheel.demoSetHour(16);
+    await gh.sleep(120);
     const sc = _center(sun);
     const day = document.getElementById('section-3')?.classList.contains('tw-daylight');
     await gh.sleep(300); if(dead()) return abort();
@@ -2234,11 +2241,16 @@ function runTimeDemo(){
     await gh.sleep(600); if(dead()) return abort();
     gh.grab(true);                                   // grab the sun
     await gh.sleep(260); if(dead()) return abort();
-    const N = 12;
-    for(let i = 1; i <= N && !dead(); i++){ gh.place(sc.x, sc.y - 90 * (i / N)); await gh.sleep(55); }   // scroll up
+    // Actually scroll the wheel forward ~6h while the hand drags up — the sky,
+    // sun and digits change together (the hand motion is synced to the duration).
+    const DUR = 2600;
+    if(wheel && wheel.demoScrollBy) wheel.demoScrollBy(6, DUR);
+    const N = 26;
+    for(let i = 1; i <= N && !dead(); i++){ gh.place(sc.x, sc.y - 120 * (i / N)); await gh.sleep(DUR / N); }
     if(dead()) return abort();
-    await gh.sleep(260);
+    await gh.sleep(280);
     gh.open();
+    reset();                                         // back to the real current time before the visitor takes over
     const conf = document.querySelector('.tw-confirm');
     if(conf){
       const cc = _center(conf);
@@ -2448,10 +2460,11 @@ const TIME_NIGHT = [40, 40, 40];    // #282828 — night
 const TIME_DAY   = [245, 245, 237]; // #f5f5ed — cream (interface day plate)
 function daylightForHour(hf){
   const h = ((hf % 24) + 24) % 24;
-  if(h >= 6 && h <= 18) return 1;                    // 06:00–18:00 full day
-  if(h >= 4 && h < 6)   return 1;                    // 04:00–06:00 → cream (no grey ramp)
-  if(h > 18 && h < 20.5) return 1 - (h - 18) / 2.5;  // 18:00–20:30 day → night
-  return 0;                                           // 20:30–04:00 full night
+  // Binary day/night — no grey blend at any RESTING hour. Cream 04:00–19:00,
+  // dark 19:00–04:00 (so 18:00–19:00 is still cream, 19:00–20:00 is already dark).
+  // The stage's 0.35s background transition smooths the flip so it never leaves a
+  // grey resting colour anywhere in the scroll.
+  return (h >= 4 && h < 19) ? 1 : 0;
 }
 function applyTimeSky(hf){
   const sec = document.getElementById('section-3');
