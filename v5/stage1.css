@@ -1893,7 +1893,7 @@ html, body {
 .tw-confirm {
   position: absolute;
   right: calc(var(--tw-right) + 76px);          /* 50px left */
-  top: calc(100% - var(--tw-wheelh) + 156px);   /* 20px up */
+  top: calc(100% - var(--tw-wheelh) + 106px);   /* raised 50px more (was +156) */
   left: auto; bottom: auto;
   background: transparent !important;
   border: none !important;

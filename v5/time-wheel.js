@@ -156,7 +156,7 @@ export function mountTimeWheel(host, { onDone, onHour } = {}){
     // centred in the sky (its prime moment); through morning/evening it drops
     // toward the digit band, and at night it rests low like a moon. (Peak is a
     // full centred disc, not a clipped dome — that big disc is the midday sun.)
-    const cy = lerp(skyH * 0.95, skyH * 0.46, alt);
+    const cy = lerp(skyH * 0.95, skyH * 0.40, alt);   // raised the peak so the disc's top reaches the top grid line (was 0.46)
     sun.style.transform = `translateY(${cy.toFixed(1)}px)`;
     const [r, g, b] = sunColor(hf);
     sun.style.background = `rgb(${r}, ${g}, ${b})`;

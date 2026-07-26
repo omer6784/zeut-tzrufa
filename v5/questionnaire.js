@@ -2244,10 +2244,9 @@ function runTimeDemo(){
     const dead = () => my !== st._timeDemoToken || !document.querySelector('.tw-sun');
     const reset = () => { if(wheel && wheel.demoReset) wheel.demoReset(); };
     const abort = () => { gh.hide(); cleanup(); reset(); };
-    // Start at a fixed afternoon hour (cream sky) so the scroll VISIBLY crosses into
-    // the evening — the sky recolours cream→dark, the sun sinks to a moon, and the
-    // digits roll. Deterministic, so the demo looks the same every time.
-    if(wheel && wheel.demoSetHour) wheel.demoSetHour(16);
+    // Start from the visitor's ACTUAL current time (not a fixed hour), then scroll
+    // forward from there so the sky/sun/digits visibly change.
+    if(wheel && wheel.demoReset) wheel.demoReset();
     await gh.sleep(120);
     const sc = _center(sun);
     const day = document.getElementById('section-3')?.classList.contains('tw-daylight');
@@ -2267,7 +2266,6 @@ function runTimeDemo(){
     if(dead()) return abort();
     await gh.sleep(280);
     gh.open();
-    reset();                                         // back to the real current time before the visitor takes over
     const conf = document.querySelector('.tw-confirm');
     if(conf){
       const cc = _center(conf);
@@ -2275,6 +2273,7 @@ function runTimeDemo(){
       await gh.sleep(650); if(dead()) return abort();
       await gh.tap();                                // illustrative — does not advance
     }
+    reset();                                         // AFTER the button press: return to the real current time
     await gh.sleep(450);
     gh.hide(); cleanup();
   })();
