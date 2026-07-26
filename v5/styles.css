@@ -2571,7 +2571,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
   left: 50%;
-  bottom: calc(100vh - 668 * var(--sy) - 100px);   /* lowered 100px */
+  bottom: calc(100vh - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
   top: auto;
   transform: translate(-50%, 26px);
   width: min(42vw, 540px);
