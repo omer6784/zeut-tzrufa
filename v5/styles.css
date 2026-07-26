@@ -6542,6 +6542,19 @@ html:not(.cursor-active) *::after {
   display: none !important;
 }
 
+/* Origin/globe MARKING phase ("סימנתי"): the shared band button moves out of the
+   bottom band to sit ABOVE the "איפה הסיפור שלך מתחיל?" title (title top 420 → 200px
+   above = y220), centred to the title's x-centre (883). position:fixed resolves to
+   the scaled #app-viewport (logical 1360×768), like the colour-stage rule above.
+   translateX(-50%) keeps it centred and is preserved by the sb-btn-breathe keyframes. */
+#section-3[data-stage="0"]:not(.q-color-stage) .stage-band .sb-btn {
+  position: fixed !important;
+  top: calc(207 * var(--sy)) !important;
+  bottom: auto !important;
+  left: calc(883 * var(--sx)) !important;
+  transform: translateX(-50%) !important;
+}
+
 /* The per-stage instruction now lives in the bottom band, not the top slot. */
 #q-instruction { display: none !important; }
 
