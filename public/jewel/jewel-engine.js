@@ -683,7 +683,8 @@ function layoutSymbols() {
   const SHRINK_PER_ADD = 0.94;
   let gs = HERO_SCALE * Math.pow(SHRINK_PER_ADD, n - 1);
 
-  const EXTENT_HALF = 920;   // fills most of the canvas height → the symbols are as big as fits
+  const EXTENT_HALF = 860;   // leaves a margin (canvas half = 960) so the biggest symbol never
+                             // pokes out of the format while it bobs / pulses / spins in motion
   const X_LIMIT = 528;
 
   // per-position size / drift / stagger (indexed by add order). Drift + jitter
@@ -695,9 +696,14 @@ function layoutSymbols() {
   const YJIT  = [ 0, 0, 0, 0, 0, 0];
 
   const OVERLAP = 1.72;   // clear gap at these larger sizes — no overlap (protruding parts included)
-  // Size per symbol: the time-in-stage factor sets the hierarchy when present,
-  // otherwise the fixed per-position variation. Order/positions are unchanged.
-  const sc = active.map((s, i) => gs * (symbolSizes[i] != null ? symbolSizes[i] : SIZE[i % SIZE.length]));
+  // Size per symbol. `symbolSizes` is the time-in-stage value on a 0–100 scale
+  // (100 ≈ the opening-screen eye), with a floor of 50 → the smallest symbol is
+  // never under HALF the largest, a clear-to-the-eye hierarchy. Map it to the
+  // internal scale factor (size 100 → FMAX, size 50 → FMAX/2). Without a value
+  // (shouldn't happen in practice) fall back to the fixed per-position variation.
+  const FMAX = 2.6;   // scale factor at size 100 — starting anchor, calibrated by eye
+  const sizeToFactor = (v) => (v / 100) * FMAX;
+  const sc = active.map((s, i) => gs * (symbolSizes[i] != null ? sizeToFactor(symbolSizes[i]) : SIZE[i % SIZE.length]));
 
   const cy = new Array(n);
   cy[0] = 0;

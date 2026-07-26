@@ -2432,9 +2432,12 @@ function applyTimeSky(hf){
 /* Map time-spent-in-a-stage (ms) → a symbol size factor. Longer → bigger, clamped
    so the smallest and largest still read together and never dominate. */
 function timeToSymbolSize(dt){
-  // Minimum size = 2 (no symbol is ever small); longer dwell → bigger, up to 3.
-  const s = 1.8 + (dt || 0) / 6000;    // +1.0 per ~6s
-  return Math.max(2.0, Math.min(3.0, s));
+  // Size on a 0–100 scale (100 ≈ the opening-screen eye), with a FLOOR of 50 so
+  // no symbol is ever under half the largest — a clearly visible size hierarchy.
+  // Longer dwell → bigger, up to 100 (+50 per ~10s). The engine maps 0–100 to its
+  // internal scale factor (see layoutSymbols).
+  const s = 50 + (dt || 0) / 200;    // +50 per ~10s
+  return Math.max(50, Math.min(100, s));
 }
 function advance(){
   const qid = QUESTIONS[st.current].id;
