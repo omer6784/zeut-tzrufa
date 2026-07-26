@@ -6580,7 +6580,7 @@ html:not(.cursor-active) *::after {
    translateX(-50%) keeps it centred and is preserved by the sb-btn-breathe keyframes. */
 #section-3[data-stage="0"]:not(.q-color-stage) .stage-band .sb-btn {
   position: fixed !important;
-  top: calc(207 * var(--sy)) !important;
+  top: calc(257 * var(--sy)) !important;   /* lowered 50px (was 207) */
   bottom: auto !important;
   left: calc(883 * var(--sx)) !important;
   transform: translateX(-50%) !important;
