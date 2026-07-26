@@ -1778,6 +1778,9 @@ html, body {
 .tw-sky {
   position: absolute;
   top: 0; bottom: var(--tw-wheelh);              /* fills from the top line down to the digit band */
+  /* #middle-q-container starts ~79px below the outer top grid line, so the sky
+     (and thus the clipped sun) stopped short of it. Extend the sky UP to the grid
+     line so the disc's top clips exactly at it. */
   left: 50%; transform: translateX(-50%);
   width: min(920px, 897.6px);
   overflow: hidden;                              /* clips the disc at the top line and at the band */
@@ -1933,12 +1936,25 @@ html, body {
 /* Daytime (bright sky): dark label + dark dotted frame. */
 #section-3[data-stage="3"].tw-daylight .tw-confirm { color: #282828 !important; --grid-dot: #282828 !important; }
 #section-3[data-stage="3"].tw-daylight .tw-confirm:hover { color: #ff5003 !important; --grid-dot: #ff5003 !important; }
+/* Night (dark sky, not tw-daylight): the step counter "06 — 08" would stay dark and
+   vanish on the dark plate — flip its digits + the dash to cream. */
+#section-3[data-stage="3"]:not(.tw-daylight) .q-header-progress-val,
+#section-3[data-stage="3"]:not(.tw-daylight) .q-header-progress-val .q-hp-current,
+#section-3[data-stage="3"]:not(.tw-daylight) .q-header-progress-val .q-hp-total {
+  color: #f5f5ed !important;
+}
+#section-3[data-stage="3"]:not(.tw-daylight) .q-header-progress-val .q-hp-line {
+  background: #f5f5ed !important;
+}
 @media (prefers-reduced-motion: reduce) { .tw-confirm { animation: none !important; } }
 
 /* Show the wheel's OWN "זו השעה שלי" (below the prompt) and hide the shared bottom
    band button here, so the single confirm sits right under the title. */
 #section-3[data-stage="3"] .tw-confirm { display: block !important; }
 #section-3[data-stage="3"] .stage-band .sb-btn { display: none !important; }
+/* Raise the sky's top edge up to the outer top grid line (≈79px above the middle
+   container), so the sun's clipped top reaches the line instead of stopping short. */
+#section-3[data-stage="3"] .tw-sky { top: -79px; }
 
 /* ── Prompt artwork, right of the digit band (per the reference). Measured off
    the band (--tw-wheelh) rather than the container, so it stays locked to the
