@@ -69,8 +69,11 @@
        so the grid reaches every edge. --lb-y (head script) = the overflow per side.
        Colour is synced to the active screen by letterbox-bg.js. -->
   <div id="grid-bleed" class="stage-grid" aria-hidden="true">
-    <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(768 + 2 * var(--lb-y));"></span>
-    <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(768 + 2 * var(--lb-y));"></span>
+    <!-- Frame sides: keep their original top at y=85 (no line above the top rule) —
+         only extend DOWN to the bottom screen edge. -->
+    <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: calc(768 + var(--lb-y) - 85);"></span>
+    <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: calc(768 + var(--lb-y) - 85);"></span>
+    <!-- Inner top verticals: extend UP to the top screen edge. -->
     <span class="sg-v" style="--x: calc(200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(85 + var(--lb-y));"></span>
     <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(85 + var(--lb-y));"></span>
   </div>
