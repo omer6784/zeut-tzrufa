@@ -32,11 +32,11 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   view.dir = 'rtl';
   view.innerHTML = `
     <div class="ed-grid stage-grid" aria-hidden="true">
-      <span class="sg-v" style="--x: calc(100vw - 200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --h: 85;"></span>
       <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 85;"></span>
       <span class="sg-h" style="--y: calc(85 * var(--sy));"></span>
       <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
-      <span class="sg-v" style="--x: calc(100vw - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
       <span class="sg-h" style="--y: calc(706 * var(--sy));"></span>
     </div>
     <div class="grid-logo ed-logo" aria-hidden="true"><img src="/image/v5-stage1/logotype.png" alt="זהות צרופה" /></div>
@@ -44,7 +44,8 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     <div class="ed-side" aria-hidden="true"><span class="ed-side-txt"></span></div>
     <div class="ed-jewel"><iframe class="ed-jewel-frame" src="/v5/display.html" title="התכשיט" tabindex="-1"></iframe></div>
     <div class="ed-tools"></div>`;
-  document.body.appendChild(view);
+  // Mount inside the fixed-aspect wrapper so it shares the 1360×768 logical space.
+  (document.getElementById('app-viewport') || document.body).appendChild(view);
 
   const tools = view.querySelector('.ed-tools');
   const editAt = (i) => (st.artifactEdits[i] = st.artifactEdits[i] || {});
