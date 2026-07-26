@@ -600,10 +600,16 @@ export function initRootsWidget(container, opts){
     }
     return best;
   }
+  // Map a client (real-viewport) point to CANVAS-INTERNAL coords — scale-invariant
+  // (works through the letterbox wrapper AND any canvas backing-store DPR), so a
+  // touch always hits the continent drawn under the finger.
+  const toCanvas = (cx, cy) => {
+    const r = canvas.getBoundingClientRect();
+    return [ (cx - r.left) * canvas.width / r.width, (cy - r.top) * canvas.height / r.height ];
+  };
   canvas.addEventListener('mousemove',e=>{
     if(state.phase!=='globe') return;
-    const r=canvas.getBoundingClientRect();
-    const id=visibleHit(e.clientX-r.left,e.clientY-r.top);
+    const id=visibleHit(...toCanvas(e.clientX, e.clientY));
     state.hover=id;
     // The custom line-art hand (#cursor) IS the pointer here — never show the OS
     // cursor on top of it.
@@ -629,7 +635,9 @@ export function initRootsWidget(container, opts){
   });
   canvas.addEventListener('pointermove', e => {
     if(!state.dragging) return;
-    const dx = e.clientX - dragLastX; dragLastX = e.clientX;
+    const r = canvas.getBoundingClientRect();
+    const dx = (e.clientX - dragLastX) * canvas.width / r.width;   // viewport → canvas-internal px
+    dragLastX = e.clientX;
     state.rot += dx / (R || 300);                       // ~1:1 with the sphere surface at the equator
     if(Math.abs(e.clientX - dragStartX) > 6) dragMoved = true;
   });
@@ -640,8 +648,7 @@ export function initRootsWidget(container, opts){
     try { canvas.releasePointerCapture(e.pointerId); } catch(_) {}
     if(!dragMoved){
       // A tap, not a drag → toggle the continent under the finger (multi-select).
-      const r = canvas.getBoundingClientRect();
-      const id = visibleHit(e.clientX - r.left, e.clientY - r.top);
+      const id = visibleHit(...toCanvas(e.clientX, e.clientY));
       if(id){
         if(state.selected.has(id)) state.selected.delete(id); else state.selected.add(id);
         doneBtn.classList.toggle('is-dim', state.selected.size === 0);

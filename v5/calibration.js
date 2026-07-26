@@ -286,7 +286,8 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     stopDemo();                                   // any real touch ends the demo
     if (committed) return;
     const r = canvas.getBoundingClientRect();
-    const x = e.clientX - r.left, y = e.clientY - r.top;
+    // client → canvas-internal px (scale-invariant through the letterbox + DPR).
+    const x = (e.clientX - r.left) * canvas.width / r.width, y = (e.clientY - r.top) * canvas.height / r.height;
     for (let i = 0; i < thumbs.length; i++) {
       if (inRect(thumbs[i], x, y)) { e.preventDefault(); select(i); return; }
     }

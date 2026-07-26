@@ -1783,13 +1783,21 @@ function runStage0Choreography(){
       rootsTitle.style.transition = 'none';
       rootsTitle.style.transform = 'none';
       void rootsTitle.offsetWidth;
-      const R = rootsTitle.getBoundingClientRect();   // now-settled resting rect
-      const sx = innerWidth / 1360, sy = innerHeight / 768;
-      const L = 100 * sx, Rt = innerWidth - 100 * sx;   // central-rectangle sides
-      const T = 85 * sy, B = 656 * sy;                  // top line → raised bottom line
-      const S = R.width ? ((Rt - L) * 0.86) / R.width : 1.6;
+      const R = rootsTitle.getBoundingClientRect();   // viewport (post wrapper-scale)
+      // Work in the 1360×768 LOGICAL space: convert the measured viewport rect back
+      // through the letterbox wrapper's scale + offset, so the translate/scale we
+      // apply (which live in the element's OWN logical space) land correctly on
+      // every screen, not just at native 1360×768.
+      const AS = window.__appScale || 1;
+      const av = (document.getElementById('app-viewport') || document.body).getBoundingClientRect();
+      const lcx = (R.left + R.width / 2 - av.left) / AS;   // title's current logical centre
+      const lcy = (R.top + R.height / 2 - av.top) / AS;
+      const lw = R.width / AS;
+      const L = 100, Rt = 1360 - 100;                   // central-rectangle sides (logical)
+      const T = 85, B = 656;                            // top line → raised bottom line
+      const S = lw ? ((Rt - L) * 0.86) / lw : 1.6;
       const cx = (L + Rt) / 2, cy = (T + B) / 2;
-      const dx = cx - (R.left + R.width / 2), dy = cy - (R.top + R.height / 2);
+      const dx = cx - lcx, dy = cy - lcy;
       rootsTitle.style.transformOrigin = 'center center';
       rootsTitle.style.transform = `translate(${dx}px, ${dy}px) scale(${S})`;
       void rootsTitle.offsetWidth;

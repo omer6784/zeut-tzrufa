@@ -30,7 +30,11 @@
       if (/[?&]story=1\b/.test(location.search)) return;
       var root = document.documentElement;
       function fit() {
-        root.style.setProperty('--app-scale', Math.min(window.innerWidth / 1360, window.innerHeight / 768));
+        var s = Math.min(window.innerWidth / 1360, window.innerHeight / 768);
+        root.style.setProperty('--app-scale', s);
+        // Exposed for JS that must convert between real-viewport and logical space
+        // (gesture deltas, entry-animation targets). 1 at 1360×768.
+        window.__appScale = s;
       }
       fit();
       window.addEventListener('resize', fit);
