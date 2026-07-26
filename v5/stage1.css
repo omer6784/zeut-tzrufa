@@ -1956,9 +1956,11 @@ html, body {
    band button here, so the single confirm sits right under the title. */
 #section-3[data-stage="3"] .tw-confirm { display: block !important; }
 #section-3[data-stage="3"] .stage-band .sb-btn { display: none !important; }
-/* Raise the sky's top edge up to the outer top grid line (≈79px above the middle
-   container), so the sun's clipped top reaches the line instead of stopping short. */
-#section-3[data-stage="3"] .tw-sky { top: -79px; }
+/* Raise the sky's top edge up to the outer top grid line so the sun's clipped top
+   reaches the line. On the time stage the middle container starts only ~16px below
+   the grid line (its title sits on the right, not in the header), so a small lift —
+   not the 79px measured on other stages. */
+#section-3[data-stage="3"] .tw-sky { top: -16px; }
 
 /* ── Prompt artwork, right of the digit band (per the reference). Measured off
    the band (--tw-wheelh) rather than the container, so it stays locked to the
