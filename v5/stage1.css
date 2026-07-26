@@ -1415,6 +1415,8 @@ html, body {
   height: auto;
   z-index: 3;
   pointer-events: none;
+  opacity: 0;   /* hidden from the first paint — the entry JS reveals it only AFTER
+                   the dot field is fully in (see TITLE_AT), so it never flashes in */
 }
 
 /* Instruction line — orange, just below the top grid rule, right side. */
