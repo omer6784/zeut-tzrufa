@@ -6553,6 +6553,17 @@ html:not(.cursor-active) *::after {
   bottom: auto !important;
   left: calc(883 * var(--sx)) !important;
   transform: translateX(-50%) !important;
+  transition: opacity 0.45s ease, background-color 0.15s ease, color 0.15s ease;
+}
+/* The band button stays hidden through the title's entry choreography and only
+   fades in once the title has reached its resting corner — runStage0Choreography
+   adds .origin-title-settled at step 3 ("once it's home"). Using visibility+opacity
+   (not a forced opacity:1) so the button's own enabled/disabled opacity still shows
+   after it appears. */
+#section-3[data-stage="0"]:not(.q-color-stage):not(.origin-title-settled) .stage-band .sb-btn {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none !important;
 }
 
 /* The per-stage instruction now lives in the bottom band, not the top slot. */

@@ -1185,7 +1185,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   position: fixed !important;
   right: calc(122 * var(--sx)) !important;
   left: auto !important;
-  top: calc(100 * var(--sy) + 320px) !important;   /* lowered 20px (was +300px) */
+  top: calc(100 * var(--sy) + 360px) !important;   /* lowered 40px more (was +320px) */
   width: var(--story-w) !important;
   height: auto !important;
   z-index: 8 !important;

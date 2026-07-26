@@ -1761,6 +1761,7 @@ function playStage0Intro(){
 function runStage0Choreography(){
   const sec = document.getElementById('section-3');
   if(!sec) return;
+  sec.classList.remove('origin-title-settled');   // hide the band button until the title reaches its resting corner (re-added at step 3)
   const rootsTitle = sec.querySelector('.roots-story-title');
   const canvasWrap = sec.querySelector('.roots-canvas-wrap');
   const s1pTitle   = sec.querySelector('.stage1-panel .s1p-title');
@@ -1812,6 +1813,7 @@ function runStage0Choreography(){
     }, TITLE_MS);
     // ── 3. Once it's home, the globe fills in and the corner title returns. ──
     setTimeout(() => {
+      sec.classList.add('origin-title-settled');   // title is home → fade the band button in
       if(canvasWrap){ canvasWrap.style.transition = 'opacity 0.55s ease'; canvasWrap.style.opacity = '1'; }
       if(s1pTitle){ s1pTitle.style.transition = 'opacity 0.4s ease'; s1pTitle.style.opacity = ''; }
       window.dispatchEvent(new CustomEvent('globe-reveal-dots'));
