@@ -2608,14 +2608,14 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   z-index: 6;                           /* just above the outline img (z5) */
   pointer-events: none;
   opacity: 0;
-  -webkit-mask-image: url(/image/v5-stage5/path-title-fill.png?v=1);
-  mask-image: url(/image/v5-stage5/path-title-fill.png?v=1);
+  -webkit-mask-image: url(/image/v5-stage5/path-title-fill.png?v=3);
+  mask-image: url(/image/v5-stage5/path-title-fill.png?v=3);
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-mask-position: center; mask-position: center;
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   background-color: transparent;
-  background-image: radial-gradient(circle, #f5f5ed 0.85px, transparent 1.15px);
-  background-size: 5px 5px;             /* small, dense dots */
+  background-image: radial-gradient(circle, #f5f5ed 0.75px, transparent 1.05px);
+  background-size: 3.5px 3.5px;         /* small, dense dots — tight pitch so the thin strokes still read as filled */
   transition: opacity 0.55s ease;
 }
 #section-3[data-stage="5"] .paths-title-fill.is-in {

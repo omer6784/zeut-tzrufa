@@ -399,7 +399,11 @@
       "Bash(awk '/function getContinentAt/,/^}/' v5/roots.js)",
       "Bash(awk 'NR>=4270 && NR<=4700 && /setLineDash|lineDash|arc\\\\\\(|\\\\bdot|DOT|OUTER_W|INNER_W|HIT_TOLERANCE|MOVE_RADIUS|lineWidth|strokeStyle/' v5/questionnaire.js)",
       "Bash(awk -F: '$1>=4270 && $1<=4900')",
-      "Bash(python3 -c \"import scipy; print\\('scipy', scipy.__version__\\)\")"
+      "Bash(python3 -c \"import scipy; print\\('scipy', scipy.__version__\\)\")",
+      "Bash(python3 /tmp/mkband.py 30)",
+      "Bash(python3 /tmp/mkband.py 22)",
+      "Bash(sed -i '' 's|path-title-fill.png?v=2|path-title-fill.png?v=3|g' v5/styles.css)",
+      "Bash(sed -i '' 's|styles.css?v=142|styles.css?v=143|' v5/index.html)"
     ]
   },
   "hooks": {
