@@ -4220,7 +4220,7 @@ body.theme-negative {
   flex: none !important;
   display: block !important;
   width: 100% !important;
-  transform: translateY(100px) !important;   /* lowered the "מהי נקודת האור שלך?" title 100px */
+  transform: translateY(250px) !important;   /* lowered the "מהי נקודת האור שלך?" title (100 → 250, i.e. 150 more) */
 }
 #section-3[data-stage="1"] .q-layout-word #q-content {
   display: none !important;
