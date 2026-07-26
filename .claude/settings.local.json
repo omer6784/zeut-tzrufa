@@ -406,7 +406,8 @@
       "Bash(sed -i '' 's|styles.css?v=142|styles.css?v=143|' v5/index.html)",
       "Bash(awk '/A_MEANINGS\\\\s*=/{f=1} f{print} f&&/\\\\];/{exit}' v5/dot-tiles.js)",
       "Bash(awk '/\\\\.tw-sky[ ,{]/,/\\\\}/' v5/stage1.css)",
-      "Bash(awk -F: '$1>=4290 && $1<=4370')"
+      "Bash(awk -F: '$1>=4290 && $1<=4370')",
+      "Bash(node --check v5/stage-morph.js)"
     ]
   },
   "hooks": {

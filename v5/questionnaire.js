@@ -10,6 +10,7 @@ import { mountLightGate } from './light-gate.js';
 import { mountCalibration } from './calibration.js';
 import { playHandDemo, stopHandDemo, getGhostHand, lockInput, unlockInput } from './demo-hand.js';
 import { mountDotTiles } from './dot-tiles.js';
+import { playStageMorph } from './stage-morph.js';
 import { mountDrive } from './drive.js';
 import { mountProfessionCards } from './profession-cards.js';
 import { mountEditor } from './editor.js';
@@ -2569,6 +2570,21 @@ function transitionQuestion(next){
   const mid = document.getElementById('middle-q-container');
   if(!mid){ renderQuestion(next); return; }
   const descending = next > st.current;
+  // POC — coherent dot morph for globe (origin, idx 1) ↔ maze (roots, idx 2):
+  // the content dissolves into the grid lattice, the dots reflow along the track +
+  // recolour, then condense into the next stage. Every other pair keeps the
+  // existing vertical track-slide for now.
+  const isMorphPair = (st.current === 1 && next === 2) || (st.current === 2 && next === 1);
+  if(isMorphPair){
+    st.paused = true;
+    playStageMorph({
+      descending,
+      swap: () => renderQuestion(next),
+      duration: 900,
+      onDone: () => { setTimeout(() => { st.paused = false; }, 200); },
+    });
+    return;
+  }
   // Pause the canvas animation loop during the transition + the first ~600ms of
   // the next question so the typewriter and textarea focus land cleanly.
   st.paused = true;
