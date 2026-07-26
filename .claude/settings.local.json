@@ -396,7 +396,10 @@
       "Bash(git stash *)",
       "Bash(grep -rnB2 \"left: 50%\\\\|left:50%\\\\|left: calc\\(50%\" v5/stage1.css v5/styles.css)",
       "Bash(awk '/#app-viewport[ ,{]/,/\\\\}/' v5/geometric.css)",
-      "Bash(awk '/function getContinentAt/,/^}/' v5/roots.js)"
+      "Bash(awk '/function getContinentAt/,/^}/' v5/roots.js)",
+      "Bash(awk 'NR>=4270 && NR<=4700 && /setLineDash|lineDash|arc\\\\\\(|\\\\bdot|DOT|OUTER_W|INNER_W|HIT_TOLERANCE|MOVE_RADIUS|lineWidth|strokeStyle/' v5/questionnaire.js)",
+      "Bash(awk -F: '$1>=4270 && $1<=4900')",
+      "Bash(python3 -c \"import scipy; print\\('scipy', scipy.__version__\\)\")"
     ]
   },
   "hooks": {

@@ -1598,7 +1598,7 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('roots-tree-active');
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
-      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
+      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png" alt="מה המסלול שלך?" /><span class="paths-title-fill" aria-hidden="true"></span><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
@@ -1617,7 +1617,11 @@ function _renderQuestionImpl(idx){
       st._pathsEntryTimers = st._pathsEntryTimers || [];
       const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
       pT(() => { if (pg) pg.classList.add('paths-shrunk'); }, 1200);
-      pT(() => { if (ptitle) ptitle.classList.add('is-in'); }, 1950);
+      pT(() => {
+        if (ptitle) ptitle.classList.add('is-in');
+        const pfill = document.querySelector('#section-3 .paths-title-fill');
+        if (pfill) pfill.classList.add('is-in');   // cream dot-fill fades in after the title types in (CSS delay)
+      }, 1950);
       pT(() => runMazeDemo(), 2400);   // ghost-hand demo once the maze has settled
     }
   } else if(q.type==='time'){
@@ -4371,7 +4375,7 @@ function buildPathsGame(host, onSelect){
   svgInner += `<path class="paths-ink-trail" d=""/>`;
   svgInner += `<g class="paths-source-group" style="cursor: pointer;">`;
   svgInner += `<circle class="paths-source" cx="${source.x.toFixed(1)}" cy="${source.y.toFixed(1)}" r="3"/>`;
-  svgInner += `<circle class="paths-source-hit" cx="${source.x.toFixed(1)}" cy="${source.y.toFixed(1)}" r="32" fill="transparent" pointer-events="all"/>`;
+  svgInner += `<circle class="paths-source-hit" cx="${source.x.toFixed(1)}" cy="${source.y.toFixed(1)}" r="48" fill="transparent" pointer-events="all"/>`;
   svgInner += `</g>`;
   // Exit — a single clearly-marked destination (pulsing ring + centre dot) the
   // user traces toward. There is only one, so it reads as "the goal".
@@ -4635,7 +4639,7 @@ function buildPathsGame(host, onSelect){
   }
 
   // ───── Pointer events ─────
-  const GRAB_RADIUS = 140;   // generous, so a paused trace is easy to pick up again
+  const GRAB_RADIUS = 220;   // generous, so a paused trace is easy to pick up again (was 140 — touch found it hard to catch the line)
   svg.addEventListener('pointerdown', (e) => {
     if(state.phase === 'completed') return;
     const pt = svgPoint(e);
