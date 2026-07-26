@@ -68,6 +68,13 @@ html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; }
   transform: translate(-50%, -50%) scale(var(--app-scale, 1));
   transform-origin: center center;
 }
+/* The dotted frame is now drawn full-bleed by #frame-grid (a direct child of the
+   wrapper, so it can reach past the clipped screen-panels into the letterbox
+   margins). Keep the in-screen grids in the DOM (JS measures their .sg-h) but
+   invisible so they don't double up with the frame. */
+#section-1 .stage-grid,
+#section-3 .stage-grid { opacity: 0 !important; }
+#frame-grid { z-index: 1; }
 
 /* ── 1. WIPE every legacy bitmap / coloured panel from v4 ─────── */
 /* Hide PNG decorations the user explicitly told us to drop. */

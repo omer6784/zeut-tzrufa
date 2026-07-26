@@ -11,32 +11,41 @@ const CREAM = 'rgb(245, 245, 237)';
 const transparent = (c) => !c || c === 'transparent' || c === 'rgba(0, 0, 0, 0)';
 
 function activeBg() {
-  const s1 = document.getElementById('section-1');
-  const s3 = document.getElementById('section-3');
-  // The opening screen (section-1) wins while it is still visible (it fades out,
-  // opacity → 0, as the questionnaire fades in).
-  if (s1 && parseFloat(getComputedStyle(s1).opacity || '1') > 0.5) {
-    const c = getComputedStyle(s1).backgroundColor;
-    return transparent(c) ? CREAM : c;
-  }
-  if (s3) {
-    // Coloured stages paint the colour on the section itself; cream/paper stages
-    // leave it transparent, so fall back to the stage's plate variable.
-    let c = getComputedStyle(s3).backgroundColor;
-    if (transparent(c)) c = getComputedStyle(s3).getPropertyValue('--stage-plate').trim() || CREAM;
-    return c;
-  }
-  return CREAM;
+  const s = activeScreen();
+  if (!s) return CREAM;
+  const c = getComputedStyle(s).backgroundColor;
+  if (!transparent(c)) return c;
+  // Cream/paper stages leave the section transparent → fall back to the plate var.
+  return getComputedStyle(s).getPropertyValue('--stage-plate').trim() || CREAM;
 }
 
-let _last = '';
+// The active screen element: the opening (section-1) wins while it is still
+// visible (it fades opacity → 0 as the questionnaire fades in), else section-3.
+function activeScreen() {
+  const s1 = document.getElementById('section-1');
+  if (s1 && parseFloat(getComputedStyle(s1).opacity || '1') > 0.5) return s1;
+  return document.getElementById('section-3');
+}
+
+let _lastBg = '', _lastDot = '';
 function sync() {
   const c = activeBg();
-  if (c === _last) return;
-  _last = c;
-  // !important — geometric.css sets html/body background-color with !important.
-  document.body.style.setProperty('background-color', c, 'important');
-  document.body.style.setProperty('background-image', 'none', 'important');
+  if (c !== _lastBg) {
+    _lastBg = c;
+    // !important — geometric.css sets html/body background-color with !important.
+    document.body.style.setProperty('background-color', c, 'important');
+    document.body.style.setProperty('background-image', 'none', 'important');
+  }
+  // Mirror the active screen's grid-dot colour onto the full-bleed frame grid.
+  // --grid-dot lives on the in-screen .stage-grid (cream on the opening, dark /
+  // per-stage-flipped in the questionnaire), so read it from there.
+  const s = activeScreen();
+  const fg = document.getElementById('frame-grid');
+  const src = s && (s.querySelector('.stage-grid') || s);
+  if (src && fg) {
+    const dot = getComputedStyle(src).getPropertyValue('--grid-dot').trim();
+    if (dot && dot !== _lastDot) { _lastDot = dot; fg.style.setProperty('--grid-dot', dot); }
+  }
 }
 
 export function initLetterboxBg() {
