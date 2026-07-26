@@ -87,6 +87,19 @@ export function mountCompletion({ } = {}) {
   async function captureGifBase64() {
     const win = jewel.contentWindow;
     await waitFor(() => win && win.__jewel && win.__jewel.isReady && win.__jewel.isReady(), 15000);
+    // Single-source-of-truth check: the jewel iframe renders from the broadcast
+    // artifact ('zehut-artifact-data'); after "סיימתי" that MUST equal the frozen
+    // snapshot ('zehut-final-jewelry'). If they differ, the GIF would not match the
+    // final jewel — surface it loudly rather than silently emailing a wrong image.
+    try {
+      const shown  = localStorage.getItem('zehut-artifact-data');
+      const frozen = localStorage.getItem('zehut-final-jewelry');
+      if (frozen && shown !== frozen) {
+        console.error('[GIF] artifact data ≠ frozen finalJewelryState — the GIF may not match the final jewel.');
+      } else if (frozen) {
+        console.info('[GIF] verified: capturing the exact frozen finalJewelryState.');
+      }
+    } catch (_) { /* verification is best-effort */ }
     // Let the per-symbol entry reveal (~1s) finish so we capture ONLY the settled
     // talisman's spin/pulse, not the dots flying in.
     await new Promise(r => setTimeout(r, 1800));

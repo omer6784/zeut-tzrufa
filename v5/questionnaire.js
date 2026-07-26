@@ -2635,6 +2635,15 @@ function enterEditor(){
 /* "סיימתי" on the editor → the final completion page (back to opening / GIF-to-email). */
 function enterCompletion(){
   if (_editorTeardown) { try { _editorTeardown(); } catch (_) {} _editorTeardown = null; }
+  // FREEZE the single source of truth: the complete, resolved artifact exactly as it
+  // is at "סיימתי" (symbols, order, sizes, per-symbol edits dx/dy/scale/color,
+  // background, frameColor, gematria, dots, zones — everything that determines the
+  // jewel). From here nothing is recomputed; the display AND the GIF read this object.
+  const w = st.pendantLayout?.width  || LW || 340;
+  const h = st.pendantLayout?.height || LH || 480;
+  st.finalJewelryState = buildArtifactData(w, h);
+  try { localStorage.setItem(FINAL_JEWELRY_KEY, JSON.stringify(st.finalJewelryState)); } catch (_) {}
+  broadcastArtifact();   // push the frozen snapshot to every display before the GIF page mounts
   if (_completionTeardown) { try { _completionTeardown(); } catch (_) {} }
   _completionTeardown = mountCompletion({ /* onSendGif wired in Part B (GIF capture + email service) */ });
 }
@@ -2807,6 +2816,7 @@ function buildArtifactData(width,height){
 const ARTIFACT_CHANNEL = 'zehut-artifact';
 const ARTIFACT_STORAGE_KEY = 'zehut-artifact-data';
 const ACTIVITY_STORAGE_KEY = 'zehut-activity-state';   // 'idle' (opening screen) | 'active'
+const FINAL_JEWELRY_KEY = 'zehut-final-jewelry';        // frozen single-source snapshot, captured at "סיימתי"
 let _artifactBC = null;
 try { _artifactBC = ('BroadcastChannel' in window) ? new BroadcastChannel(ARTIFACT_CHANNEL) : null; } catch(_) { _artifactBC = null; }
 
@@ -2829,7 +2839,10 @@ function broadcastArtifact(){
     // the display overrides pixel size itself when it fits the camera.
     const w = st.pendantLayout?.width  || LW || 340;
     const h = st.pendantLayout?.height || LH || 480;
-    const data = buildArtifactData(w, h);
+    // Single source of truth: once the jewel is frozen at "סיימתי", ALWAYS broadcast
+    // that exact snapshot — never recompute — so the display and the GIF render the
+    // identical object the user approved. Before the freeze, broadcast live state.
+    const data = st.finalJewelryState || buildArtifactData(w, h);
     _artifactBC?.postMessage({ type: 'artifact', payload: data });
     // localStorage doubles as a fallback channel AND a snapshot so a display
     // opened late (mid-session) can restore the current object immediately.
