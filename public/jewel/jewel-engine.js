@@ -234,11 +234,12 @@ function _captureTick() {
     octx.globalAlpha = 1;
     octx.fillStyle = _cap.bgCol;
     octx.fillRect(0, 0, w, h);
-    // 2. cream dotted centre line (x = centre, 2%…98% of height — like #display-center-line)
+    // 2. cream dotted centre line (x = centre, 14%…86% of height — 25% shorter and
+    //    centred, matching #display-center-line)
     octx.fillStyle = _cap.lineCol;
     octx.globalAlpha = 0.9;
     const cx = w / 2, r = Math.max(0.7, gap * 0.11);
-    for (let y = h * 0.02; y <= h * 0.98; y += gap) { octx.beginPath(); octx.arc(cx, y, r, 0, Math.PI * 2); octx.fill(); }
+    for (let y = h * 0.14; y <= h * 0.86; y += gap) { octx.beginPath(); octx.arc(cx, y, r, 0, Math.PI * 2); octx.fill(); }
     octx.globalAlpha = 1;
     // 3. the transparent jewel canvas on top
     octx.drawImage(mainCanvasEl, 0, 0, w, h);
@@ -683,8 +684,8 @@ function layoutSymbols() {
   // the format; it never scales it up.
   const gs = 1;
 
-  const EXTENT_HALF = 860;   // leaves a margin (canvas half = 960) so the biggest symbol never
-                             // pokes out of the format while it bobs / pulses / spins in motion
+  const EXTENT_HALF = 673;   // the 6-symbol stack fits INSIDE the (shortened, ±691) centre line by
+                             // ~2 dots at each end, and well clear of the name-stage frame (±900)
   const X_LIMIT = 528;
 
   // per-position size / drift / stagger (indexed by add order). Drift + jitter
