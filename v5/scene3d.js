@@ -5,7 +5,7 @@ const canvas   = document.getElementById('canvas-3d');
 const section4 = document.getElementById('section-4');
 
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(window.__renderDPR || window.devicePixelRatio);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene  = new THREE.Scene();

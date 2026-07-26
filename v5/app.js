@@ -1050,7 +1050,7 @@ function initTitleScene3D() {
   if (!canvas || !section1) return;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(window.__renderDPR || Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene  = new THREE.Scene();
@@ -1521,7 +1521,7 @@ function initScene3D() {
   if (!canvas || !section4) return;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(window.__renderDPR || Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene  = new THREE.Scene();
@@ -1579,7 +1579,7 @@ function initHamsaScene3D() {
   if (!canvas) return;
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(window.__renderDPR || Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const scene  = new THREE.Scene();

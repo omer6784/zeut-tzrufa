@@ -35,6 +35,10 @@
         // Exposed for JS that must convert between real-viewport and logical space
         // (gesture deltas, entry-animation targets). 1 at 1360×768.
         window.__appScale = s;
+        // Effective device-pixel ratio for canvases/renderers sized from LOGICAL
+        // dimensions: the wrapper scales them up by `s`, so render the backing store
+        // that much denser to stay crisp at the real screen resolution (capped).
+        window.__renderDPR = Math.min((window.devicePixelRatio || 1) * s, 2.5);
       }
       fit();
       window.addEventListener('resize', fit);

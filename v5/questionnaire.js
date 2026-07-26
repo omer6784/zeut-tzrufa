@@ -3179,7 +3179,7 @@ function handleHamsaP5() {
             const w = p5Container.clientWidth || 500;
             const h = p5Container.clientHeight || 500;
             p.createCanvas(w, h, p.WEBGL);
-            p.pixelDensity(window.devicePixelRatio || 2);
+            p.pixelDensity(window.__renderDPR || (window.devicePixelRatio || 2));
 
             // Populate combined rawPoints from all models
             for (let model of models) {
@@ -3266,7 +3266,7 @@ function handleHamsaP5() {
             const w = p5Container.clientWidth || 500;
             const h = p5Container.clientHeight || 500;
             p.createCanvas(w, h, p.WEBGL);
-            p.pixelDensity(window.devicePixelRatio || 2);
+            p.pixelDensity(window.__renderDPR || (window.devicePixelRatio || 2));
             
             p.strokeWeight(0.9);
             p.noFill();

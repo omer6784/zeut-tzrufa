@@ -286,8 +286,10 @@ export function mountCalibration(host, { onFreeze, onLock, cont } = {}) {
     stopDemo();                                   // any real touch ends the demo
     if (committed) return;
     const r = canvas.getBoundingClientRect();
-    // client → canvas-internal px (scale-invariant through the letterbox + DPR).
-    const x = (e.clientX - r.left) * canvas.width / r.width, y = (e.clientY - r.top) * canvas.height / r.height;
+    // The thumbnails are laid out in getBoundingClientRect (displayed-px) space —
+    // W = rect.width — so the pointer offset in that same space is client − rect,
+    // no extra scaling (the letterbox scale is already baked into rect).
+    const x = e.clientX - r.left, y = e.clientY - r.top;
     for (let i = 0; i < thumbs.length; i++) {
       if (inRect(thumbs[i], x, y)) { e.preventDefault(); select(i); return; }
     }
