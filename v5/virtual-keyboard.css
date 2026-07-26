@@ -10,9 +10,9 @@
      remaining width to its LEFT. */
   right: calc(100 * var(--sx));
   left: auto;
-  bottom: calc(768px - 726 * var(--sy) + 26px);
+  bottom: calc(768px - 726 * var(--sy) + 4px);   /* rests just on the bottom grid line */
   transform: translateY(0);
-  width: calc((1360px - 200 * var(--sx)) * 0.66);
+  width: calc((1360px - 200 * var(--sx)) * 0.74);
   z-index: 1000;
   background: #e2bc71;
   border: 1px solid #ff601a;
@@ -44,7 +44,7 @@
 #virtual-keyboard .vk-key {
   flex: 1 1 0;
   min-width: 0;
-  height: clamp(38px, 42.24px, 56px);
+  height: clamp(54px, 62px, 70px);
   background: #fffae6;
   color: #1c1c1c;
   border: 1px solid #ff601a;
