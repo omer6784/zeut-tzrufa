@@ -409,7 +409,9 @@
       "Bash(awk -F: '$1>=4290 && $1<=4370')",
       "Bash(node --check v5/stage-morph.js)",
       "Bash(awk -F: '$1>=1244 && $1<=1330')",
-      "Bash(node --check v5/stage-crossfade.js)"
+      "Bash(node --check v5/stage-crossfade.js)",
+      "Bash(awk -F: '$1>=485 || $1<=460')",
+      "Bash(awk '/BUILD_KEYS *=/,/\\\\]/' public/jewel/jewel-engine.js)"
     ]
   },
   "hooks": {

@@ -359,10 +359,14 @@ function setGallery(on) {
 function galleryInstance(key, hex) {
   const proto = built[key];
   const col = color(hex);
+  // Gallery-ONLY dot thinning: the cards are tiny, so the full point cloud reads as
+  // crowded/muddy. Drop ~1 in 3 points (stride) for a lighter, clearer symbol. This
+  // never touches the single live jewel — only these mini instances get thinned.
+  const thinned = proto.points.filter((_, i) => i % 3 !== 0);
   return {
-    key, profile: PROFILES[key], points: proto.points,
+    key, profile: PROFILES[key], points: thinned,
     halfW: proto.halfW, halfH: proto.halfH, halfD: proto.halfD,
-    visible: proto.points.length, x: 0, y: 0, s: 1, lx: 0, ly: 0, phase: 0,
+    visible: thinned.length, x: 0, y: 0, s: 1, lx: 0, ly: 0, phase: 0,
     cr: red(col), cg: green(col), cb: blue(col),
     activatedTick: 0, rotOffset: random(1000)
   };
@@ -381,8 +385,9 @@ function galleryConfigFor(k) {
   if (k < GALLERY_CONFIGS.length) return GALLERY_CONFIGS[k];
   let seed = ((k + 1) * 2654435761) >>> 0;
   const rnd = () => { seed = (seed * 48271 + 1) >>> 0; return (seed % 100000) / 100000; };
-  const out = [];
-  for (let i = 0; i < 6; i++) out.push(BUILD_KEYS[Math.floor(rnd() * BUILD_KEYS.length)]);
+  // Draw 6 DISTINCT symbols (no symbol appears twice in one talisman).
+  const avail = BUILD_KEYS.slice(), out = [];
+  for (let i = 0; i < 6 && avail.length; i++) out.push(avail.splice(Math.floor(rnd() * avail.length), 1)[0]);
   return out;
 }
 const GALLERY_BG_PAL = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark];
@@ -407,11 +412,13 @@ function buildCard(idx, cx, cy, innerW, innerH, bg, keys, gem) {
   const top = ly[0] - insts[0].halfH, bottom = ly[n - 1] + insts[n - 1].halfH, mid = (top + bottom) / 2;
   let maxHW = 0; insts.forEach(s => { maxHW = Math.max(maxHW, s.halfW); });
   const colH = bottom - top, colW = maxHW * 2;
-  // Symbols fill almost the full frame height (small gap top/bottom).
+  // Same centre-line rule as the single display jewel: the symbol column sits WELL
+  // INSIDE the frame (clear gap top/bottom), and the dotted line runs just 2 dots
+  // past the top/bottom symbol — so the line never touches the frame either.
   const frameHalfW = innerW * 0.40, frameHalfH = innerH * 0.44;
-  const scale = Math.min((frameHalfW * 2 * 0.72) / (colW || 1), (frameHalfH * 2 * 0.97) / (colH || 1));
+  const scale = Math.min((frameHalfW * 2 * 0.72) / (colW || 1), (frameHalfH * 2 * 0.74) / (colH || 1));
   insts.forEach((s, i) => { s.s = scale; s.x = cx; s.y = cy + (ly[i] - mid) * scale; s.phase = idx * 11.7; });
-  const lineHalf = (colH * 0.5 * scale) + 10;
+  const lineHalf = (colH * 0.5 * scale) + 22;   // +22 ≈ 2 dots (line pitch 11) beyond the end symbols
   const line = { hex: GALLERY_LINE_ON[bg] || '#f5f5ed', x: cx, y0: cy - lineHalf, y1: cy + lineHalf };
   const frame = { hex: galleryFrameColor(bg), sx: frameHalfW / 450, sy: frameHalfH / 900, dots: buildOrnament(gem) };
   return { idx, cx, cy, innerW, innerH, bg, keys, insts, line, frame, a: 1, swap: null };
@@ -440,7 +447,9 @@ function buildGallery() {
 }
 // Every few seconds one random card swaps to a different talisman from the pool,
 // cross-fading its content (the coloured card stays put).
-const GALLERY_SWAP_EVERY = 2600, GALLERY_FADE = 480;
+const GALLERY_SWAP_EVERY = 1500, GALLERY_FADE = 300;
+// Gallery symbols animate faster than the single jewel (the mosaic feels livelier).
+const GALLERY_ANIM_SPEED = 1.7;
 let gallerySwapAt = 0;
 function triggerSwap() {
   const free = galleryCards.filter(c => !c.swap);
@@ -450,7 +459,10 @@ function triggerSwap() {
   let keys = null;
   for (let t = 0; t < 12 && !keys; t++) { const cand = galleryPool[Math.floor(random(galleryPool.length))]; if (cand.join(',') !== cur) keys = cand; }
   if (!keys) return;
-  card.swap = { stage: 'out', t0: millis(), keys, gem: 40 + Math.floor(random(160)) };
+  // A completely different talisman: also switch to a different background colour.
+  const bgs = GALLERY_BG_PAL.filter(b => b !== card.bg);
+  const bg = bgs[Math.floor(random(bgs.length))];
+  card.swap = { stage: 'out', t0: millis(), keys, bg, gem: 40 + Math.floor(random(160)) };
 }
 function galleryTick() {
   if (!galleryCards || !galleryCards.length) return;
@@ -461,8 +473,11 @@ function galleryTick() {
     if (card.swap.stage === 'out') {
       card.a = Math.max(0, 1 - el / GALLERY_FADE);
       if (el >= GALLERY_FADE) {
-        const nc = buildCard(card.idx, card.cx, card.cy, card.innerW, card.innerH, card.bg, card.swap.keys, card.swap.gem);
-        if (nc) { card.keys = nc.keys; card.insts = nc.insts; card.line = nc.line; card.frame = nc.frame; }
+        const nbg = card.swap.bg || card.bg;
+        const nc = buildCard(card.idx, card.cx, card.cy, card.innerW, card.innerH, nbg, card.swap.keys, card.swap.gem);
+        // Swap the whole talisman — including its background colour — at the moment
+        // its content is fully faded out (a=0), so the bg change never flickers.
+        if (nc) { card.bg = nc.bg; card.keys = nc.keys; card.insts = nc.insts; card.line = nc.line; card.frame = nc.frame; }
         card.a = 0; card.swap.stage = 'in'; card.swap.t0 = now;
       }
     } else {
@@ -507,7 +522,7 @@ function drawGallery() {
     pop();
     // 4. the symbols, each with its own motion (faded via galleryAlpha)
     galleryAlpha = a;
-    for (const s of card.insts) drawSymbol(s, tick + s.phase);
+    for (const s of card.insts) drawSymbol(s, tick * GALLERY_ANIM_SPEED + s.phase);
     galleryAlpha = 1;
   }
 }
