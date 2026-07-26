@@ -66,6 +66,16 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 900, co
   const fromBg = parse(cs0.backgroundColor);
   const fromGrid = parse(cs0.getPropertyValue('--grid-dot'));
 
+  // The crossfade recolours the FIXED interface grid + chrome ONLY — never the
+  // stage's own content. #middle-q-container holds that content (the central
+  // element); pin its --grid-dot to its current colour so the EXITING content keeps
+  // its own colours through the melt (it simply swaps out at contentAt) instead of
+  // inheriting the recolouring meant for the fixed frame. (The symbol window lives
+  // on <body>, already outside this scope and closed before the transition.)
+  const mid = document.getElementById('middle-q-container');
+  const midGridPin = mid ? getComputedStyle(mid).getPropertyValue('--grid-dot').trim() : '';
+  if (mid && midGridPin) mid.style.setProperty('--grid-dot', midGridPin);
+
   // Phase-A target = a rough estimate of the next palette (the exact value is read
   // for real at the swap and corrected in phase B — see below — so the estimate need
   // not be perfect, only roughly the right direction).
@@ -89,6 +99,10 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 900, co
     swapped = true;
     segBg = estBg.slice(); segGrid = estGrid.slice();
     try { applyContent && applyContent(); } catch (_) {}
+    // Release the exiting-content colour pin so the NEW content takes the stage's
+    // own colours (not the pinned old ones).
+    const m2 = document.getElementById('middle-q-container');
+    if (m2) m2.style.removeProperty('--grid-dot');
     const real = readResolvedPalette(sec);
     toBg = real.bg; toGrid = real.grid;
   }
