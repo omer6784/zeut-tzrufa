@@ -33,6 +33,14 @@
   pointer-events: none;
 }
 
+/* Globe country-input phase only: nudge the keyboard up 40 + left 70 so it sits
+   inside the grid rectangle. Scoped via body:has() so the name-stage keyboard —
+   which shares this element (appended to <body>) — keeps its own docked position. */
+body:has(#section-3.origin-input-phase) #virtual-keyboard {
+  right: calc(100 * var(--sx) + 70px);
+  bottom: calc(768px - 726 * var(--sy) + 44px);
+}
+
 #virtual-keyboard .vk-row {
   display: flex;
   flex-direction: row;

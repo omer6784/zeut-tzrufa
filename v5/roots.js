@@ -1194,10 +1194,13 @@ export function initRootsWidget(container, opts){
       hold(on){ state.dragging = !!on; },   // pause the idle auto-spin while driving
       spinBy(rad){ state.rot += rad; },
       // Viewport-space centre of a continent now, or null if it's on the far side.
-      continentPos(id){
+      continentPos(id, at){
         const c = CONTINENTS.find(k => k.id === id);
         if(!c) return null;
-        const p = project(c.center[0], c.center[1], state.rot, R, cx, cy);
+        // Optional [lon,lat] override → aim at a specific point on the continent
+        // (e.g. its visual middle) instead of the label centre.
+        const lon = at ? at[0] : c.center[0], lat = at ? at[1] : c.center[1];
+        const p = project(lon, lat, state.rot, R, cx, cy);
         if(p.z <= 0.18) return null;
         const r = canvas.getBoundingClientRect();
         return { x: r.left + p.x, y: r.top + p.y, z: p.z };

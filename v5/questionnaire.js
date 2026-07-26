@@ -1860,7 +1860,7 @@ function runGlobeDemo(){
     //    flicks rightward). Measure the total rotation first and rewind synchronously
     //    (no await → the intermediate never renders), then replay it split evenly
     //    across the three flicks.
-    const asiaFront = () => { const p = rd.continentPos('asia'); return !!(p && p.z > 0.62); };
+    const asiaFront = () => { const p = rd.continentPos('asia'); return !!(p && p.z > 0.69); };   // spin further so Asia's centre sits near the front (its lat45 centre maxes at z≈0.707)
     let need = 0;
     while(need < 400 && !asiaFront()){ rd.spinBy(0.03); need++; }
     rd.spinBy(-0.03 * need);                       // rewind to the start (no frame rendered)
@@ -1890,8 +1890,11 @@ function runGlobeDemo(){
     if(dead()) return abort();
     await gh.sleep(350);
 
-    // 3. open → pointing finger → tap Asia (it marks black)
-    const ap = rd.continentPos('asia') || { x: gcx, y: gcy };
+    // 3. open → pointing finger → tap Asia (it marks black). Aim at central Asia
+    //    ([90,30] ≈ the visual middle of the mass — Asia is a northern continent, so
+    //    its drawn body sits in the globe's upper half and lat30 lands ~mid-mass),
+    //    not the northern label centre [90,45], so the finger taps the middle, not an edge.
+    const ap = rd.continentPos('asia', [90, 30]) || rd.continentPos('asia') || { x: gcx, y: gcy };
     gh.point(true);
     gh.move(ap.x, ap.y);
     await gh.sleep(650); if(dead()) return abort();
