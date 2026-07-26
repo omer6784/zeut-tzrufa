@@ -824,6 +824,7 @@ body.theme-negative #section-3 { --grid-dot: #f5f5ed; }
 .grid-logo {
   position: absolute;
   top: 0;
+  transform: translateY(-30px);   /* raised 30px */
   left: calc(1360px - 150 * var(--sx));   /* moved right 50 (was 200 from right) */
   width: calc(140 * var(--sx));          /* 200 − 60 = 140 wide */
   height: calc(85 * var(--sy));          /* down to the top horizontal */

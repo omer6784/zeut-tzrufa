@@ -1594,7 +1594,7 @@ html, body {
   /* Centred in its top-left grid cell (screen-left → the 200·sx vertical), i.e.
      the cell centre at 100·sx; vertically centred at 42·sy. */
   left: calc(100 * var(--sx));
-  top: calc(42 * var(--sy));
+  top: calc(42 * var(--sy) - 30px);   /* raised 30px */
   transform: translate(-50%, -50%);
   z-index: 200;
   pointer-events: auto;
