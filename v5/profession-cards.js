@@ -148,7 +148,9 @@ export function mountProfessionCards(host, { onSelect } = {}) {
 
   function select(i) {
     selected = i;
-    cards.forEach(o => { o.card.classList.toggle('is-selected', o.i === selected); o.card.classList.toggle('is-dimmed', o.i !== selected); });
+    // Only the pressed card grows (is-selected) — the others are NOT dimmed, so
+    // every category stays bright and keeps animating.
+    cards.forEach(o => o.card.classList.toggle('is-selected', o.i === selected));
     onSelect && onSelect(CATS[i].label, CATS[i].symbol);
   }
   function deselect() {

@@ -1360,6 +1360,9 @@ body::-webkit-scrollbar-thumb {
 }
 .prof-card.is-dimmed { opacity: 0.42; }
 .prof-card.is-selected { transform: translateY(0) scale(1.1); z-index: 2; }
+/* Lift the SECOND row of categories 30px (position:relative is already set, so this
+   is independent of the entrance/selected transforms). */
+.prof-card:nth-child(n + 5) { top: -30px; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {
