@@ -1315,10 +1315,14 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 3px;                 /* tighter gap → bigger tiles (was 5px) */
+  gap: 4px;
   box-sizing: border-box;
   height: 100%;
-  width: 100%;              /* fill the FULL content rectangle (was aspect-bound 7/4, which left side margins) → larger tiles */
+  aspect-ratio: 7 / 4;      /* SQUARE cells (7 cols × 4 rows) + height-bound so the block
+                               stays NARROWER than the content width → centred INSIDE the
+                               fixed grid lines, never spilling past them. */
+  width: auto;
+  max-width: 100%;
 }
 .dot-tile {
   position: relative;
