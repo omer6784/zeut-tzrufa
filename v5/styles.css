@@ -539,7 +539,7 @@ body::-webkit-scrollbar-thumb {
 
 #ui-bottom-left {
   position: absolute;
-  bottom: 32px;
+  bottom: 12px;
   left: 32px;
   display: flex;
   flex-direction: column;
