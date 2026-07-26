@@ -1892,7 +1892,7 @@ html, body {
    bright day sky. */
 .tw-confirm {
   position: absolute;
-  right: calc(var(--tw-right) + 76px);          /* 50px left */
+  right: calc(var(--tw-right) + 86px);          /* 60px left (was +76 = 50px) */
   top: calc(100% - var(--tw-wheelh) + 106px);   /* raised 50px more (was +156) */
   left: auto; bottom: auto;
   background: transparent !important;
