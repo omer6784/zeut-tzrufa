@@ -394,7 +394,8 @@
       "Bash(gh pr create --base main --head fit-1920x1200-letterbox --title 'Fit interface to 1920×1200 \\(fixed-aspect letterbox\\)' --body ' *)",
       "Bash(git merge fit-1920x1200-letterbox --no-ff -m 'Merge: fit interface to 1920×1200 \\(fixed-aspect letterbox\\) *)",
       "Bash(git stash *)",
-      "Bash(grep -rnB2 \"left: 50%\\\\|left:50%\\\\|left: calc\\(50%\" v5/stage1.css v5/styles.css)"
+      "Bash(grep -rnB2 \"left: 50%\\\\|left:50%\\\\|left: calc\\(50%\" v5/stage1.css v5/styles.css)",
+      "Bash(awk '/#app-viewport[ ,{]/,/\\\\}/' v5/geometric.css)"
     ]
   },
   "hooks": {

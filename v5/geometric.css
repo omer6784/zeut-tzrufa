@@ -821,10 +821,10 @@ body.theme-negative #section-3 { --grid-dot: #f5f5ed; }
    200px-from-right, above the top horizontal (y0→y85). Scales with the
    grid; sits on every non-opening stage. */
 .grid-logo {
-  position: absolute;
+  position: fixed;   /* fixed → clipped by #app-viewport (overflow:visible), NOT by section-3's overflow:hidden, so it can rise past y0 into the top letterbox without being cut */
   top: 0;
-  transform: translateY(-12px);   /* raised as far as it can go without the section clipping its top (was -30px, which cut ~16px) */
-  left: calc(1360px - 150 * var(--sx));   /* moved right 50 (was 200 from right) */
+  transform: translateY(-32px);   /* raised 20px (was -12px); no longer clipped since it's fixed to the wrapper */
+  left: calc(1360px - 160 * var(--sx));   /* moved 10 left (was -150 → -160 from the right edge) */
   width: calc(140 * var(--sx));          /* 200 − 60 = 140 wide */
   height: calc(85 * var(--sy));          /* down to the top horizontal */
   display: flex;
