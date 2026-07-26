@@ -1312,7 +1312,7 @@ body::-webkit-scrollbar-thumb {
 /* Tiles stage (life-wish): the button moved to the top, so extend the grid a touch
    DOWN into the freed bottom space → the height-bound square tiles grow, still
    contained inside the vertical grid lines. */
-#section-3[data-stage="2"] .dot-tiles-grid { height: calc(100% + 70px); }
+#section-3[data-stage="2"] .dot-tiles-grid { height: calc(100% + 70px); top: -100px; }
 
 /* 7 columns × 4 rows (28 tiles) — landscape. aspect-ratio 7/4 at full height makes
    the cells SQUARE; the block is height-bound and centred (side margins inside). */

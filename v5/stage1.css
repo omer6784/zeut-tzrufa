@@ -126,6 +126,10 @@ html, body {
 /* Stage 2 has a dark background — dots read cream. */
 #section-3[data-stage="1"] #step-rail li { background: #f5f5ed; }
 #section-3[data-stage="1"] #step-rail li.is-current { background: #fb5716; }
+/* Time stage at NIGHT (dark sky): the step-rail dots on the right would stay dark
+   grey and get swallowed — flip them to cream (the current dot stays orange). */
+#section-3[data-stage="3"]:not(.tw-daylight) #step-rail li { background: #f5f5ed; }
+#section-3[data-stage="3"]:not(.tw-daylight) #step-rail li.is-current { background: #fb5716; }
 
 #step-prev-btn,
 #step-next-btn {
@@ -1896,7 +1900,7 @@ html, body {
 .tw-confirm {
   position: absolute;
   right: calc(var(--tw-right) + 86px);          /* 60px left (was +76 = 50px) */
-  top: calc(100% - var(--tw-wheelh) + 106px);   /* raised 50px more (was +156) */
+  top: calc(100% - var(--tw-wheelh) + 126px);   /* lowered 20px (was +106) */
   left: auto; bottom: auto;
   background: transparent !important;
   border: none !important;
