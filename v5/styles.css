@@ -2608,37 +2608,6 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 }
 @keyframes paths-type { to { clip-path: inset(0 0 0 0); } }
 
-/* Cream dot-fill inside the "מה המסלול שלך?" letters. A dense cream dot pattern
-   masked to a SOLID silhouette of the title (path-title-fill.png), overlaid exactly
-   on the outline <img> and faded in AFTER the title types in — the letters fill with
-   small cream dots. Same fixed anchor + width as .paths-title so they register. */
-#section-3[data-stage="5"] .paths-title-fill {
-  position: fixed;
-  left: 50%;
-  bottom: calc(768px - 668 * var(--sy) - 50px);
-  top: auto;
-  transform: translate(-50%, 0);        /* the title's rest position (.paths-title.is-in) */
-  width: min(571.2px, 540px);
-  aspect-ratio: 4388 / 840;             /* source PNG size → height follows width, matches the img */
-  height: auto;
-  z-index: 6;                           /* just above the outline img (z5) */
-  pointer-events: none;
-  opacity: 0;
-  -webkit-mask-image: url(/image/v5-stage5/path-title-fill.png?v=3);
-  mask-image: url(/image/v5-stage5/path-title-fill.png?v=3);
-  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-  -webkit-mask-position: center; mask-position: center;
-  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-  background-color: transparent;
-  background-image: radial-gradient(circle, #f5f5ed 0.75px, transparent 1.05px);
-  background-size: 3.5px 3.5px;         /* small, dense dots — tight pitch so the thin strokes still read as filled */
-  transition: opacity 0.55s ease;
-}
-#section-3[data-stage="5"] .paths-title-fill.is-in {
-  opacity: 1;
-  transition: opacity 0.55s ease 1.35s;   /* wait for the type-in to finish, then fill in */
-}
-
 /* ── Path stage on the ORANGE background — explicit colour scheme ──
    Outer grid LINES → cream; the stage instruction + restart button → cream. The
    remaining chrome (logo, counter, symbol-library) + the right-side arrows stay

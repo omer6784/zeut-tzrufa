@@ -1598,7 +1598,7 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('roots-tree-active');
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
-      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png" alt="מה המסלול שלך?" /><span class="paths-title-fill" aria-hidden="true"></span><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
+      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
@@ -1617,11 +1617,7 @@ function _renderQuestionImpl(idx){
       st._pathsEntryTimers = st._pathsEntryTimers || [];
       const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
       pT(() => { if (pg) pg.classList.add('paths-shrunk'); }, 1200);
-      pT(() => {
-        if (ptitle) ptitle.classList.add('is-in');
-        const pfill = document.querySelector('#section-3 .paths-title-fill');
-        if (pfill) pfill.classList.add('is-in');   // cream dot-fill fades in after the title types in (CSS delay)
-      }, 1950);
+      pT(() => { if (ptitle) ptitle.classList.add('is-in'); }, 1950);
       pT(() => runMazeDemo(), 2400);   // ghost-hand demo once the maze has settled
     }
   } else if(q.type==='time'){
@@ -4307,7 +4303,7 @@ function buildPathsGame(host, onSelect){
   // the corridors wind AND meet at junctions with loops — the dense, irregular
   // weave of the reference. Every segment is a deduped UNIT edge (no overlaps),
   // corners are sharp, and the whole thing is one connected system.
-  const NY = 14, NX = 26;
+  const NY = 10, NX = 19;   // coarser grid (was 14×26) → wider gaps between paths, easier to grab by touch
   const gx = c => X_MIN + (X_MAX - X_MIN) * (c / (NX - 1));
   const gy = r => Y_MIN + (Y_MAX - Y_MIN) * (r / (NY - 1));
   const MID = (NY - 1) >> 1;
