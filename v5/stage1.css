@@ -1680,6 +1680,7 @@ html, body {
 /* Remove the v4 grid-cell dark horizontal divider borders (they read as darker
    lines on the orange plate) — the dotted grid lines (.sg-h) stay. */
 #section-3[data-stage="4"] #middle-q-container,
+#section-3[data-stage="4"] #q-input-wrap,
 #section-3[data-stage="4"] .bot-mid,
 #section-3[data-stage="4"] #q-deco-bot-left,
 #section-3[data-stage="4"] #q-deco-bot-right,
