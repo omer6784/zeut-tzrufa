@@ -27,25 +27,14 @@ function activeScreen() {
   return document.getElementById('section-3');
 }
 
-let _lastBg = '', _lastDot = '';
+let _lastBg = '';
 function sync() {
   const c = activeBg();
-  if (c !== _lastBg) {
-    _lastBg = c;
-    // !important — geometric.css sets html/body background-color with !important.
-    document.body.style.setProperty('background-color', c, 'important');
-    document.body.style.setProperty('background-image', 'none', 'important');
-  }
-  // Mirror the active screen's grid-dot colour onto the full-bleed frame grid.
-  // --grid-dot lives on the in-screen .stage-grid (cream on the opening, dark /
-  // per-stage-flipped in the questionnaire), so read it from there.
-  const s = activeScreen();
-  const fg = document.getElementById('frame-grid');
-  const src = s && (s.querySelector('.stage-grid') || s);
-  if (src && fg) {
-    const dot = getComputedStyle(src).getPropertyValue('--grid-dot').trim();
-    if (dot && dot !== _lastDot) { _lastDot = dot; fg.style.setProperty('--grid-dot', dot); }
-  }
+  if (c === _lastBg) return;
+  _lastBg = c;
+  // !important — geometric.css sets html/body background-color with !important.
+  document.body.style.setProperty('background-color', c, 'important');
+  document.body.style.setProperty('background-image', 'none', 'important');
 }
 
 export function initLetterboxBg() {

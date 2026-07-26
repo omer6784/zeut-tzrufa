@@ -8,7 +8,7 @@
   <!-- v5 override layer: redraws the visual surface as outlines + nodes
        on top of v4's full functionality. styles.css stays first so its
        cascade order is preserved; geometric.css wins by being later. -->
-  <link rel="stylesheet" href="geometric.css?v=32" />
+  <link rel="stylesheet" href="geometric.css?v=33" />
   <link rel="stylesheet" href="stage1.css?v=183" />
   <!-- Portrait Story recording layout (opening screen only). Loaded LAST and
        scoped to html.story-mode; inert for the exhibition. -->
@@ -60,25 +60,6 @@
        distorts on a differently-proportioned screen (e.g. 1920×1200). The
        cursor + JS pointer overlays live OUTSIDE it, in real viewport space. -->
   <div id="app-viewport">
-
-  <!-- ═══ Full-bleed construction-grid frame ═══════════════════════════════
-       A copy of the dotted frame that lives DIRECTLY on the wrapper (outside the
-       clipping screen-panels), so its vertical lines run to the physical screen
-       top+bottom and its horizontals to the left+right — reaching every screen
-       edge across the letterbox margins. Positions are the same logical grid; the
-       --lb-x/--lb-y overflow (set by the head script) extends the lines into the
-       margins. Colour is synced to the active screen by letterbox-bg.js. -->
-  <div id="frame-grid" class="stage-grid" aria-hidden="true">
-    <!-- Frame sides — full physical-screen height -->
-    <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(768 + 2 * var(--lb-y));"></span>
-    <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(768 + 2 * var(--lb-y));"></span>
-    <!-- Inner top verticals — extended up to the screen top -->
-    <span class="sg-v" style="--x: calc(200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(85 + var(--lb-y));"></span>
-    <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --y: calc(-1 * var(--lb-y) * var(--sy)); --h: calc(85 + var(--lb-y));"></span>
-    <!-- Top + bottom horizontals — full physical-screen width -->
-    <span class="sg-h" style="--y: calc(85 * var(--sy)); left: calc(-1 * var(--lb-x) * var(--sx)); width: calc(1360px + 2 * var(--lb-x) * var(--sx));"></span>
-    <span class="sg-h" style="--y: calc(726 * var(--sy)); left: calc(-1 * var(--lb-x) * var(--sx)); width: calc(1360px + 2 * var(--lb-x) * var(--sx));"></span>
-  </div>
 
   <!-- Global restart button -->
   <button id="btn-restart" onclick="location.reload()">
