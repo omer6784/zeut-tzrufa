@@ -6597,6 +6597,24 @@ html:not(.cursor-active) *::after {
   transform: translateX(-50%) !important;
   transition: opacity 0.45s ease, background-color 0.15s ease, color 0.15s ease;
 }
+
+/* Stage 6 (name stage): move "סיום" button to the top-left of the content rectangle, aligned with the explanation text line */
+#section-3[data-stage="6"] .stage-band .sb-btn {
+  position: fixed !important;
+  top: calc(85 * var(--sy) + 14px) !important;
+  left: calc(100 * var(--sx) + 20px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 100 !important;
+}
+#section-3[data-stage="6"] .stage-band .sb-btn:not(.is-disabled) {
+  animation: sb-btn-topleft-breathe 1.8s ease-in-out infinite !important;
+}
+@keyframes sb-btn-topleft-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
 /* The band button stays hidden through the title's entry choreography and only
    fades in once the title has reached its resting corner — runStage0Choreography
    adds .origin-title-settled at step 3 ("once it's home"). Using visibility+opacity
@@ -6951,15 +6969,15 @@ html:not(.cursor-active) *::after {
   left: 50%;
   right: auto;
   transform: translateX(-50%);
-  bottom: calc(768px - 726 * var(--sy) + 330px);
-  display: flex; direction: ltr; gap: 5px; align-items: center; justify-content: center;
+  bottom: calc(768px - 726 * var(--sy) + 355px);
+  display: flex; direction: ltr; gap: 6px; align-items: center; justify-content: center;
   pointer-events: none;
   opacity: 0; transition: opacity 0.35s ease;
   z-index: 10;
 }
 .name-stage .ns-total.is-on { opacity: 1; }
 .name-stage .ns-total span {
-  display: block; width: 32px; height: 42px;
+  display: block; width: 50px; height: 64px;
   background-color: #282828;
   -webkit-mask-image: var(--d); mask-image: var(--d);
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
@@ -6986,10 +7004,10 @@ html:not(.cursor-active) *::after {
 .name-stage .ns-letters {
   display: flex; direction: rtl; align-items: flex-end; justify-content: center;
   flex-wrap: nowrap; gap: clamp(4px, 1vw, 12px);
-  min-height: 70px; padding: 0 8px 8px;
+  min-height: 54px; padding: 0 8px 6px;
 }
 .name-stage .ns-letter {
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
   animation: ns-letter-in 0.28s ease;
 }
 @keyframes ns-letter-in {
@@ -6998,7 +7016,7 @@ html:not(.cursor-active) *::after {
 }
 .name-stage .ns-letter b {
   font-family: 'ArbelG', sans-serif; font-weight: 500;
-  font-size: var(--ns-letter-size, clamp(26px, 3vw, 38px));
+  font-size: var(--ns-letter-size, clamp(18px, 2.2vw, 26px));
   line-height: 1; color: #282828;
 }
 .name-stage .ns-letter i {
