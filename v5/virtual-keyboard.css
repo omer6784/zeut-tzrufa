@@ -38,13 +38,13 @@
    which shares this element (appended to <body>) — keeps its own docked position. */
 body:has(#section-3.origin-input-phase) #virtual-keyboard {
   right: calc(100 * var(--sx) + 110px);   /* 40 further left (was +70) */
-  bottom: calc(768px - 726 * var(--sy) + 64px);   /* 20 further up (was +44) */
+  bottom: calc(768px - 726 * var(--sy) + 84px);   /* 20 further up (was +64) */
 }
 /* Enlarge it a touch. Scoped to :not(.vk-hidden) so the .vk-hidden slide-out
    (translateY 110%) still wins when the keyboard is dismissed. Grows up-left from
    its docked bottom-right corner, so the anchor set above stays put. */
 body:has(#section-3.origin-input-phase) #virtual-keyboard:not(.vk-hidden) {
-  transform: scale(1.1);
+  transform: scale(1.18);
   transform-origin: right bottom;
 }
 
