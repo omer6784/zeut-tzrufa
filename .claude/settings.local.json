@@ -412,7 +412,10 @@
       "Bash(node --check v5/stage-crossfade.js)",
       "Bash(awk -F: '$1>=485 || $1<=460')",
       "Bash(awk '/BUILD_KEYS *=/,/\\\\]/' public/jewel/jewel-engine.js)",
-      "Bash(xargs -I{} sh -c 'grep -liE \"מסלול|maze\" \"{}\" 2>/dev/null')"
+      "Bash(xargs -I{} sh -c 'grep -liE \"מסלול|maze\" \"{}\" 2>/dev/null')",
+      "Bash(awk '/\\\\.dot-tiles-grid/{p=1} p{print} /\\\\}/{if\\(p\\)c++; if\\(c>0 && p && /\\\\}/\\){}}' v5/styles.css)",
+      "Bash(awk '/#middle-q-container[ ,{]/{print NR\": \"$0; f=1; next} f&&/z-index|position/{print NR\": \"$0} f&&/\\\\}/{f=0}' v5/styles.css)",
+      "Bash(awk '/^#middle-q-container *\\\\{/{print NR\": \"$0; f=1; next} f&&/z-index|position/{print NR\": \"$0} f&&/^\\\\}/{f=0}' v5/styles.css)"
     ]
   },
   "hooks": {

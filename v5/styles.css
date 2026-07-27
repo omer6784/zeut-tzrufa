@@ -1308,6 +1308,12 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   align-items: stretch;
   justify-content: center;   /* centred inside the content rectangle */
+  /* The container spans the full central rectangle but the tile block is centred,
+     leaving empty side margins. It lives in #middle-q-container's stacking context
+     (z-index 10), ABOVE the stage band (z-index 9) that holds "המשך" — so the empty
+     container was swallowing clicks meant for the top-left "המשך" button. Let clicks
+     pass through the container; only the tiles themselves (below) are interactive. */
+  pointer-events: none;
 }
 /* Tiles stage (life-wish): the button moved to the top, so extend the grid a touch
    DOWN into the freed bottom space → the height-bound square tiles grow, still
@@ -1336,6 +1342,7 @@ body::-webkit-scrollbar-thumb {
   min-width: 0;
   min-height: 0;
   cursor: pointer;
+  pointer-events: auto;   /* re-enable on the tiles (the grid container is none — see above) */
   transition: opacity 0.4s ease, transform 0.25s ease;
 }
 /* Selected (tapped) tile — pops slightly above the rest, which dim (canvas alpha). */
