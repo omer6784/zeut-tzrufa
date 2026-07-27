@@ -206,12 +206,15 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     return { L, y: (clientY - (r.top + r.height / 2)) * (L.h / r.height) };
   }
   // The symbol whose band contains (or is nearest to) the world y — generous grab.
-  function hitIndex(clientY) {
+  // `loose` skips the band check entirely (pinch: two fingers straddle a symbol,
+  // so their midpoint can easily land BETWEEN bands — just take the nearest).
+  function hitIndex(clientY, loose) {
     const w = worldY(clientY);
     if (!w) return -1;
     let best = -1, bd = Infinity;
     w.L.items.forEach((it, i) => { const d = Math.abs(w.y - it.y); if (d < bd) { bd = d; best = i; } });
     if (best < 0) return -1;
+    if (loose) return best;
     const it = w.L.items[best];
     return bd <= Math.max(it.hh * 1.6, w.L.h * 0.045) ? best : -1;
   }
@@ -247,8 +250,10 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
       const idx = hitIndex(ev.clientY);
       drag = idx >= 0 ? { idx, y0: ev.clientY, moved: false } : null;
     } else if (ptrs.size === 2) {
+      // Pinch target: the symbol the first finger grabbed, else the NEAREST one to
+      // the fingers' midpoint (loose — no band check, so the pinch always lands).
       const mid = [...ptrs.values()].reduce((a, p) => a + p.y, 0) / 2;
-      const idx = (drag && drag.idx >= 0) ? drag.idx : hitIndex(mid);
+      const idx = (drag && drag.idx >= 0) ? drag.idx : hitIndex(mid, true);
       drag = null;
       if (idx >= 0) pinch = { idx, d0: dist(), s0: (st.artifactEdits[idx] && st.artifactEdits[idx].scale) || 1 };
     }
@@ -278,6 +283,12 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   };
   gest.addEventListener('pointerup', endPtr);
   gest.addEventListener('pointercancel', endPtr);
+  // Belt-and-braces for the kiosk touch screen: swallow raw touch gestures on the
+  // layer so the BROWSER's own pinch-zoom / scroll can never hijack the two-finger
+  // pinch before our pointer events see it (touch-action:none alone is not always
+  // honoured for page zoom on every kiosk browser).
+  ['touchstart', 'touchmove'].forEach((t) =>
+    gest.addEventListener(t, (e) => e.preventDefault(), { passive: false }));
 
   // ---- left wordmark typewriter (matches the stage sidebar) ----------------
   const sideTxt = view.querySelector('.ed-side-txt');

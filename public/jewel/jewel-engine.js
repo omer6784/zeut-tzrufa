@@ -754,7 +754,7 @@ function layoutSymbols() {
   // are ZERO so the symbols stack in a clean VERTICAL column on the axis, in add
   // order (stage 2 on top, then 3, 4 …); the group still centres and shrinks as
   // each new one joins (the first appears centred, then rises + shrinks).
-  const SIZE  = [1.14, 0.92, 1.34, 1.16, 0.82, 1.04];
+  const SIZE  = [1.04, 1.04, 1.04, 1.04, 1.04, 1.04];   // uniform fallback (matches the uniform-stack design)
   const DRIFT = [ 0, 0, 0, 0, 0, 0];
   const YJIT  = [ 0, 0, 0, 0, 0, 0];
 
@@ -766,11 +766,10 @@ function layoutSymbols() {
   // (shouldn't happen in practice) fall back to the fixed per-position variation.
   const FMAX = 1.3;   // scale factor at size 100 — halved (was 2.6): the first/biggest symbol was too large
   const sizeToFactor = (v) => (v / 100) * FMAX;
-  // A stable per-index size wobble (±~16%) on top of the time-based size, so the
-  // stack reads with a bit more variety instead of near-uniform discs. Deterministic
-  // (identical on the display, the editor iframe and the GIF), so nothing desyncs.
-  const vary = (i) => { const v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return 0.84 + 0.32 * (v - Math.floor(v)); };
-  const sc = active.map((s, i) => gs * vary(i) * (symbolSizes[i] != null ? sizeToFactor(symbolSizes[i]) : SIZE[i % SIZE.length]));
+  // UNIFORM stack by design: the size comes straight from the broadcast value
+  // (all stage symbols share one size). No per-index wobble — the only size
+  // variation is the user's editor pinch (edits[i].scale, applied in layout).
+  const sc = active.map((s, i) => gs * (symbolSizes[i] != null ? sizeToFactor(symbolSizes[i]) : SIZE[i % SIZE.length]));
 
   const cy = new Array(n);
   cy[0] = 0;

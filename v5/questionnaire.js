@@ -2529,12 +2529,11 @@ function advance(){
   }
   if(sym){
     st.chosenSymbols.push(sym);
-    // Size this symbol by how long the visitor spent in THIS stage — longer → bigger,
-    // so the times set the hierarchy (positions/order unchanged; layout keeps them
-    // from overlapping). Aligned with chosenSymbols.
+    // ALL stage symbols enter at the SAME size (uniform stack) — the only size
+    // variation is the user's own pinch in the editor (edits[i].scale, 0.8–1.2).
+    // Replaced the old time-in-stage hierarchy per the updated design.
     st.chosenSymbolSizes = st.chosenSymbolSizes || [];
-    const dt = performance.now() - (st._stageEnteredAt || performance.now());
-    st.chosenSymbolSizes.push(timeToSymbolSize(dt));
+    st.chosenSymbolSizes.push(UNIFORM_SYMBOL_SIZE);
   }
   broadcastArtifact();   // 3D display builds in parallel with the window below
 
@@ -2734,6 +2733,9 @@ function enterArtifactView(){
    colours could suddenly differ between the display and the editor page). */
 const JEWEL_PALETTE = ['#e2bc71', '#282828', '#ff5003', '#f5f5ed'];
 const JEWEL_DEFAULT_BG = '#282828';
+// Every stage symbol enters the jewel at this ONE size (0–100 scale; the engine
+// maps it to its internal factor). Uniform by design — only the editor pinch scales.
+const UNIFORM_SYMBOL_SIZE = 80;
 /* Per-symbol colours are PERSISTENT and belong to the SYMBOL: stored in
    st.chosenSymbolColors (aligned with chosenSymbols), so reordering symbols in
    the editor moves each colour WITH its symbol. A colour only ever changes when
