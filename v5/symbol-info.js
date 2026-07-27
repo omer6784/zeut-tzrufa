@@ -96,6 +96,47 @@ export const SYMBOL_INFO = {
     origin: 'אירלנד והמסורת הקלטית',
     meaning: 'עלה תלת-אונתי — סמל למזל טוב, לברכה ולתקווה.',
   },
+  // ── the authored North-African / Berber set (generated OBJs — tools/gen-symbols.mjs) ──
+  circle: {
+    name: 'עיגול',
+    origin: 'צפון אפריקה — הברברים',
+    meaning: 'צורה ללא התחלה וללא סוף — סמל לשלמות ולמחזוריות.',
+  },
+  bird: {
+    name: 'ציפור',
+    origin: 'צפון אפריקה',
+    meaning: 'סמל לנאמנות ולאהבת הבריות.',
+  },
+  sun: {
+    name: 'שמש קורנת',
+    origin: 'צפון אפריקה והברברים',
+    meaning: 'עיגול בתוך עיגול בתוך עיגול — סמל לחיוניות ולאנרגיה אלוהית.',
+  },
+  diamond: {
+    name: 'מעוין',
+    origin: 'צפון אפריקה והברברים',
+    meaning: 'מייצג את העין האנושית, ומשמש כהגנה מפני עין הרע.',
+  },
+  hexagram: {
+    name: 'כוכב משושה — חותם שלמה',
+    origin: 'צפון אפריקה',
+    meaning: 'הגנה מפני עין הרע, שמירה מפני רוחות ושדים, חוכמה — וכוחו של שלמה המלך.',
+  },
+  pentagram: {
+    name: 'פנטגרם — כוכב מחומש',
+    origin: 'צפון אפריקה',
+    meaning: 'סמל להגנה, לאיזון ולמזל.',
+  },
+  cowrie: {
+    name: 'צדף קאורי',
+    origin: 'אפריקה, הודו וצפון אפריקה',
+    meaning: 'סמל לפוריות, לשפע ולהגנה.',
+  },
+  snake: {
+    name: 'נחש',
+    origin: 'מצרים ויוון',
+    meaning: 'סמל לריפוי ולהתחדשות.',
+  },
   // Add more symbols here as they are registered.
 };
 

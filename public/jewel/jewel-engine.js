@@ -74,7 +74,18 @@ const PROFILES = {
   horseshoe:{ file: "horseshoe.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" },           // flat OBJ → depth-boosted; gentle sway
   spiral:   { file: "spiral.obj",    type: "shell", grid: 4.4, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // continuous Y spin
   moon:     { file: "moon.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "pendant" },                      // gentle sway
-  tiltan:   { file: "tiltan.obj",    type: "shell", grid: 4.6, dotSize: 3.4, targetSize: 300, motion: "spinY" }                         // continuous Y spin
+  tiltan:   { file: "tiltan.obj",    type: "shell", grid: 4.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // continuous Y spin
+  // ── authored (generated) symbols — North-African / Berber set. All are FLAT
+  //    extrusions (tools/gen-symbols.mjs), so zScale boosts their depth shading
+  //    like the horseshoe. Thin frame shapes get a denser sampling grid.
+  circle:   { file: "circle.obj",    type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // ring — wholeness
+  sun:      { file: "sun.obj",       type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pulse" },             // radiant sun — breathes
+  bird:     { file: "bird.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },
+  diamond:  { file: "diamond.obj",   type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Berber eye rhombus
+  hexagram: { file: "hexagram.obj",  type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Seal of Solomon
+  pentagram:{ file: "pentagram.obj", type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },
+  cowrie:   { file: "cowrie.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" },           // gentle sway
+  snake:    { file: "snake.obj",     type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" }
 };
 const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
 

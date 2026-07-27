@@ -48,6 +48,15 @@ const MOTIF_OBJ = {
   spiral:    '/spiral.obj',
   moon:      '/moon.obj',
   tiltan:    '/tiltan.obj',
+  // authored North-African / Berber set (generated — tools/gen-symbols.mjs)
+  circle:    '/circle.obj',
+  bird:      '/bird.obj',
+  sun:       '/sun.obj',
+  diamond:   '/diamond.obj',
+  hexagram:  '/hexagram.obj',
+  pentagram: '/pentagram.obj',
+  cowrie:    '/cowrie.obj',
+  snake:     '/snake.obj',
 };
 
 /* Per-motif contour overrides. Some OBJs are authored facing a side axis, so

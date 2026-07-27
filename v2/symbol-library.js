@@ -13,6 +13,26 @@ import { SYMBOL_INFO as IFACE_INFO } from '../v5/symbol-info.js';
 /* ── SVG artwork for each symbol — redesigned for true-to-life recognizability.
    All symbols use viewBox 0 0 40 40 and currentColor for theming. ── */
 const MOTIF_SVG = {
+  // ── the authored North-African / Berber set (icons for the generated OBJs) ──
+  // Radiant sun — a circle in a circle in a circle, with a core.
+  sunrings: '<circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+          + '<circle cx="20" cy="20" r="10" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+          + '<circle cx="20" cy="20" r="5.5" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+          + '<circle cx="20" cy="20" r="1.4" fill="currentColor"/>',
+  // Bird — a side-profile dove facing right: body, raised wing, beak, tail.
+  bird:     '<path d="M8,22 Q10,14 19,13 Q27,12 31,17 L36,19 L31,21 Q29,28 21,29 Q12,30 8,22 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>'
+          + '<path d="M17,14 Q15,7 20,4 Q22,9 21,13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>'
+          + '<path d="M9,22 L3,27 L4,20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>'
+          + '<circle cx="28" cy="17.5" r="0.9" fill="currentColor"/>',
+  // Cowrie shell — a portrait oval with the wavy mouth-slit and its teeth.
+  cowrie:   '<ellipse cx="20" cy="20" rx="11" ry="15" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+          + '<path d="M20,7.5 Q17.5,13 20,18 Q22.5,23 20,28 Q18.5,30.5 20,32.5" fill="none" stroke="currentColor" stroke-width="1.3"/>'
+          + '<path d="M17.8,12 L19.3,12.8 M17.6,17 L19.2,17.6 M21,22 L22.6,22.6 M20.6,26.6 L22.2,27.2" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
+  // Snake — an S-curved serpent with a round head and a flicking tongue.
+  snake:    '<path d="M12,35 Q6,30 12,25 Q18,20 14,15 Q10,9 17,6 Q22,4 26,7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'
+          + '<circle cx="28.5" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+          + '<path d="M31.5,10.5 L35,13 M35,13 L33.4,13.6 M35,13 L34.2,11.4" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
+
   // ── Pure geometric forms ──────────────────────────────────
   circle:   '<circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="1.4"/>',
   triangle: '<polygon points="20,6 35,33 5,33" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
@@ -456,6 +476,14 @@ const SYMBOL_INFO = {
    icon; pyramid reads as a triangle in 2D). ── */
 const BUILT = [
   { key: 'hamsa',     svg: 'hamsa' },
+  { key: 'circle',    svg: 'circle' },
+  { key: 'bird',      svg: 'bird' },
+  { key: 'sun',       svg: 'sunrings' },
+  { key: 'diamond',   svg: 'diamond' },
+  { key: 'hexagram',  svg: 'shatkona' },
+  { key: 'pentagram', svg: 'pentagram' },
+  { key: 'cowrie',    svg: 'cowrie' },
+  { key: 'snake',     svg: 'snake' },
   { key: 'eye',       svg: 'eye' },
   { key: 'scarab',    svg: 'scarab' },
   { key: 'anah',      svg: 'anah' },

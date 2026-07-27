@@ -422,7 +422,8 @@
       "Bash(curl -s -o r1.txt -w \"HTTP %{http_code}\\\\n\" -X POST \"https://zehut-tzrufa.com/.netlify/functions/send-gif\" -H \"Content-Type: application/json\" --data @small.json)",
       "Bash(curl -s -o r2.txt -w \"HTTP %{http_code}\\\\n\" -X POST \"https://zehut-tzrufa.com/.netlify/functions/send-gif\" -H \"Content-Type: application/json\" --data @mid.json)",
       "Bash(awk '/^\\\\.ed-jewel *\\\\{/,/\\\\}/' v5/styles.css)",
-      "Bash(awk '/^#editor-view \\\\{/,/\\\\}/' v5/styles.css)"
+      "Bash(awk '/^#editor-view \\\\{/,/\\\\}/' v5/styles.css)",
+      "Bash(node tools/gen-symbols.mjs)"
     ]
   },
   "hooks": {

@@ -238,6 +238,53 @@ export const SYMBOLS_3D = {
     },
   },
 
+  /* ── the authored North-African / Berber set — generated flat OBJs
+        (tools/gen-symbols.mjs), all SHELL-sampled like the rest. ── */
+  circle: {
+    obj: '/circle.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.y = tMs * 0.0006; },                 // continuous spin
+  },
+  bird: {
+    obj: '/bird.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.y = Math.sin(tMs * 0.0012) * 0.6; }, // swayY
+  },
+  sun: {
+    obj: '/sun.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => {                                                    // breathing pulse
+      const p = (Math.sin(tMs * 0.0027 - Math.PI / 2) + 1) / 2;
+      const s = 1 + 0.2 * p;
+      obj.scale.set(s, s, s);
+    },
+  },
+  diamond: {
+    obj: '/diamond.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.y = tMs * 0.0006; },                 // continuous spin
+  },
+  hexagram: {
+    obj: '/hexagram.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.y = tMs * 0.0006; },                 // continuous spin
+  },
+  pentagram: {
+    obj: '/pentagram.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.y = tMs * 0.0006; },                 // continuous spin
+  },
+  cowrie: {
+    obj: '/cowrie.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.z = Math.sin(tMs * 0.0022) * 0.14; },// gentle pendant sway
+  },
+  snake: {
+    obj: '/snake.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.y = Math.sin(tMs * 0.0012) * 0.6; }, // swayY
+  },
+
   /* Add more symbols here — one card each: obj + sampler + sample + color +
      dotSize + its own animate. */
 };
