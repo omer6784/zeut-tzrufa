@@ -648,23 +648,14 @@ function applySymbolColor(s, i) {
 
 function setBackground(hex) {
   if (!hex) return;
-  const prev = COLOR_EXCLUDE;
   COLOR_EXCLUDE = hex;                  // symbols use the OTHER 3 palette colours
-  // Any AUTO-coloured symbol that now matches the background (so it would blend
-  // into it) takes the colour the background just vacated — the one palette
-  // colour that wasn't on the jewel before. (Symbols the user manually recoloured
-  // keep their choice.)
-  if (prev && prev !== hex) {
-    const t = color(hex);
-    const tr = red(t), tg = green(t), tb = blue(t);
-    order.forEach((s, i) => {
-      const userSet = symbolEdits[i] && symbolEdits[i].color;
-      if (!userSet && Math.abs(s.cr - tr) < 4 && Math.abs(s.cg - tg) < 4 && Math.abs(s.cb - tb) < 4) {
-        s.assignedColor = prev;
-        const c = color(prev); s.cr = red(c); s.cg = green(c); s.cb = blue(c);
-      }
-    });
-  }
+  // Re-derive every auto colour from the NEW background pool (the deterministic
+  // i % 3 rule). This replaced the old "recolour only the symbols that now blend
+  // into the background" pass, whose result depended on the ORDER the background
+  // and the symbols happened to arrive in — the display (accumulating stage by
+  // stage) and the editor iframe (everything at once) ended up with different
+  // colours from the very same data. Now both converge on the identical set.
+  recomputeAutoColors();
   // The DISPLAY page shows the chosen colour as its background; the canvas stays
   // transparent (RENDER_BG null) so the centre line — behind the jewel — shows
   // through the gaps. The centre-line colour is owned by display.js (the
@@ -686,25 +677,25 @@ function addSymbol(key) {
   s.visible = 0;
   s.activatedTick = tick;
   order.push(s);
-  assignSymbolColor(s);
+  // Deterministic per-index bob phase (was random(1000)) — the display, the editor
+  // iframe and the GIF capture all give symbol i the same phase.
+  { const i = order.length - 1, v = Math.sin(i * 91.7 + 47.3) * 43758.5453; s.rotOffset = (v - Math.floor(v)) * 1000; }
+  recomputeAutoColors();
   layoutSymbols();
 }
 
-/* colour a new symbol from the 3 non-background palette colours (least used) */
-function assignSymbolColor(s) {
+/* Colour ALL symbols deterministically: index i → pool[i % 3], where pool is the
+   fixed-order palette minus the background. The SAME rule runs in every renderer
+   (the display, the editor's display iframe, the GIF capture iframe), with no
+   per-instance randomness and no dependence on the ORDER things arrived in — so
+   identical artifact data always yields identical colours everywhere. User-edited
+   colours (symbolEdits[i].color) still override via applySymbolColor. */
+function recomputeAutoColors() {
   const pool = PALETTE_LIST.filter(c => c !== COLOR_EXCLUDE);
-  const counts = {};
-  pool.forEach(c => (counts[c] = 0));
-  for (const o of order) {
-    if (o !== s && o.assignedColor && counts[o.assignedColor] != null) counts[o.assignedColor]++;
-  }
-  let min = Infinity;
-  pool.forEach(c => { if (counts[c] < min) min = counts[c]; });
-  const cands = pool.filter(c => counts[c] === min);
-  const chosen = cands[floor(random(cands.length))];
-  s.assignedColor = chosen;
-  const col = color(chosen);
-  s.cr = red(col); s.cg = green(col); s.cb = blue(col);
+  order.forEach((s, i) => {
+    s.assignedColor = pool[i % pool.length];
+    applySymbolColor(s, i);
+  });
 }
 
 /* ---- composition layout (accumulate, shrink, hug the axis) ------------- */
