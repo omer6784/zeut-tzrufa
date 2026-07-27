@@ -54,7 +54,7 @@ body:has(.name-stage) #virtual-keyboard {
   right: auto !important;
   transform: translateX(-50%) !important;
   bottom: calc(768px - 726 * var(--sy) + 30px) !important;
-  width: clamp(440px, 50vw, 620px) !important;
+  width: clamp(640px, 72vw, 880px) !important;
 }
 
 #virtual-keyboard .vk-row {
