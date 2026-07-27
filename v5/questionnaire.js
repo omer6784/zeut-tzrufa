@@ -1508,7 +1508,7 @@ function _renderQuestionImpl(idx){
       onAbsorb: (dotEl) => commitWord(dotEl),
       revealDelay: GATE_AT,          // the dotted gate circle fades in with the build
     });
-    setTimeout(() => runWordDemo(), 2600);   // ghost-hand demo once the dots + gate are in
+    lockInput(); setTimeout(() => runWordDemo(), 2600);   // ghost-hand demo once the dots + gate are in
   } else if(q.type==='choice'){
     wrap.innerHTML=`<div id="q-choices">${q.choices.map(c=>`<button class="choice-btn" data-value="${c}">${c}</button>`).join('')}</div>`;
     document.querySelectorAll('.choice-btn').forEach(btn=>{
@@ -1626,7 +1626,7 @@ function _renderQuestionImpl(idx){
       const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
       pT(() => { if (pg) pg.classList.add('paths-shrunk'); }, 1200);
       pT(() => { if (ptitle) ptitle.classList.add('is-in'); }, 1950);
-      pT(() => runMazeDemo(), 2400);   // ghost-hand demo once the maze has settled
+      lockInput(); pT(() => runMazeDemo(), 2400);   // ghost-hand demo once the maze has settled
     }
   } else if(q.type==='time'){
     wrap.innerHTML = '';
@@ -1647,7 +1647,7 @@ function _renderQuestionImpl(idx){
       // An hour is always selected → the band button is ready at once; it drives
       // the wheel's (now hidden) "זו השעה שלי" confirm.
       armBand(() => document.querySelector('.tw-confirm')?.click());
-      setTimeout(() => runTimeDemo(), 1500);   // ghost-hand demo once the wheel settles
+      lockInput(); setTimeout(() => runTimeDemo(), 1500);   // ghost-hand demo once the wheel settles
     }
   } else if(q.type==='word-grid'){
     // Replaced the yellow letter grid with 8 animated dot tiles — the user picks
@@ -1679,7 +1679,7 @@ function _renderQuestionImpl(idx){
       },
     });
     // Entrance stagger finishes, then the ghost-hand demo plays (tap a tile → "המשך").
-    setTimeout(() => runTilesDemo(), st._dotTiles.appearMs + 500);
+    lockInput(); setTimeout(() => runTilesDemo(), st._dotTiles.appearMs + 500);
 
   } else if(q.type==='drive'){
     // "מה תחום העיסוק שלך?" — 8 profession-category cards; a tap picks the field,
@@ -1697,7 +1697,7 @@ function _renderQuestionImpl(idx){
         armBand(advance);              // light up "המשך"; the press continues
       },
     });
-    setTimeout(() => runProfDemo(), 1400);   // after the cards have entered
+    lockInput(); setTimeout(() => runProfDemo(), 1400);   // after the cards have entered
   } else if(q.type==='placeholder'){
     // Empty placeholder stage — the shared grid/frame stays, no middle content.
     wrap.innerHTML='';
