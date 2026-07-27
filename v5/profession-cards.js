@@ -135,7 +135,7 @@ export function mountProfessionCards(host, { onSelect } = {}) {
       if (!c.W) { size(c); if (!c.W) continue; }
       const ctx = c.ctx; ctx.clearRect(0, 0, c.W, c.H);
       ctx.fillStyle = DOTC;
-      const cx = c.W / 2, cy = c.H / 2, S = Math.min(c.W, c.H) * 0.33, b = Math.max(0.9, S * 0.030);
+      const cx = c.W / 2, cy = c.H / 2, S = Math.min(c.W, c.H) * 0.39, b = Math.max(0.9, S * 0.030);
       const D = [];
       CATS[c.i].draw(D, cx, cy, S, b, t);
       ctx.beginPath();

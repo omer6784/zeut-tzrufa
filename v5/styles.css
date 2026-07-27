@@ -1354,30 +1354,30 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  column-gap: clamp(2px, 4px, 6px);
-  row-gap: 0px;
-  width: 58%; height: 54%; max-height: 340px;   /* tighter — symbols sit closer together */
+  column-gap: clamp(4px, 6px, 10px);
+  row-gap: 2px;
+  width: 66%; height: 60%; max-height: 380px;   /* slightly larger container to frame bigger symbols */
 }
 .prof-card {
   position: relative;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 0px;
+  gap: 2px;
   /* No plate — the cards float directly on the orange stage. */
   cursor: pointer; pointer-events: auto;
   opacity: 0; transform: translateY(14px);
   transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .prof-card.is-in { opacity: 1; transform: translateY(0); }
-.prof-icon { width: 36%; aspect-ratio: 1 / 1; display: block; }
+.prof-icon { width: 48%; aspect-ratio: 1 / 1; display: block; }
 .prof-label {
   font-family: 'ArbelG', sans-serif; color: #f5f5ed;
-  font-size: clamp(9.5px, 11px, 12.5px); letter-spacing: 0.02em;
+  font-size: clamp(11.5px, 13.5px, 15.5px); letter-spacing: 0.02em;
   direction: rtl; text-align: center;
 }
 .prof-card.is-dimmed { opacity: 0.42; }
 .prof-card.is-selected { transform: translateY(0) scale(1.1); z-index: 2; }
-/* Lift the SECOND row of categories 4px */
-.prof-card:nth-child(n + 5) { top: -4px; }
+/* Lift the SECOND row of categories 6px */
+.prof-card:nth-child(n + 5) { top: -6px; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {
