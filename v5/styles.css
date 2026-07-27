@@ -6573,6 +6573,13 @@ html:not(.cursor-active) *::after {
 #section-3[data-stage="2"] .stage-band .sb-btn:not(.is-disabled) {
   animation: dotted-frame-breathe 1.8s ease-in-out infinite !important;
 }
+/* Tiles stage: the tile grid is RAISED 80px (top:-80), so a real TILE
+   (pointer-events:auto, inside #middle-q-container, z-index 10) overlaps the
+   top-left button area — painting over it AND swallowing its clicks, since the
+   whole band stacks at z-index 9. Raise the band above the middle container on
+   this stage; the band itself is pointer-events:none, so only the button (and
+   nothing else) becomes interactive above the tiles. */
+#section-3[data-stage="2"] .stage-band { z-index: 30; }
 @keyframes sb-btn-breathe {
   0%, 100% { transform: translateX(-50%) scale(1); }
   50%      { transform: translateX(-50%) scale(1.06); }
