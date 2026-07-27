@@ -133,14 +133,28 @@ export function mountCompletion({ } = {}) {
     });
     if (!frames.length) throw new Error('no frames');
     const { GIFEncoder, quantize, applyPalette } = await import('gifenc');
-    const enc = GIFEncoder();
-    for (const f of frames) {
-      const palette = quantize(f.data, 256);
-      const index = applyPalette(f.data, palette);
-      enc.writeFrame(index, f.w, f.h, { palette, delay: 66 });
+    // Netlify synchronous functions reject request bodies over ~6MB (verified:
+    // a 4MB body reaches the function, a 7MB one dies with a generic 500 before
+    // it runs). Doubling the GIF length pushed the base64 payload past that —
+    // which is why sending failed. Encode at full quality first; if the result
+    // is too big, re-encode with every 2nd frame at double the delay (SAME total
+    // duration, half the data), repeating until it fits.
+    const BINARY_LIMIT = 4.4 * 1024 * 1024;   // ×4/3 as base64 ≈ 5.9MB body < 6MB cap
+    let step = 1, delay = 66, bytes = null;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const enc = GIFEncoder();
+      for (let i = 0; i < frames.length; i += step) {
+        const f = frames[i];
+        const palette = quantize(f.data, 256);
+        const index = applyPalette(f.data, palette);
+        enc.writeFrame(index, f.w, f.h, { palette, delay });
+      }
+      enc.finish();
+      bytes = enc.bytes();
+      if (bytes.length <= BINARY_LIMIT) break;
+      step *= 2; delay *= 2;
     }
-    enc.finish();
-    return bytesToBase64(enc.bytes());
+    return bytesToBase64(bytes);
   }
 
   sendBtn.addEventListener('click', async () => {
