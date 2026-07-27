@@ -425,7 +425,9 @@
       "Bash(awk '/^#editor-view \\\\{/,/\\\\}/' v5/styles.css)",
       "Bash(node tools/gen-symbols.mjs)",
       "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" -X POST \"https://zehut-tzrufa.com/.netlify/functions/send-gif\" -H \"Content-Type: application/json\" -d '{\"email\":\"probe@example.com\",\"gif\":\"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\"}')",
-      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" -X POST \"https://zehut-tzrufa.com/.netlify/functions/send-gif\" -H \"Content-Type: application/json\" -d '{\"email\":\"zehut.probe.doesnotexist987@gmail.com\",\"gif\":\"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\"}')"
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" -X POST \"https://zehut-tzrufa.com/.netlify/functions/send-gif\" -H \"Content-Type: application/json\" -d '{\"email\":\"zehut.probe.doesnotexist987@gmail.com\",\"gif\":\"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\"}')",
+      "Bash(awk '/function init|requestAnimationFrame/ {print NR\": \"$0}' v5/app.js)",
+      "Bash(awk -F: '$1 > 4287 {print}')"
     ]
   },
   "hooks": {

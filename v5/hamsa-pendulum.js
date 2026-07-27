@@ -146,6 +146,13 @@ export function mountHamsaPendulum(container) {
       [60, 240, 600, 1000].forEach(ms => setTimeout(() => { if (buildCordDots()) cordCalibrated = true; }, ms));
       // Expose the sketch so a recorder can force a render if needed.
       if (STORY_MODE) window.__pend = p;
+      // The pendulum lives on the OPENING screen only; every route back there is
+      // a full page reload. Once the morph into the questionnaire lands, stop the
+      // draw loop for good — this is a 1300×1900 WEBGL canvas re-plotting
+      // thousands of dots every frame behind a hidden section.
+      if (!STORY_MODE) window.addEventListener('opening-morph-done', () => {
+        setTimeout(() => { try { p.noLoop(); } catch (_) {} }, 2000);
+      }, { once: true });
     };
 
     // One dotted BALL at the pupil (story mode): several CONCENTRIC Fibonacci

@@ -1246,6 +1246,11 @@ function _renderQuestionImpl(idx){
   if (st._lightGateTeardown) { try { st._lightGateTeardown(); } catch (_) {} st._lightGateTeardown = null; }
   if (st._calibTeardown) { try { st._calibTeardown(); } catch (_) {} st._calibTeardown = null; }
   if (st._driveTeardown) { try { st._driveTeardown(); } catch (_) {} st._driveTeardown = null; }
+  // These two only tore down when RE-entering their own stage, so after passing
+  // them their animation loops kept running (28 detached tile canvases redrawn +
+  // the time wheel ticking) for the REST of the session. Stop them on ANY switch.
+  if (st._dotTiles) { try { st._dotTiles.teardown(); } catch (_) {} st._dotTiles = null; }
+  if (st._timeTeardown) { try { st._timeTeardown(); } catch (_) {} st._timeTeardown = null; }
   if (st._originBandPoll) { clearInterval(st._originBandPoll); st._originBandPoll = null; }
   document.getElementById('section-3')?.classList.remove('origin-input-phase');
   if (st._lightEntryTimers) { st._lightEntryTimers.forEach(clearTimeout); st._lightEntryTimers = []; }

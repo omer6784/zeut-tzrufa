@@ -1156,18 +1156,23 @@ export function initRootsWidget(container, opts){
   }
 
   let alive=true;
+  let detachedFrames=0;
   function frame(){
     if(!alive){ return; }
     // The canvas may be momentarily detached while a stage transition swaps the
     // central content in/out of the DOM. Don't kill the loop for that — only
     // retire it once a DIFFERENT roots-canvas has taken our place (a new geo
-    // stage was mounted). Otherwise keep polling and resume drawing on reattach.
+    // stage was mounted), or once it has clearly been LEFT BEHIND (detached for
+    // several seconds straight — the visitor moved to another stage; without
+    // this the poll ticked every frame for the rest of the session).
     if(!document.body.contains(canvas)){
       const current=document.querySelector('.roots-canvas');
       if(current && current!==canvas){ alive=false; ro.disconnect(); return; }
+      if(++detachedFrames > 240){ alive=false; ro.disconnect(); return; }
       requestAnimationFrame(frame);
       return;
     }
+    detachedFrames=0;
     if(state.phase==='globe'){
       if(!state.dragging) state.rot += 0.0028;   // gentle auto-spin while idle; the user's drag takes over
       drawGlobe();

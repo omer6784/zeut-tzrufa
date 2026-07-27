@@ -790,6 +790,10 @@ function initOrganicFloat() {
   const mouseLerp = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
   function tick(ts) {
+    // Opening-only decoration (parallax float + XYZ readout): once the opening is
+    // gone for good, stop — this loop wrote several DOM transforms + three
+    // textContents EVERY frame behind the entire questionnaire.
+    if (openingLoopsDone) return;
     const targetMouseX = mouse.x === -999 ? window.innerWidth / 2 : mouse.x;
     const targetMouseY = mouse.y === -999 ? window.innerHeight / 2 : mouse.y;
     mouseLerp.x += (targetMouseX - mouseLerp.x) * 0.08;
@@ -1469,6 +1473,7 @@ function initTitleScene3D() {
 
   const clock = new THREE.Clock();
   (function animate() {
+    if (openingLoopsDone) return;   // opening hidden for good → stop this render loop
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
 
@@ -1563,6 +1568,7 @@ function initScene3D() {
 
   const clock = new THREE.Clock();
   (function animate() {
+    if (openingLoopsDone) return;   // opening hidden for good → stop this render loop
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
     if (model) {
@@ -1689,6 +1695,7 @@ function initHamsaScene3D() {
 
   const clock = new THREE.Clock();
   (function animate() {
+    if (openingLoopsDone) return;   // opening hidden for good → stop this render loop
     requestAnimationFrame(animate);
     const t = clock.getElapsedTime();
     if (model) {
@@ -1701,6 +1708,19 @@ function initHamsaScene3D() {
     renderer.render(scene, camera);
   })();
 }
+
+/* ─── Opening-screen render gate ─────────────────────────────
+   The landing runs THREE always-on render loops (the 3D logotype scene, the
+   small GLB hamsa scene, and the organic-float parallax that also rewrites the
+   XYZ readout every frame). Once the visitor presses "לחץ להתחלה" section-1 is
+   hidden for good — every route back to the opening is a full page reload
+   (idle reset / "חזרה למסך הפתיחה") — so these loops can STOP permanently
+   instead of burning CPU/GPU behind the whole questionnaire. A 2s grace after
+   'opening-morph-done' lets the morph transition finish on screen first. */
+let openingLoopsDone = false;
+window.addEventListener('opening-morph-done', () => {
+  setTimeout(() => { openingLoopsDone = true; }, 2000);
+}, { once: true });
 
 /* ─── Boot ───────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {

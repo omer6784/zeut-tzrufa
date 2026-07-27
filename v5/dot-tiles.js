@@ -281,6 +281,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     tl.canvas.width = Math.round(r.width * dpr); tl.canvas.height = Math.round(r.height * dpr);
     tl.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     tl.cache = null;
+    tl.settledPaint = false;   // resized → repaint the settled frame once
   }
   const sizeAll = () => tiles.forEach(sizeTile);
   sizeAll();
@@ -290,13 +291,13 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   function setSelected(i) {
     if (chosen >= 0) return;
     selected = i;
-    tiles.forEach(o => o.cell.classList.toggle('is-selected', o.i === i));
+    tiles.forEach(o => { o.cell.classList.toggle('is-selected', o.i === i); o.settledPaint = false; });
     if (onSelect) onSelect(i, TILES[i].meaning);
   }
   function deselect() {
     if (chosen >= 0) return;
     selected = -1;
-    tiles.forEach(o => o.cell.classList.remove('is-selected'));
+    tiles.forEach(o => { o.cell.classList.remove('is-selected'); o.settledPaint = false; });
   }
 
   function frame(now) {
@@ -307,17 +308,25 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       // selected/chosen; only its MOTION (not its brightness) marks the pick.
       const aTarget = appeared ? 1 : 0;
       tl.alpha += (aTarget - tl.alpha) * 0.16;
+      // STATIC by default; only the tile the visitor TAPPED (selected) shows its
+      // movement — no hover. The confirming tile also animates.
+      const animated = (tl.i === selected || tl.i === chosen);
+      // A settled static tile is pixel-identical every frame — skip its redraw
+      // entirely (28 medallions × hundreds of arcs per frame otherwise). It is
+      // repainted once (tl.settledPaint) and again only when its state changes
+      // (select/deselect/resize reset settledPaint below).
+      const settled = appeared && Math.abs(1 - tl.alpha) < 0.005;
+      if (settled) tl.alpha = 1;
+      if (!animated && settled && tl.settledPaint) continue;
       const ctx = tl.ctx;
       ctx.clearRect(0, 0, tl.W, tl.H);
       ctx.globalAlpha = tl.alpha;
       ctx.fillStyle = tl.dotColor;   // dark dots on the yellow plate
-      // STATIC by default; only the tile the visitor TAPPED (selected) shows its
-      // movement — no hover. The confirming tile also animates.
-      const animated = (tl.i === selected || tl.i === chosen);
       const localT = tl.frozen ? tl.frozenT : (animated ? t : STATIC_T);
       TILES[tl.i].draw(ctx, tl, localT);
       if (tl.i === chosen && tl.confirmT >= 0) { ctx.globalAlpha = tl.alpha; drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS)); }
       ctx.globalAlpha = 1;
+      tl.settledPaint = !animated && settled;
     }
     raf = requestAnimationFrame(frame);
   }
