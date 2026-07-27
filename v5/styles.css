@@ -1346,6 +1346,7 @@ body::-webkit-scrollbar-thumb {
   position: fixed;
   left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
   top: calc(85 * var(--sy)); bottom: calc(768px - 726 * var(--sy));
+  transform: translateY(-50px);
   display: flex; align-items: center; justify-content: center;
   z-index: 8; pointer-events: none;
 }
@@ -1353,9 +1354,9 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  column-gap: clamp(6px, 10px, 14px);
-  row-gap: clamp(2px, 4px, 8px);
-  width: 76%; height: 72%; max-height: 480px;   /* tighter — symbols sit closer together */
+  column-gap: clamp(4px, 6px, 10px);
+  row-gap: clamp(0px, 2px, 4px);
+  width: 66%; height: 62%; max-height: 400px;   /* tighter — symbols sit closer together */
 }
 .prof-card {
   position: relative;
@@ -1367,16 +1368,16 @@ body::-webkit-scrollbar-thumb {
   transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .prof-card.is-in { opacity: 1; transform: translateY(0); }
-.prof-icon { width: 42%; aspect-ratio: 1 / 1; display: block; }
+.prof-icon { width: 40%; aspect-ratio: 1 / 1; display: block; }
 .prof-label {
   font-family: 'ArbelG', sans-serif; color: #f5f5ed;
-  font-size: clamp(10px, 12px, 14px); letter-spacing: 0.02em;
+  font-size: clamp(10px, 11.5px, 13px); letter-spacing: 0.02em;
   direction: rtl; text-align: center;
 }
 .prof-card.is-dimmed { opacity: 0.42; }
 .prof-card.is-selected { transform: translateY(0) scale(1.1); z-index: 2; }
-/* Lift the SECOND row of categories 15px */
-.prof-card:nth-child(n + 5) { top: -15px; }
+/* Lift the SECOND row of categories 8px */
+.prof-card:nth-child(n + 5) { top: -8px; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {
