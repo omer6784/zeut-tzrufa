@@ -1354,30 +1354,30 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  column-gap: clamp(4px, 6px, 10px);
-  row-gap: clamp(0px, 2px, 4px);
-  width: 66%; height: 62%; max-height: 400px;   /* tighter — symbols sit closer together */
+  column-gap: clamp(2px, 4px, 6px);
+  row-gap: 0px;
+  width: 58%; height: 54%; max-height: 340px;   /* tighter — symbols sit closer together */
 }
 .prof-card {
   position: relative;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 2px;
+  gap: 0px;
   /* No plate — the cards float directly on the orange stage. */
   cursor: pointer; pointer-events: auto;
   opacity: 0; transform: translateY(14px);
   transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .prof-card.is-in { opacity: 1; transform: translateY(0); }
-.prof-icon { width: 40%; aspect-ratio: 1 / 1; display: block; }
+.prof-icon { width: 36%; aspect-ratio: 1 / 1; display: block; }
 .prof-label {
   font-family: 'ArbelG', sans-serif; color: #f5f5ed;
-  font-size: clamp(10px, 11.5px, 13px); letter-spacing: 0.02em;
+  font-size: clamp(9.5px, 11px, 12.5px); letter-spacing: 0.02em;
   direction: rtl; text-align: center;
 }
 .prof-card.is-dimmed { opacity: 0.42; }
 .prof-card.is-selected { transform: translateY(0) scale(1.1); z-index: 2; }
-/* Lift the SECOND row of categories 8px */
-.prof-card:nth-child(n + 5) { top: -8px; }
+/* Lift the SECOND row of categories 4px */
+.prof-card:nth-child(n + 5) { top: -4px; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {
@@ -6492,6 +6492,10 @@ html:not(.cursor-active) *::after {
 /* Path stage sits on the interface ORANGE — the orange note would be invisible,
    so flip it to cream there. */
 #section-3[data-stage="5"] .stage-band .sb-note { color: #f5f5ed; }
+/* Stage 4 (occupation stage): raise "המשך" button 50px higher */
+#section-3[data-stage="4"] .stage-band .sb-btn {
+  bottom: calc(80 * var(--sy) + 50px) !important;
+}
 .stage-band .sb-btn {
   position: absolute; left: 50%; bottom: calc(80 * var(--sy));    /* ABOVE the bottom grid line (y726) */
   transform: translateX(-50%);
