@@ -2446,6 +2446,18 @@ function mountNameStage(host, initial){
     caret.className = 'ns-caret';
     lettersEl.appendChild(caret);
     st.gematriaValue = calcGematria(inp.value);
+    const totalEl = root.querySelector('.ns-total');
+    if (totalEl) {
+      const gVal = st.gematriaValue || 0;
+      if (gVal > 0) {
+        totalEl.innerHTML = String(gVal).split('').map(d =>
+          `<span style="--d:url('/image/v5-stage6/${d}.png')"></span>`).join('');
+        totalEl.classList.add('is-on');
+      } else {
+        totalEl.innerHTML = '';
+        totalEl.classList.remove('is-on');
+      }
+    }
     // Long names: step the letterforms down so the row stays on the line.
     const n = chars.length;
     root.style.setProperty('--ns-letter-size', n > 16 ? '30px' : n > 10 ? '38px' : '');

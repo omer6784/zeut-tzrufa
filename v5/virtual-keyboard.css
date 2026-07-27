@@ -48,12 +48,12 @@ body:has(#section-3.origin-input-phase) #virtual-keyboard:not(.vk-hidden) {
   transform-origin: right bottom;
 }
 
-/* Name stage: slightly shrunk keyboard with smaller letters inside */
+/* Name stage: slightly shrunk keyboard raised 50px higher */
 body:has(.name-stage) #virtual-keyboard {
   left: calc(100 * var(--sx) + 40px) !important;
   right: calc(100 * var(--sx) + 40px) !important;
   transform: none !important;
-  bottom: calc(768px - 726 * var(--sy) + 16px) !important;
+  bottom: calc(768px - 726 * var(--sy) + 66px) !important;
   width: auto !important;
   max-width: none !important;
   padding: 8px clamp(8px, 1.2vw, 14px) !important;
