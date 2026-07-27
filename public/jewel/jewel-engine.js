@@ -177,7 +177,7 @@ function setup() {
 
   window.__jewel = {
     setSymbols, reset, setBackground, setGematria, applyEdits, setGallery, setSymbolSizes,
-    setSymbolColors, getLayout,
+    setSymbolColors, getLayout, setHighlight,
     isReady: () => finishedBuildingAll,
     captureFrames
   };
@@ -288,7 +288,34 @@ function draw() {
   }
 
   drawOrnament();
+  drawHighlightRing();
   if (_cap) _captureTick();
+}
+
+/* ---- editor selection ring -------------------------------------------------
+   A dotted ellipse around the tapped symbol (setHighlight), in the dot language.
+   Colour picked for contrast against the background. */
+let highlightIndex = null;
+function setHighlight(i) { highlightIndex = (i == null || i < 0) ? null : i; }
+function drawHighlightRing() {
+  if (highlightIndex == null) return;
+  const s = order[highlightIndex];
+  if (!s || !s.active) return;
+  const onLight = COLOR_EXCLUDE === PALETTE.cream || COLOR_EXCLUDE === PALETTE.tan;
+  const col = color(onLight ? PALETTE.dark : PALETTE.cream);
+  const rx = s.halfW * (s.ts || s.s || 1) * 1.18 + 34;
+  const ry = s.halfH * (s.ts || s.s || 1) * 1.18 + 34;
+  push();
+  stroke(red(col), green(col), blue(col), 235);
+  strokeWeight(7);
+  beginShape(POINTS);
+  const N = 44;
+  for (let k = 0; k < N; k++) {
+    const a = (k / N) * Math.PI * 2;
+    vertex(s.x + rx * Math.cos(a), s.y + ry * Math.sin(a), 0);
+  }
+  endShape();
+  pop();
 }
 
 /* ---- Moroccan floral dot-ornament that frames the jewel --------------------
@@ -632,11 +659,16 @@ function setSymbols(keys) {
    canvas height + each symbol's TARGET centre-y and scaled half-height, in order. */
 function getLayout() {
   return {
+    w: width,
     h: height,
+    // The gematria ornament rectangle (world px) — the editor's "tap the frame"
+    // hit band. `on` is false before the name stage sets a gematria.
+    ornament: { hw: 450, hh: 900, on: gematria > 0 },
     items: order.map(s => ({
       key: s.key,
       y: (s.ty != null ? s.ty : s.y),
       hh: s.halfH * (s.ts || s.s || 1),
+      hw: s.halfW * (s.ts || s.s || 1),
     })),
   };
 }
@@ -648,6 +680,7 @@ function reset() {
   gematria = 0; ornamentDots = [];
   symbolEdits = []; frameColorOverride = null;
   symbolColorsData = [];
+  highlightIndex = null;
 }
 
 /* Apply the editor's manual tweaks: per-symbol { scale, dx, dy, color } (indexed
