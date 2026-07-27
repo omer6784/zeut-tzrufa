@@ -37,8 +37,8 @@
    inside the grid rectangle. Scoped via body:has() so the name-stage keyboard —
    which shares this element (appended to <body>) — keeps its own docked position. */
 body:has(#section-3.origin-input-phase) #virtual-keyboard {
-  right: calc(100 * var(--sx) + 110px);   /* 40 further left (was +70) */
-  bottom: calc(768px - 726 * var(--sy) + 84px);   /* 20 further up (was +64) */
+  right: calc(100 * var(--sx) + 100px);   /* 10 further right (was +110) */
+  bottom: calc(768px - 726 * var(--sy) + 94px);   /* 10 further up (was +84) */
 }
 /* Enlarge it a touch. Scoped to :not(.vk-hidden) so the .vk-hidden slide-out
    (translateY 110%) still wins when the keyboard is dismissed. Grows up-left from

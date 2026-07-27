@@ -442,10 +442,12 @@ function buildGallery() {
     const cx = -W / 2 + cellW * (c + 0.5);
     const cy = -H / 2 + cellH * (r + 0.5);
     const innerW = cellW - GALLERY_GAP, innerH = cellH - GALLERY_GAP;
-    // Scatter the background so no column lines up on one colour.
+    // Scatter the background so no two ADJACENT cards (horizontal or vertical)
+    // share a colour — a varied mosaic. This formula already differs per step in
+    // both axes; triggerSwap keeps the invariant when a card later swaps.
     const bg = GALLERY_BG_PAL[(c + r * 2 + ((r % 2) ? 1 : 0)) % GALLERY_BG_PAL.length];
     const card = buildCard(idx, cx, cy, innerW, innerH, bg, galleryPool[idx % galleryPool.length], 56 + (idx * 11) % 150);
-    if (card) cards.push(card);
+    if (card) { card.c = c; card.r = r; cards.push(card); }
   }
   galleryCards = cards;
   gallerySwapAt = (typeof millis === 'function') ? millis() : 0;
@@ -464,10 +466,24 @@ function triggerSwap() {
   let keys = null;
   for (let t = 0; t < 12 && !keys; t++) { const cand = galleryPool[Math.floor(random(galleryPool.length))]; if (cand.join(',') !== cur) keys = cand; }
   if (!keys) return;
-  // A completely different talisman: also switch to a different background colour.
-  const bgs = GALLERY_BG_PAL.filter(b => b !== card.bg);
+  // A completely different talisman: also switch to a different background colour —
+  // one that differs from this card's own AND from its 4-neighbours, so adjacent
+  // cards never share a background (keeps the mosaic varied after swaps too).
+  const nb = neighborBgs(card);
+  let bgs = GALLERY_BG_PAL.filter(b => b !== card.bg && !nb.includes(b));
+  if (!bgs.length) bgs = GALLERY_BG_PAL.filter(b => b !== card.bg);   // fallback: at least not itself
   const bg = bgs[Math.floor(random(bgs.length))];
   card.swap = { stage: 'out', t0: millis(), keys, bg, gem: 40 + Math.floor(random(160)) };
+}
+// Background colours of a card's horizontal/vertical neighbours in the mosaic.
+function neighborBgs(card) {
+  const out = [];
+  for (const o of galleryCards) {
+    if (o === card) continue;
+    if ((o.r === card.r && Math.abs(o.c - card.c) === 1) ||
+        (o.c === card.c && Math.abs(o.r - card.r) === 1)) out.push(o.bg);
+  }
+  return out;
 }
 function galleryTick() {
   if (!galleryCards || !galleryCards.length) return;
