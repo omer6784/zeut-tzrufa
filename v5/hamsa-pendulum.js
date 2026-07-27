@@ -339,7 +339,23 @@ export function mountHamsaPendulum(container) {
     // frame before layout), so the caller can fall back and retry.
     function computeCordTopY() {
       if (!canvasEl) return null;
+      // The container is ROTATED (-6° on the landing). getBoundingClientRect returns
+      // the rotated box's AABB, which breaks the screen→canvas mapping (the cord fell
+      // short of the grid line). Measure the UNROTATED box instead (transform off for
+      // one read; transform-origin is top-center, so the untransformed top is the
+      // rotation pivot's y), and divide the screen distance by cosθ — the on-cord
+      // distance to the target is longer than its vertical projection.
+      const cont = canvasEl.parentElement;
+      let cosT = 1;
+      try {
+        const m = new DOMMatrix(getComputedStyle(cont).transform);
+        const sc = Math.hypot(m.a, m.b);                 // rotation+scale column length
+        if (sc > 0.0001) cosT = Math.max(0.2, m.a / sc); // cos of the rotation angle
+      } catch (_) { /* no DOMMatrix / none transform → cosT stays 1 */ }
+      const savedT = cont.style.transform;
+      cont.style.transform = 'none';
       const cr = canvasEl.getBoundingClientRect();
+      cont.style.transform = savedT;
       if (!cr.height) return null;
       let anchorTop;
       if (STORY_MODE) {
@@ -360,7 +376,9 @@ export function mountHamsaPendulum(container) {
         if (!isFinite(gridTop)) return null;
         anchorTop = gridTop;
       }
-      const internalY = (anchorTop - cr.top) / cr.height * H;
+      // Distance ALONG the (rotated) cord to reach the target's screen height =
+      // vertical distance / cosθ. With the unrotated rect this maps 1:1 to canvas px.
+      const internalY = ((anchorTop - cr.top) / cosT) / cr.height * H;
       return internalY - H / 2;
     }
 
@@ -372,12 +390,9 @@ export function mountHamsaPendulum(container) {
       cordAttachY = objectMinY + 10;
       cordAnchorY = (measured != null) ? measured : CORD_TOP_Y_FALLBACK;
       cordPivotY = cordAnchorY;
-      // A few EXTRA dots ABOVE the measured anchor: the container is rotated (-6°),
-      // which the rect-based screen→canvas mapping can't account for, so the rendered
-      // cord top otherwise falls a few dots SHORT of the top horizontal grid line.
-      // These extra static dots carry the cord the rest of the way up to the line.
-      const CORD_TOP_EXTRA = 10;
-      for (let k = CORD_TOP_EXTRA; k >= 1; k--) staticCordDots.push({ x: 0, y: cordAnchorY - k * CORD_STEP, z: 0 });
+      // ONE static dot at the anchor (the pivot, ON the grid line — the rotation-aware
+      // measurement above lands it there exactly); everything below swings with the
+      // pendulum, so the cord reads alive all the way up.
       staticCordDots.push({ x: 0, y: cordAnchorY, z: 0 });
       for (let y = cordAnchorY + CORD_STEP; y <= cordAttachY; y += CORD_STEP) movingCordDots.push({ x: 0, y, z: 0 });
       return measured != null;

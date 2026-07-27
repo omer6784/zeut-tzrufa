@@ -476,8 +476,8 @@ body::-webkit-scrollbar-thumb {
      position:fixed resolves to the transformed #app-viewport, so section-1's
      overflow:hidden can't clip it. */
   position: fixed;
-  top: calc(85 * var(--sy) / 2 - 23px);   /* vertically centred in the 0…85·sy strip */
-  right: calc(100 * var(--sx) - 16px);    /* horizontally centred in the 200·sx-wide box */
+  top: calc(85 * var(--sy) / 2 - 123px);  /* centred in the strip, then raised 100 */
+  right: calc(100 * var(--sx) - 66px);    /* centred in the box, then 50 further right */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
