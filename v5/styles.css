@@ -7004,13 +7004,16 @@ html:not(.cursor-active) *::after {
   transition: opacity 0.3s ease;
 }
 .name-stage .ns-space { width: clamp(10px, 1.5vw, 22px); }
-/* Blinking dot caret — sits on the baseline at the writing position. */
+/* Blinking dark vertical line caret — sits on the baseline at the writing position. */
 .name-stage .ns-caret {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #fb5716; margin-bottom: 14px;
-  animation: ns-caret-blink 1.05s step-end infinite;
+  width: 2px; height: 26px; border-radius: 0;
+  background: #282828; margin-bottom: 2px;
+  animation: ns-line-caret-blink 1.05s step-end infinite;
 }
-@keyframes ns-caret-blink { 50% { opacity: 0; } }
+@keyframes ns-line-caret-blink {
+  0%, 50% { opacity: 0.9; }
+  50.01%, 100% { opacity: 0; }
+}
 /* The short, delicate dotted baseline the name stands on. */
 .name-stage .ns-baseline {
   width: 100%; height: 1.5px;
