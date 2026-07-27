@@ -6970,23 +6970,24 @@ html:not(.cursor-active) *::after {
   40%  { transform: scale(1.09); }
   100% { transform: scale(1); }
 }
-/* The writing line: pinned just ABOVE the keyboard and sharing its column, so
-   the two read as one block in the bottom-right of the rectangle. */
+/* The short, delicate writing line: centered horizontally, directly above the centered keyboard. */
 .name-stage .ns-line-wrap {
   position: fixed;
-  right: calc(100 * var(--sx));
-  width: calc((1360px - 200 * var(--sx)) * 0.74);
-  bottom: calc(768px - 726 * var(--sy) + 295px);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: clamp(260px, 36vw, 380px);
+  bottom: calc(768px - 726 * var(--sy) + 310px);
   display: flex; flex-direction: column; align-items: center;
 }
 .name-stage.ns-locked .ns-caret { display: none; }
 .name-stage .ns-letters {
   display: flex; direction: rtl; align-items: flex-end; justify-content: center;
-  flex-wrap: nowrap; gap: clamp(6px, 1.2vw, 18px);
-  min-height: 124px; padding: 0 12px 14px;
+  flex-wrap: nowrap; gap: clamp(4px, 1vw, 12px);
+  min-height: 70px; padding: 0 8px 8px;
 }
 .name-stage .ns-letter {
-  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
   animation: ns-letter-in 0.28s ease;
 }
 @keyframes ns-letter-in {
@@ -6994,29 +6995,29 @@ html:not(.cursor-active) *::after {
   to   { opacity: 1; transform: none; }
 }
 .name-stage .ns-letter b {
-  font-family: 'Shofar', 'ArbelG', sans-serif; font-weight: 400;
-  font-size: var(--ns-letter-size, clamp(40px, 5vw, 64px));
+  font-family: 'ArbelG', sans-serif; font-weight: 500;
+  font-size: var(--ns-letter-size, clamp(26px, 3vw, 38px));
   line-height: 1; color: #282828;
 }
 .name-stage .ns-letter i {
   font-style: normal; font-family: 'ArbelG', sans-serif; font-weight: 500;
-  font-size: 13px; color: #fb5716; min-height: 15px;
+  font-size: 12px; color: #fb5716; min-height: 14px;
   transition: opacity 0.3s ease;
 }
-.name-stage .ns-space { width: clamp(14px, 2vw, 30px); }
+.name-stage .ns-space { width: clamp(10px, 1.5vw, 22px); }
 /* Blinking dot caret — sits on the baseline at the writing position. */
 .name-stage .ns-caret {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #fb5716; margin-bottom: 24px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #fb5716; margin-bottom: 14px;
   animation: ns-caret-blink 1.05s step-end infinite;
 }
 @keyframes ns-caret-blink { 50% { opacity: 0; } }
-/* The dotted baseline the name stands on — the axis language, horizontal. */
+/* The short, delicate dotted baseline the name stands on. */
 .name-stage .ns-baseline {
-  width: 100%; height: 3px;
-  background-image: radial-gradient(circle, #282828 1.5px, transparent 1.7px);
-  background-size: 11px 3px; background-repeat: repeat-x; background-position: center;
-  opacity: 0.9;
+  width: 100%; height: 2px;
+  background-image: radial-gradient(circle, #282828 1.2px, transparent 1.4px);
+  background-size: 9px 2px; background-repeat: repeat-x; background-position: center;
+  opacity: 0.75;
 }
 .name-stage .ns-hidden-input {
   position: absolute; opacity: 0; width: 1px; height: 1px;

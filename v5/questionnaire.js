@@ -1298,9 +1298,8 @@ function _renderQuestionImpl(idx){
     firstStage0Intro = false;
     qEl.innerHTML = '';
     if(instrEl){ stopTypewriter(instrEl); instrEl.textContent = ''; }
-  } else if(q.id === 'word'){
-    // Light-point stage: the title FADES in (not typed) — held blank here and
-    // revealed by the gradual-entry choreography in the 'words' branch below.
+  } else if(q.id === 'word' || q.id === 'name'){
+    // Title is suppressed for word and name stages — instruction text only.
     stopTypewriter(qEl);
     qEl.textContent = '';
     if(instrEl){ stopTypewriter(instrEl); instrEl.textContent = INSTRUCTIONS[q.id] || ''; }

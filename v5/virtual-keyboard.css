@@ -48,6 +48,15 @@ body:has(#section-3.origin-input-phase) #virtual-keyboard:not(.vk-hidden) {
   transform-origin: right bottom;
 }
 
+/* Name stage: center the keyboard horizontally under the short writing line */
+body:has(.name-stage) #virtual-keyboard {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  bottom: calc(768px - 726 * var(--sy) + 30px) !important;
+  width: clamp(440px, 50vw, 620px) !important;
+}
+
 #virtual-keyboard .vk-row {
   display: flex;
   flex-direction: row;
