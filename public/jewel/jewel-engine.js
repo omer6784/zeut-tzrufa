@@ -243,12 +243,12 @@ function _captureTick() {
     octx.globalAlpha = 1;
     octx.fillStyle = _cap.bgCol;
     octx.fillRect(0, 0, w, h);
-    // 2. cream dotted centre line (x = centre, 14%…86% of height — 25% shorter and
-    //    centred, matching #display-center-line)
+    // 2. cream dotted centre line (x = centre, 11.5%…88.5% of height — a touch
+    //    longer than before, centred, matching #display-center-line)
     octx.fillStyle = _cap.lineCol;
     octx.globalAlpha = 0.9;
     const cx = w / 2, r = Math.max(0.7, gap * 0.11);
-    for (let y = h * 0.14; y <= h * 0.86; y += gap) { octx.beginPath(); octx.arc(cx, y, r, 0, Math.PI * 2); octx.fill(); }
+    for (let y = h * 0.115; y <= h * 0.885; y += gap) { octx.beginPath(); octx.arc(cx, y, r, 0, Math.PI * 2); octx.fill(); }
     octx.globalAlpha = 1;
     // 3. the transparent jewel canvas on top
     octx.drawImage(mainCanvasEl, 0, 0, w, h);
@@ -421,7 +421,7 @@ function buildCard(idx, cx, cy, innerW, innerH, bg, keys, gem) {
   // INSIDE the frame (clear gap top/bottom), and the dotted line runs just 2 dots
   // past the top/bottom symbol — so the line never touches the frame either.
   const frameHalfW = innerW * 0.40, frameHalfH = innerH * 0.44;
-  const scale = Math.min((frameHalfW * 2 * 0.72) / (colW || 1), (frameHalfH * 2 * 0.74) / (colH || 1));
+  const scale = Math.min((frameHalfW * 2 * 0.72) / (colW || 1), (frameHalfH * 2 * 0.79) / (colH || 1));
   insts.forEach((s, i) => { s.s = scale; s.x = cx; s.y = cy + (ly[i] - mid) * scale; s.phase = idx * 11.7; });
   const lineHalf = (colH * 0.5 * scale) + 22;   // +22 ≈ 2 dots (line pitch 11) beyond the end symbols
   const line = { hex: GALLERY_LINE_ON[bg] || '#f5f5ed', x: cx, y0: cy - lineHalf, y1: cy + lineHalf };
@@ -704,7 +704,7 @@ function layoutSymbols() {
   // the format; it never scales it up.
   const gs = 1;
 
-  const EXTENT_HALF = 673;   // the 6-symbol stack fits INSIDE the (shortened, ±691) centre line by
+  const EXTENT_HALF = 720;   // the 6-symbol stack fits INSIDE the (±739, from 11.5%) centre line by
                              // ~2 dots at each end, and well clear of the name-stage frame (±900)
   const X_LIMIT = 528;
 

@@ -1656,6 +1656,7 @@ function _renderQuestionImpl(idx){
         const symbolKey = pickTileSymbol(meaning);
         st.answers['life-wish'] = meaning;      // internal meaning (never shown)
         st.lifeWishSymbol = symbolKey;          // mapped symbol, revealed later
+        st._forcedSymbol = symbolKey;           // "המשך" → open the symbol window on THIS chosen symbol (not a random one)
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
         st.p5SymbolsByStage[6] = [symbolKey + '.obj'];
         armBand(() => st._dotTiles && st._dotTiles.confirm());   // "המשך" confirms the pick
@@ -2203,20 +2204,25 @@ function runMazeDemo(){
     gh.grab(true);                                   // grab the source dot
     md.setTrail(pts, 0);
     await gh.sleep(150); if(dead()) return abort();
-    // Step the hand + tracer along the route, subsampled to ≤ ~44 hops so the whole
-    // trace stays ~1.2s regardless of length; the white trail still draws at full
-    // resolution (setTrail includes every point up to i), so the line stays smooth.
-    const HOP = Math.max(1, Math.ceil(pts.length / 44));
+    // Trace the route as ONE continuous flowing drag: give the hand a short, linear
+    // glide (instead of teleporting per step, which looked stuck), subsample to a
+    // moderate number of hops, and GLIDE (move) rather than jump (place) between them
+    // so the hand and the ink-trail flow together — not too fast, not too slow.
+    // (The white trail still draws at full resolution via setTrail(pts, i).)
+    const el = gh.el, savedTr = el.style.transition;
+    el.style.transition = 'left 0.13s linear, top 0.13s linear';
+    const HOP = Math.max(1, Math.ceil(pts.length / 28));
     for(let i = HOP; i < pts.length && !dead(); i += HOP){
       md.setTrail(pts, i);
       const s = md.svgToScreen(pts[i]);
-      gh.place(s.x, s.y);
-      await gh.sleep(100);   // slower trace
+      gh.move(s.x, s.y);
+      await gh.sleep(100);
     }
-    if(dead()) return abort();
+    if(dead()){ el.style.transition = savedTr; return abort(); }
     md.setTrail(pts, pts.length - 1);                // finish exactly on the exit
-    { const s = md.svgToScreen(pts[pts.length - 1]); gh.place(s.x, s.y); }
-    await gh.sleep(250);
+    { const s = md.svgToScreen(pts[pts.length - 1]); gh.move(s.x, s.y); }
+    await gh.sleep(240);
+    el.style.transition = savedTr;                   // restore the normal glide
     gh.open();
     await gh.sleep(150);
     md.resetDemo();                                  // clear the trail — the visitor starts clean

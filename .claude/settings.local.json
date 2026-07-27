@@ -411,7 +411,8 @@
       "Bash(awk -F: '$1>=1244 && $1<=1330')",
       "Bash(node --check v5/stage-crossfade.js)",
       "Bash(awk -F: '$1>=485 || $1<=460')",
-      "Bash(awk '/BUILD_KEYS *=/,/\\\\]/' public/jewel/jewel-engine.js)"
+      "Bash(awk '/BUILD_KEYS *=/,/\\\\]/' public/jewel/jewel-engine.js)",
+      "Bash(xargs -I{} sh -c 'grep -liE \"מסלול|maze\" \"{}\" 2>/dev/null')"
     ]
   },
   "hooks": {
