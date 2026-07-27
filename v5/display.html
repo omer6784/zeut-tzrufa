@@ -92,6 +92,9 @@
   </style>
 </head>
 <body>
+  <!-- Empty #p5_loading: suppresses p5's default "Loading..." text while the
+       engine's preload() fetches the symbol OBJs. -->
+  <div id="p5_loading" style="display:none" aria-hidden="true"></div>
   <div id="display-center-line" aria-hidden="true"></div>
   <div id="display-stage" aria-hidden="true"></div>
   <!-- Global p5 + the jewel engine (classic scripts, run before the module). -->
