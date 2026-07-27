@@ -1,37 +1,37 @@
-/* ─── Body sans (SimplerPro Mono) ─────────────────────────────
-   Loaded under the family name 'ArbelG' so the rest of the
-   stylesheet/JS keeps working without a global rename. All font
-   files are BUNDLED in public/fonts (served at /fonts/… in Vite
-   dev and on Netlify alike) — the interface never depends on a
-   font installed on the machine, so Mac and Windows render
-   identically. Weights used across the UI: 300/400/500/700/900;
-   300 is pinned to the Regular cut and 900 to the Bold cut (no
-   lighter/heavier cuts exist in this family), so every requested
-   weight resolves to a DECLARED face — never to a synthesized or
-   system substitute. */
+/* ─── Body font: the REAL ArbelG ──────────────────────────────
+   Back to the authored ArbelG cuts (the SimplerPro-Mono alias is
+   retired; its files stay in /fonts for an instant revert). All
+   font files are BUNDLED in public/fonts (served at /fonts/… in
+   Vite dev and on Netlify alike) — the interface never depends on
+   a font installed on the machine, so Mac and Windows render
+   identically. Weights used across the UI: 300/400/500/700/900,
+   mapped to the family's historical cuts: 300→Regular (no light
+   cut exists), 400 Regular, 500 Medium, 700 Bold, 900 Stencil —
+   every requested weight resolves to a DECLARED face, never to a
+   synthesized or system substitute. */
 @font-face {
   font-family: 'ArbelG';
-  src: url('/fonts/SimplerPro_HLAR_Mono-Regular.otf') format('opentype');
+  src: url('/fonts/ArbelG-Regular.otf') format('opentype');
   font-weight: 300;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/fonts/SimplerPro_HLAR_Mono-Regular.otf') format('opentype');
+  src: url('/fonts/ArbelG-Regular.otf') format('opentype');
   font-weight: 400;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/fonts/SimplerPro_HLAR_Mono-Medium.otf') format('opentype');
+  src: url('/fonts/ArbelG-Medium.otf') format('opentype');
   font-weight: 500;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
+  src: url('/fonts/ArbelG-Bold.otf') format('opentype');
   font-weight: 700;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
+  src: url('/fonts/ArbelG-Stencil.otf') format('opentype');
   font-weight: 900;
 }
 
