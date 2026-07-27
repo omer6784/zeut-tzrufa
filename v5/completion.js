@@ -111,6 +111,7 @@ export function mountCompletion({ } = {}) {
         if (j.setGallery) j.setGallery(false);
         if (snap.background && j.setBackground) j.setBackground(snap.background);
         if (j.setSymbolSizes) j.setSymbolSizes(Array.isArray(snap.symbolSizes) ? snap.symbolSizes : []);
+        if (j.setSymbolColors) j.setSymbolColors(Array.isArray(snap.symbolColors) ? snap.symbolColors : []);
         j.setSymbols(Array.isArray(snap.symbols3d) ? snap.symbols3d : []);
         if (j.setGematria) j.setGematria(snap.gematria || 0);
         if (j.applyEdits && (snap.edits || snap.frameColor)) j.applyEdits({ symbols: snap.edits || [], frameColor: snap.frameColor || null });

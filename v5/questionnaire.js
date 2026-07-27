@@ -2726,6 +2726,20 @@ function enterArtifactView(){
 
 /* Gathers the generated pendant's data for the 3D module. The composition
    (positions, motif choices, dot layout) is read straight from current state. */
+/* The jewel palette in the ENGINE's fixed order (jewel-engine PALETTE_LIST) and
+   its default background. Symbol colours are decided HERE — once, by the
+   interface — and travel as DATA (symbolColors below), so the display, the
+   editor's display iframe and the GIF capture all just paint them. No renderer
+   derives colours on its own any more (that independent derivation was why the
+   colours could suddenly differ between the display and the editor page). */
+const JEWEL_PALETTE = ['#e2bc71', '#282828', '#ff5003', '#f5f5ed'];
+const JEWEL_DEFAULT_BG = '#282828';
+function computeSymbolColors(){
+  const bg = String(st.background || JEWEL_DEFAULT_BG).toLowerCase();
+  const pool = JEWEL_PALETTE.filter(c => c !== bg);
+  return (st.chosenSymbols || []).map((_, i) => pool[i % pool.length]);
+}
+
 function buildArtifactData(width,height){
   // Use the dimensions of the 2D pendant the user actually saw, not the
   // expanded artifact-view container. This locks the composition (motif
@@ -2787,6 +2801,9 @@ function buildArtifactData(width,height){
     symbols3d: (st.chosenSymbols || []).slice(),
     // Per-symbol size factor from the time spent in each stage (aligned with symbols3d).
     symbolSizes: (st.chosenSymbolSizes || []).slice(),
+    // The RESOLVED colour of every symbol (aligned with symbols3d), decided once by
+    // the interface — every renderer paints these as-is (see computeSymbolColors).
+    symbolColors: computeSymbolColors(),
     seed:  origins.length ? { origins: origins.map(motifForCountry) } : null,
     sides: sidesMotif ? { motif: sidesMotif, rotation: sideRot } : null,
     stars: (st.answers.stars||[]).slice(),

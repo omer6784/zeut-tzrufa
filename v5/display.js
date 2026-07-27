@@ -45,6 +45,9 @@ function applyData(data) {
   // Per-symbol size (time-in-stage → hierarchy) BEFORE setSymbols, so the first
   // layout already uses it.
   if (window.__jewel.setSymbolSizes) window.__jewel.setSymbolSizes(Array.isArray(data.symbolSizes) ? data.symbolSizes : []);
+  // Per-symbol COLOURS decided by the interface (single source of truth) — the
+  // engine paints these as-is instead of deriving its own.
+  if (window.__jewel.setSymbolColors) window.__jewel.setSymbolColors(Array.isArray(data.symbolColors) ? data.symbolColors : []);
   window.__jewel.setSymbols(keys);
   // Name's gematria → the dotted Moroccan floral frame around the jewel.
   if (window.__jewel.setGematria) window.__jewel.setGematria(data.gematria || 0);

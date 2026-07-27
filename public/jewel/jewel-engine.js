@@ -177,6 +177,7 @@ function setup() {
 
   window.__jewel = {
     setSymbols, reset, setBackground, setGematria, applyEdits, setGallery, setSymbolSizes,
+    setSymbolColors,
     isReady: () => finishedBuildingAll,
     captureFrames
   };
@@ -619,6 +620,7 @@ function reset() {
   tick = 0;
   gematria = 0; ornamentDots = [];
   symbolEdits = []; frameColorOverride = null;
+  symbolColorsData = [];
 }
 
 /* Apply the editor's manual tweaks: per-symbol { scale, dx, dy, color } (indexed
@@ -684,16 +686,22 @@ function addSymbol(key) {
   layoutSymbols();
 }
 
-/* Colour ALL symbols deterministically: index i → pool[i % 3], where pool is the
-   fixed-order palette minus the background. The SAME rule runs in every renderer
-   (the display, the editor's display iframe, the GIF capture iframe), with no
-   per-instance randomness and no dependence on the ORDER things arrived in — so
-   identical artifact data always yields identical colours everywhere. User-edited
-   colours (symbolEdits[i].color) still override via applySymbolColor. */
+/* Per-symbol colours ARRIVING AS DATA (broadcast `symbolColors`, aligned with
+   symbols3d): the interface decides them once, and every renderer (display,
+   editor iframe, GIF capture) just paints them — the single source of truth. */
+let symbolColorsData = [];
+function setSymbolColors(colors) {
+  symbolColorsData = Array.isArray(colors) ? colors.slice() : [];
+  if (finishedBuildingAll) recomputeAutoColors();
+}
+/* Colour ALL symbols: prefer the colour given in the DATA for index i; only when
+   the data has none (older broadcasts) fall back to deriving it deterministically
+   (pool[i % 3], fixed-order palette minus the background). User-edited colours
+   (symbolEdits[i].color) still override via applySymbolColor. */
 function recomputeAutoColors() {
   const pool = PALETTE_LIST.filter(c => c !== COLOR_EXCLUDE);
   order.forEach((s, i) => {
-    s.assignedColor = pool[i % pool.length];
+    s.assignedColor = symbolColorsData[i] || pool[i % pool.length];
     applySymbolColor(s, i);
   });
 }
