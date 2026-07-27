@@ -1606,7 +1606,7 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('roots-tree-active');
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
-      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png?v=2" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
+      midContainer.innerHTML = `<div id="paths-game"></div><div class="paths-title">מה המסלול שלך?</div><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
@@ -4457,26 +4457,27 @@ function buildPathsGame(host, onSelect){
   // grid nodes. Corners are SHARP: they form where a horizontal edge meets a
   // vertical edge at a shared node. Sampled to an even polyline that drives both
   // the dotted render and the path-locked tracer.
-  function resampleRoute(pts, step){
-    const cum = [0];
-    for(let i = 1; i < pts.length; i++) cum[i] = cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
-    const total = cum[cum.length - 1] || 1;
-    const n = Math.max(2, Math.round(total / step));
+  function sampleBezierRoute(p0, p3, step = 12) {
+    const dx = p3.x - p0.x, dy = p3.y - p0.y;
+    const p1 = { x: p0.x + dx * 0.45, y: p0.y + dy * 0.15 };
+    const p2 = { x: p0.x + dx * 0.55, y: p3.y - dy * 0.15 };
+    const dist = Math.hypot(dx, dy);
+    const n = Math.max(3, Math.round(dist / step));
     const out = [];
-    let seg = 0;
-    for(let k = 0; k <= n; k++){
-      const target = total * (k / n);
-      while(seg < pts.length - 2 && cum[seg + 1] < target) seg++;
-      const segLen = (cum[seg + 1] - cum[seg]) || 1;
-      const f = (target - cum[seg]) / segLen;
-      out.push({ x: pts[seg].x + (pts[seg + 1].x - pts[seg].x) * f, y: pts[seg].y + (pts[seg + 1].y - pts[seg].y) * f, t: k / n });
+    for (let k = 0; k <= n; k++) {
+      const t = k / n;
+      const mt = 1 - t;
+      const mt2 = mt * mt, mt3 = mt2 * mt;
+      const t2 = t * t, t3 = t2 * t;
+      const x = mt3 * p0.x + 3 * mt2 * t * p1.x + 3 * mt * t2 * p2.x + t3 * p3.x;
+      const y = mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y;
+      out.push({ x, y, t });
     }
-    return out;
+    return { samples: out, p1, p2 };
   }
   function mkEdge(from, to, type){
-    const samples = resampleRoute([{ x: from.x, y: from.y }, { x: to.x, y: to.y }], 13);
-    let d = `M${samples[0].x.toFixed(1)} ${samples[0].y.toFixed(1)}`;
-    for(let i = 1; i < samples.length; i++) d += ` L${samples[i].x.toFixed(1)} ${samples[i].y.toFixed(1)}`;
+    const { samples, p1, p2 } = sampleBezierRoute(from, to, 12);
+    let d = `M${from.x.toFixed(1)} ${from.y.toFixed(1)} C${p1.x.toFixed(1)} ${p1.y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}, ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
     const e = { id: edges.length, from, to, samples, d, type: type || 'side' };
     edges.push(e);
     from.edgesOut.push(e);

@@ -2585,16 +2585,23 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
   left: 50%;
-  bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
+  bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px */
   top: auto;
   transform: translate(-50%, 26px);
-  width: min(571.2px, 540px);
-  height: auto;
+  font-family: 'ArbelG', sans-serif;
+  font-weight: 300 !important;
+  font-size: clamp(20px, 2.4vw, 32px);
+  color: #f5f5ed !important;
+  letter-spacing: 0.04em;
+  text-align: center;
+  direction: rtl;
   z-index: 5;
   opacity: 0;
   clip-path: inset(0 0 0 100%);
   transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
   pointer-events: none;
+  filter: none !important;
+  text-shadow: none !important;
 }
 #section-3[data-stage="5"] .paths-title.is-in {
   opacity: 1;
@@ -6600,6 +6607,7 @@ html:not(.cursor-active) *::after {
 }
 
 /* Stage 6 (name stage): move "סיום" button to the top-left of the content rectangle, aligned with the explanation text line */
+#section-3[data-stage="6"] .stage-band { z-index: 120 !important; }
 #section-3[data-stage="6"] .stage-band .sb-btn {
   position: fixed !important;
   top: calc(85 * var(--sy) + 14px) !important;
@@ -6607,7 +6615,7 @@ html:not(.cursor-active) *::after {
   right: auto !important;
   bottom: auto !important;
   transform: none !important;
-  z-index: 100 !important;
+  z-index: 1002 !important;
 }
 #section-3[data-stage="6"] .stage-band .sb-btn:not(.is-disabled) {
   animation: sb-btn-topleft-breathe 1.8s ease-in-out infinite !important;
