@@ -469,12 +469,15 @@ body::-webkit-scrollbar-thumb {
 }
 
 #ui-coords {
-  /* position:fixed → resolves to the transformed #app-viewport (overflow:visible),
-     NOT clipped by section-1's overflow:hidden, so the 50px raise can push it above
-     the frame's top edge without cutting off X/Y. Same anchor as #ui-top-right. */
+  /* Sits INSIDE the small extreme top-right grid rectangle — the box between the
+     short vertical line at 1360−200·sx and the right frame edge, above the top
+     horizontal line at 85·sy. Centred in that box: three rows (X/Y/Z), each row
+     "X: 51" on ONE line (label + number together — see nowrap below).
+     position:fixed resolves to the transformed #app-viewport, so section-1's
+     overflow:hidden can't clip it. */
   position: fixed;
-  top: 24px;
-  right: 28px;
+  top: calc(85 * var(--sy) / 2 - 23px);   /* vertically centred in the 0…85·sy strip */
+  right: calc(100 * var(--sx) - 16px);    /* horizontally centred in the 200·sx-wide box */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -482,8 +485,10 @@ body::-webkit-scrollbar-thumb {
   font-family: 'ArbelG', sans-serif;
   font-size: 12px;
   color: #1c1c1c;
-  transform: translate(-200px, -50px);   /* nudged 200 left + 50 up (logical px) */
 }
+/* Keep each axis row on a single line — the shrink-to-fit fixed box was collapsing
+   to min-content and wrapping the number under its letter. */
+#ui-coords span { white-space: nowrap; }
 
 #ui-project {
   text-align: right;

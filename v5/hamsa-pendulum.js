@@ -372,6 +372,12 @@ export function mountHamsaPendulum(container) {
       cordAttachY = objectMinY + 10;
       cordAnchorY = (measured != null) ? measured : CORD_TOP_Y_FALLBACK;
       cordPivotY = cordAnchorY;
+      // A few EXTRA dots ABOVE the measured anchor: the container is rotated (-6°),
+      // which the rect-based screen→canvas mapping can't account for, so the rendered
+      // cord top otherwise falls a few dots SHORT of the top horizontal grid line.
+      // These extra static dots carry the cord the rest of the way up to the line.
+      const CORD_TOP_EXTRA = 10;
+      for (let k = CORD_TOP_EXTRA; k >= 1; k--) staticCordDots.push({ x: 0, y: cordAnchorY - k * CORD_STEP, z: 0 });
       staticCordDots.push({ x: 0, y: cordAnchorY, z: 0 });
       for (let y = cordAnchorY + CORD_STEP; y <= cordAttachY; y += CORD_STEP) movingCordDots.push({ x: 0, y, z: 0 });
       return measured != null;
