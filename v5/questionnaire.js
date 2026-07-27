@@ -2734,10 +2734,21 @@ function enterArtifactView(){
    colours could suddenly differ between the display and the editor page). */
 const JEWEL_PALETTE = ['#e2bc71', '#282828', '#ff5003', '#f5f5ed'];
 const JEWEL_DEFAULT_BG = '#282828';
+/* Per-symbol colours are PERSISTENT and belong to the SYMBOL: stored in
+   st.chosenSymbolColors (aligned with chosenSymbols), so reordering symbols in
+   the editor moves each colour WITH its symbol. A colour only ever changes when
+   (a) the user recolours the symbol, or (b) the background changes to that very
+   colour — then it's repaired here (deterministically) so nothing blends in.
+   New symbols get pool[i % 3] on first sight. Self-repairing on every broadcast. */
 function computeSymbolColors(){
   const bg = String(st.background || JEWEL_DEFAULT_BG).toLowerCase();
   const pool = JEWEL_PALETTE.filter(c => c !== bg);
-  return (st.chosenSymbols || []).map((_, i) => pool[i % pool.length]);
+  const stored = st.chosenSymbolColors || [];
+  st.chosenSymbolColors = (st.chosenSymbols || []).map((_, i) => {
+    const c = stored[i];
+    return (c && String(c).toLowerCase() !== bg) ? c : pool[i % pool.length];
+  });
+  return st.chosenSymbolColors.slice();
 }
 
 function buildArtifactData(width,height){

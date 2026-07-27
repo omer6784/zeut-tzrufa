@@ -177,7 +177,7 @@ function setup() {
 
   window.__jewel = {
     setSymbols, reset, setBackground, setGematria, applyEdits, setGallery, setSymbolSizes,
-    setSymbolColors,
+    setSymbolColors, getLayout,
     isReady: () => finishedBuildingAll,
     captureFrames
   };
@@ -605,13 +605,40 @@ function setSymbols(keys) {
   if (!finishedBuildingAll) { pendingKeys = keys.slice(); return; }
 
   // If the incoming list still starts with what we already show, just append the
-  // new ones (the interface's list is append-only). Otherwise rebuild from scratch.
+  // new ones (the interface's list is append-only). Otherwise it's a REORDER (the
+  // editor's drag) or a rebuild: REUSE the existing instance for every key we
+  // already show (keyed by symbol — a talisman never repeats one), so reordering
+  // moves the SAME dots with no re-entry reveal; only genuinely new keys build.
   const cur = order.map(s => s.key);
   let isExtension = keys.length >= cur.length;
   for (let i = 0; i < cur.length && isExtension; i++) if (keys[i] !== cur[i]) isExtension = false;
 
-  if (!isExtension) { order = []; }
+  if (!isExtension) {
+    const prev = new Map(order.map(s => [s.key, s]));
+    order = [];
+    for (const k of keys) {
+      const ex = prev.get(k);
+      if (ex) { prev.delete(k); order.push(ex); }
+      else addSymbol(k);   // pushes to the end of `order` — keys are processed in order
+    }
+    recomputeAutoColors();
+    layoutSymbols();
+    return;
+  }
   for (let i = order.length; i < keys.length; i++) addSymbol(keys[i]);
+}
+
+/* Current stack layout for the editor's touch gestures (hit-testing): the world
+   canvas height + each symbol's TARGET centre-y and scaled half-height, in order. */
+function getLayout() {
+  return {
+    h: height,
+    items: order.map(s => ({
+      key: s.key,
+      y: (s.ty != null ? s.ty : s.y),
+      hh: s.halfH * (s.ts || s.s || 1),
+    })),
+  };
 }
 
 function reset() {

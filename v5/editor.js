@@ -24,8 +24,8 @@ const TAGLINE = 'זהות צרופה - עיצוב התכשיט האישי שלך
 export function mountEditor({ st, broadcast, symbolName, onDone }) {
   document.getElementById('editor-view')?.remove();
   st.artifactEdits = st.artifactEdits || [];
-  const symbols = (st.chosenSymbols || []).slice();
-  const originalBackground = st.background || null;   // for "back to original"
+  // LIVE view of the stack (drag-reorder changes it) — never a frozen copy.
+  const syms = () => st.chosenSymbols || [];
 
   const view = document.createElement('div');
   view.id = 'editor-view';
@@ -52,32 +52,34 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   const push = () => { try { broadcast(); } catch (_) {} };
 
   // ---- undo / redo history -------------------------------------------------
-  const snap = () => JSON.stringify({ bg: st.background || null, fr: st.frameColor || null, ed: st.artifactEdits });
+  // The snapshot covers EVERYTHING the editor can change: colours, edits, AND the
+  // stack order (+ the per-symbol colour/size arrays that travel with a reorder).
+  const snap = () => JSON.stringify({
+    bg: st.background || null, fr: st.frameColor || null, ed: st.artifactEdits,
+    sy: (st.chosenSymbols || []).slice(),
+    sz: (st.chosenSymbolSizes || []).slice(),
+    sc: (st.chosenSymbolColors || []).slice(),
+  });
   let history = [snap()];
   let hp = 0;
   function record() { history = history.slice(0, hp + 1); history.push(snap()); hp = history.length - 1; updateHistBtns(); }
   function restore(json) {
     const s = JSON.parse(json);
     st.background = s.bg; st.frameColor = s.fr; st.artifactEdits = s.ed || [];
+    if (s.sy) st.chosenSymbols = s.sy;
+    if (s.sz) st.chosenSymbolSizes = s.sz;
+    if (s.sc) st.chosenSymbolColors = s.sc;
     renderTools(); push();
   }
   function undo() { if (hp > 0) { hp--; restore(history[hp]); updateHistBtns(); } }
   function redo() { if (hp < history.length - 1) { hp++; restore(history[hp]); updateHistBtns(); } }
-  function toOriginal() {
-    st.background = originalBackground; st.frameColor = null; st.artifactEdits = [];
-    record(); renderTools(); push();
-  }
 
-  // ---- top action bar (undo / redo / original) -----------------------------
+  // ---- top action bar (undo / redo) -----------------------------------------
   const bar = document.createElement('div');
   bar.className = 'ed-bar';
   const undoBtn = mkActionBtn('↶', 'בטל', undo);
   const redoBtn = mkActionBtn('↷', 'בצע שוב', redo);
-  const origBtn = mkActionBtn('', 'חזרה לתכשיט המקורי', toOriginal); origBtn.classList.add('ed-orig');
-  origBtn.querySelector('.ed-btn-ico').textContent = '';
-  origBtn.querySelector('.ed-btn-ico').remove();
-  origBtn.textContent = 'התכשיט המקורי';
-  bar.append(undoBtn, redoBtn, origBtn);
+  bar.append(undoBtn, redoBtn);
   view.querySelector('.ed-tools').appendChild(bar);
   function updateHistBtns() {
     undoBtn.disabled = hp <= 0;
@@ -91,16 +93,22 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   }
 
   // ---- colour-swatch row ---------------------------------------------------
-  function swatches(current, onPick) {
+  // `blocked` (a hex) disables that colour in the row — used to block the CURRENT
+  // BACKGROUND colour in the frame/symbol pickers, so nothing can be set to a
+  // colour that would blend into the background.
+  function swatches(current, onPick, blocked) {
     const row = document.createElement('div');
     row.className = 'ed-swatches';
     PALETTE.forEach((c) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'ed-sw' + (current === c.hex ? ' is-on' : '');
+      const isBlocked = blocked && c.hex === blocked;
+      b.className = 'ed-sw' + (current === c.hex ? ' is-on' : '') + (isBlocked ? ' is-blocked' : '');
       b.style.setProperty('--sw', c.hex);
-      b.title = c.name;
+      b.title = isBlocked ? 'זהה לצבע הרקע' : c.name;
+      if (isBlocked) b.disabled = true;
       b.addEventListener('click', () => {
+        if (isBlocked) return;
         row.querySelectorAll('.ed-sw').forEach((x) => x.classList.remove('is-on'));
         b.classList.add('is-on');
         onPick(c.hex);
@@ -117,25 +125,35 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     return s;
   }
 
-  // ---- the editable panel (rebuilt on undo/redo/reset) ---------------------
+  // ---- the editable panel (rebuilt on undo/redo/reorder) --------------------
   const panel = document.createElement('div');
   panel.className = 'ed-panel';
   tools.appendChild(panel);
-  let selected = symbols.length ? 0 : -1;
+  let selected = syms().length ? 0 : -1;
+
+  // Background changed → nothing may stay in that colour. The FRAME and any
+  // MANUALLY-recoloured symbol matching the new background revert to automatic
+  // (the auto paths never blend: the frame's auto map and the stored per-symbol
+  // colours are both self-repairing against the background).
+  function fixBlends(newBg) {
+    if (st.frameColor === newBg) st.frameColor = null;
+    (st.artifactEdits || []).forEach((e) => { if (e && e.color === newBg) e.color = null; });
+  }
 
   function renderTools() {
     panel.innerHTML = '';
 
     const bg = section('צבע הרקע', panel);
-    bg.appendChild(swatches(st.background || null, (hex) => { st.background = hex; record(); push(); }));
+    bg.appendChild(swatches(st.background || null, (hex) => { st.background = hex; fixBlends(hex); record(); push(); renderTools(); }));
 
+    // The current background colour is BLOCKED in the frame + symbol pickers.
     const fr = section('צבע המסגרת', panel);
-    fr.appendChild(swatches(st.frameColor || null, (hex) => { st.frameColor = hex; record(); push(); }));
+    fr.appendChild(swatches(st.frameColor || null, (hex) => { st.frameColor = hex; record(); push(); }, st.background || null));
 
     const symSec = section('הסמלים', panel);
     const chips = document.createElement('div');
     chips.className = 'ed-chips';
-    symbols.forEach((key, i) => {
+    syms().forEach((key, i) => {
       const c = document.createElement('button');
       c.type = 'button';
       c.className = 'ed-chip' + (i === selected ? ' is-on' : '');
@@ -151,53 +169,115 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     if (selected < 0) { controls.innerHTML = '<div class="ed-hint">אין סמלים לעריכה</div>'; return; }
     const e = editAt(selected);
 
-    // size
-    const sizeWrap = document.createElement('div');
-    sizeWrap.className = 'ed-ctrl';
-    sizeWrap.innerHTML = '<span class="ed-ctrl-label">גודל</span>';
-    const size = document.createElement('input');
-    size.type = 'range'; size.min = '0.5'; size.max = '1.8'; size.step = '0.02';
-    size.value = String(e.scale || 1);
-    size.addEventListener('input', () => { editAt(selected).scale = parseFloat(size.value); push(); });
-    size.addEventListener('change', record);
-    sizeWrap.appendChild(size);
-    controls.appendChild(sizeWrap);
-
-    // position
-    const posWrap = document.createElement('div');
-    posWrap.className = 'ed-ctrl';
-    posWrap.innerHTML = '<span class="ed-ctrl-label">מיקום</span>';
-    const pad = document.createElement('div');
-    pad.className = 'ed-pad';
-    const STEP = 45;
-    const nudge = (dx, dy) => {
-      const ed = editAt(selected);
-      ed.dx = (ed.dx || 0) + dx;
-      let ndy = (ed.dy || 0) + dy;
-      // The TOP symbol can't be raised above its place (dy ≥ 0); the BOTTOM can't be
-      // lowered below its place (dy ≤ 0). Keeps them within the centre line so its
-      // dots always show above the top and below the bottom.
-      if (selected === 0) ndy = Math.max(0, ndy);
-      if (selected === symbols.length - 1) ndy = Math.min(0, ndy);
-      ed.dy = ndy;
-      push(); record();
-    };
-    const mk = (label, dx, dy) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', () => nudge(dx, dy)); return b; };
-    // Only up/down — symbols stack vertically on the axis, so no left/right.
-    pad.append(mk('↑', 0, -STEP), mk('↓', 0, STEP));
-    posWrap.appendChild(pad);
-    controls.appendChild(posWrap);
-
-    // colour
+    // Colour only — size is a PINCH on the jewel itself, order is a vertical DRAG
+    // on the jewel itself (see the gesture layer below).
     const colWrap = document.createElement('div');
     colWrap.className = 'ed-ctrl';
     colWrap.innerHTML = '<span class="ed-ctrl-label">צבע</span>';
-    colWrap.appendChild(swatches(e.color || null, (hex) => { editAt(selected).color = hex; record(); push(); }));
+    colWrap.appendChild(swatches(e.color || null, (hex) => { editAt(selected).color = hex; record(); push(); }, st.background || null));
     controls.appendChild(colWrap);
+
+    const hint = document.createElement('div');
+    hint.className = 'ed-hint';
+    hint.textContent = 'גררו סמל למעלה או למטה לשינוי הסדר · צבטו להגדלה או הקטנה';
+    controls.appendChild(hint);
   }
   renderTools();
   updateHistBtns();
   push();
+
+  // ---- touch gestures ON the jewel ------------------------------------------
+  // One finger, vertical drag = REORDER: the dragged symbol moves to the slot
+  // under the finger and the others close ranks in their existing order. No
+  // sideways movement. Two fingers = PINCH: gently scale the symbol (0.8–1.2).
+  // Hit-testing uses the engine's real layout (iframe __jewel.getLayout()).
+  const jewelBox = view.querySelector('.ed-jewel');
+  const jf = view.querySelector('.ed-jewel-frame');
+  const gest = document.createElement('div');
+  gest.className = 'ed-gesture';
+  jewelBox.appendChild(gest);
+
+  const engine = () => { try { return jf.contentWindow && jf.contentWindow.__jewel; } catch (_) { return null; } };
+  // Map a clientY to the engine's world-y (canvas is height-fitted + centred in the iframe).
+  function worldY(clientY) {
+    const L = engine() && engine().getLayout ? engine().getLayout() : null;
+    if (!L || !L.items.length) return null;
+    const r = jf.getBoundingClientRect();
+    return { L, y: (clientY - (r.top + r.height / 2)) * (L.h / r.height) };
+  }
+  // The symbol whose band contains (or is nearest to) the world y — generous grab.
+  function hitIndex(clientY) {
+    const w = worldY(clientY);
+    if (!w) return -1;
+    let best = -1, bd = Infinity;
+    w.L.items.forEach((it, i) => { const d = Math.abs(w.y - it.y); if (d < bd) { bd = d; best = i; } });
+    if (best < 0) return -1;
+    const it = w.L.items[best];
+    return bd <= Math.max(it.hh * 1.6, w.L.h * 0.045) ? best : -1;
+  }
+  // The stack SLOT under the finger (boundaries = midpoints between neighbours).
+  function slotAt(clientY) {
+    const w = worldY(clientY);
+    if (!w) return -1;
+    let slot = 0;
+    for (let i = 0; i < w.L.items.length - 1; i++) {
+      if (w.y > (w.L.items[i].y + w.L.items[i + 1].y) / 2) slot = i + 1;
+    }
+    return slot;
+  }
+  function applyReorder(from, to) {
+    if (from === to) return;
+    const move = (arr) => { if (Array.isArray(arr) && arr.length > from) { const v = arr.splice(from, 1)[0]; arr.splice(to, 0, v); } };
+    move(st.chosenSymbols); move(st.chosenSymbolSizes); move(st.chosenSymbolColors); move(st.artifactEdits);
+    if (selected === from) selected = to;
+    else if (from < selected && to >= selected) selected--;
+    else if (from > selected && to <= selected) selected++;
+    push(); renderTools();
+  }
+
+  const ptrs = new Map();   // active pointers on the gesture layer
+  let drag = null;          // { idx, moved } single-finger reorder
+  let pinch = null;         // { idx, d0, s0 }  two-finger scale
+  const dist = () => { const p = [...ptrs.values()]; return Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y); };
+
+  gest.addEventListener('pointerdown', (ev) => {
+    gest.setPointerCapture(ev.pointerId);
+    ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (ptrs.size === 1) {
+      const idx = hitIndex(ev.clientY);
+      drag = idx >= 0 ? { idx, y0: ev.clientY, moved: false } : null;
+    } else if (ptrs.size === 2) {
+      const mid = [...ptrs.values()].reduce((a, p) => a + p.y, 0) / 2;
+      const idx = (drag && drag.idx >= 0) ? drag.idx : hitIndex(mid);
+      drag = null;
+      if (idx >= 0) pinch = { idx, d0: dist(), s0: (st.artifactEdits[idx] && st.artifactEdits[idx].scale) || 1 };
+    }
+  });
+  gest.addEventListener('pointermove', (ev) => {
+    const p = ptrs.get(ev.pointerId);
+    if (!p) return;
+    p.x = ev.clientX; p.y = ev.clientY;
+    if (pinch && ptrs.size === 2) {
+      const s = Math.max(0.8, Math.min(1.2, pinch.s0 * (dist() / pinch.d0)));
+      editAt(pinch.idx).scale = Math.round(s * 100) / 100;
+      push();
+    } else if (drag) {
+      if (!drag.moved && Math.abs(ev.clientY - drag.y0) > 8) drag.moved = true;
+      const slot = slotAt(ev.clientY);
+      if (slot >= 0 && slot !== drag.idx) { applyReorder(drag.idx, slot); drag.idx = slot; drag.moved = true; }
+    }
+  });
+  const endPtr = (ev) => {
+    ptrs.delete(ev.pointerId);
+    if (pinch && ptrs.size < 2) { pinch = null; record(); }
+    if (drag && ptrs.size === 0) {
+      if (drag.moved) record();
+      else { selected = drag.idx; renderTools(); }   // simple tap → select in the panel
+      drag = null;
+    }
+  };
+  gest.addEventListener('pointerup', endPtr);
+  gest.addEventListener('pointercancel', endPtr);
 
   // ---- left wordmark typewriter (matches the stage sidebar) ----------------
   const sideTxt = view.querySelector('.ed-side-txt');

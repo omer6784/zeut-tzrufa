@@ -6957,6 +6957,22 @@ html:not(.cursor-active) *::after {
 }
 #editor-view .ed-sw:hover { transform: scale(1.08); }
 #editor-view .ed-sw.is-on { box-shadow: 0 0 0 2px #f5f5ed, 0 0 0 4px #ff5003; }
+/* Blocked = the current background colour: picking it would blend the frame /
+   symbol into the background, so it's dimmed, crossed and unclickable. */
+#editor-view .ed-sw.is-blocked {
+  opacity: 0.22; pointer-events: none; cursor: default; position: relative;
+}
+#editor-view .ed-sw.is-blocked::after {
+  content: ''; position: absolute; left: 15%; right: 15%; top: 50%;
+  height: 1.6px; background: #282828; transform: rotate(-45deg);
+}
+
+/* Invisible gesture layer over the jewel iframe — one-finger vertical drag
+   reorders the stack, two-finger pinch scales a symbol (editor.js). */
+#editor-view .ed-gesture {
+  position: absolute; inset: 0; z-index: 3;
+  touch-action: none; cursor: grab;
+}
 
 #editor-view .ed-chips { display: flex; flex-wrap: wrap; gap: 9px; }
 /* Symbol chips — a DOTTED rectangular frame (square corners), from the one dot
