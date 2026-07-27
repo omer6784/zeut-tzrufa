@@ -6573,13 +6573,17 @@ html:not(.cursor-active) *::after {
 #section-3[data-stage="2"] .stage-band .sb-btn:not(.is-disabled) {
   animation: dotted-frame-breathe 1.8s ease-in-out infinite !important;
 }
-/* Tiles stage: the tile grid is RAISED 80px (top:-80), so a real TILE
-   (pointer-events:auto, inside #middle-q-container, z-index 10) overlaps the
-   top-left button area — painting over it AND swallowing its clicks, since the
-   whole band stacks at z-index 9. Raise the band above the middle container on
-   this stage; the band itself is pointer-events:none, so only the button (and
-   nothing else) becomes interactive above the tiles. */
-#section-3[data-stage="2"] .stage-band { z-index: 30; }
+/* Tiles stage: the top-left "המשך" button sits under the QUESTION-HEADER grid
+   cell (.q-header-container, z-index 100, default pointer-events), which spans
+   that corner and swallowed every click — verified live with elementFromPoint:
+   at z-index 30 the header is returned, at 120 the button is. The band itself is
+   pointer-events:none, so only the button becomes interactive above the header.
+   (Earlier suspects — the tiles grid margins, a raised tile at z 10 — were real
+   but LOWER layers; the z:100 header was the one actually taking the hit.) */
+#section-3[data-stage="2"] .stage-band { z-index: 120; }
+/* The frequency stage's top-left "המשך" shares the exact same corner geometry —
+   protect it from the same z:100 header. */
+#section-3.q-color-stage[data-stage="0"] .stage-band { z-index: 120; }
 @keyframes sb-btn-breathe {
   0%, 100% { transform: translateX(-50%) scale(1); }
   50%      { transform: translateX(-50%) scale(1.06); }

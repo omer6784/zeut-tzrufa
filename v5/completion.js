@@ -125,10 +125,13 @@ export function mountCompletion({ } = {}) {
     const frames = [];
     await new Promise((resolve, reject) => {
       let settled = false;
-      const to = setTimeout(() => { if (!settled) { settled = true; reject(new Error('capture timeout')); } }, 15000);
+      // The engine's capture is wall-clock paced (66ms/frame ≈ 6.6s) and pumps its
+      // own draw ticks, so it finishes even in the throttled offscreen iframe; the
+      // timeout is a generous safety net only.
+      const to = setTimeout(() => { if (!settled) { settled = true; reject(new Error('capture timeout')); } }, 25000);
       win.__jewel.captureFrames({
-        // 100 frames (was 50) → the exported GIF runs twice as long.
-        count: 100, everyN: 2, size: 600,
+        // 100 frames × 66ms → a ~6.6s GIF (double the original length).
+        count: 100, intervalMs: 66, size: 600,
         onFrame: (data, w, h) => { frames.push({ data: new Uint8ClampedArray(data), w, h }); },
         onDone: () => { if (!settled) { settled = true; clearTimeout(to); resolve(); } },
       });
@@ -171,10 +174,18 @@ export function mountCompletion({ } = {}) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, gif }),
       });
-      if (!res.ok) throw new Error('send failed');
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error('server HTTP ' + res.status + ' — ' + body.slice(0, 300));
+      }
       msgEl.textContent = 'נשלח! בדקו את תיבת המייל שלכם';
-    } catch (_) {
-      msgEl.textContent = 'השליחה נכשלה, נסו שוב';
+    } catch (err) {
+      // Surface WHICH stage died (capture vs server) — in the console in full,
+      // and as a slightly more specific message on screen.
+      console.error('[GIF] export failed:', err);
+      msgEl.textContent = /capture|frames/i.test(String(err))
+        ? 'יצירת ה-GIF נכשלה, נסו שוב'
+        : 'השליחה נכשלה, נסו שוב';
     } finally {
       sendBtn.disabled = false;
     }

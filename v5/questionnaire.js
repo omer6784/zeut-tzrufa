@@ -1463,7 +1463,9 @@ function _renderQuestionImpl(idx){
     // starts fading at DOTS_START + (n-1)*DOT_STEP and its fade takes 400ms, so
     // clear that (+400) plus a small beat (+250).
     const TITLE_AT = DOTS_START + allDots.length * DOT_STEP + 400 + 250;
-    const GATE_AT = DOTS_START + Math.round(allDots.length * DOT_STEP * 0.5);   // gate circle mid-cascade
+    // The gate circle appears ONLY AFTER the title has fully faded in (title fade
+    // is 900ms + a small beat) — the order is: dots → title → gate.
+    const GATE_AT = TITLE_AT + 900 + 200;
     const qTitle = document.querySelector('#section-3 .stage2 .s2-prompt');
     if (qTitle) {
       qTitle.style.opacity = '0';

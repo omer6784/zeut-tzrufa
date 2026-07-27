@@ -1712,8 +1712,45 @@ window.addEventListener('DOMContentLoaded', () => {
   initQuestionnaire();
   initStage2FloatDots();
   initBackgroundMusic();
+  initTouchSound();
   initIdleReset();
 });
+
+/* Soft ceremonial touch-sound: a gentle two-partial sine chime on every press —
+   very quiet, short (~0.22s), sitting UNDER the ambient track so it reads as a
+   ritual "tick" rather than a UI beep. Pure WebAudio (no asset to load). The
+   AudioContext is created lazily on the first gesture (autoplay policy) and the
+   sound is debounced so rapid taps / multi-touch don't stack into a clatter.
+   The ghost-hand demos dispatch no real pointer events, so they stay silent. */
+function initTouchSound() {
+  let ctx = null, last = 0;
+  const play = () => {
+    const now = performance.now();
+    if (now - last < 90) return;   // debounce double-fires (touch → pointer)
+    last = now;
+    try {
+      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.05, t + 0.008);   // fast, soft attack
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);  // gentle decay
+      g.connect(ctx.destination);
+      // Two quiet sine partials a fifth apart — a small, warm chime.
+      [660, 990].forEach((f, i) => {
+        const o = ctx.createOscillator();
+        o.type = 'sine';
+        o.frequency.value = f;
+        const og = ctx.createGain();
+        og.gain.value = i ? 0.35 : 1;
+        o.connect(og); og.connect(g);
+        o.start(t); o.stop(t + 0.25);
+      });
+    } catch (_) { /* no audio available — stay silent */ }
+  };
+  window.addEventListener('pointerdown', play, { passive: true, capture: true });
+}
 
 /* Kiosk auto-reset: once the experience has started, if nobody touches or presses
    anything for TWO MINUTES, return to the opening screen. A full reload gives a clean

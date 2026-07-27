@@ -222,6 +222,7 @@ function setup() {
 // canvas and reading its pixels back as RGBA.
 let mainCanvasEl = null;
 let _cap = null;
+let _capPump = null;
 function captureFrames(opts = {}) {
   if (!mainCanvasEl) { opts.onDone && opts.onDone(); return; }
   const size = opts.size || 320;
@@ -243,12 +244,24 @@ function captureFrames(opts = {}) {
     if (l) lineCol = l;
   } catch (_) {}
   const gap = 9 * h / (window.innerHeight || 640);   // centre-line dot spacing (mirrors the CSS 9px)
-  _cap = { count: opts.count || 30, everyN: Math.max(1, opts.everyN || 2), n: 0, taken: 0, w, h,
+  // Frames are spaced by WALL-CLOCK time (intervalMs), not by counting draw
+  // ticks: the capture iframe on the completion page sits OFFSCREEN, where the
+  // browser throttles requestAnimationFrame to a crawl — counting draws made the
+  // export hang past its timeout once the GIF was doubled to 100 frames. A timer
+  // PUMP forces draw() (p5 redraw) while capturing (timers keep firing when rAF
+  // doesn't), so the capture always finishes in ~count × intervalMs (~6.6s),
+  // whatever the tab/iframe state; the animation itself is wall-clock driven, so
+  // pump-drawn frames advance the motion correctly.
+  _cap = { count: opts.count || 30, intervalMs: opts.intervalMs || 66, last: 0, taken: 0, w, h,
     octx, bgCol, lineCol, gap, onFrame: opts.onFrame, onDone: opts.onDone };
+  clearInterval(_capPump);
+  _capPump = setInterval(() => { try { if (typeof redraw === 'function') redraw(); } catch (_) {} }, 22);
 }
 function _captureTick() {
   if (!_cap) return;
-  if ((_cap.n++ % _cap.everyN) !== 0) return;
+  const _now = performance.now();
+  if (_now - _cap.last < _cap.intervalMs) return;
+  _cap.last = _now;
   try {
     const { octx, w, h, gap } = _cap;
     // 1. chosen background plate
@@ -267,7 +280,10 @@ function _captureTick() {
     const img = octx.getImageData(0, 0, w, h);
     _cap.onFrame && _cap.onFrame(img.data, w, h);
   } catch (_) {}
-  if (++_cap.taken >= _cap.count) { const done = _cap.onDone; _cap = null; done && done(); }
+  if (++_cap.taken >= _cap.count) {
+    clearInterval(_capPump); _capPump = null;
+    const done = _cap.onDone; _cap = null; done && done();
+  }
 }
 
 function draw() {
