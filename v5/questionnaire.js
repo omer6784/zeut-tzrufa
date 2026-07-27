@@ -540,7 +540,7 @@ const QUESTIONS = [
      6 = "שעה" (not built yet), 7 = empty. The former stars stage is retired. */
   { id:'stars',     label:'שעה',        text:'',                              type:'time',        styleStage:3 },
   { id:'personal',  label:'עיסוק',      text:'מה תחום\nהעיסוק שלך?',           type:'drive',       styleStage:4 },
-  { id:'name',      label:'שם',         text:'איך קוראים לך?',                 type:'text',   placeholder:'כתבי את שמך...', styleStage:6 },
+  { id:'name',      label:'שם',         text:'הזינו את שמכם המלא',             type:'text',   placeholder:'כתבי את שמך...', styleStage:6 },
 ];
 
 /* Per-stage instructions shown in the bottom rectangle of the grid (#ff5003).
@@ -553,7 +553,7 @@ const INSTRUCTIONS = {
   stars: 'גללו ובחרו את השעה הרצויה',
   personal: 'בחרו את תחום העיסוק שלכם',
   'life-wish': 'בחרו את האופן בו תרצו לנוע',
-  name: 'כתבו את שמכם על הקו — לכל אות ערך גימטרי משלה',
+  name: 'הזינו את שמכם המלא',
 };
 
 /* The frequency stage's own cue text (shown in the shared band's note slot). */
@@ -2408,37 +2408,30 @@ function submitAnswer(){
   advance();
 }
 
-/* ── NAME stage: "השם נחקק על הציר" ────────────────────────────────────────
-   A dotted horizontal BASELINE (the jewel-axis language) with the typed name
-   standing on it in large Shofar; each letter carries its gematria value in
-   small orange beneath, and the RUNNING TOTAL builds live on the LEFT of the
-   rectangle in the big gold dotted numerals. The hidden real <input> keeps the
-   id "q-input" so the virtual keyboard + submitAnswer flows work unchanged. */
+/* ── NAME stage — quiet by design ──────────────────────────────────────────
+   While typing there is nothing but a dotted WRITING LINE sitting just above
+   the keyboard (which docks bottom-right), the name standing on it, and a
+   blinking dot caret. Each letter's gematria value is rendered but HIDDEN —
+   the numbers only appear in the finale, so the stage stays calm until then.
+   The hidden real <input> keeps the id "q-input" so the virtual keyboard +
+   submitAnswer flows work unchanged. */
 function mountNameStage(host, initial){
   if(!host) return null;
   host.innerHTML = '';
   const root = document.createElement('div');
   root.className = 'name-stage';
   root.innerHTML = `
-    <div class="ns-sum" aria-hidden="true"></div>
     <div class="ns-line-wrap">
       <div class="ns-letters" dir="rtl"></div>
       <div class="ns-baseline" aria-hidden="true"></div>
     </div>
+    <div class="ns-total" aria-hidden="true"></div>
     <input id="q-input" class="ns-hidden-input" dir="rtl" autocomplete="off" aria-label="שם" />`;
   host.appendChild(root);
   const lettersEl = root.querySelector('.ns-letters');
-  const sumEl = root.querySelector('.ns-sum');
   const inp = root.querySelector('#q-input');
   inp.value = initial || '';
 
-  const renderSum = (n) => {
-    // Masked spans (not <img>) so the gold digit art takes the stage's own ink
-    // colour while keeping its dotted shapes — see .ns-sum span in styles.css.
-    sumEl.innerHTML = String(Math.max(0, n | 0)).split('').map(d =>
-      `<span style="--d:url('/image/v5-stage6/${d}.png')"></span>`).join('');
-    sumEl.classList.remove('ns-pop'); void sumEl.offsetWidth; sumEl.classList.add('ns-pop');
-  };
   const render = () => {
     const chars = [...inp.value];
     lettersEl.innerHTML = '';
@@ -2454,10 +2447,9 @@ function mountNameStage(host, initial){
     caret.className = 'ns-caret';
     lettersEl.appendChild(caret);
     st.gematriaValue = calcGematria(inp.value);
-    renderSum(st.gematriaValue);
     // Long names: step the letterforms down so the row stays on the line.
     const n = chars.length;
-    root.style.setProperty('--ns-letter-size', n > 14 ? '32px' : n > 9 ? '44px' : '');
+    root.style.setProperty('--ns-letter-size', n > 16 ? '30px' : n > 10 ? '38px' : '');
   };
   inp.addEventListener('input', render);
   // The real input is visually hidden (the letters ON THE LINE are the visible
@@ -2475,36 +2467,42 @@ function mountNameStage(host, initial){
   };
 }
 
-/* The gematria FINALE (plays on "סיום"): the letters' values detach and fly as
-   orange dots into the running total; then the total's dots stream outward and
-   DRAW the jewel's ornament frame (the exact buildOrnament geometry, scaled to
-   the content rectangle) around the whole stage — the name's number visibly
-   becoming the jewel's frame. Calls onDone when the frame has fully drawn. */
+/* The gematria animation (plays on "סיום", once the keyboard has slid away):
+   1. each letter's value fades in beneath it, one after another, while the
+      RUNNING TOTAL climbs in the big dotted numerals below the line;
+   2. the total's dots then stream out and DRAW the jewel's ornament frame — the
+      exact buildOrnament geometry, scaled to the content rectangle — around the
+      whole stage, so the name's number visibly becomes the jewel's frame.
+   Calls onDone when the frame has fully drawn. */
 function playGematriaFinale(name, total, onDone){
   const ns = st._nameStage;
   const sec = document.getElementById('section-3');
   if(!ns || !sec){ onDone && onDone(); return; }
   ns.root.classList.add('ns-locked');           // caret off, input frozen
-  const sumEl = ns.root.querySelector('.ns-sum');
-  const sumRect = sumEl.getBoundingClientRect();
-  const targets = [...ns.root.querySelectorAll('.ns-letter i')].filter(i => i.textContent);
+  const totalEl = ns.root.querySelector('.ns-total');
+  const values = [...ns.root.querySelectorAll('.ns-letter i')].filter(i => i.textContent);
 
-  // 1. the values fly into the total
-  targets.forEach((el, k) => {
-    const r = el.getBoundingClientRect();
-    const fly = document.createElement('span');
-    fly.className = 'ns-fly';
-    fly.style.left = (r.left + r.width / 2 - 5) + 'px';
-    fly.style.top  = (r.top + r.height / 2 - 5) + 'px';
-    document.body.appendChild(fly);
-    el.style.opacity = '0';
-    const dx = (sumRect.left + sumRect.width / 2) - (r.left + r.width / 2);
-    const dy = (sumRect.top + sumRect.height / 2) - (r.top + r.height / 2);
-    setTimeout(() => { fly.style.transform = `translate(${dx}px, ${dy}px) scale(0.45)`; fly.style.opacity = '0.15'; }, 40 + k * 55);
-    setTimeout(() => { try { fly.remove(); } catch (_) {} }, 950 + k * 55);
+  const renderTotal = (n) => {
+    // Masked spans (not <img>) so the gold digit art takes the stage's own ink
+    // colour while keeping its dotted shapes — see .ns-total span in styles.css.
+    totalEl.innerHTML = String(Math.max(0, n | 0)).split('').map(d =>
+      `<span style="--d:url('/image/v5-stage6/${d}.png')"></span>`).join('');
+    totalEl.classList.remove('ns-pop'); void totalEl.offsetWidth; totalEl.classList.add('ns-pop');
+  };
+
+  // 1. values appear one by one; the total climbs with them
+  const STEP = 420;
+  totalEl.classList.add('is-on');
+  renderTotal(0);
+  let running = 0;
+  values.forEach((el, k) => {
+    setTimeout(() => {
+      el.classList.add('is-on');
+      running += parseInt(el.textContent, 10) || 0;
+      renderTotal(running);
+    }, 450 + k * STEP);
   });
-  const flyMs = 700 + targets.length * 55;
-  setTimeout(() => { sumEl.classList.remove('ns-pop'); void sumEl.offsetWidth; sumEl.classList.add('ns-pop'); }, flyMs);
+  const climbMs = 450 + values.length * STEP + 700;
 
   // 2. the total's dots draw the ornament frame around the content rectangle
   setTimeout(() => {
@@ -2540,7 +2538,7 @@ function playGematriaFinale(name, total, onDone){
       if(f < 1) requestAnimationFrame(draw);
       else setTimeout(() => onDone && onDone(), 650);
     })();
-  }, flyMs + 350);
+  }, climbMs);
 }
 function submitChoiceAnswer(val){
   st.answers[QUESTIONS[st.current].id]=val;
