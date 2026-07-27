@@ -1353,30 +1353,30 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: clamp(8px, 13.6px, 18px);
-  width: 85%; height: 80%; max-height: 560px;   /* tighter — symbols sit closer together */
+  column-gap: clamp(6px, 10px, 14px);
+  row-gap: clamp(2px, 4px, 8px);
+  width: 76%; height: 72%; max-height: 480px;   /* tighter — symbols sit closer together */
 }
 .prof-card {
   position: relative;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px;
+  gap: 2px;
   /* No plate — the cards float directly on the orange stage. */
   cursor: pointer; pointer-events: auto;
   opacity: 0; transform: translateY(14px);
   transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .prof-card.is-in { opacity: 1; transform: translateY(0); }
-.prof-icon { width: 46%; aspect-ratio: 1 / 1; display: block; }
+.prof-icon { width: 42%; aspect-ratio: 1 / 1; display: block; }
 .prof-label {
   font-family: 'ArbelG', sans-serif; color: #f5f5ed;
-  font-size: clamp(12px, 14.96px, 17px); letter-spacing: 0.02em;
+  font-size: clamp(10px, 12px, 14px); letter-spacing: 0.02em;
   direction: rtl; text-align: center;
 }
 .prof-card.is-dimmed { opacity: 0.42; }
 .prof-card.is-selected { transform: translateY(0) scale(1.1); z-index: 2; }
-/* Lift the SECOND row of categories 30px (position:relative is already set, so this
-   is independent of the entrance/selected transforms). */
-.prof-card:nth-child(n + 5) { top: -30px; }
+/* Lift the SECOND row of categories 15px */
+.prof-card:nth-child(n + 5) { top: -15px; }
 /* Canvas is taken out of flow so its backing-store size never inflates the grid
    tracks (a canvas-in-grid feedback loop that otherwise overshoots the height). */
 .dot-tile-canvas {
