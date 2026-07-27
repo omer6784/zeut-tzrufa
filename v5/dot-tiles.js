@@ -10,8 +10,8 @@
    a short confirmation, then onChoose(index, meaning) fires. Each tile carries
    an internal meaning (never shown) that the caller maps to a symbol. */
 
-const DOT = 2.0;   // dot DIAMETER — bolder dots so each tile reads fuller
-const GAP = 4.6;   // centre-to-centre pitch — denser grid → richer shapes per tile
+const DOT = 2.2;   // dot DIAMETER — bolder dots so each tile reads fuller
+const GAP = 4.2;   // centre-to-centre pitch — denser grid → richer shapes per tile
 const TAU = Math.PI * 2;
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
 const P = x => 0.5 + 0.5 * Math.sin(x);   // 0..1 oscillator

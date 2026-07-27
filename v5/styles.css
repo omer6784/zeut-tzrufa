@@ -1283,41 +1283,28 @@ body::-webkit-scrollbar-thumb {
   position: relative;
 }
 
-/* ── "choose a living behaviour" — 24 animated dot tiles (dot-tiles.js) ─────
-   A 6×4 grid pinned INSIDE the fixed interface grid frame (100·sx from each
-   side, 85·sy → 706·sy top/bottom — the same rectangle the grid lines draw), so
-   the tiles never spill past the grid. No cards, borders or rounding. */
+/* ── "choose a living behaviour" — 28 animated dot tiles (dot-tiles.js) ───── */
 .dot-tiles-grid {
-  /* Stays INSIDE the content rectangle (no rise onto the outer grid); the 7×4
-     square block is height-bound and centred horizontally. */
   position: absolute;
   left: 0; right: 0;
   top: 0;
   height: 100%;
-  padding: 0;                /* was 2px 0 — reclaim the inset for bigger tiles */
+  padding: 0;
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
-  justify-content: center;   /* centred inside the content rectangle */
-  /* The container spans the full central rectangle but the tile block is centred,
-     leaving empty side margins. It lives in #middle-q-container's stacking context
-     (z-index 10), ABOVE the stage band (z-index 9) that holds "המשך" — so the empty
-     container was swallowing clicks meant for the top-left "המשך" button. Let clicks
-     pass through the container; only the tiles themselves (below) are interactive. */
+  justify-content: center;
   pointer-events: none;
 }
-/* Tiles stage (life-wish): the button moved to the top, so extend the grid a touch
-   DOWN into the freed bottom space → the height-bound square tiles grow, still
-   contained inside the vertical grid lines. */
 #section-3[data-stage="2"] .dot-tiles-grid { height: calc(100% + 70px); top: -80px; }
 
-/* 7 columns × 4 rows (28 tiles) — landscape. aspect-ratio 7/4 at full height makes
-   the cells SQUARE; the block is height-bound and centred (side margins inside). */
+
+
 .dot-tiles-inner {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 3px;
+  gap: 6px;
   box-sizing: border-box;
   height: 100%;
   aspect-ratio: 7 / 4;      /* SQUARE cells (7 cols × 4 rows) + height-bound so the block
@@ -1332,12 +1319,21 @@ body::-webkit-scrollbar-thumb {
   height: 100%;
   min-width: 0;
   min-height: 0;
+  border-radius: 6px;
+  overflow: hidden;
   cursor: pointer;
-  pointer-events: auto;   /* re-enable on the tiles (the grid container is none — see above) */
-  transition: opacity 0.4s ease, transform 0.25s ease;
+  pointer-events: auto;
+  transition: opacity 0.4s ease, transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease;
 }
-/* Selected (tapped) tile — pops slightly above the rest, which dim (canvas alpha). */
-.dot-tile.is-selected { transform: scale(1.05); z-index: 2; }
+.dot-tile:hover {
+  transform: scale(1.04);
+  z-index: 3;
+}
+.dot-tile.is-selected {
+  transform: scale(1.08);
+  z-index: 5;
+  box-shadow: 0 0 0 2px #fb5716, 0 6px 18px rgba(0,0,0,0.25);
+}
 
 /* ── "מה תחום העיסוק שלך?" — 8 profession-category cards (profession-cards.js) ──
    Cream plates with a dotted animated icon + label, pinned inside the content
