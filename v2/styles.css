@@ -1,66 +1,36 @@
 /* ─── ArbelG Font ─────────────────────────────────────────── */
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/ArbelG-Regular.otf') format('opentype');
+  src: url('/fonts/ArbelG-Regular.otf') format('opentype');
   font-weight: 400;
 }
 
 /* ─── Shofar Font ─────────────────────────────────────────── */
 @font-face {
   font-family: 'Shofar';
-  src: url('/image/fonts/shofarregular-webfont.ttf') format('truetype');
+  src: url('/fonts/shofarregular-webfont.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/ArbelG-Medium.otf') format('opentype');
+  src: url('/fonts/ArbelG-Medium.otf') format('opentype');
   font-weight: 500;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/ArbelG-Bold.otf') format('opentype');
+  src: url('/fonts/ArbelG-Bold.otf') format('opentype');
   font-weight: 700;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/ArbelG-Stencil.otf') format('opentype');
+  src: url('/fonts/ArbelG-Stencil.otf') format('opentype');
   font-weight: 900;
 }
 
 /* ─── LiaCarnaval ─────────────────────────────────────────── */
-@font-face {
-  font-family: 'LiaCarnaval';
-  src: url('/image/fonts/LiaCarnaval-Regular.ttf') format('truetype');
-  font-weight: 400;
-}
-@font-face {
-  font-family: 'LiaCarnavalTextured';
-  src: url('/image/fonts/LiaCarnaval-Textured.ttf') format('truetype');
-  font-weight: 400;
-}
 
 /* ─── Oscar ───────────────────────────────────────────────── */
-@font-face {
-  font-family: 'OscarLight';
-  src: url('/image/fonts/oscar-light-fm.otf') format('opentype');
-  font-weight: 300;
-}
-@font-face {
-  font-family: 'Oscar';
-  src: url('/image/fonts/oscar-regular-fm.otf') format('opentype');
-  font-weight: 400;
-}
-@font-face {
-  font-family: 'OscarRound';
-  src: url('/image/fonts/oscar-round-fm.otf') format('opentype');
-  font-weight: 400;
-}
-@font-face {
-  font-family: 'OscarStencil';
-  src: url('/image/fonts/oscar-stencil-fm.otf') format('opentype');
-  font-weight: 400;
-}
 
 *, *::before, *::after {
   box-sizing: border-box;

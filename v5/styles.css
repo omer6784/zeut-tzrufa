@@ -1,70 +1,54 @@
 /* ─── Body sans (SimplerPro Mono) ─────────────────────────────
    Loaded under the family name 'ArbelG' so the rest of the
-   stylesheet/JS keeps working without a global rename. No 900
-   stencil cut exists in this family, so weight 900 falls back to
-   the 700 Bold. */
+   stylesheet/JS keeps working without a global rename. All font
+   files are BUNDLED in public/fonts (served at /fonts/… in Vite
+   dev and on Netlify alike) — the interface never depends on a
+   font installed on the machine, so Mac and Windows render
+   identically. Weights used across the UI: 300/400/500/700/900;
+   300 is pinned to the Regular cut and 900 to the Bold cut (no
+   lighter/heavier cuts exist in this family), so every requested
+   weight resolves to a DECLARED face — never to a synthesized or
+   system substitute. */
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/SimplerPro_HLAR_Mono-Regular.otf') format('opentype');
-  font-weight: 400;
+  src: url('/fonts/SimplerPro_HLAR_Mono-Regular.otf') format('opentype');
+  font-weight: 300;
 }
-
-/* ─── Shofar Font ─────────────────────────────────────────── */
-@font-face {
-  font-family: 'Shofar';
-  src: url('/image/fonts/shofarregular-webfont.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/SimplerPro_HLAR_Mono-Medium.otf') format('opentype');
+  src: url('/fonts/SimplerPro_HLAR_Mono-Regular.otf') format('opentype');
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'ArbelG';
+  src: url('/fonts/SimplerPro_HLAR_Mono-Medium.otf') format('opentype');
   font-weight: 500;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
+  src: url('/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
   font-weight: 700;
 }
 @font-face {
   font-family: 'ArbelG';
-  src: url('/image/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
+  src: url('/fonts/SimplerPro_HLAR_Mono-Bold.otf') format('opentype');
   font-weight: 900;
 }
 
-/* ─── LiaCarnaval ─────────────────────────────────────────── */
+/* ─── Shofar (display serif) ──────────────────────────────────
+   Real demi-bold cut declared for 700 so bold Shofar text uses
+   the authored face instead of per-OS synthetic bolding. */
 @font-face {
-  font-family: 'LiaCarnaval';
-  src: url('/image/fonts/LiaCarnaval-Regular.ttf') format('truetype');
+  font-family: 'Shofar';
+  src: url('/fonts/shofarregular-webfont.ttf') format('truetype');
   font-weight: 400;
+  font-style: normal;
 }
 @font-face {
-  font-family: 'LiaCarnavalTextured';
-  src: url('/image/fonts/LiaCarnaval-Textured.ttf') format('truetype');
-  font-weight: 400;
-}
-
-/* ─── Oscar ───────────────────────────────────────────────── */
-@font-face {
-  font-family: 'OscarLight';
-  src: url('/image/fonts/oscar-light-fm.otf') format('opentype');
-  font-weight: 300;
-}
-@font-face {
-  font-family: 'Oscar';
-  src: url('/image/fonts/oscar-regular-fm.otf') format('opentype');
-  font-weight: 400;
-}
-@font-face {
-  font-family: 'OscarRound';
-  src: url('/image/fonts/oscar-round-fm.otf') format('opentype');
-  font-weight: 400;
-}
-@font-face {
-  font-family: 'OscarStencil';
-  src: url('/image/fonts/oscar-stencil-fm.otf') format('opentype');
-  font-weight: 400;
+  font-family: 'Shofar';
+  src: url('/fonts/shofardemi-bold-webfont.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
 }
 
 *, *::before, *::after {
@@ -6473,7 +6457,10 @@ html:not(.cursor-active) *::after {
 }
 .calib-status {
   flex: 0 0 auto; text-align: center; margin-top: 12px;
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  /* Was 'IBM Plex Mono' — not shipped with any OS, so it silently fell back to a
+     DIFFERENT system mono on Mac vs Windows. ArbelG (SimplerPro Mono) IS the
+     project's bundled mono — identical everywhere. */
+  font-family: 'ArbelG', monospace;
   font-size: 12px; letter-spacing: 0.08em;
   color: var(--q-ink, #282828); opacity: 0.6;
 }
