@@ -285,7 +285,10 @@ const _TAU = Math.PI * 2;
 // the straight edges. Returned in that same coordinate space so the window frame
 // is drawn at the SAME proportions as the display (only scaled to fit the slot).
 const ORN_HW = 450, ORN_HH = 900, ORN_R1 = 15, ORN_R2 = 27, ORN_DOT = 4.4;
-function buildOrnamentDots(N) {
+/* Exported for the NAME stage's finale, which draws this exact frame around the
+   stage's content rectangle (the number of the name becoming the jewel's frame). */
+export const ORNAMENT_GEOM = { hw: ORN_HW, hh: ORN_HH, r2: ORN_R2 };
+export function buildOrnamentDots(N) {
   const dots = [];
   N = Math.max(0, N | 0);
   const rectAt = t => {

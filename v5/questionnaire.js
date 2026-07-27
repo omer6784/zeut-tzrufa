@@ -1,9 +1,9 @@
 /* questionnaire.js — Identity Forging v6 — Icon Talisman */
 import { initRootsWidget } from './roots.js';
 import { mountArtifact3D, unmountArtifact3D, assetsReady } from './artifact3d.js';
-import { attachKeyboardTo, detachKeyboard } from './virtual-keyboard.js';
+import { attachKeyboardTo, detachKeyboard, openKeyboardFor } from './virtual-keyboard.js';
 import { showSymbolInfo, hideSymbolInfo, SYMBOL_INFO as SYMBOL_INFO_2D } from './symbol-info.js';
-import { openSymbolWindow, closeSymbolWindow } from './symbol-window.js';
+import { openSymbolWindow, closeSymbolWindow, buildOrnamentDots, ORNAMENT_GEOM } from './symbol-window.js';
 import { SYMBOLS_3D } from './symbols-3d.js';
 import { mountTimeWheel } from './time-wheel.js';
 import { mountLightGate } from './light-gate.js';
@@ -21,6 +21,7 @@ import { mountCompletion } from './completion.js';
 if (typeof window !== 'undefined') {
   window.__openSymbolWindow = (motif = 'hamsa', opts) => openSymbolWindow(motif, opts);
   window.__closeSymbolWindow = closeSymbolWindow;
+  window.__goQuestion = (i) => renderQuestion(i);   // dev/verification: jump to a stage
 }
 
 let BLUE   = '#282828';
@@ -552,6 +553,7 @@ const INSTRUCTIONS = {
   stars: 'גללו ובחרו את השעה הרצויה',
   personal: 'בחרו את תחום העיסוק שלכם',
   'life-wish': 'בחרו את האופן בו תרצו לנוע',
+  name: 'כתבו את שמכם על הקו — לכל אות ערך גימטרי משלה',
 };
 
 /* The frequency stage's own cue text (shown in the shared band's note slot). */
@@ -1251,6 +1253,8 @@ function _renderQuestionImpl(idx){
   // the time wheel ticking) for the REST of the session. Stop them on ANY switch.
   if (st._dotTiles) { try { st._dotTiles.teardown(); } catch (_) {} st._dotTiles = null; }
   if (st._timeTeardown) { try { st._timeTeardown(); } catch (_) {} st._timeTeardown = null; }
+  if (st._nameStage) { try { st._nameStage.teardown(); } catch (_) {} st._nameStage = null; }
+  document.getElementById('ns-ornament')?.remove();
   if (st._originBandPoll) { clearInterval(st._originBandPoll); st._originBandPoll = null; }
   document.getElementById('section-3')?.classList.remove('origin-input-phase');
   if (st._lightEntryTimers) { st._lightEntryTimers.forEach(clearTimeout); st._lightEntryTimers = []; }
@@ -1698,22 +1702,28 @@ function _renderQuestionImpl(idx){
   } else if(q.type==='placeholder'){
     // Empty placeholder stage — the shared grid/frame stays, no middle content.
     wrap.innerHTML='';
+  } else if(q.id==='name'){
+    // ── NAME stage, redesigned: "השם נחקק על הציר" ──────────────────────
+    // A dotted BASELINE (the jewel's axis language, laid horizontal) across the
+    // middle; each typed letter stands on it in large Shofar with its gematria
+    // value in small orange beneath; the RUNNING TOTAL builds on the LEFT side
+    // of the rectangle in the big gold dotted numerals. The band's "סיום" fires
+    // submitAnswer → playGematriaFinale (values fly into the total, then the
+    // total's dots draw the jewel's ornament FRAME around the whole rectangle)
+    // → the dark gematria explainer window → the editor.
+    // The old bordered input row is gone entirely — the writing line IS the field.
+    // (wrap.className is reset on every stage render, so this self-clears.)
+    wrap.innerHTML='';
+    wrap.classList.add('is-hidden-input');
+    const nameHost = document.getElementById('word-field-container');
+    st._nameStage = mountNameStage(nameHost, st.answers.name || '');
   } else if(q.type!=='background'){
-    const isName = q.id === 'name';
-    // Name (final) stage is stripped bare — just the input + a "סיום" button (no
-    // help hint, no gematria watermark). The gematria is still computed on input
-    // and, on submit, drives the ornament on the display.
-    const submitLabel = isName ? 'סיום' : 'המשך';
-    const helpBtn = isName ? '' : `<button class="q-help" type="button" aria-label="עזרה"><span class="q-help-tip">${q.placeholder||''}</span></button>`;
-    wrap.innerHTML=`<textarea id="q-input" dir="rtl" rows="2"></textarea><button id="q-submit" aria-label="${submitLabel}">${submitLabel}</button>${helpBtn}`;
+    // Generic text fallback (no current question uses it — kept for safety).
+    wrap.innerHTML=`<textarea id="q-input" dir="rtl" rows="2"></textarea><button id="q-submit" aria-label="המשך">המשך</button>`;
     const inp=document.getElementById('q-input');
     inp.value=st.answers[q.id]||''; setTimeout(()=>inp.focus(),350);
     document.getElementById('q-submit').addEventListener('click',submitAnswer);
     inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitAnswer();}});
-    if(isName){
-      attachKeyboardTo(inp);   // virtual Hebrew keyboard, name step only
-      inp.addEventListener('input',()=>{ st.gematriaValue=calcGematria(inp.value); });
-    }
   }
   updateProgressList(idx);
   const pb=document.getElementById('q-prev'); if(pb) pb.style.opacity='1';
@@ -2367,17 +2377,21 @@ function restartStage(){
 }
 function submitAnswer(){
   const inp=document.getElementById('q-input'), val=inp?.value?.trim();
-  if(!val){inp?.classList.add('shake');setTimeout(()=>inp?.classList.remove('shake'),500);return;}
+  if(!val){
+    if(st._nameStage){ st._nameStage.shake(); return; }
+    inp?.classList.add('shake');setTimeout(()=>inp?.classList.remove('shake'),500);return;
+  }
   const currentQ = QUESTIONS[st.current];
   st.answers[currentQ.id]=val;
   if(currentQ.id==='name'){
     st.gematriaValue=calcGematria(val);
     // Final stage: broadcast so the display builds the dotted ornament (gematria
-    // dots) in parallel; animate the gematria calculation; then open the window
+    // dots) in parallel; play the gematria FINALE (values fly into the total,
+    // the total draws the ornament frame around the stage); then open the window
     // showing that same ornament + text about gematria.
     broadcastArtifact();
     try { detachKeyboard(); } catch(_){}
-    playGematriaCalc(val, st.gematriaValue, () => {
+    playGematriaFinale(val, st.gematriaValue, () => {
       openSymbolWindow(null, {
         gematria: { value: st.gematriaValue, name: val },
         onContinue: () => finishQuestionnaire(),
@@ -2394,39 +2408,139 @@ function submitAnswer(){
   advance();
 }
 
-/* Illustrate the gematria of `name`: reveal each Hebrew letter with its value,
-   the running total climbing in the big dotted numerals (the time-stage digit
-   art), landing on `total`. Calls onDone when finished. */
-function playGematriaCalc(name, total, onDone){
-  const host = document.getElementById('middle-q-container');
-  const letters = [...name].map(c=>({ c, v: GEMATRIA[c]||0 })).filter(o=>o.v>0);
-  if(!host || !letters.length){ onDone && onDone(); return; }
-  // Hide the input row while the calc plays.
-  ['q-input','q-submit'].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.visibility='hidden'; });
-  document.getElementById('gematria-calc')?.remove();
-  const ov = document.createElement('div');
-  ov.id='gematria-calc';
-  ov.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5vh;z-index:30;pointer-events:none;direction:rtl;';
-  const row=document.createElement('div');
-  row.style.cssText='display:flex;gap:1.2vw;align-items:flex-end;flex-wrap:wrap;justify-content:center;max-width:80%;';
-  letters.forEach(o=>{
-    const cell=document.createElement('div');
-    cell.style.cssText='display:flex;flex-direction:column;align-items:center;opacity:0;transition:opacity .35s ease;';
-    cell.innerHTML=`<span style="font-family:'ArbelG',sans-serif;font-size:clamp(28px,3.2vw,50px);color:#282828;line-height:1;">${o.c}</span><span style="font-family:monospace;font-size:clamp(11px,0.95vw,15px);color:#fb5716;margin-top:6px;">${o.v}</span>`;
-    row.appendChild(cell); o.cell=cell;
-  });
-  const sum=document.createElement('div');
-  sum.style.cssText='display:flex;gap:0.5vw;align-items:center;direction:ltr;';
-  const renderSum=n=>{ sum.innerHTML=String(n).split('').map(d=>`<img src="/image/v5-stage6/${d}.png" style="height:clamp(56px,12vh,140px);width:auto;display:block;" alt="">`).join(''); };
-  renderSum(0);
-  ov.appendChild(row); ov.appendChild(sum); host.appendChild(ov);
-  let running=0, i=0;
-  const step=()=>{
-    if(i>=letters.length){ renderSum(total); setTimeout(()=>{ try{ov.remove();}catch(_){} onDone && onDone(); }, 1500); return; }
-    const o=letters[i]; o.cell.style.opacity='1'; running+=o.v; renderSum(running); i++;
-    setTimeout(step, 540);
+/* ── NAME stage: "השם נחקק על הציר" ────────────────────────────────────────
+   A dotted horizontal BASELINE (the jewel-axis language) with the typed name
+   standing on it in large Shofar; each letter carries its gematria value in
+   small orange beneath, and the RUNNING TOTAL builds live on the LEFT of the
+   rectangle in the big gold dotted numerals. The hidden real <input> keeps the
+   id "q-input" so the virtual keyboard + submitAnswer flows work unchanged. */
+function mountNameStage(host, initial){
+  if(!host) return null;
+  host.innerHTML = '';
+  const root = document.createElement('div');
+  root.className = 'name-stage';
+  root.innerHTML = `
+    <div class="ns-sum" aria-hidden="true"></div>
+    <div class="ns-line-wrap">
+      <div class="ns-letters" dir="rtl"></div>
+      <div class="ns-baseline" aria-hidden="true"></div>
+    </div>
+    <input id="q-input" class="ns-hidden-input" dir="rtl" autocomplete="off" aria-label="שם" />`;
+  host.appendChild(root);
+  const lettersEl = root.querySelector('.ns-letters');
+  const sumEl = root.querySelector('.ns-sum');
+  const inp = root.querySelector('#q-input');
+  inp.value = initial || '';
+
+  const renderSum = (n) => {
+    // Masked spans (not <img>) so the gold digit art takes the stage's own ink
+    // colour while keeping its dotted shapes — see .ns-sum span in styles.css.
+    sumEl.innerHTML = String(Math.max(0, n | 0)).split('').map(d =>
+      `<span style="--d:url('/image/v5-stage6/${d}.png')"></span>`).join('');
+    sumEl.classList.remove('ns-pop'); void sumEl.offsetWidth; sumEl.classList.add('ns-pop');
   };
-  setTimeout(step, 350);
+  const render = () => {
+    const chars = [...inp.value];
+    lettersEl.innerHTML = '';
+    chars.forEach(c => {
+      if (c === ' ') { const sp = document.createElement('span'); sp.className = 'ns-space'; lettersEl.appendChild(sp); return; }
+      const v = GEMATRIA[c] || 0;
+      const cell = document.createElement('span');
+      cell.className = 'ns-letter';
+      cell.innerHTML = `<b>${c}</b><i>${v > 0 ? v : ''}</i>`;
+      lettersEl.appendChild(cell);
+    });
+    const caret = document.createElement('span');
+    caret.className = 'ns-caret';
+    lettersEl.appendChild(caret);
+    st.gematriaValue = calcGematria(inp.value);
+    renderSum(st.gematriaValue);
+    // Long names: step the letterforms down so the row stays on the line.
+    const n = chars.length;
+    root.style.setProperty('--ns-letter-size', n > 14 ? '32px' : n > 9 ? '44px' : '');
+  };
+  inp.addEventListener('input', render);
+  // The real input is visually hidden (the letters ON THE LINE are the visible
+  // field), so it can never be tapped — open the virtual keyboard programmatically
+  // instead of waiting for a tap on the input.
+  attachKeyboardTo(inp);
+  setTimeout(() => { try { openKeyboardFor(inp); } catch (_) {} }, 420);
+  render();
+
+  return {
+    value: () => inp.value,
+    root,
+    shake(){ const w = root.querySelector('.ns-line-wrap'); w.classList.remove('ns-shake'); void w.offsetWidth; w.classList.add('ns-shake'); },
+    teardown(){ try { root.remove(); } catch (_) {} },
+  };
+}
+
+/* The gematria FINALE (plays on "סיום"): the letters' values detach and fly as
+   orange dots into the running total; then the total's dots stream outward and
+   DRAW the jewel's ornament frame (the exact buildOrnament geometry, scaled to
+   the content rectangle) around the whole stage — the name's number visibly
+   becoming the jewel's frame. Calls onDone when the frame has fully drawn. */
+function playGematriaFinale(name, total, onDone){
+  const ns = st._nameStage;
+  const sec = document.getElementById('section-3');
+  if(!ns || !sec){ onDone && onDone(); return; }
+  ns.root.classList.add('ns-locked');           // caret off, input frozen
+  const sumEl = ns.root.querySelector('.ns-sum');
+  const sumRect = sumEl.getBoundingClientRect();
+  const targets = [...ns.root.querySelectorAll('.ns-letter i')].filter(i => i.textContent);
+
+  // 1. the values fly into the total
+  targets.forEach((el, k) => {
+    const r = el.getBoundingClientRect();
+    const fly = document.createElement('span');
+    fly.className = 'ns-fly';
+    fly.style.left = (r.left + r.width / 2 - 5) + 'px';
+    fly.style.top  = (r.top + r.height / 2 - 5) + 'px';
+    document.body.appendChild(fly);
+    el.style.opacity = '0';
+    const dx = (sumRect.left + sumRect.width / 2) - (r.left + r.width / 2);
+    const dy = (sumRect.top + sumRect.height / 2) - (r.top + r.height / 2);
+    setTimeout(() => { fly.style.transform = `translate(${dx}px, ${dy}px) scale(0.45)`; fly.style.opacity = '0.15'; }, 40 + k * 55);
+    setTimeout(() => { try { fly.remove(); } catch (_) {} }, 950 + k * 55);
+  });
+  const flyMs = 700 + targets.length * 55;
+  setTimeout(() => { sumEl.classList.remove('ns-pop'); void sumEl.offsetWidth; sumEl.classList.add('ns-pop'); }, flyMs);
+
+  // 2. the total's dots draw the ornament frame around the content rectangle
+  setTimeout(() => {
+    document.getElementById('ns-ornament')?.remove();
+    const cv = document.createElement('canvas');
+    cv.id = 'ns-ornament';
+    sec.appendChild(cv);
+    const W = sec.clientWidth, H = sec.clientHeight;
+    cv.width = W; cv.height = H;
+    const cs = getComputedStyle(document.documentElement);
+    const sx = parseFloat(cs.getPropertyValue('--sx')) || 1;
+    const sy = parseFloat(cs.getPropertyValue('--sy')) || 1;
+    const x0 = 100 * sx, x1 = W - 100 * sx, y0 = 85 * sy, y1 = 706 * sy;
+    const cx = (x0 + x1) / 2, cyc = (y0 + y1) / 2;
+    const kx = ((x1 - x0) / 2 - 30) / (ORNAMENT_GEOM.hw + ORNAMENT_GEOM.r2);
+    const ky = ((y1 - y0) / 2 - 26) / (ORNAMENT_GEOM.hh + ORNAMENT_GEOM.r2);
+    const dots = buildOrnamentDots(total);
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#282828';
+    // Constant drawing pace (like the symbol contours) — clamped so tiny and
+    // huge gematria values alike feel deliberate.
+    const DUR = Math.max(1600, Math.min(4200, dots.length / 140 * 1000));
+    const t0 = performance.now();
+    (function draw(){
+      if(!cv.isConnected) return;
+      const f = Math.min(1, (performance.now() - t0) / DUR);
+      const upto = Math.floor(dots.length * f);
+      ctx.clearRect(0, 0, W, H);
+      for(let i = 0; i < upto; i++){
+        const d = dots[i];
+        ctx.beginPath(); ctx.arc(cx + d.x * kx, cyc + d.y * ky, 2.6, 0, Math.PI * 2); ctx.fill();
+      }
+      if(f < 1) requestAnimationFrame(draw);
+      else setTimeout(() => onDone && onDone(), 650);
+    })();
+  }, flyMs + 350);
 }
 function submitChoiceAnswer(val){
   st.answers[QUESTIONS[st.current].id]=val;
