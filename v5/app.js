@@ -1716,11 +1716,11 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 /* Kiosk auto-reset: once the experience has started, if nobody touches or presses
-   anything for a minute, return to the opening screen. A full reload gives a clean
+   anything for TWO MINUTES, return to the opening screen. A full reload gives a clean
    start and re-broadcasts 'idle' to the display (its gallery comes back). Only armed
    after "לחץ להתחלה" — the idle opening screen itself never needs resetting. */
 function initIdleReset() {
-  const IDLE_MS = 60000;
+  const IDLE_MS = 120000;
   let timer = null;
   const arm = () => { clearTimeout(timer); timer = setTimeout(() => location.reload(), IDLE_MS); };
   window.addEventListener('opening-morph-start', () => {

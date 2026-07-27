@@ -20,7 +20,12 @@ export function mountSymbolContour(container, objPath, opts = {}) {
   const DOT_SIZE    = opts.dotSize    ?? 2.5;
   const DOT_COLOR   = opts.dotColor   ?? '#f5f5ed';
   const SAMPLE_STEP = opts.sampleStep ?? 7;
-  const DRAW_MS     = opts.drawMs     ?? 2900;   // wall-clock duration of the reveal
+  // The reveal runs at a CONSTANT drawing rate (dots per second), so simple and
+  // intricate symbols alike draw at the same visual pace — a fixed wall-clock
+  // duration made dot-heavy symbols rush. Clamped so no symbol feels endless
+  // or instant. (drawMs, if passed, still overrides.)
+  const DOTS_PER_SEC = opts.dotsPerSec ?? 150;
+  let DRAW_MS = opts.drawMs ?? 2900;             // resolved per-symbol once dots exist
   // Some OBJs are authored facing a non-frontal axis (e.g. a wheel whose face
   // lies in the YZ plane). The contour is a silhouette along Z, so such a model
   // would come out edge-on. rotateY/rotateX (radians) reorient it to its frontal
@@ -53,6 +58,8 @@ export function mountSymbolContour(container, objPath, opts = {}) {
       normalizeModel(vertices, OBJ_SCALE);
       const mask = buildMask(vertices, faces);
       dots = buildContourDots(mask);
+      // Constant pace: duration follows the dot count (unless drawMs was forced).
+      if (opts.drawMs == null) DRAW_MS = Math.max(2200, Math.min(5600, (dots.length / DOTS_PER_SEC) * 1000));
       try { container.setAttribute('data-dot-count', String(dots.length)); } catch (_) {}
       rafId = requestAnimationFrame(frame);
     })
@@ -157,7 +164,7 @@ export function mountSymbolContour(container, objPath, opts = {}) {
   }
 
   function buildContourDots(mask) {
-    let contour = [];
+    const contour = [];
     for (let y = 1; y < H - 1; y++) {
       for (let x = 1; x < W - 1; x++) {
         if (isInsideMask(mask, x, y) && isEdgePixel(mask, x, y)) {
@@ -165,15 +172,64 @@ export function mountSymbolContour(container, objPath, opts = {}) {
         }
       }
     }
-    contour = orderContour(contour);
+    // A symbol's contour is usually SEVERAL separate lines (outer silhouette,
+    // holes, inner details). Ordering all points as one greedy path made the pen
+    // jump mid-line to whichever other line happened to be nearest. Instead:
+    // split into connected components, draw each line COMPLETELY (greedy walk
+    // along its adjacent pixels), then hop to the nearest next line — so the
+    // reveal reads as a hand finishing one stroke before starting another.
+    const components = splitComponents(contour).map(orderComponent);
+    const ordered = chainComponents(components);
     const out = [];
-    for (let i = 0; i < contour.length; i += SAMPLE_STEP) out.push(contour[i]);
+    for (const comp of ordered) {
+      for (let i = 0; i < comp.length; i += SAMPLE_STEP) out.push(comp[i]);
+    }
     return out;
   }
 
-  /* Greedy nearest-neighbour ordering so the reveal draws the outline as a
-     continuous stroke, starting from the topmost point. */
-  function orderContour(points) {
+  /* Group contour pixels into connected components (grid-hash BFS; pixels within
+     ~2px of each other belong to the same line). */
+  function splitComponents(points) {
+    const CELL = 2, LINK2 = 2.5 * 2.5;
+    const grid = new Map();
+    const keyOf = (p) => ((Math.round(p.x / CELL) + 4096) << 13) | (Math.round(p.y / CELL) + 4096);
+    points.forEach((p, i) => {
+      const k = keyOf(p);
+      const arr = grid.get(k);
+      if (arr) arr.push(i); else grid.set(k, [i]);
+    });
+    const seen = new Uint8Array(points.length);
+    const comps = [];
+    for (let s = 0; s < points.length; s++) {
+      if (seen[s]) continue;
+      const comp = [], queue = [s];
+      seen[s] = 1;
+      while (queue.length) {
+        const i = queue.pop();
+        const p = points[i];
+        comp.push(p);
+        const cx = Math.round(p.x / CELL), cy = Math.round(p.y / CELL);
+        for (let gy = cy - 1; gy <= cy + 1; gy++) {
+          for (let gx = cx - 1; gx <= cx + 1; gx++) {
+            const arr = grid.get(((gx + 4096) << 13) | (gy + 4096));
+            if (!arr) continue;
+            for (const j of arr) {
+              if (seen[j]) continue;
+              const q = points[j], dx = q.x - p.x, dy = q.y - p.y;
+              if (dx * dx + dy * dy <= LINK2) { seen[j] = 1; queue.push(j); }
+            }
+          }
+        }
+      }
+      comps.push(comp);
+    }
+    return comps;
+  }
+
+  /* Order ONE component as a continuous stroke: greedy nearest-neighbour walk
+     starting from its topmost point (pixels along a line are adjacent, so the
+     walk simply follows it). */
+  function orderComponent(points) {
     if (points.length < 2) return points;
     const remaining = points.slice();
     let startIndex = 0, bestY = -Infinity;
@@ -191,6 +247,26 @@ export function mountSymbolContour(container, objPath, opts = {}) {
         if (d < nearestDist) { nearestDist = d; nearestIndex = i; }
       }
       ordered.push(remaining.splice(nearestIndex, 1)[0]);
+    }
+    return ordered;
+  }
+
+  /* Draw order of the lines: start with the one holding the topmost point, then
+     always continue to the line whose start is nearest to where the pen stopped. */
+  function chainComponents(comps) {
+    if (comps.length <= 1) return comps;
+    const remaining = comps.slice();
+    let bestI = 0, bestY = -Infinity;
+    remaining.forEach((c, i) => { if (c[0] && c[0].y > bestY) { bestY = c[0].y; bestI = i; } });
+    const ordered = [remaining.splice(bestI, 1)[0]];
+    while (remaining.length) {
+      const end = ordered[ordered.length - 1][ordered[ordered.length - 1].length - 1];
+      let ni = 0, nd = Infinity;
+      remaining.forEach((c, i) => {
+        const dx = c[0].x - end.x, dy = c[0].y - end.y, d = dx * dx + dy * dy;
+        if (d < nd) { nd = d; ni = i; }
+      });
+      ordered.push(remaining.splice(ni, 1)[0]);
     }
     return ordered;
   }

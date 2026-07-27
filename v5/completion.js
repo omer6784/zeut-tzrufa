@@ -51,7 +51,7 @@ export function mountCompletion({ } = {}) {
         <input class="cv-modal-input" id="cv-email" type="email" inputmode="email" dir="rtl" placeholder="הזינו כתובת מייל" autocomplete="email" />
         <div class="cv-modal-actions">
           <button class="cv-btn cv-btn-dark" id="cv-send" type="button">שלח</button>
-          <button class="cv-btn cv-btn-dark" id="cv-cancel" type="button">ביטול</button>
+          <button class="cv-btn cv-btn-dark" id="cv-cancel" type="button">חזרה למסך הפתיחה</button>
         </div>
         <div class="cv-modal-msg" id="cv-msg" aria-live="polite"></div>
       </div>
@@ -82,7 +82,9 @@ export function mountCompletion({ } = {}) {
     modal.hidden = false;
     setTimeout(() => emailEl.focus(), 50);
   });
-  view.querySelector('#cv-cancel').addEventListener('click', () => { modal.hidden = true; });
+  // The modal's second button goes BACK TO THE OPENING SCREEN (was "ביטול" that
+  // merely closed the modal) — a full reload, same as the main "חזור" button.
+  view.querySelector('#cv-cancel').addEventListener('click', () => location.reload());
 
   async function captureGifBase64() {
     const win = jewel.contentWindow;
