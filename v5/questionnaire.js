@@ -1925,7 +1925,9 @@ function runGlobeDemo(){
    visitor starts with an empty box. Plays once; a real touch cancels it. */
 const DEMO_COUNTRY_BY_CONTINENT = {
   namerica: 'קנדה', samerica: 'ברזיל', europe: 'צרפת',
-  africa: 'מרוקו', asia: 'הודו', oceania: 'אוסטרליה',
+  // The oceania continent button is itself named אוסטרליה, so the demo types one
+  // of Australia's six STATES as its example (all six resolve in roots.js).
+  africa: 'מרוקו', asia: 'הודו', oceania: 'טסמניה',
 };
 function runInputDemo(){
   const rd = st._roots && st._roots.demo;
