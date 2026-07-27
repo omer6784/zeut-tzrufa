@@ -3709,8 +3709,7 @@ body.theme-negative {
   grid-row: 2 !important;
 }
 #questionnaire-layout #q-deco-mid-right {
-  grid-column: 3 !important;
-  grid-row: 2 !important;
+  display: none !important;
 }
 #questionnaire-layout #q-deco-bot-left {
   grid-column: 1 !important;

@@ -48,13 +48,20 @@ body:has(#section-3.origin-input-phase) #virtual-keyboard:not(.vk-hidden) {
   transform-origin: right bottom;
 }
 
-/* Name stage: center the keyboard horizontally under the short writing line */
+/* Name stage: stretch the keyboard all the way to the vertical grid lines on the left and right */
 body:has(.name-stage) #virtual-keyboard {
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
-  bottom: calc(768px - 726 * var(--sy) + 30px) !important;
-  width: clamp(640px, 72vw, 880px) !important;
+  left: calc(100 * var(--sx)) !important;
+  right: calc(100 * var(--sx)) !important;
+  transform: none !important;
+  bottom: calc(768px - 726 * var(--sy) + 20px) !important;
+  width: auto !important;
+  max-width: none !important;
+  padding: 12px clamp(10px, 1.5vw, 20px) !important;
+}
+
+body:has(.name-stage) #virtual-keyboard .vk-key {
+  height: clamp(56px, 7.5vh, 76px) !important;
+  font-size: clamp(18px, 2.2vw, 28px) !important;
 }
 
 #virtual-keyboard .vk-row {
