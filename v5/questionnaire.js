@@ -1620,13 +1620,11 @@ function _renderQuestionImpl(idx){
       // title "מה המסלול שלך?" rises from beneath it + types in, settling below.
       const pg = document.getElementById('paths-game');
       const ptitle = document.querySelector('#section-3 .paths-title');
-      // Until the PNG is added, hide it so no broken-image box shows.
-      if (ptitle) ptitle.addEventListener('error', () => { ptitle.style.display = 'none'; }, { once: true });
+      if (pg) pg.classList.add('paths-shrunk');
+      if (ptitle) ptitle.classList.add('is-in');
       st._pathsEntryTimers = st._pathsEntryTimers || [];
       const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
-      pT(() => { if (pg) pg.classList.add('paths-shrunk'); }, 1200);
-      pT(() => { if (ptitle) ptitle.classList.add('is-in'); }, 1950);
-      lockInput(); pT(() => runMazeDemo(), 2400);   // ghost-hand demo once the maze has settled
+      lockInput(); pT(() => runMazeDemo(), 1200);   // ghost-hand demo once mounted
     }
   } else if(q.type==='time'){
     wrap.innerHTML = '';
