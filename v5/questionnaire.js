@@ -3186,7 +3186,15 @@ function broadcastActivity(state){
 // Opening screen is up on load (and after a reload back to it) → gallery.
 broadcastActivity('idle');
 // The visitor pressed "לחץ להתחלה" → the experience begins → single live jewel.
-window.addEventListener('opening-morph-start', () => broadcastActivity('active'));
+// Also push a FRESH artifact right away: without it the display would keep the
+// previous visitor's stored one, and their chosen background with it. This new
+// visitor's jewel starts empty on the interface ORANGE (JEWEL_DEFAULT_BG) and
+// only changes when the frequency stage picks a colour.
+window.addEventListener('opening-morph-start', () => {
+  broadcastActivity('active');
+  st.background = null;
+  broadcastArtifact();
+});
 
 function broadcastArtifact(){
   try {
