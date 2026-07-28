@@ -4451,53 +4451,48 @@ function buildPathsGame(host, onSelect){
     return e;
   }
 
-  // ───── 6 Flowing Routes (מסלולים זורמים) ─────
-  // 6 distinct, elegant flowing paths from Right (entry) to Left (6 exits).
-  const NUM_ROUTES = 6;
-  const NUM_COLS = 7;
+  // ───── 5 Distinct Flowing Routes (מסלולים זורמים) ─────
+  // 5 distinct, elegant flowing paths from Right (entry) to Left (exit).
+  const NUM_ROUTES = 5;
+  const NUM_COLS = 6;
   const routeNodes = [];
 
   const source = mkNode(W - X_MIN, H / 2, Y_MIN, Y_MAX);
   source.isSource = true;
 
-  // Create 6 exit nodes (sinks) on the left
-  const sinks = [];
-  for (let r = 0; r < NUM_ROUTES; r++) {
-    const y = Y_MIN + (Y_MAX - Y_MIN) * ((r + 0.5) / NUM_ROUTES);
-    const sink = mkNode(X_MIN, y, Y_MIN, Y_MAX);
-    sink.isSink = true;
-    sink.symbol = PATHS_SYMBOL_POOL[r % PATHS_SYMBOL_POOL.length];
-    sinks.push(sink);
-  }
+  const exitNode = mkNode(X_MIN, H / 2, Y_MIN, Y_MAX);
+  exitNode.isSink = true;
+  exitNode.symbol = PATHS_SYMBOL_POOL[Math.floor(Math.random() * PATHS_SYMBOL_POOL.length)];
+  const sinks = [exitNode];
 
-  // Create intermediate nodes along 6 flowing routes
+  // Intermediate nodes along 5 graceful flowing routes
   for (let r = 0; r < NUM_ROUTES; r++) {
     const rNodes = [];
     const baseY = Y_MIN + (Y_MAX - Y_MIN) * ((r + 0.5) / NUM_ROUTES);
     for (let c = 1; c < NUM_COLS - 1; c++) {
       const x = W - X_MIN - (W - 2 * X_MIN) * (c / (NUM_COLS - 1));
-      const wave = Math.sin((c / NUM_COLS) * Math.PI * 2 + r * 1.1) * 32;
-      const y = Math.max(Y_MIN + 25, Math.min(Y_MAX - 25, baseY + wave));
+      const wave = Math.sin((c / NUM_COLS) * Math.PI * 2 + r * 1.2) * 36;
+      const y = Math.max(Y_MIN + 30, Math.min(Y_MAX - 30, baseY + wave));
       const n = mkNode(x, y, Y_MIN, Y_MAX);
       rNodes.push(n);
     }
     routeNodes.push(rNodes);
   }
 
-  // Connect source to first column of nodes
+  // Connect source (right) to first node of each route
   for (let r = 0; r < NUM_ROUTES; r++) {
     mkEdge(source, routeNodes[r][0], 'primary');
   }
 
-  // Connect along each route
+  // Connect along each route to exitNode (left)
   for (let r = 0; r < NUM_ROUTES; r++) {
     for (let c = 0; c < routeNodes[r].length - 1; c++) {
       mkEdge(routeNodes[r][c], routeNodes[r][c + 1], 'primary');
     }
-    mkEdge(routeNodes[r][routeNodes[r].length - 1], sinks[r], 'primary');
+    mkEdge(routeNodes[r][routeNodes[r].length - 1], exitNode, 'primary');
   }
 
-  // Add gentle cross-route bridges to allow choosing between routes
+  // Add cross-route branches so user can switch between routes during drag
   for (let c = 1; c < NUM_COLS - 2; c++) {
     for (let r = 0; r < NUM_ROUTES - 1; r++) {
       if ((r + c) % 2 === 0) {
@@ -4824,7 +4819,6 @@ function buildPathsGame(host, onSelect){
   // ── Demo API — drives a WINDING source→exit trace (+ the real white trail) for
   //    the ghost-hand stage demo. Purely visual; resetDemo() clears it after. ──
   function _neighbours(node){ const nb = []; node.edgesOut.forEach(e => nb.push(e.to)); node.edgesIn.forEach(e => nb.push(e.from)); return nb; }
-  const exitNode = sinks[0];
   function _shortestRoute(){
     const q = [source], prev = new Map([[source, null]]);
     while(q.length){
