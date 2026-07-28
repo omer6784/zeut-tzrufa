@@ -25,6 +25,12 @@ export function mountHamsaPendulum(container) {
       '/jewel/objs/Dharma.obj', '/jewel/objs/anah.obj', '/jewel/objs/djed.obj',
       '/jewel/objs/VEGVISIR.obj', '/jewel/objs/pyramid.obj',
       '/jewel/objs/spiral.obj', '/jewel/objs/tiltan.obj',
+      // newer volumetric models (frontal as authored). The cowrie is deliberately
+      // NOT here: this sketch's net transform mirrors Z (back toward the viewer —
+      // invisible on symmetric symbols), which would show the shell's dome
+      // instead of its mouth.
+      '/jewel/objs/snake.obj', '/jewel/objs/bird.obj', '/jewel/objs/triquetra.obj',
+      '/jewel/objs/triskele.obj', '/jewel/objs/solarcross.obj',
     ];
     // Story/recording frame (demo.html loads index.html with ?story=1) forces the
     // eye so the portrait opening matches the mockup; the exhibition stays random.
