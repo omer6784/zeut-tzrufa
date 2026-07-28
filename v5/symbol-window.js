@@ -60,6 +60,7 @@ const MOTIF_OBJ = {
   triskele:   '/triskele.obj',
   solarcross: '/solarcross.obj',
   endlessknot:'/endlessknot.obj',
+  triquetra:  '/triquetra.obj',
 };
 
 /* Per-motif contour overrides. Some OBJs are authored facing a side axis, so

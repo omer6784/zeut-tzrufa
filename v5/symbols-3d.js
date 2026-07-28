@@ -292,6 +292,12 @@ export const SYMBOLS_3D = {
     animate: (obj, tMs) => { obj.rotation.z = Math.sin(tMs * 0.0022) * 0.14; }, // gentle pendant sway
   },
 
+  triquetra: {
+    obj: '/triquetra.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
+    color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
+    animate: (obj, tMs) => { obj.rotation.y = tMs * 0.0006; },                  // continuous spin
+  },
+
   /* Add more symbols here — one card each: obj + sampler + sample + color +
      dotSize + its own animate. */
 };

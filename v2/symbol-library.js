@@ -516,6 +516,7 @@ const BUILT = [
   { key: 'triskele',    svg: 'triskele' },
   { key: 'solarcross',  svg: 'solarcross' },
   { key: 'endlessknot', svg: 'endlessknot' },
+  { key: 'triquetra',   svg: 'triquetra' },
 ];
 
 /* ── Build the grid ── */

@@ -152,6 +152,11 @@ export const SYMBOL_INFO = {
     origin: 'טיבט והבודהיזם',
     meaning: 'קשר ללא התחלה וללא סוף — סמל לאינסוף ולקשר ההדדי שבין כל הדברים.',
   },
+  triquetra: {
+    name: 'טריקווטרה',
+    origin: 'המסורת הקלטית',
+    meaning: 'שלוש קשתות שלובות זו בזו — סמל לשילוש, לאחדות ולנצחיות הקשר.',
+  },
   // Add more symbols here as they are registered.
 };
 

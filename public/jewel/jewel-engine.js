@@ -89,7 +89,8 @@ const PROFILES = {
   algiz:      { file: "algiz.obj",       type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },   // protection rune
   triskele:   { file: "triskele.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 2, motion: "spinY" },   // triple spiral — turns
   solarcross: { file: "solarcross.obj",  type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "spinY" },              // sun wheel — turns
-  endlessknot:{ file: "endlessknot.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" }  // hangs + sways
+  endlessknot:{ file: "endlessknot.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" }, // hangs + sways
+  triquetra:  { file: "triquetra.obj",   type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 2, motion: "spinY" }    // Celtic knot — turns
 };
 const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
 
