@@ -1752,20 +1752,28 @@ function initTouchSound() {
       ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
       if (ctx.state === 'suspended') ctx.resume();
       const t = ctx.currentTime;
+      // A soft "water-droplet" tap. The previous sound was two sines a FIFTH
+      // apart (660+990) — the exact interval/timbre of a system ALERT beep, which
+      // read as "you did something wrong". Now: a warm C5 with a quiet OCTAVE
+      // partial (consonant, chime-like), a tiny downward glide for an organic
+      // "plick", a lowpass to round off the edges, and a shorter, gentler decay.
       const g = ctx.createGain();
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.05, t + 0.008);   // fast, soft attack
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);  // gentle decay
-      g.connect(ctx.destination);
-      // Two quiet sine partials a fifth apart — a small, warm chime.
-      [660, 990].forEach((f, i) => {
+      g.gain.exponentialRampToValueAtTime(0.035, t + 0.006);  // soft, quick bloom
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);  // short, delicate tail
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 1800;                              // no sharp beepy edge
+      g.connect(lp); lp.connect(ctx.destination);
+      [523.25, 1046.5].forEach((f, i) => {                    // C5 + its octave
         const o = ctx.createOscillator();
         o.type = 'sine';
-        o.frequency.value = f;
+        o.frequency.setValueAtTime(f * 1.03, t);              // starts a hair high…
+        o.frequency.exponentialRampToValueAtTime(f, t + 0.05);// …settles: droplet feel
         const og = ctx.createGain();
-        og.gain.value = i ? 0.35 : 1;
+        og.gain.value = i ? 0.22 : 1;                         // octave stays a whisper
         o.connect(og); og.connect(g);
-        o.start(t); o.stop(t + 0.25);
+        o.start(t); o.stop(t + 0.2);
       });
     } catch (_) { /* no audio available — stay silent */ }
   };
