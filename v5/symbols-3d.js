@@ -223,8 +223,10 @@ export const SYMBOLS_3D = {
     },
   },
 
-  /* ── the authored North-African / Berber set — generated flat OBJs
-        (tools/gen-symbols.mjs), all SHELL-sampled like the rest. ── */
+  /* ── the authored North-African / Berber set — circle, sun, diamond,
+        hexagram and pentagram are REAL user-supplied models (Jul 2026 —
+        do NOT regenerate them with tools/gen-symbols.mjs); the rest of
+        this block is generated. All SHELL-sampled like the rest. ── */
   circle: {
     obj: '/circle.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
     color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),

@@ -77,12 +77,12 @@ const PROFILES = {
   // ── authored (generated) symbols — North-African / Berber set. All are FLAT
   //    extrusions (tools/gen-symbols.mjs), so zScale boosts their depth shading
   //    like the horseshoe. Thin frame shapes get a denser sampling grid.
-  circle:   { file: "circle.obj",    type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // ring — wholeness
-  sun:      { file: "sun.obj",       type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pulse" },             // radiant sun — breathes
+  circle:   { file: "circle.obj",    type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model (patterned sphere) — turns, whole from every side
+  sun:      { file: "sun.obj",       type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "pulse" },                        // real model — radiant sun, rays breathe
   bird:     { file: "bird.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayY" },                        // real model — true depth
-  diamond:  { file: "diamond.obj",   type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Berber eye rhombus
-  hexagram: { file: "hexagram.obj",  type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Seal of Solomon
-  pentagram:{ file: "pentagram.obj", type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },
+  diamond:  { file: "diamond.obj",   type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model — rhombus frame, turns
+  hexagram: { file: "hexagram.obj",  type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model — interwoven Seal of Solomon, turns
+  pentagram:{ file: "pentagram.obj", type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model — star in its ring, turns
   cowrie:   { file: "cowrie.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "pendant" },                      // real shell scan — true depth
   snake:    { file: "snake.obj",     type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayY" },                        // cobra icon — true depth
   // ── the four user-supplied OBJs (Jul 2026) — all authored frontal in XY. ──

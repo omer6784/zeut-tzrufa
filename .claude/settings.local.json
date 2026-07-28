@@ -508,7 +508,8 @@
       "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=201/stage1.css?v=202/' index.html)",
       "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=203/stage1.css?v=204/' index.html)",
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=174/styles.css?v=175/' index.html)",
-      "Bash(cd \"/Users/omershushan/.claude/projects/-Users-omershushan-Desktop-final-project-code/memory\" *)"
+      "Bash(cd \"/Users/omershushan/.claude/projects/-Users-omershushan-Desktop-final-project-code/memory\" *)",
+      "Bash(awk -F'motion: ' '{print $2}')"
     ]
   },
   "hooks": {
