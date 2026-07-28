@@ -33,6 +33,20 @@ const MOTIF_SVG = {
           + '<circle cx="28.5" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.4"/>'
           + '<path d="M31.5,10.5 L35,13 M35,13 L33.4,13.6 M35,13 L34.2,11.4" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>',
 
+  // Algiz rune (ᛉ) — the protection rune: a stem with two raised branches.
+  algiz:    '<line x1="20" y1="36" x2="20" y2="8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+          + '<line x1="20" y1="16" x2="9" y2="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+          + '<line x1="20" y1="16" x2="31" y2="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+  // Solar cross — an equal-armed cross inside the sun circle.
+  solarcross: '<circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="1.4"/>'
+          + '<line x1="20" y1="6" x2="20" y2="34" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+          + '<line x1="6" y1="20" x2="34" y2="20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+  // Endless knot — the interlaced Tibetan knot, simplified to its woven lattice.
+  endlessknot: '<path d="M14,8 L32,26 Q35,29 32,32 Q29,35 26,32 L8,14 Q5,11 8,8 Q11,5 14,8 Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'
+          + '<path d="M26,8 L8,26 Q5,29 8,32 Q11,35 14,32 L32,14 Q35,11 32,8 Q29,5 26,8 Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>'
+          + '<line x1="20" y1="2.5" x2="20" y2="9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'
+          + '<line x1="20" y1="31" x2="20" y2="37.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
+
   // ── Pure geometric forms ──────────────────────────────────
   circle:   '<circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="1.4"/>',
   triangle: '<polygon points="20,6 35,33 5,33" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
@@ -498,6 +512,10 @@ const BUILT = [
   { key: 'spiral',    svg: 'spiral' },
   { key: 'moon',      svg: 'moon' },
   { key: 'tiltan',    svg: 'tiltan' },
+  { key: 'algiz',       svg: 'algiz' },
+  { key: 'triskele',    svg: 'triskele' },
+  { key: 'solarcross',  svg: 'solarcross' },
+  { key: 'endlessknot', svg: 'endlessknot' },
 ];
 
 /* ── Build the grid ── */

@@ -56,6 +56,10 @@ const MOTIF_OBJ = {
   pentagram: '/pentagram.obj',
   cowrie:    '/cowrie.obj',
   snake:     '/snake.obj',
+  algiz:      '/algiz.obj',
+  triskele:   '/triskele.obj',
+  solarcross: '/solarcross.obj',
+  endlessknot:'/endlessknot.obj',
 };
 
 /* Per-motif contour overrides. Some OBJs are authored facing a side axis, so

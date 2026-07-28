@@ -84,7 +84,12 @@ const PROFILES = {
   hexagram: { file: "hexagram.obj",  type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Seal of Solomon
   pentagram:{ file: "pentagram.obj", type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },
   cowrie:   { file: "cowrie.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" },           // gentle sway
-  snake:    { file: "snake.obj",     type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" }
+  snake:    { file: "snake.obj",     type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },
+  // ── the four user-supplied OBJs (Jul 2026) — all authored frontal in XY. ──
+  algiz:      { file: "algiz.obj",       type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },   // protection rune
+  triskele:   { file: "triskele.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 2, motion: "spinY" },   // triple spiral — turns
+  solarcross: { file: "solarcross.obj",  type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "spinY" },              // sun wheel — turns
+  endlessknot:{ file: "endlessknot.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" }  // hangs + sways
 };
 const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
 
