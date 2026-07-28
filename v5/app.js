@@ -1743,7 +1743,7 @@ window.addEventListener('DOMContentLoaded', () => {
    sound is debounced so rapid taps / multi-touch don't stack into a clatter.
    The ghost-hand demos dispatch no real pointer events, so they stay silent. */
 function initTouchSound() {
-  let ctx = null, last = 0;
+  let ctx = null, noiseBuf = null, last = 0;
   const play = () => {
     const now = performance.now();
     if (now - last < 90) return;   // debounce double-fires (touch → pointer)
@@ -1752,29 +1752,35 @@ function initTouchSound() {
       ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
       if (ctx.state === 'suspended') ctx.resume();
       const t = ctx.currentTime;
-      // A soft "water-droplet" tap. The previous sound was two sines a FIFTH
-      // apart (660+990) — the exact interval/timbre of a system ALERT beep, which
-      // read as "you did something wrong". Now: a warm C5 with a quiet OCTAVE
-      // partial (consonant, chime-like), a tiny downward glide for an organic
-      // "plick", a lowpass to round off the edges, and a shorter, gentler decay.
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.035, t + 0.006);  // soft, quick bloom
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);  // short, delicate tail
-      const lp = ctx.createBiquadFilter();
-      lp.type = 'lowpass';
-      lp.frequency.value = 1800;                              // no sharp beepy edge
-      g.connect(lp); lp.connect(ctx.destination);
-      [523.25, 1046.5].forEach((f, i) => {                    // C5 + its octave
-        const o = ctx.createOscillator();
-        o.type = 'sine';
-        o.frequency.setValueAtTime(f * 1.03, t);              // starts a hair high…
-        o.frequency.exponentialRampToValueAtTime(f, t + 0.05);// …settles: droplet feel
-        const og = ctx.createGain();
-        og.gain.value = i ? 0.22 : 1;                         // octave stays a whisper
-        o.connect(og); og.connect(g);
-        o.start(t); o.stop(t + 0.2);
-      });
+      // A FELT TAP, not a tone. Every previous attempt was a pitched sine "beep",
+      // which always reads electronic/alert-ish. This is the sound of touching
+      // something soft: a whisper of band-filtered noise (the tactile brush of a
+      // fingertip) over a very low, warm body at 108Hz — exactly 432÷4, so it sits
+      // in tune under the interface's 432Hz ambient track and never clashes.
+      // 1. the brush — 60ms of shaped noise through a gentle bandpass
+      if (!noiseBuf) {
+        noiseBuf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * 0.08), ctx.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      }
+      const n = ctx.createBufferSource();
+      n.buffer = noiseBuf;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 1100; bp.Q.value = 0.9;
+      const ng = ctx.createGain();
+      ng.gain.setValueAtTime(0.05, t);
+      ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+      n.connect(bp); bp.connect(ng); ng.connect(ctx.destination);
+      n.start(t); n.stop(t + 0.09);
+      // 2. the body — a quiet 108Hz warmth, felt more than heard
+      const o = ctx.createOscillator();
+      o.type = 'sine'; o.frequency.value = 108;
+      const og = ctx.createGain();
+      og.gain.setValueAtTime(0.0001, t);
+      og.gain.exponentialRampToValueAtTime(0.06, t + 0.008);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + 0.11);
+      o.connect(og); og.connect(ctx.destination);
+      o.start(t); o.stop(t + 0.13);
     } catch (_) { /* no audio available — stay silent */ }
   };
   window.addEventListener('pointerdown', play, { passive: true, capture: true });
