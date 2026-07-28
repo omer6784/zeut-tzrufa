@@ -7328,9 +7328,14 @@ html:not(.cursor-active) *::after {
   display: block !important;
 }
 
-/* ── Unified Symmetrical Card Expansion & Color Melt Stage Transition ── */
+/* ── Unified Symmetrical Card Expansion bounded by Grid Lines ── */
 #symbol-window {
+  background: transparent !important;
   transition: opacity 0.3s ease;
+}
+
+#symbol-window.is-covering {
+  background: transparent !important;
 }
 
 #symbol-window .sw-frame {
@@ -7346,11 +7351,11 @@ html:not(.cursor-active) *::after {
   transition: opacity 250ms ease !important;
 }
 
-/* Step 2: Background card expands symmetrically from center outwards to fill screen (800ms) */
+/* Step 2: Background card expands symmetrically from center outwards to fit the inner grid lines (800ms) */
 #symbol-window .sw-frame.is-expanding-card {
   transform: scale(1) !important;
-  width: 100vw !important;
-  height: 100vh !important;
+  width: calc(100vw - 200px * var(--sx)) !important;
+  height: calc(100vh - 147px * var(--sy)) !important;
   max-width: none !important;
   max-height: none !important;
   border-radius: 0 !important;
