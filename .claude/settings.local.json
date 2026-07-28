@@ -490,7 +490,10 @@
       "Bash(awk -F: '$1 > 4200 && $1 < 5200')",
       "Bash(node -e \"1\")",
       "Bash(npx --no-install esbuild v5/questionnaire.js --outfile=/dev/null --bundle=false)",
-      "Bash(node --input-type=module -e \"import\\('./v5/symbol-info.js'\\).then\\(m => { const I = m.SYMBOL_INFO; console.log\\(Object.keys\\(I\\).length, 'entries'\\); for \\(const k of ['sun','anah','djed','moon','algiz','tiltan','hexagram']\\) console.log\\(k, '→', I[k].name, '|', I[k].origin, '|', I[k].meaning\\); }\\)\")"
+      "Bash(node --input-type=module -e \"import\\('./v5/symbol-info.js'\\).then\\(m => { const I = m.SYMBOL_INFO; console.log\\(Object.keys\\(I\\).length, 'entries'\\); for \\(const k of ['sun','anah','djed','moon','algiz','tiltan','hexagram']\\) console.log\\(k, '→', I[k].name, '|', I[k].origin, '|', I[k].meaning\\); }\\)\")",
+      "Bash(awk 'NR>=4381 && NR<=4900' v5/questionnaire.js)",
+      "Bash(npx vite *)",
+      "Bash(awk 'NR>=4900 && NR<=5100' v5/questionnaire.js)"
     ]
   },
   "hooks": {

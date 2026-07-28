@@ -22,6 +22,7 @@ if (typeof window !== 'undefined') {
   window.__openSymbolWindow = (motif = 'hamsa', opts) => openSymbolWindow(motif, opts);
   window.__closeSymbolWindow = closeSymbolWindow;
   window.__goQuestion = (i) => renderQuestion(i);   // dev/verification: jump to a stage
+  window.__pathsApi = () => st._pathsDemo;          // dev/verification: the maze's demo/analyze API
 }
 
 let BLUE   = '#282828';
@@ -1609,6 +1610,9 @@ function _renderQuestionImpl(idx){
       midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png?v=3" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
+        // The route analysis chose this symbol — the symbol window and the jewel
+        // must show IT (advance() would otherwise pick a random one).
+        if (symbolKey) st._forcedSymbol = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
         if (!st.p5SymbolsByStage[4]) {
           st.p5SymbolsByStage[4] = [getRandomSymbol()];
@@ -4368,11 +4372,44 @@ function drawParticles(){
    (hidden until reached) and add it to the pendant via layer 5.
    ══════════════════════════════════════════════════════════════ */
 
-const PATHS_SYMBOL_POOL = [
-  'yaz', 'meti', 'nazar', 'rosette', 'tyet', 'agadez', 'shatkona', 'triskele', 'spiral', 'om', 'evil_eye',
-  'vegvisir', 'dharmachakra', 'pentagram', 'scarab', 'lotus', 'pomegranate', 'sun', 'sri_yantra', 'yin_yang',
-  'eye', 'hamsa', 'crescent', 'diamond', 'triangle', 'circle', 'star', 'anah'
-];
+/* ── Paths-stage symbol selection: the ROUTE speaks, not a questionnaire ──
+   The system doesn't ask "who is the user?" but "what did the user seek in the
+   way they chose to move?". At the exit the traced route is analysed, ONE
+   dominant movement pattern is detected, and a symbol is drawn from that
+   pattern's meaning group (skipping symbols already on the talisman). */
+const PATH_PATTERN_GROUPS = {
+  DIRECT_PATH:       ['vegvisir', 'algiz', 'solarcross'],          // הכוונה, מציאת דרך והתקדמות
+  BRANCHING_PATH:    ['rimon', 'cowrie', 'sun'],                   // שפע, צמיחה וברכה
+  PROTECTIVE_PATH:   ['hamsa', 'eye', 'diamond', 'pyramid'],       // הגנה מפני סכנה או פגיעה
+  CENTER_PATH:       ['dharma', 'endlessknot', 'circle', 'hexagram'], // איזון, הרמוניה ומרכז פנימי
+  LONG_JOURNEY_PATH: ['spiral', 'triskele', 'bird'],               // מסע, התפתחות וגילוי
+  STEADY_PATH:       ['djed', 'anah', 'pentagram'],                // יציבות, חוזק והתמדה
+};
+/* Near-tie priority: the two SPATIAL patterns first (an explicit spatial choice
+   beats relative length/segment measures), then direct/long/branching/steady. */
+const PATH_PATTERN_PRIORITY = ['CENTER_PATH', 'PROTECTIVE_PATH', 'DIRECT_PATH', 'LONG_JOURNEY_PATH', 'BRANCHING_PATH', 'STEADY_PATH'];
+/* If a whole group is already used up on the talisman, walk to the NEAREST
+   meaning group, in this predefined order per pattern. */
+const PATH_PATTERN_FALLBACK = {
+  DIRECT_PATH:       ['STEADY_PATH', 'LONG_JOURNEY_PATH', 'CENTER_PATH', 'BRANCHING_PATH', 'PROTECTIVE_PATH'],
+  BRANCHING_PATH:    ['LONG_JOURNEY_PATH', 'CENTER_PATH', 'DIRECT_PATH', 'STEADY_PATH', 'PROTECTIVE_PATH'],
+  PROTECTIVE_PATH:   ['CENTER_PATH', 'STEADY_PATH', 'DIRECT_PATH', 'BRANCHING_PATH', 'LONG_JOURNEY_PATH'],
+  CENTER_PATH:       ['STEADY_PATH', 'PROTECTIVE_PATH', 'BRANCHING_PATH', 'DIRECT_PATH', 'LONG_JOURNEY_PATH'],
+  LONG_JOURNEY_PATH: ['BRANCHING_PATH', 'DIRECT_PATH', 'CENTER_PATH', 'STEADY_PATH', 'PROTECTIVE_PATH'],
+  STEADY_PATH:       ['CENTER_PATH', 'PROTECTIVE_PATH', 'DIRECT_PATH', 'LONG_JOURNEY_PATH', 'BRANCHING_PATH'],
+};
+/* One symbol from the pattern's group: never one already on the talisman;
+   random among what remains; a single survivor is picked automatically; an
+   exhausted group falls through to the nearest groups in order. */
+function pickPathsSymbol(pattern){
+  const used = new Set(st.chosenSymbols || []);
+  const order = [pattern, ...(PATH_PATTERN_FALLBACK[pattern] || [])];
+  for(const g of order){
+    const free = (PATH_PATTERN_GROUPS[g] || []).filter(k => !used.has(k));
+    if(free.length) return free[Math.floor(Math.random() * free.length)];
+  }
+  return null;   // everything used (can't happen with 28 symbols / 6 slots) → random fallback in advance()
+}
 
 /* Helper for the paths-game reveal panel. Uses the SYMBOL_INFO map
    defined earlier in this file (line ~509) which has full coverage. */
@@ -4500,7 +4537,6 @@ function buildPathsGame(host, onSelect){
   const source = getNode(0, MID); source.isSource = true;
   const exitNode = getNode(NX - 1, MID); exitNode.isSink = true;
   const sinks = [exitNode];
-  exitNode.symbol = PATHS_SYMBOL_POOL[Math.floor(Math.random() * PATHS_SYMBOL_POOL.length)];
   // ONE clean straight corridor along the MID row from entry to exit. Built via
   // unitEdge so any segment the maze already carved there is REUSED (deduped) —
   // no overlapping/doubled dots, and the tracer passes cleanly.
@@ -4578,6 +4614,9 @@ function buildPathsGame(host, onSelect){
     t: 0,                            // parameter along current edge (0..1)
     pos: { x: source.x, y: source.y },
     trailPoints: [{ x: source.x, y: source.y }],
+    // route-analysis tracking (see detectPattern): gross distance actually
+    // walked (backtracks included), retracted distance/count, junction visits.
+    grossLen: 0, retractLen: 0, retracts: 0, nodeVisits: [],
   };
 
   function svgPoint(e){
@@ -4678,10 +4717,14 @@ function buildPathsGame(host, onSelect){
   function pushTrail(x, y){
     const n = state.trailPoints.length;
     if(n >= 2 && Math.hypot(state.trailPoints[n - 2].x - x, state.trailPoints[n - 2].y - y) < 0.5){
-      state.trailPoints.pop();
+      const popped = state.trailPoints.pop();
+      const prev = state.trailPoints[state.trailPoints.length - 1];
+      if(prev){ const d = Math.hypot(popped.x - prev.x, popped.y - prev.y); state.grossLen += d; state.retractLen += d; }
+      state.retracts++;
     } else {
       const lastPt = state.trailPoints[n - 1];
       if(!lastPt || Math.hypot(lastPt.x - x, lastPt.y - y) > 0.5){
+        if(lastPt) state.grossLen += Math.hypot(lastPt.x - x, lastPt.y - y);
         state.trailPoints.push({ x, y });
       }
     }
@@ -4776,6 +4819,7 @@ function buildPathsGame(host, onSelect){
         }
         const nodeDist = Math.hypot(nodePos.x - mx, nodePos.y - my);
         if(bestE && bd < nodeDist - 0.5){
+          state.nodeVisits.push(node.id);                       // route analysis: junction crossed
           state.edge = bestE; state.fidx = enterIdx;
           continue;                                             // re-project on the chosen branch
         }
@@ -4789,6 +4833,101 @@ function buildPathsGame(host, onSelect){
     return 'TRACING';
   }
 
+
+  // ───── Route analysis: which movement pattern dominated? ─────
+  // Shortest possible route length (Dijkstra over the corridor graph) — the
+  // reference every relative measure compares against.
+  function edgeLen(e){
+    if(e._len == null){
+      let L = 0;
+      for(let i = 1; i < e.samples.length; i++) L += Math.hypot(e.samples[i].x - e.samples[i-1].x, e.samples[i].y - e.samples[i-1].y);
+      e._len = L;
+    }
+    return e._len;
+  }
+  function shortestPathLen(){
+    const dist = new Map([[source.id, 0]]);
+    const pq = [[0, source]];
+    while(pq.length){
+      pq.sort((a, b) => a[0] - b[0]);
+      const [d, n] = pq.shift();
+      if(n === exitNode) return d;
+      if(d > (dist.get(n.id) ?? Infinity)) continue;
+      for(const e of [...n.edgesOut, ...n.edgesIn]){
+        const m = (e.from === n) ? e.to : e.from;
+        const nd = d + edgeLen(e);
+        if(nd < (dist.get(m.id) ?? Infinity)){ dist.set(m.id, nd); pq.push([nd, m]); }
+      }
+    }
+    return 0;
+  }
+  /* Score all six patterns from the whole route's behaviour (not one action):
+     length vs shortest, junctions crossed, direction changes, closeness to the
+     centre, peripheral hugging, backtracks, entry→exit directness. Highest
+     score wins; a near-tie (≤0.08) is broken by PATH_PATTERN_PRIORITY (the two
+     explicitly SPATIAL patterns first). */
+  function detectPattern(){
+    const pts = state.trailPoints;
+    let netLen = 0;
+    for(let i = 1; i < pts.length; i++) netLen += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+    const gross = Math.max(state.grossLen, netLen);
+    const shortest = shortestPathLen() || netLen || 1;
+    const ratio = netLen / shortest;
+    const grossRatio = gross / shortest;
+    const straight = Math.hypot(exitNode.x - source.x, exitNode.y - source.y);
+    const directness = netLen > 0 ? Math.min(1, straight / netLen) : 0;
+    const totalJ = state.nodeVisits.length;
+    const uniqJ = new Set(state.nodeVisits).size;
+    const repeats = (totalJ - uniqJ) + state.retracts;
+    // direction changes along the FINAL route, sampled every ~24px
+    let turns = 0;
+    { let dirPrev = null, px = pts[0];
+      for(let i = 1; i < pts.length; i++){
+        const dx = pts[i].x - px.x, dy = pts[i].y - px.y;
+        if(Math.hypot(dx, dy) < 24) continue;
+        const dir = Math.atan2(dy, dx);
+        if(dirPrev != null){ let dd = Math.abs(dir - dirPrev); if(dd > Math.PI) dd = 2*Math.PI - dd; if(dd > 0.7) turns++; }
+        dirPrev = dir; px = pts[i];
+      } }
+    const turnsPer100 = netLen > 0 ? turns / (netLen / 100) : 0;
+    // occupancy: centre zone vs peripheral band (normalized elliptical radius).
+    // The FIRST and LAST 15% are excluded — the entry/exit funnels force every
+    // route to the edges, which would otherwise inflate the peripheral measure.
+    const cx = (X_MIN + X_MAX) / 2, cyy = (Y_MIN + Y_MAX) / 2;
+    const hx = (X_MAX - X_MIN) / 2, hy = (Y_MAX - Y_MIN) / 2;
+    const mid = pts.slice(Math.floor(pts.length * 0.15), Math.ceil(pts.length * 0.85));
+    let cIn = 0, pOut = 0;
+    for(const p of mid){
+      const re = Math.hypot((p.x - cx) / hx, (p.y - cyy) / hy);
+      if(re < 0.5) cIn++; else if(re > 0.8) pOut++;
+    }
+    const centerFrac = mid.length ? cIn / mid.length : 0;
+    const periphFrac = mid.length ? pOut / mid.length : 0;
+    const c01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+    const scores = {
+      // hinges on HOW CLOSE to the graph's true shortest route (corridors wiggle
+      // by design, so air-line directness only assists)
+      // may exceed 1.0 by design: a genuinely near-shortest route must WIN
+      // outright over the incidental centre-crossing every direct route makes
+      DIRECT_PATH:       c01((1.45 - ratio) / 0.45) * 0.85 + directness * 0.25,
+      BRANCHING_PATH:    c01(uniqJ / 14) * 0.6 + c01((grossRatio - 1) / 1.2) * 0.4,
+      PROTECTIVE_PATH:   periphFrac * 0.7 + c01(1 - centerFrac * 3) * 0.3,
+      // baseline-subtracted: crossing the centre strip is unavoidable (entry
+      // and exit sit at mid-height) — only LINGERING there beyond that counts
+      CENTER_PATH:       c01((centerFrac - 0.15) * 1.8),
+      LONG_JOURNEY_PATH: c01((ratio - 1.2) / 1.4) * 0.7 + c01(grossRatio - ratio) * 0.3,
+      // damped so it wins only when nothing else clearly does
+      STEADY_PATH:       (c01(1 - turnsPer100 / 6) * 0.6 + c01(1 - repeats / 4) * 0.4) * 0.72,
+    };
+    const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    let winner = ranked[0][0];
+    if(ranked.length > 1 && ranked[0][1] - ranked[1][1] <= 0.08){
+      const near = ranked.filter(e => ranked[0][1] - e[1] <= 0.08).map(e => e[0]);
+      winner = PATH_PATTERN_PRIORITY.find(p => near.includes(p)) || winner;
+    }
+    return { winner, scores };
+  }
+
   // Reveal the symbol at the arrived sink. The sink itself gets a subtle
   // highlight; the actual annotation (name / tradition / meaning) appears
   // as quiet text in the hint area below the network — not as a popup.
@@ -4796,9 +4935,16 @@ function buildPathsGame(host, onSelect){
     const sinkEl = svg.querySelector(`[data-sink-id="${sink.id}"]`);
     if(sinkEl) sinkEl.classList.add('revealed');
     setTracerPos(sink.x, sink.y);
-    // The chosen symbol's name / tradition / meaning is now presented by the
-    // centred symbol window (symbol-window.js), not as inline hint text here.
-    setTimeout(() => { onSelect && onSelect(sink.symbol); }, 1400);
+    // Analyse the whole traced route → dominant movement pattern → one unused
+    // symbol from that pattern's meaning group. The symbol window then presents
+    // it (name / tradition / meaning) like every other stage.
+    let chosenSym = null;
+    try {
+      const a = detectPattern();
+      chosenSym = pickPathsSymbol(a.winner);
+      state.lastAnalysis = a;
+    } catch(_) { /* fall back to a random registered symbol via advance() */ }
+    setTimeout(() => { onSelect && onSelect(chosenSym); }, 1400);
   }
 
   // ───── Pointer events ─────
@@ -4880,6 +5026,7 @@ function buildPathsGame(host, onSelect){
     return pts;
   }
   return {
+    analyze(){ return detectPattern(); },   // dev/verification: score the current trail
     demoRoute(){ const np = _shortestRoute(); return np ? _routeSamples(np) : null; },
     svgToScreen(p){ const m = svg.getScreenCTM(); return { x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f }; },
     setTrail(pts, upto){
