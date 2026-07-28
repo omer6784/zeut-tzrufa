@@ -37,15 +37,13 @@
    inside the grid rectangle. Scoped via body:has() so the name-stage keyboard —
    which shares this element (appended to <body>) — keeps its own docked position. */
 body:has(#section-3.origin-input-phase) #virtual-keyboard {
-  right: calc(100 * var(--sx) + 80px);    /* 20 further right (was +100) */
-  bottom: calc((768 - 726) * var(--sy) + 94px);   /* 10 further up (was +84) */
+  right: calc(100 * var(--sx));                   /* 80 further right — docked to the right grid line */
+  bottom: calc((768 - 726) * var(--sy) - 36px);   /* 130 lower (was +94) */
 }
-/* Enlarge it a touch. Scoped to :not(.vk-hidden) so the .vk-hidden slide-out
-   (translateY 110%) still wins when the keyboard is dismissed. Grows up-left from
-   its docked bottom-right corner, so the anchor set above stays put. */
+/* The 1.18 enlarge was dropped when the keyboard was docked to the right grid
+   line — at natural size its left edge leaves room for the writing-line column. */
 body:has(#section-3.origin-input-phase) #virtual-keyboard:not(.vk-hidden) {
-  transform: scale(1.18);
-  transform-origin: right bottom;
+  transform: none;
 }
 
 /* Name stage: slightly shrunk keyboard, slightly narrower */

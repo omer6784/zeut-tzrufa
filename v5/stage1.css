@@ -673,7 +673,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      line to just before the keyboard's left edge. Vertically centred against
      the keyboard band. */
   left: calc(100 * var(--sx)) !important;
-  right: calc(100 * var(--sx) + ((1360 - 200) * var(--sx)) * 0.66 + 28px) !important;
+  right: calc(100 * var(--sx) + (1360 - 200) * var(--sx) * 0.74 + 60px) !important;   /* ends at the re-docked keyboard's left edge */
   top: auto !important;
   bottom: calc((768 - 726) * var(--sy) + 26px) !important;   /* keyboard bottom line */
   height: var(--kb-band) !important;   /* ≈ keyboard height */
@@ -700,7 +700,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      --kb-band) down to the bottom grid line (706·sy) — so it separates the
      writing line from the keyboard without reaching up into the map. Same dot
      size/spacing as the fixed grid. */
-  right: calc(100 * var(--sx) + ((1360 - 200) * var(--sx)) * 0.66 + 14px) !important;
+  right: calc(100 * var(--sx) + (1360 - 200) * var(--sx) * 0.74 + 46px) !important;   /* in the gap left of the keyboard */
   left: auto !important;
   top: calc(726 * var(--sy) - 46px - var(--kb-band)) !important;
   height: calc(46px + var(--kb-band)) !important;
