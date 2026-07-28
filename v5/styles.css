@@ -7290,28 +7290,83 @@ html:not(.cursor-active) *::after {
 /* Paths Stage (stage 5 / roots-tree) Layout & Routes Visibility */
 #section-3[data-stage="5"] #paths-game {
   position: absolute !important;
-  inset: 0 !important;
+  left: 0 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   width: 100% !important;
   height: 100% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  z-index: 3 !important;
+  z-index: 10 !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
 }
 
 #section-3[data-stage="5"] .paths-game-svg {
   width: 100% !important;
   height: 100% !important;
   display: block !important;
+  overflow: visible !important;
+}
+
+@keyframes pathFlowDash {
+  to {
+    stroke-dashoffset: -40px;
+  }
 }
 
 #section-3[data-stage="5"] .paths-rail {
   stroke: #f5f5ed !important;
-  stroke-width: 4px !important;
-  stroke-dasharray: 8 8 !important;
+  stroke-width: 6px !important;
+  stroke-dasharray: 12 12 !important;
   stroke-linecap: round !important;
+  stroke-linejoin: round !important;
   opacity: 1 !important;
   fill: none !important;
+  visibility: visible !important;
+  display: block !important;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)) !important;
+  animation: pathFlowDash 1.8s linear infinite !important;
+}
+
+#section-3[data-stage="5"] .paths-ink-trail {
+  stroke: #f5f5ed !important;
+  stroke-width: 5px !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  fill: none !important;
+  filter: drop-shadow(0 0 8px #f5f5ed) !important;
+}
+
+#section-3[data-stage="5"] .paths-source {
+  fill: #ff5003 !important;
+  stroke: #f5f5ed !important;
+  stroke-width: 4px !important;
+  r: 16px !important;
+}
+
+#section-3[data-stage="5"] .paths-tracer {
+  fill: #ff601a !important;
+  stroke: #f5f5ed !important;
+  stroke-width: 4px !important;
+  r: 16px !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 12px #f5f5ed) !important;
+}
+
+#section-3[data-stage="5"] .paths-exit-ring {
+  stroke: #f5f5ed !important;
+  stroke-width: 3.5px !important;
+  fill: rgba(245, 245, 237, 0.2) !important;
+  r: 26px !important;
+  transform-origin: center !important;
+}
+
+#section-3[data-stage="5"] .paths-sink {
+  fill: #f5f5ed !important;
+  r: 12px !important;
 }
 
 #section-3[data-stage="5"] .paths-title {
@@ -7322,7 +7377,7 @@ html:not(.cursor-active) *::after {
   transform: translateX(-50%) !important;
   width: min(540px, 80%) !important;
   height: auto !important;
-  z-index: 10 !important;
+  z-index: 12 !important;
   opacity: 1 !important;
   clip-path: none !important;
   display: block !important;
