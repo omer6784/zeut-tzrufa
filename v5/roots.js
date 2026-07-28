@@ -849,8 +849,12 @@ export function initRootsWidget(container, opts){
     const geo = findCountry(raw);
     if(!geo){
       // Unrecognized country: a CLEAR message — never behave as if nothing was
-      // entered, and never add junk to the origins.
+      // entered, and never add junk to the origins. The attempt still ARMS
+      // "הזנתי, אפשר להמשיך" — if we simply can't recognise what the visitor
+      // typed, they must never be stuck on this stage.
       showInputError('המדינה "' + raw + '" לא זוהתה — נסו שם אחר');
+      state.attemptedEntry = true;
+      finishBtn?.classList.remove('is-dim');
       inputEl.select?.();
       return;
     }
@@ -942,7 +946,10 @@ export function initRootsWidget(container, opts){
   finishBtn?.addEventListener('click',()=>{
     const raw=inputEl.value.trim();
     if(raw) addCountry();       // capture a country still in the box first
-    if(state.countryDots.length === 0) return;   // nothing entered at all
+    // Continue if anything was recognised — or if the visitor TRIED and we
+    // could not recognise it (the stage then falls back to a random symbol
+    // downstream rather than trapping them here).
+    if(state.countryDots.length === 0 && !state.attemptedEntry) return;
     onDone && onDone();
   });
 
