@@ -1329,6 +1329,7 @@ body::-webkit-scrollbar-thumb {
   z-index: 5;
   filter: none !important;
   box-shadow: none !important;
+  transform: scale(1.12);
 }
 
 /* ── "מה תחום העיסוק שלך?" — 8 profession-category cards (profession-cards.js) ──
@@ -7291,8 +7292,10 @@ html:not(.cursor-active) *::after {
   grid-template-columns: repeat(7, 1fr) !important;
   grid-template-rows: repeat(4, 1fr) !important;
   gap: clamp(6px, 1.1vw, 14px) !important;
-  width: 100% !important;
+  /* height-bound; width FOLLOWS the 7/4 aspect → SQUARE cells, centred, never
+     wider than the container (never crossing the vertical grid lines) */
   height: 100% !important;
+  width: auto !important;
   max-width: calc(100% - 80px) !important;
   max-height: calc(100% - 60px) !important;
   aspect-ratio: 7 / 4 !important;

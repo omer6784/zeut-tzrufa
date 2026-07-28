@@ -247,6 +247,7 @@ function drawConfirm(ctx, tl, ce) {
 
 // Every tile shares ONE look: the interface YELLOW plate with dark #282828 dots.
 const TILE_BG = '#e2bc71', TILE_DOT = '#282828';
+const SELECT_BG = '#ff5003', SELECT_DOT = '#f5f5ed';   // pressed tile: orange plate, cream dots
 // Tiles are STATIC — drawn at this frozen frame — and only animate while the
 // pointer is over them (hover / touch). STAGGER = per-tile entrance delay.
 const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
@@ -296,13 +297,24 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   function setSelected(i) {
     if (chosen >= 0) return;
     selected = i;
-    tiles.forEach(o => { o.cell.classList.toggle('is-selected', o.i === i); o.settledPaint = false; });
+    tiles.forEach(o => {
+      const sel = o.i === i;
+      o.cell.classList.toggle('is-selected', sel);
+      o.cell.style.backgroundColor = sel ? SELECT_BG : TILE_BG;
+      o.dotColor = sel ? SELECT_DOT : TILE_DOT;
+      o.settledPaint = false;
+    });
     if (onSelect) onSelect(i, TILES[i].meaning);
   }
   function deselect() {
     if (chosen >= 0) return;
     selected = -1;
-    tiles.forEach(o => { o.cell.classList.remove('is-selected'); o.settledPaint = false; });
+    tiles.forEach(o => {
+      o.cell.classList.remove('is-selected');
+      o.cell.style.backgroundColor = TILE_BG;
+      o.dotColor = TILE_DOT;
+      o.settledPaint = false;
+    });
   }
 
   function frame(now) {
