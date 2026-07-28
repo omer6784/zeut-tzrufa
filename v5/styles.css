@@ -6240,17 +6240,24 @@ html:not(.cursor-active) *::after {
   background: #e2bc71;
   will-change: transform;
   animation: s2-float 7s ease-in-out infinite;
-  pointer-events: auto;   /* selectable light-point */
-  cursor: pointer;
+  pointer-events: none;   /* decoration only — active light-points are .gold-dot-pick */
 }
-/* Enlarge the tiny (4px) dot's HIT target so it's a reliable light-point to grab
-   and drag to the gate — small dots pick a symbol just like the big ones. */
-.s2-float-dot::before {
-  content: '';
+/* Drifting dots muted at field build (quiet space around protected points and
+   small sparks). */
+.s2-float-dot.s2-quiet { opacity: 0 !important; pointer-events: none !important; }
+/* Decorative family-character dots (cluster companions, protective ring,
+   geometric structures) — never selectable. */
+.s2-deco-dot {
   position: absolute;
-  inset: -8px;            /* ~20px grabbable area around the dot */
   border-radius: 50%;
+  background: #e2bc71;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
+.s2-deco-drift { animation: s2-float 7s ease-in-out infinite; }
+/* A pressed ACTIVE point holds still and grows gently while its line is drawn. */
+.gold-dot-pick.s2-selected { animation: none; }
+.gold-dot-pick.s2-selected .gold-dot-img { transform: scale(1.35); }
 @keyframes s2-float {
   0%, 100% { transform: translate(0, 0); }
   25%      { transform: translate(4px, -9px); }

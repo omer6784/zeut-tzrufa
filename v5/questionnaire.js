@@ -524,6 +524,39 @@ function pickMovementSymbol(family){
 window.__timeTest = { timePeriodForHour, pickTimeSymbol };  // dev/verification
 window.__movementTest = { pickMovementSymbol, groups: MOVEMENT_SYMBOL_GROUPS };  // dev/verification
 
+/* ── Light-point stage: family → meaning-group symbol selection ─────────────
+   Every ACTIVE light point in the field carries a fixed lightFamily, assigned
+   at field build according to its visual character (size / cluster / ring /
+   center / periphery / geometric structure). The drawn line is ONLY the act of
+   carrying the light to the gate — its shape, length and speed are never
+   analysed. Meaning comes solely from WHICH point was taken. */
+const LIGHT_POINT_SYMBOL_GROUPS = {
+  BRIGHT_LIGHT:     ['sun', 'djed', 'anah', 'snake'],             // כוח · חיים · חיוניות
+  SMALL_SPARK:      ['scarab', 'lotus', 'moon', 'triskele'],      // התחלה · התחדשות · צמיחה
+  CLUSTERED_LIGHT:  ['rimon', 'cowrie', 'fish', 'tiltan'],        // שפע · ברכה · צמיחה
+  PROTECTED_LIGHT:  ['hamsa', 'eye', 'horseshoe', 'algiz'],       // הגנה · שמירה
+  CENTRAL_LIGHT:    ['circle', 'dharma', 'hexagram', 'endlessknot'], // איזון · הרמוניה · שלמות
+  DISTANT_LIGHT:    ['vegvisir', 'solarcross', 'bird', 'spiral'], // דרך · הכוונה · גילוי
+  STRUCTURED_LIGHT: ['diamond', 'pyramid', 'pentagram', 'triquetra'], // סדר · אחדות · הגנה
+};
+/* Used symbols are FILTERED FIRST, then a random draw from what remains in the
+   SAME family. A family whose symbols are all on the talisman gets no active
+   points at field build (see the 'words' branch), so the group here is never
+   empty in practice; the full-library line is a crash guard only. */
+function pickLightSymbol(family){
+  const used = new Set(st.chosenSymbols || []);
+  const free = (LIGHT_POINT_SYMBOL_GROUPS[family] || []).filter(k => !used.has(k));
+  if(free.length){
+    const sym = free[Math.floor(Math.random() * free.length)];
+    st.lightChoice = { family, symbol: sym };
+    console.log('[light-point] symbol choice:', st.lightChoice);
+    return sym;
+  }
+  const all = Object.keys(SYMBOL_INFO_2D).filter(k => SYMBOLS_3D[k] && !used.has(k));
+  return all.length ? all[Math.floor(Math.random() * all.length)] : null;
+}
+window.__lightTest = { pickLightSymbol, groups: LIGHT_POINT_SYMBOL_GROUPS };  // dev/verification
+
 const COUNTRY_MOTIFS = {
   'מרוקו':'hamsa', 'אלג׳יריה':'yaz', 'תוניסיה':'nazar', 'לוב':'nazar',
   'מצרים':'anah', 'תימן':'crescent', 'עיראק':'nazar', 'איראן':'sun',
@@ -1550,55 +1583,111 @@ function _renderQuestionImpl(idx){
       });
     });
   } else if(q.type==='words'){
-    const pool = [...WORD_POOL];
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-
-    const chosenWords = [...pool];
-    while (chosenWords.length < 50) {
-      const randomWord = pool[Math.floor(Math.random() * pool.length)];
-      chosenWords.push(randomWord);
-    }
-
-    for (let i = chosenWords.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [chosenWords[i], chosenWords[j]] = [chosenWords[j], chosenWords[i]];
-    }
-
-    const numCols = 10;
-    const dotItems = chosenWords.map((w, i) => {
-      const row = Math.floor(i / numCols);
-      const col = i % numCols;
-      // Keep a margin inside the rectangle so even the largest dots don't spill.
-      const baseX = 9 + col * 8.2;
-      const baseY = 8 + row * 19;
-      const jitterX = (Math.random() - 0.5) * 3;
-      const jitterY = (Math.random() - 0.5) * 9;
-      const left = baseX + jitterX;
-      const top = baseY + jitterY;
-
-      const delay = -Math.random() * 6;
-      const dur = 3 + Math.random() * 3;
-      
-      return `<span class="gold-dot-pick" data-word="${w}" style="left:${left}%;top:${top}%;--dur:${dur}s;--delay:${delay}s"><img class="gold-dot-img" src="/image/v5-stage2/dot-gold.png" alt="" /><span class="gold-dot-label">${w}</span></span>`;
-    }).join('');
+    // ── Field build: ACTIVE light points, each carrying a FIXED lightFamily ──
+    // The family is part of the point's data (id + data-family), never decided
+    // at press time. Only families that still have at least one unused symbol
+    // produce active points — so the touched family can ALWAYS supply a fresh
+    // symbol (no duplicates, no arbitrary jump to another meaning). Exhausted
+    // families stay in the field as decoration only (the small drifting dots).
+    const usedSyms = new Set(st.chosenSymbols || []);
+    const activeFamilies = Object.keys(LIGHT_POINT_SYMBOL_GROUPS)
+      .filter(f => LIGHT_POINT_SYMBOL_GROUPS[f].some(k => !usedSyms.has(k)));
 
     const dotsContainer = document.getElementById('s2-dots-container');
-    if (dotsContainer) {
-      dotsContainer.innerHTML = dotItems;
+    let boxRect = dotsContainer ? dotsContainer.getBoundingClientRect() : null;
+    if (!boxRect || !boxRect.width) boxRect = { width: 1160, height: 495, left: 100, top: 155 };
+    const pxX = p => p * boxRect.width / 100,  pxY = p => p * boxRect.height / 100;
+    const offX = px => px / boxRect.width * 100, offY = px => px / boxRect.height * 100;
+    const rnd = (a, b) => a + Math.random() * (b - a);
+
+    // Per-family placement zones (% of the dots box). The gate sits below the
+    // box's bottom-centre, so "far from the gate" = the top band + far sides.
+    const zoneFor = (family) => {
+      switch (family) {
+        case 'CENTRAL_LIGHT':    return { x: rnd(38, 62), y: rnd(34, 60) };
+        case 'DISTANT_LIGHT': {
+          const side = Math.random();
+          if (side < 0.5) return { x: rnd(6, 94), y: rnd(4, 10) };            // far top band
+          return { x: side < 0.75 ? rnd(3, 8) : rnd(92, 97), y: rnd(6, 58) }; // far left/right rim
+        }
+        case 'CLUSTERED_LIGHT':  return { x: rnd(12, 88), y: rnd(12, 74) };
+        case 'PROTECTED_LIGHT':  return { x: rnd(12, 88), y: rnd(12, 70) };
+        case 'STRUCTURED_LIGHT': return { x: rnd(14, 86), y: rnd(12, 74) };
+        case 'BRIGHT_LIGHT':     return { x: rnd(10, 90), y: rnd(8, 76) };
+        default:                 return { x: rnd(8, 92), y: rnd(6, 76) };     // SMALL_SPARK
+      }
+    };
+
+    // 3–4 active points per available family, kept apart so the field reads as
+    // an organic scatter (never a grid / menu).
+    const actives = [];
+    for (const family of activeFamilies) {
+      const n = 3 + Math.floor(Math.random() * 2);
+      for (let k = 0; k < n; k++) {
+        let p = null;
+        for (let t = 0; t < 40 && !p; t++) {
+          const c = zoneFor(family);
+          if (actives.every(a => Math.hypot(pxX(a.x - c.x), pxY(a.y - c.y)) > 85)) p = c;
+        }
+        if (!p) continue;
+        actives.push({ id: 'light-point-' + String(actives.length + 1).padStart(2, '0'), family, x: p.x, y: p.y });
+      }
     }
 
-    // fallback / hidden word list setup
-    const items = chosenWords.map((w, i) => {
-      return `<span class="float-word" data-word="${w}">${w}</span>`;
+    // Decorative (non-selectable) helper dots that give each family its visual
+    // character: cluster companions, a delicate protective ring, and quiet
+    // geometric structures. Positions are px offsets converted to box %.
+    const deco = [];
+    const pushDeco = (x, y, s, drift) =>
+      deco.push(`<span class="s2-deco-dot${drift ? ' s2-deco-drift' : ''}" style="left:${x.toFixed(2)}%;top:${y.toFixed(2)}%;width:${s}px;height:${s}px;animation-delay:${(-Math.random() * 7).toFixed(2)}s"></span>`);
+    let structN = 3;   // rotating structure: triangle → diamond → pentagon
+    const dotItems = actives.map(pt => {
+      const { family, x, y } = pt;
+      let size = 13 + Math.random() * 2;                 // ordinary focus of light
+      if (family === 'BRIGHT_LIGHT') size = 21 + Math.random() * 4;   // a significant glow
+      if (family === 'SMALL_SPARK')  size = 8 + Math.random();        // a delicate spark
+      pt.size = Math.round(size);
+      if (family === 'CLUSTERED_LIGHT') {
+        const n = 5 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < n; i++) {
+          const ang = Math.random() * Math.PI * 2, rad = 11 + Math.random() * 24;
+          pushDeco(x + offX(Math.cos(ang) * rad), y + offY(Math.sin(ang) * rad), 3 + Math.round(Math.random()), true);
+        }
+      } else if (family === 'PROTECTED_LIGHT') {
+        const n = 12, rad = 27, rot = Math.random() * Math.PI * 2;
+        for (let i = 0; i < n; i++) {
+          const ang = rot + i * Math.PI * 2 / n;
+          pushDeco(x + offX(Math.cos(ang) * rad), y + offY(Math.sin(ang) * rad), 2, false);
+        }
+      } else if (family === 'STRUCTURED_LIGHT') {
+        const n = 3 + ((structN++ - 3) % 3), rad = 20 + n * 2, rot = Math.random() * Math.PI * 2;
+        for (let i = 0; i < n; i++) {
+          const ang = rot + i * Math.PI * 2 / n;
+          pushDeco(x + offX(Math.cos(ang) * rad), y + offY(Math.sin(ang) * rad), 4, false);
+        }
+      }
+      const delay = -Math.random() * 6, dur = 3 + Math.random() * 3;
+      return `<span class="gold-dot-pick" id="${pt.id}" data-family="${family}" style="left:${x.toFixed(2)}%;top:${y.toFixed(2)}%;--dur:${dur.toFixed(2)}s;--delay:${delay.toFixed(2)}s"><img class="gold-dot-img" style="width:${pt.size}px;height:${pt.size}px" src="/image/v5-stage2/dot-gold.png" alt="" /></span>`;
     }).join('');
-    const midContainer = document.getElementById('word-field-container');
-    if (midContainer) {
-      midContainer.innerHTML = `<div id="word-field">${items}</div>`;
-    }
-    
+
+    if (dotsContainer) dotsContainer.innerHTML = dotItems + deco.join('');
+
+    // Quiet zones: a protected point keeps a clear margin outside its ring, and
+    // a small spark sits inside a visibly sparse area — background drifting dots
+    // that landed there are muted (they're decor only, so hiding them is safe).
+    document.querySelectorAll('#stage2-float-dots .s2-float-dot').forEach(d => {
+      d.classList.remove('s2-quiet');
+      const r = d.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      for (const pt of actives) {
+        if (pt.family !== 'PROTECTED_LIGHT' && pt.family !== 'SMALL_SPARK') continue;
+        const R = pt.family === 'PROTECTED_LIGHT' ? 58 : 72;
+        if (Math.hypot(cx - (boxRect.left + pxX(pt.x)), cy - (boxRect.top + pxY(pt.y))) < R) {
+          d.classList.add('s2-quiet'); break;
+        }
+      }
+    });
+
     wrap.classList.add('words-active');
     wrap.innerHTML = '';
 
@@ -1611,10 +1700,10 @@ function _renderQuestionImpl(idx){
     const DOTS_START = 720, DOT_STEP = 9;
     st._lightEntryTimers = st._lightEntryTimers || [];
     const lightT = (fn, ms) => st._lightEntryTimers.push(setTimeout(fn, ms));
-    // Both dot layers: big labelled (.gold-dot-pick) + small scattered
-    // (.s2-float-dot). Shuffle them together so the rectangle fills as a scatter.
-    const bigDots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.gold-dot-pick')) : [];
-    const smallDots = Array.from(document.querySelectorAll('#stage2-float-dots .s2-float-dot'));
+    // All dot layers: active family points + their decorations (.s2-deco-dot) +
+    // small scattered (.s2-float-dot). Shuffled so the rectangle fills as a scatter.
+    const bigDots = dotsContainer ? Array.from(dotsContainer.querySelectorAll('.gold-dot-pick, .s2-deco-dot')) : [];
+    const smallDots = Array.from(document.querySelectorAll('#stage2-float-dots .s2-float-dot:not(.s2-quiet)'));
     const allDots = [...bigDots, ...smallDots];
     for (let i = allDots.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [allDots[i], allDots[j]] = [allDots[j], allDots[i]]; }
     allDots.forEach(d => { d.style.opacity = '0'; d.style.transition = 'opacity 0.4s ease'; });
@@ -1635,16 +1724,16 @@ function _renderQuestionImpl(idx){
       lightT(() => { qTitle.style.opacity = '1'; }, TITLE_AT);
     }
 
-    // Picking a light-point — works for BOTH the labelled dots and the small
-    // scattered dots. Fades every other dot (both layers), marks the chosen one,
-    // stores the word + a symbol, then advances.
-    // Light-point selection: press a point, drag a path toward the gate, and
-    // release inside it — the point then travels the dotted trail on its own and
-    // is absorbed (light-gate.js). The chosen point's word (labelled dots carry
-    // one; scattered dots take a random one) is saved when it is absorbed.
-    const commitWord = (dotEl) => {
-      const word = (dotEl && dotEl.dataset && dotEl.dataset.word) || chosenWords[Math.floor(Math.random() * chosenWords.length)];
-      st.answers.word = word || '';
+    // Light-point selection: press an ACTIVE point (only .gold-dot-pick carries
+    // pointer events — the drifting/deco dots are decoration), drag a line to
+    // the gate, and release inside it — the point then travels the dotted trail
+    // on its own and is absorbed (light-gate.js). The line's shape is never
+    // analysed: the meaning comes solely from the point's fixed lightFamily.
+    const commitLight = (dotEl) => {
+      const family = (dotEl && dotEl.dataset && dotEl.dataset.family) || 'CENTRAL_LIGHT';
+      const sym = pickLightSymbol(family);
+      st.answers.word = family;
+      if (sym) st._forcedSymbol = sym;
       st.p5SymbolsByStage = st.p5SymbolsByStage || {};
       if (!st.p5SymbolsByStage[1]) st.p5SymbolsByStage[1] = [getRandomSymbol()];
       advance();                     // no "המשך" here — the pick opens the symbol window directly
@@ -1659,7 +1748,7 @@ function _renderQuestionImpl(idx){
     st._lightGateTeardown = mountLightGate({
       arena: document.getElementById('q-main-cell'),
       dots: document.querySelectorAll('.s2-float-dot, .gold-dot-pick'),
-      onAbsorb: (dotEl) => commitWord(dotEl),
+      onAbsorb: (dotEl) => commitLight(dotEl),
       revealDelay: GATE_AT,          // the dotted gate circle fades in with the build
     });
     lockInput(); setTimeout(() => runWordDemo(), 2600);   // ghost-hand demo once the dots + gate are in
