@@ -1606,7 +1606,7 @@ function _renderQuestionImpl(idx){
     wrap.classList.add('roots-tree-active');
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
-      midContainer.innerHTML = `<div id="paths-game"></div><div class="paths-title">מה המסלול שלך?</div><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
+      midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png?v=2" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
       st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
         st.answers.roots = symbolKey;
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
@@ -4856,18 +4856,13 @@ function buildPathsGame(host, onSelect){
   // ── Demo API — drives a WINDING source→exit trace (+ the real white trail) for
   //    the ghost-hand stage demo. Purely visual; resetDemo() clears it after. ──
   function _neighbours(node){ const nb = []; node.edgesOut.forEach(e => nb.push(e.to)); node.edgesIn.forEach(e => nb.push(e.from)); return nb; }
-  // Shortest source→exit route (BFS, fewest hops) that is NOT the straight middle
-  // corridor — moves along the MID row (MID→adjacent MID) are forbidden, so the
-  // path must dip off the middle at least once.
+  const exitNode = sinks[0];
   function _shortestRoute(){
-    const midY = source.y;
-    const onMid = n => Math.abs(n.y - midY) < 1;
     const q = [source], prev = new Map([[source, null]]);
     while(q.length){
       const node = q.shift();
       if(node === exitNode) break;
       for(const nb of _neighbours(node)){
-        if(onMid(node) && onMid(nb)) continue;   // skip the straight MID corridor
         if(!prev.has(nb)){ prev.set(nb, node); q.push(nb); }
       }
     }
