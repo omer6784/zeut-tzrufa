@@ -523,7 +523,12 @@
       "Bash(perl -pi -e 's/jewel-engine\\\\.js\\\\?v=76/jewel-engine.js?v=77/' display.html)",
       "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=212/stage1.css?v=213/' index.html)",
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=181/styles.css?v=182/' index.html)",
-      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=182/styles.css?v=183/' index.html)"
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=182/styles.css?v=183/' index.html)",
+      "Bash(awk -F: '$1>4675 && $1<4800')",
+      "Bash(awk -F: '$1>4675 && $1<4780')",
+      "Bash(awk -F: '$1>4900 && $1<5100')",
+      "Bash(awk -F: '$1>4930 && $1<5040')",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=184/styles.css?v=185/' index.html)"
     ]
   },
   "hooks": {

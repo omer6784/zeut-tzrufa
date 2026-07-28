@@ -4728,7 +4728,7 @@ function buildPathsGame(host, onSelect){
   // the corridors wind AND meet at junctions with loops — the dense, irregular
   // weave of the reference. Every segment is a deduped UNIT edge (no overlaps),
   // corners are sharp, and the whole thing is one connected system.
-  const NY = 10, NX = 19;   // coarser grid (was 14×26) → wider gaps between paths, easier to grab by touch
+  const NY = 9, NX = 17;    // coarser again → wider gaps between the corridors (was 10×19)
   const gx = c => X_MIN + (X_MAX - X_MIN) * (c / (NX - 1));
   const gy = r => Y_MIN + (Y_MAX - Y_MIN) * (r / (NY - 1));
   const MID = (NY - 1) >> 1;

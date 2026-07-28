@@ -2646,7 +2646,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 /* Bigger gold dots at the two ends of the maze. The tracer (r 6→9) is the
    grabbable dot the user leads from the entry; the sink (r 3.4→5.5, revealed
    4→6.5) marks the exit. */
-#section-3[data-stage="5"] .paths-tracer { r: 9px !important; }
+#section-3[data-stage="5"] .paths-tracer { r: 13px !important; }   /* bigger: far easier to catch and steer by finger */
 #section-3[data-stage="5"] .paths-sink { r: 5.5px !important; }
 #section-3[data-stage="5"] .paths-sink.revealed { r: 6.5px !important; }
 /* Once tracing has begun, the cream start dot must not reappear behind the
