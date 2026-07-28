@@ -1253,11 +1253,7 @@ body::-webkit-scrollbar-thumb {
   }
 
   #q-content {
-    max-width: none;
-  }
-
-  #progress-col {
-    display: none;
+    aspect-ratio: auto !important;
   }
 }
 
@@ -1304,7 +1300,7 @@ body::-webkit-scrollbar-thumb {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 6px;
+  gap: clamp(8px, 1vw, 16px) !important;
   box-sizing: border-box;
   height: 100%;
   aspect-ratio: 7 / 4;      /* SQUARE cells (7 cols × 4 rows) + height-bound so the block
@@ -7270,4 +7266,64 @@ html:not(.cursor-active) *::after {
   background-size: 6px 1.6px, 6px 1.6px, 1.6px 6px, 1.6px 6px;
   background-position: top, bottom, left, right;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+}
+
+/* ── Overrides for Dot-Tiles Full-Width Spacing & Paths Stage Visibility ── */
+#section-3[data-stage="2"] .dot-tiles-grid {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  padding: 0 20px !important;
+}
+
+#section-3[data-stage="2"] .dot-tiles-inner {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  grid-template-rows: repeat(4, 1fr) !important;
+  gap: clamp(8px, 1.1vw, 18px) !important;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  max-width: 100% !important;
+}
+
+/* Paths Stage (stage 5 / roots-tree) Layout & Routes Visibility */
+#section-3[data-stage="5"] #paths-game {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 3 !important;
+}
+
+#section-3[data-stage="5"] .paths-game-svg {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+#section-3[data-stage="5"] .paths-rail {
+  stroke: #f5f5ed !important;
+  stroke-width: 4px !important;
+  stroke-dasharray: 8 8 !important;
+  stroke-linecap: round !important;
+  opacity: 1 !important;
+  fill: none !important;
+}
+
+#section-3[data-stage="5"] .paths-title {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 24px !important;
+  top: auto !important;
+  transform: translateX(-50%) !important;
+  width: min(540px, 80%) !important;
+  height: auto !important;
+  z-index: 10 !important;
+  opacity: 1 !important;
+  clip-path: none !important;
+  display: block !important;
 }
