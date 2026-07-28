@@ -41,7 +41,12 @@ const SCHEMES = [
 
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
-function dot(ctx, x, y, r) { if (r <= 0.05) return; ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, TAU); }
+function dot(ctx, x, y, r) {
+  if (r <= 0.05) return;
+  const s = ctx._dotScale || 1;
+  const rs = r * s;
+  ctx.moveTo(x + rs, y); ctx.arc(x, y, rs, 0, TAU);
+}
 function grid(tl) {
   if (tl.cache && tl.cache.grid) return tl.cache.grid;
   const cols = Math.max(3, Math.floor((tl.W - GAP) / GAP));
@@ -322,6 +327,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       ctx.clearRect(0, 0, tl.W, tl.H);
       ctx.globalAlpha = tl.alpha;
       ctx.fillStyle = tl.dotColor;   // dark dots on the yellow plate
+      ctx._dotScale = (tl.i === selected || tl.i === chosen) ? 1.3 : 1.0;
       const localT = tl.frozen ? tl.frozenT : (animated ? t : STATIC_T);
       TILES[tl.i].draw(ctx, tl, localT);
       if (tl.i === chosen && tl.confirmT >= 0) { ctx.globalAlpha = tl.alpha; drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS)); }

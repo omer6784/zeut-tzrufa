@@ -1287,16 +1287,16 @@ body::-webkit-scrollbar-thumb {
 .dot-tiles-grid {
   position: absolute;
   left: 0; right: 0;
-  top: 0;
+  top: 0; bottom: 0;
   height: 100%;
-  padding: 0;
+  padding: 0 20px;
   box-sizing: border-box;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   pointer-events: none;
 }
-#section-3[data-stage="2"] .dot-tiles-grid { height: calc(100% + 70px); top: -80px; }
+#section-3[data-stage="2"] .dot-tiles-grid { height: 100%; top: 0; padding: 0 20px; }
 
 
 
@@ -1330,10 +1330,9 @@ body::-webkit-scrollbar-thumb {
   z-index: 3;
 }
 .dot-tile.is-selected {
-  transform: scale(1.04);
   z-index: 5;
-  filter: brightness(0.82);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+  filter: none !important;
+  box-shadow: none !important;
 }
 
 /* ── "מה תחום העיסוק שלך?" — 8 profession-category cards (profession-cards.js) ──
