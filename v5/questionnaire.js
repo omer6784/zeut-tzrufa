@@ -1607,21 +1607,25 @@ function _renderQuestionImpl(idx){
     const midContainer = document.getElementById('word-field-container');
     if(midContainer){
       midContainer.innerHTML = `<div id="paths-game"></div><img class="paths-title" src="/image/v5-stage5/path-title.png?v=2" alt="מה המסלול שלך?" /><button class="q-help q-help-floating" type="button" aria-label="עזרה"><span class="q-help-tip">גררו את הנקודה הכתומה מימין, ועקבו אחר המסלולים עד נקודת היציאה משמאל</span></button>`;
-      st._pathsDemo = buildPathsGame(document.getElementById('paths-game'), (symbolKey) => {
-        st.answers.roots = symbolKey;
-        st.p5SymbolsByStage = st.p5SymbolsByStage || {};
-        if (!st.p5SymbolsByStage[4]) {
-          st.p5SymbolsByStage[4] = [getRandomSymbol()];
-        }
-        triggerLayer(5); spawnBurst();
-        setTimeout(() => advance(), 900);   // reaching the exit opens the symbol window directly (no "המשך")
-      });
-      // Entry choreography: the maze shows LARGE, then shrinks a touch, and the
-      // title "מה המסלול שלך?" rises from beneath it + types in, settling below.
-      const pg = document.getElementById('paths-game');
-      const ptitle = document.querySelector('#section-3 .paths-title');
-      if (pg) pg.classList.add('paths-shrunk');
-      if (ptitle) ptitle.classList.add('is-in');
+      
+      const mountPaths = () => {
+        const gameEl = document.getElementById('paths-game');
+        if(!gameEl) return;
+        st._pathsDemo = buildPathsGame(gameEl, (symbolKey) => {
+          st.answers.roots = symbolKey;
+          st.p5SymbolsByStage = st.p5SymbolsByStage || {};
+          if (!st.p5SymbolsByStage[4]) {
+            st.p5SymbolsByStage[4] = [getRandomSymbol()];
+          }
+          triggerLayer(5); spawnBurst();
+          setTimeout(() => advance(), 900);   // reaching the exit opens the symbol window directly
+        });
+        const ptitle = document.querySelector('#section-3 .paths-title');
+        if (gameEl) gameEl.classList.add('paths-shrunk');
+        if (ptitle) ptitle.classList.add('is-in');
+      };
+      
+      setTimeout(mountPaths, 50);
       st._pathsEntryTimers = st._pathsEntryTimers || [];
       const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
       lockInput(); pT(() => runMazeDemo(), 1200);   // ghost-hand demo once mounted

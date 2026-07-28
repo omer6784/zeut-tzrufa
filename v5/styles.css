@@ -7300,27 +7300,40 @@ html:not(.cursor-active) *::after {
 }
 
 /* Paths Stage (stage 5 / roots-tree) Layout & Routes Visibility */
-#section-3[data-stage="5"] #paths-game {
-  position: absolute !important;
-  left: 0 !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
+#paths-game,
+#section-3 #paths-game,
+#section-3[data-stage="5"] #paths-game,
+#section-3[data-stage="4"] #paths-game {
+  position: fixed !important;
+  left: calc(100 * var(--sx)) !important;
+  right: calc(100 * var(--sx)) !important;
+  top: calc(90 * var(--sy)) !important;
+  bottom: calc(110 * var(--sy)) !important;
+  width: calc(100vw - 200px * var(--sx)) !important;
+  height: calc(100vh - 200px * var(--sy)) !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  z-index: 10 !important;
-  overflow: visible !important;
+  z-index: 100 !important;
   pointer-events: auto !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
+.paths-game-svg,
+#section-3 .paths-game-svg,
 #section-3[data-stage="5"] .paths-game-svg {
   width: 100% !important;
   height: 100% !important;
   display: block !important;
   overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 @keyframes pathFlowDash {
@@ -7329,6 +7342,8 @@ html:not(.cursor-active) *::after {
   }
 }
 
+.paths-rail,
+#section-3 .paths-rail,
 #section-3[data-stage="5"] .paths-rail {
   stroke: #f5f5ed !important;
   stroke-width: 6px !important;
@@ -7339,7 +7354,7 @@ html:not(.cursor-active) *::after {
   fill: none !important;
   visibility: visible !important;
   display: block !important;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25)) !important;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)) !important;
   animation: pathFlowDash 1.8s linear infinite !important;
 }
 
