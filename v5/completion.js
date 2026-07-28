@@ -176,16 +176,26 @@ export function mountCompletion({ } = {}) {
       });
       if (!res.ok) {
         const body = await res.text().catch(() => '');
-        throw new Error('server HTTP ' + res.status + ' — ' + body.slice(0, 300));
+        let reason = '';
+        try { reason = (JSON.parse(body) || {}).reason || ''; } catch (_) {}
+        const e = new Error('server HTTP ' + res.status + ' — ' + body.slice(0, 300));
+        e.reason = reason;
+        throw e;
       }
       msgEl.textContent = 'נשלח! בדקו את תיבת המייל שלכם';
     } catch (err) {
       // Surface WHICH stage died (capture vs server) — in the console in full,
       // and as a slightly more specific message on screen.
       console.error('[GIF] export failed:', err);
+      // Say WHY when the mail service refused (e.g. an unverified sender that may
+      // only mail the account owner) — a silent "try again" sends the visitor in
+      // circles and hides a configuration problem from whoever runs the stand.
+      const refused = /only send testing emails|verify a domain|not verified/i.test(err && err.reason || '');
       msgEl.textContent = /capture|frames/i.test(String(err))
         ? 'יצירת ה-GIF נכשלה, נסו שוב'
-        : 'השליחה נכשלה, נסו שוב';
+        : refused
+          ? 'שירות הדואר טרם אושר לשליחה לכתובת הזו — פנו למפעיל התערוכה'
+          : 'השליחה נכשלה, נסו שוב';
     } finally {
       sendBtn.disabled = false;
     }
