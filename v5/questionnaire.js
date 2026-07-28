@@ -438,7 +438,50 @@ function pickGlobeSymbol(geos){
   return pick.key;
 }
 
+/* ── Time stage: day-period symbol selection ────────────────────────────────
+   The chosen hour maps to ONE of four day periods; each period carries one
+   symbolic meaning and a defined symbol group, from which a single UNUSED
+   symbol is drawn. */
+const TIME_PERIOD_GROUPS = {
+  SUNRISE: ['scarab', 'lotus', 'anah'],                    // התחדשות · התחלה · צמיחה (05:00–08:59)
+  DAY:     ['sun', 'snake', 'djed'],                       // חיים · כוח · חיוניות (09:00–15:59)
+  EVENING: ['circle', 'dharma', 'endlessknot', 'hexagram'],// איזון · הרמוניה · שלמות (16:00–19:59)
+  NIGHT:   ['hamsa', 'eye', 'diamond', 'pyramid'],         // הגנה · ביטחון (20:00–04:59)
+};
+/* Exhausted group → the temporally-adjacent periods, in this predefined order. */
+const TIME_PERIOD_FALLBACK = {
+  SUNRISE: ['DAY', 'NIGHT', 'EVENING'],
+  DAY:     ['EVENING', 'SUNRISE', 'NIGHT'],
+  EVENING: ['NIGHT', 'DAY', 'SUNRISE'],
+  NIGHT:   ['SUNRISE', 'EVENING', 'DAY'],
+};
+function timePeriodForHour(h){
+  if(h >= 5 && h <= 8)  return 'SUNRISE';
+  if(h >= 9 && h <= 15) return 'DAY';
+  if(h >= 16 && h <= 19) return 'EVENING';
+  return 'NIGHT';
+}
+/* One symbol for the chosen hour: already-chosen symbols removed from the pool;
+   random among what remains; a single survivor auto-picked; an exhausted group
+   walks the fallback order. A symbol never repeats on the talisman. */
+function pickTimeSymbol(hour){
+  const period = timePeriodForHour(hour);
+  const used = new Set(st.chosenSymbols || []);
+  const order = [period, ...(TIME_PERIOD_FALLBACK[period] || [])];
+  for(const g of order){
+    const free = (TIME_PERIOD_GROUPS[g] || []).filter(k => !used.has(k));
+    if(free.length){
+      const sym = free[Math.floor(Math.random() * free.length)];
+      st.timeChoice = { hour, period, symbol: sym };
+      console.log('[time] symbol choice:', st.timeChoice);
+      return sym;
+    }
+  }
+  return null;
+}
+
 window.__globeTest = { findCountry, pickGlobeSymbol, centers: SYMBOL_CULTURAL_CENTERS };  // dev/verification
+window.__timeTest = { timePeriodForHour, pickTimeSymbol };  // dev/verification
 
 const COUNTRY_MOTIFS = {
   'מרוקו':'hamsa', 'אלג׳יריה':'yaz', 'תוניסיה':'nazar', 'לוב':'nazar',
@@ -1717,6 +1760,11 @@ function _renderQuestionImpl(idx){
         onHour: (hf) => applyTimeSky(hf),
         onDone: (val) => {
           st.answers.stars = val;
+          // Day-period selection: the chosen hour's meaning group provides THIS
+          // stage's symbol (window + jewel).
+          const hh = parseInt(String(val).split(':')[0], 10);
+          const sym = pickTimeSymbol(isNaN(hh) ? 12 : hh);
+          if(sym) st._forcedSymbol = sym;
           st.p5SymbolsByStage = st.p5SymbolsByStage || {};
           if(!st.p5SymbolsByStage[3]) st.p5SymbolsByStage[3] = [getRandomSymbol()];
           advance();
