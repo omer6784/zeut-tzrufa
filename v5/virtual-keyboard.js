@@ -50,7 +50,7 @@ function ensureBuilt() {
   spaceBtn.type = 'button';
   spaceBtn.className = 'vk-key vk-key-space';
   spaceBtn.dataset.action = 'space';
-  spaceBtn.textContent = 'רווח';
+  spaceBtn.textContent = '';
   bottomRow.appendChild(spaceBtn);
 
   const enterBtn = document.createElement('button');

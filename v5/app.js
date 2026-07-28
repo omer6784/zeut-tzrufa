@@ -1744,7 +1744,12 @@ window.addEventListener('DOMContentLoaded', () => {
    The ghost-hand demos dispatch no real pointer events, so they stay silent. */
 function initTouchSound() {
   let ctx = null, last = 0;
-  const play = () => {
+  const play = (e) => {
+    // Sound ONLY for taps on something interactive — a tap on empty screen is
+    // silent, and so is everything while a stage demo has input locked.
+    if (window.__inputLocked) return;
+    const t = e && e.target;
+    if (!(t && t.closest && t.closest('button, a, input, textarea, select, canvas, svg, .vk-key, .dot-tile, .ed-gesture, .prof-card, #step-rail li'))) return;
     const now = performance.now();
     if (now - last < 90) return;   // debounce double-fires (touch → pointer)
     last = now;

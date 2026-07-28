@@ -598,7 +598,7 @@ const ZODIAC_ELEMENT = {
    background stage reuses 0 (it renders swatches, never concurrent with the
    globe, and finer targeting is done via the `.q-layout-*` classes). */
 const QUESTIONS = [
-  { id:'background', label:'רקע',       text:'בחר צבע רקע\nלתכשיט שלך',        type:'background',  styleStage:0 },
+  { id:'background', label:'רקע',       text:'בחרו צבע רקע\nלתכשיט שלכם',        type:'background',  styleStage:0 },
   { id:'origin',    label:'ארץ מוצא',   text:'איפה הסיפור שלך\nמתחיל?',       type:'geo',         styleStage:0 },
   /* 3 = light-point ("נקודת אור" — scattered gold dots you click; type 'words'),
      4 = path — a placeholder for now (fixed grid only, no content),
@@ -616,9 +616,9 @@ const QUESTIONS = [
 /* Per-stage instructions shown in the bottom rectangle of the grid (#ff5003).
    Keyed by question id; add a line here for each stage. */
 const INSTRUCTIONS = {
-  background: 'בחר צבע רקע לתכשיט שלך',
-  origin: 'בחר את היבשות מהן הגיעו בני משפחתך',
-  word: 'מתח קו בין הנקודה לעיגול',
+  background: 'בחרו צבע רקע לתכשיט שלכם',
+  origin: 'בחרו את היבשות מהן הגיעו בני משפחתכם',
+  word: 'מתחו קו בין הנקודה לעיגול',
   roots: 'גררו את הנקודה במסלול שאתם בוחרים',
   stars: 'גללו ובחרו את השעה הרצויה',
   personal: 'בחרו את תחום העיסוק שלכם',
@@ -1656,7 +1656,7 @@ function _renderQuestionImpl(idx){
         sb.btn.classList.toggle('is-disabled', !live);
         sb.btn.textContent = 'סימנתי';
       }
-      setBandNote(inputPhase ? 'הזן את ארצות המוצא' : (INSTRUCTIONS.origin || ''));
+      setBandNote(inputPhase ? 'הזינו את ארצות המוצא' : (INSTRUCTIONS.origin || ''));
       document.getElementById('section-3')?.classList.toggle('origin-input-phase', inputPhase);
       // First time we reach the input phase → play the ghost-hand country-typing
       // demo (types a country from a chosen continent, presses "הוסף", then "הזנתי").

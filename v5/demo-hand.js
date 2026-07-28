@@ -116,7 +116,8 @@ export function lockInput() {
   const swallow = (e) => { if (e.isTrusted) { e.preventDefault(); e.stopImmediatePropagation(); } };
   const opts = { capture: true, passive: false };
   _LOCK_TYPES.forEach(t => document.addEventListener(t, swallow, opts));
-  _lockRelease = () => _LOCK_TYPES.forEach(t => document.removeEventListener(t, swallow, opts));
+  window.__inputLocked = true;   // the touch-sound checks this (its window-capture listener fires first)
+  _lockRelease = () => { _LOCK_TYPES.forEach(t => document.removeEventListener(t, swallow, opts)); window.__inputLocked = false; };
 }
 export function unlockInput() {
   if (_lockRelease) { _lockRelease(); _lockRelease = null; }

@@ -602,7 +602,7 @@ export function initRootsWidget(container, opts){
         </div>
       </div>
       <div class="roots-map-note" id="roots-map-note">
-        <span class="roots-map-note-text">הזן את ארצות המוצא</span>
+        <span class="roots-map-note-text">הזינו את ארצות המוצא</span>
       </div>
       <!-- Dotted-pattern title, split into two lines so each types itself in,
            letter by letter, on entry: line 1 "איפה הסיפור", then line 2

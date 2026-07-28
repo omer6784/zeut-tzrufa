@@ -2583,7 +2583,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
    size it never spills below the line. */
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
-  left: calc(50% - 200px);
+  left: 50%;
   bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
   top: auto;
   transform: translate(-50%, 26px);
@@ -4188,7 +4188,7 @@ body.theme-negative {
   flex: none !important;
   display: block !important;
   width: 100% !important;
-  transform: translateY(250px) !important;   /* lowered the "מהי נקודת האור שלך?" title (100 → 250, i.e. 150 more) */
+  transform: translateY(350px) !important;   /* lowered the "מהי נקודת האור שלך?" title (250 → 350) */
 }
 #section-3[data-stage="1"] .q-layout-word #q-content {
   display: none !important;

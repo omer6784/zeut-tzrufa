@@ -107,13 +107,13 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: calc(20 * var(--sy));
+  gap: calc(14 * var(--sy));
   z-index: 30;
   pointer-events: none;
 }
 #step-rail li {
-  width: 6.5px;
-  height: 6.5px;
+  width: 5.5px;
+  height: 5.5px;
   border-radius: 50%;
   background: #282828;   /* interface dark grey on the light stages */
   opacity: 1;
