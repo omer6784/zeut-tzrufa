@@ -66,176 +66,378 @@ function paint(ctx, dots) {
   ctx.fill();
 }
 
-/* ── Ornamental "azulejo"-style tiles, rendered entirely in DOTS ──────────────
-   Each tile is a symmetric medallion — a dotted border framing one of 14 distinct
-   central motifs — with its OWN base rotation, symmetry and animation, so no two
-   tiles read alike. The per-tile `meaning` (index → symbol) is unchanged. */
+/* ── 28 movement tiles in SEVEN movement families (4 tiles each) ─────────────
+   The visitor picks the motion that FEELS right; the family answers "what
+   energy drew them?" and maps to a meaning + symbol group (questionnaire.js).
+   All tiles move all the time; touch/hover gently REINFORCES a tile's own
+   motion (faster clock + emphasized dots) without ever changing its family.
+   Language: dots only — quiet, digital, clean. */
 const A_TAU = Math.PI * 2;
+// stable per-tile pseudo-random (no state, safe to call every frame)
+const sd = (i, k) => { const v = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v); };
+const frac = v => v - Math.floor(v);
+const ease = t => t * t * (3 - 2 * t);
 
-// Dotted border, `ins` in from each edge; `dbl` adds a second inner line.
-function frameDots(D, W, H, ins, r, dbl) {
-  const gap = GAP * 1.3;
-  const line = (x0, y0, x1, y1) => {
-    const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / gap));
-    for (let i = 0; i <= n; i++) D.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r });
+/* Each draw(ctx, tl, t, bo): t = the tile's own smooth clock (already boost-
+   scaled), bo = 0..1 reinforcement (hover 0.45 / selected 1). */
+const FAMILY_DRAWS = {
+
+  /* ── PULSE — חיים · חיוניות · התחדשות ── */
+  PULSE: [
+    // 1. a central dot breathing in size, inside a faint steady ring
+    (ctx, tl, t, bo) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [];
+      for (let i = 0; i < 14; i++) { const a = i / 14 * A_TAU; D.push({ x: cx + Math.cos(a) * S * 0.62, y: cy + Math.sin(a) * S * 0.62, r: b * 0.55 }); }
+      D.push({ x: cx, y: cy, r: b * (1.6 + (1.5 + bo) * P(t * 2.1)) });
+      paint(ctx, D);
+    },
+    // 2. a circle of dots expanding and contracting (a breathing ring)
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const R = S * (0.3 + 0.26 * P(t * 1.7));
+      const D = [{ x: cx, y: cy, r: b * 0.9 }];
+      for (let i = 0; i < 16; i++) { const a = i / 16 * A_TAU; D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b }); }
+      paint(ctx, D);
+    },
+    // 3. a small field of dots pulsing in a staggered rhythm
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [], sp = S * 0.42;
+      for (let r = -1; r <= 1; r++) for (let c = -1; c <= 1; c++)
+        D.push({ x: cx + c * sp, y: cy + r * sp, r: b * (0.55 + 1.15 * P(t * 2.2 + (r + c + 2) * 0.9)) });
+      paint(ctx, D);
+    },
+    // 4. a pulse travelling dot-to-dot along a line, like a wave
+    (ctx, tl, t) => {
+      const b = DOT / 2, cy = tl.H / 2, n = 9, m = tl.W * 0.14, step = (tl.W - 2 * m) / (n - 1);
+      const D = [];
+      for (let i = 0; i < n; i++) D.push({ x: m + i * step, y: cy, r: b * (0.55 + 1.5 * Math.max(0, P(t * 2.4 - i * 0.55)) ** 2) });
+      paint(ctx, D);
+    },
+  ],
+
+  /* ── CENTER_PULL — איזון · אחדות · מרכז פנימי ── */
+  CENTER_PULL: [
+    // 1. dots from every direction drawn steadily into the centre
+    (ctx, tl, t, bo, i) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [{ x: cx, y: cy, r: b * 1.3 }];
+      for (let k = 0; k < 12; k++) {
+        const a = sd(i, k) * A_TAU, f = frac(t * 0.22 + sd(i, k + 40));
+        const R = S * 0.92 * (1 - ease(f));
+        if (R > S * 0.09) D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * (0.6 + 0.5 * f) });
+      }
+      paint(ctx, D);
+    },
+    // 2. two groups approaching each other and meeting in the middle
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const off = S * 0.62 * (0.18 + 0.82 * P(t * 1.15 + Math.PI));
+      const D = [];
+      for (let k = -1; k <= 2; k++) {
+        const y = cy + (k - 0.5) * S * 0.34;
+        D.push({ x: cx - off, y, r: b }, { x: cx + off, y, r: b });
+      }
+      paint(ctx, D);
+    },
+    // 3. scattered dots settling into one balanced circle
+    (ctx, tl, t, bo, i) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const m = ease(P(t * 0.75)), D = [];
+      for (let k = 0; k < 12; k++) {
+        const a = k / 12 * A_TAU;
+        const sx = cx + (sd(i, k) - 0.5) * S * 1.5, sy = cy + (sd(i, k + 17) - 0.5) * S * 1.5;
+        const tx = cx + Math.cos(a) * S * 0.55, ty = cy + Math.sin(a) * S * 0.55;
+        D.push({ x: sx + (tx - sx) * m, y: sy + (ty - sy) * m, r: b });
+      }
+      paint(ctx, D);
+    },
+    // 4. dots gathering to the centre, easing out a little, gathering again
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [{ x: cx, y: cy, r: b }];
+      for (let k = 0; k < 8; k++) {
+        const a = k / 8 * A_TAU + t * 0.12;
+        const R = S * (0.14 + 0.5 * Math.abs(Math.sin(t * 1.15 + k * 0.16)));
+        D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b });
+      }
+      paint(ctx, D);
+    },
+  ],
+
+  /* ── EXPANSION — שפע · צמיחה · ברכה ── */
+  EXPANSION: [
+    // 1. one dot splitting outward along branching rays
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const f = ease(frac(t * 0.3)), D = [{ x: cx, y: cy, r: b * 1.4 }];
+      for (let k = 0; k < 6; k++) {
+        const a = k / 6 * A_TAU - Math.PI / 2;
+        const reach = f * S * 0.85, n = Math.floor(reach / (GAP * 1.6));
+        for (let j = 1; j <= n; j++) { const R = j * GAP * 1.6; D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * (j === n ? 1.25 : 0.8) }); }
+      }
+      paint(ctx, D);
+    },
+    // 2. dots streaming out of the centre in every direction
+    (ctx, tl, t, bo, i) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [{ x: cx, y: cy, r: b }];
+      for (let k = 0; k < 14; k++) {
+        const a = sd(i, k) * A_TAU, f = frac(t * 0.32 + k / 14);
+        const R = ease(f) * S * 0.92;
+        D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * (1.15 - 0.6 * f) });
+      }
+      paint(ctx, D);
+    },
+    // 3. rows of dots added one after another, filling upward
+    (ctx, tl, t) => {
+      const b = DOT / 2, rows = 6, colsN = 7;
+      const mx = tl.W * 0.16, my = tl.H * 0.16;
+      const stx = (tl.W - 2 * mx) / (colsN - 1), sty = (tl.H - 2 * my) / (rows - 1);
+      const prog = frac(t * 0.14) * (rows + 1), D = [];
+      for (let r = 0; r < Math.min(rows, prog); r++) {
+        const rowA = clamp01(prog - r);
+        for (let c = 0; c < colsN; c++) D.push({ x: mx + c * stx, y: tl.H - my - r * sty, r: b * (0.5 + 0.5 * rowA) });
+      }
+      paint(ctx, D);
+    },
+    // 4. a small cluster growing into a fuller field (sunflower fill)
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const count = Math.floor(6 + ease(P(t * 0.5)) * 34), GA = 2.399963, D = [];
+      for (let k = 0; k < count; k++) {
+        const R = S * 0.9 * Math.sqrt((k + 0.5) / 40), a = k * GA;
+        D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * 0.85 });
+      }
+      paint(ctx, D);
+    },
+  ],
+
+  /* ── PATH — דרך · הכוונה · גילוי ── */
+  PATH: [
+    // 1. a dot travelling a straight dotted line
+    (ctx, tl, t) => {
+      const b = DOT / 2, cy = tl.H / 2, m = tl.W * 0.14;
+      const D = [];
+      for (let x = m; x <= tl.W - m; x += GAP * 1.8) D.push({ x, y: cy, r: b * 0.5 });
+      const f = ease(frac(t * 0.38));
+      D.push({ x: m + (tl.W - 2 * m) * f, y: cy, r: b * 1.7 });
+      paint(ctx, D);
+    },
+    // 2. a dot moving station-to-station along a broken route
+    (ctx, tl, t) => {
+      const b = DOT / 2, W = tl.W, H = tl.H;
+      const Pts = [[0.16, 0.72], [0.4, 0.34], [0.62, 0.62], [0.86, 0.28]].map(([x, y]) => [x * W, y * H]);
+      const D = [];
+      Pts.forEach(([x, y]) => D.push({ x, y, r: b * 1.05 }));
+      for (let sgi = 0; sgi < Pts.length - 1; sgi++) {
+        const [x0, y0] = Pts[sgi], [x1, y1] = Pts[sgi + 1], L = Math.hypot(x1 - x0, y1 - y0), n = Math.floor(L / (GAP * 1.9));
+        for (let j = 1; j < n; j++) D.push({ x: x0 + (x1 - x0) * j / n, y: y0 + (y1 - y0) * j / n, r: b * 0.45 });
+      }
+      const prog = frac(t * 0.22) * (Pts.length - 1), sgn = Math.min(Pts.length - 2, Math.floor(prog)), f = ease(prog - sgn);
+      const [ax, ay] = Pts[sgn], [bx, by] = Pts[sgn + 1];
+      D.push({ x: ax + (bx - ax) * f, y: ay + (by - ay) * f, r: b * 1.7 });
+      paint(ctx, D);
+    },
+    // 3. several dots advancing one after another on the same route
+    (ctx, tl, t) => {
+      const b = DOT / 2, m = tl.W * 0.14;
+      const y = (x) => tl.H / 2 + Math.sin((x / tl.W) * Math.PI * 2) * tl.H * 0.14;
+      const D = [];
+      for (let x = m; x <= tl.W - m; x += GAP * 2) D.push({ x, y: y(x), r: b * 0.42 });
+      for (let k = 0; k < 4; k++) {
+        const f = frac(t * 0.3 + k * 0.13), x = m + (tl.W - 2 * m) * f;
+        D.push({ x, y: y(x), r: b * (1.6 - k * 0.22) });
+      }
+      paint(ctx, D);
+    },
+    // 4. a dot reaching a fork, choosing a branch, continuing to the exit
+    (ctx, tl, t) => {
+      const b = DOT / 2, W = tl.W, H = tl.H, m = W * 0.14, jx = W * 0.5;
+      const branch = Math.floor(t * 0.24) % 2;                  // alternates each loop
+      const yFor = (x, br) => x <= jx ? H / 2 : H / 2 + (br ? 1 : -1) * (x - jx) / (W - m - jx) * H * 0.24;
+      const D = [{ x: jx, y: H / 2, r: b * 1.1 }];
+      for (let x = m; x <= W - m; x += GAP * 1.9) {
+        if (x <= jx) D.push({ x, y: H / 2, r: b * 0.45 });
+        else { D.push({ x, y: yFor(x, 0), r: b * 0.45 }); D.push({ x, y: yFor(x, 1), r: b * 0.45 }); }
+      }
+      const f = ease(frac(t * 0.24)), x = m + (W - 2 * m) * f;
+      D.push({ x, y: yFor(x, branch), r: b * 1.7 });
+      paint(ctx, D);
+    },
+  ],
+
+  /* ── PROTECTION — הגנה · שמירה ── */
+  PROTECTION: [
+    // 1. a ring of dots encircling a steady centre
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [{ x: cx, y: cy, r: b * 1.25 }];
+      for (let k = 0; k < 15; k++) { const a = k / 15 * A_TAU + t * 0.35; D.push({ x: cx + Math.cos(a) * S * 0.6, y: cy + Math.sin(a) * S * 0.6, r: b }); }
+      paint(ctx, D);
+    },
+    // 2. guards circling the centre without ever entering it
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [{ x: cx, y: cy, r: b * 0.8 }];
+      for (let k = 0; k < 5; k++) {
+        const a = t * (0.5 + k * 0.09) + k * A_TAU / 5, R = S * (0.42 + 0.18 * (k % 3) / 2);
+        D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * 1.15 });
+      }
+      paint(ctx, D);
+    },
+    // 3. a shell of dots closing into a full circle and easing open
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const span = Math.PI * (0.5 + 0.5 * P(t * 1.05)), D = [{ x: cx, y: cy, r: b }];
+      for (let k = 0; k < 11; k++) {
+        const f = k / 10 - 0.5;
+        const aT = -Math.PI / 2 + f * 2 * span, aB = Math.PI / 2 + f * 2 * span;
+        D.push({ x: cx + Math.cos(aT) * S * 0.62, y: cy + Math.sin(aT) * S * 0.62, r: b });
+        D.push({ x: cx + Math.cos(aB) * S * 0.62, y: cy + Math.sin(aB) * S * 0.62, r: b });
+      }
+      paint(ctx, D);
+    },
+    // 4. scattered dots organizing into a closed boundary
+    (ctx, tl, t, bo, i) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const m = ease(P(t * 0.7)), half = S * 0.62, D = [];
+      for (let k = 0; k < 16; k++) {
+        const e = Math.floor(k / 4), j = (k % 4) / 4 - 0.375;
+        const tx = e === 0 ? cx + j * 2 * half : e === 1 ? cx + half : e === 2 ? cx - j * 2 * half : cx - half;
+        const ty = e === 0 ? cy - half : e === 1 ? cy + j * 2 * half : e === 2 ? cy + half : cy - j * 2 * half;
+        const sx = cx + (sd(i, k) - 0.5) * S * 1.4, sy = cy + (sd(i, k + 23) - 0.5) * S * 1.4;
+        D.push({ x: sx + (tx - sx) * m, y: sy + (ty - sy) * m, r: b });
+      }
+      paint(ctx, D);
+    },
+  ],
+
+  /* ── CYCLE — מחזוריות · המשכיות · נצח ── */
+  CYCLE: [
+    // 1. a dot on an endless circular track, trailing softly
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2, R = S * 0.6;
+      const D = [];
+      for (let k = 0; k < 18; k++) { const a = k / 18 * A_TAU; D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * 0.42 }); }
+      for (let k = 0; k < 4; k++) { const a = t * 1.05 - k * 0.22; D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * (1.6 - k * 0.32) }); }
+      paint(ctx, D);
+    },
+    // 2. dots flowing along a spiral, in and out without end
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [];
+      for (let k = 0; k < 12; k++) {
+        const f = frac(t * 0.16 + k / 12);
+        const R = S * (0.12 + 0.72 * f), a = f * A_TAU * 2.2 + t * 0.5;
+        D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * (1.25 - 0.5 * f) });
+      }
+      paint(ctx, D);
+    },
+    // 3. three dot-groups cycling around at 120° to each other
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
+      const D = [{ x: cx, y: cy, r: b * 0.8 }];
+      for (let g = 0; g < 3; g++) {
+        const base = t * 0.7 + g * A_TAU / 3;
+        for (let j = 0; j < 3; j++) {
+          const a = base - j * 0.17, R = S * (0.55 + Math.sin(t * 1.2 + g) * 0.06);
+          D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r: b * (1.3 - j * 0.3) });
+        }
+      }
+      paint(ctx, D);
+    },
+    // 4. a stream that leaves one side and returns from the other
+    (ctx, tl, t, bo, i) => {
+      const b = DOT / 2, D = [];
+      for (let k = 0; k < 8; k++) {
+        const f = frac(t * 0.22 + k / 8);
+        const y = tl.H * (0.28 + 0.44 * sd(i, k));
+        D.push({ x: f * tl.W, y, r: b * (0.8 + 0.5 * Math.sin(f * Math.PI)) });
+      }
+      paint(ctx, D);
+    },
+  ],
+
+  /* ── STABILITY — יציבות · חוזק · עמידות ── */
+  STABILITY: [
+    // 1. a row of dots swaying a little and always returning home
+    (ctx, tl, t) => {
+      const b = DOT / 2, cy = tl.H / 2, n = 7, m = tl.W * 0.15, step = (tl.W - 2 * m) / (n - 1);
+      const off = Math.sin(t * 1.05) * GAP * 0.55, D = [];
+      for (let k = 0; k < n; k++) D.push({ x: m + k * step + off, y: cy, r: b });
+      for (let k = 0; k < n; k++) D.push({ x: m + k * step, y: cy + GAP * 2.2, r: b * 0.4 });   // the home line, steady
+      paint(ctx, D);
+    },
+    // 2. a lattice that trembles gently but never breaks
+    (ctx, tl, t, bo, i) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2, sp = S * 0.44;
+      const D = [];
+      let k = 0;
+      for (let r = -1; r <= 1; r++) for (let c = -1; c <= 1; c++) {
+        const jx = Math.sin(t * 1.9 + sd(i, k) * 9) * GAP * 0.16, jy = Math.cos(t * 1.7 + sd(i, k + 9) * 9) * GAP * 0.16;
+        D.push({ x: cx + c * sp + jx, y: cy + r * sp + jy, r: b * (r === 0 && c === 0 ? 1.3 : 1) });
+        k++;
+      }
+      paint(ctx, D);
+    },
+    // 3. a column of dots rising and settling within a small range
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, n = 6, m = tl.H * 0.16, step = (tl.H - 2 * m) / (n - 1);
+      const off = Math.sin(t * 0.85) * GAP * 0.7, D = [];
+      for (let k = 0; k < n; k++) D.push({ x: cx, y: m + k * step + off, r: b * (k === 0 ? 1.35 : 1) });
+      D.push({ x: cx - GAP * 2.2, y: tl.H - m, r: b * 0.5 }, { x: cx + GAP * 2.2, y: tl.H - m, r: b * 0.5 });  // steady base
+      paint(ctx, D);
+    },
+    // 4. dots drifting slightly apart and re-forming the same order
+    (ctx, tl, t, bo, i) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2, sp = S * 0.42;
+      const burst = Math.max(0, Math.sin(t * 0.7)) ** 3, D = [];
+      let k = 0;
+      for (let r = -1; r <= 1; r++) for (let c = -1; c <= 1; c++) {
+        const dx = (sd(i, k) - 0.5) * GAP * 2.4 * burst, dy = (sd(i, k + 31) - 0.5) * GAP * 2.4 * burst;
+        D.push({ x: cx + c * sp + dx, y: cy + r * sp + dy, r: b });
+        k++;
+      }
+      paint(ctx, D);
+    },
+  ],
+};
+
+/* Interleave the families across the 7×4 grid so no row/column clusters one
+   family: tile i belongs to family (i % 7), variant floor(i / 7). Each family
+   gets exactly four visually-distinct tiles expressing its motion principle. */
+/* A quiet dotted BORDER for every tile — the tile's boundary in the dot
+   language (cached per size). Drawn under the family animation. */
+function drawTileFrame(ctx, tl) {
+  if (!tl.cache || !tl.cache.frame) {
+    const b = DOT / 2, ins = Math.min(tl.W, tl.H) * 0.06, gp = GAP * 1.7, F = [];
+    const line = (x0, y0, x1, y1) => {
+      const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / gp));
+      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b * 0.45 });
+    };
+    line(ins, ins, tl.W - ins, ins); line(ins, tl.H - ins, tl.W - ins, tl.H - ins);
+    line(ins, ins, ins, tl.H - ins); line(tl.W - ins, ins, tl.W - ins, tl.H - ins);
+    tl.cache = Object.assign(tl.cache || {}, { frame: F });
+  }
+  paint(ctx, tl.cache.frame);
+}
+
+const FAMILY_ORDER = ['PULSE', 'CENTER_PULL', 'EXPANSION', 'PATH', 'PROTECTION', 'CYCLE', 'STABILITY'];
+const TILES = Array.from({ length: 28 }, (_, i) => {
+  const family = FAMILY_ORDER[i % 7];
+  const variant = Math.floor(i / 7);
+  const fn = FAMILY_DRAWS[family][variant];
+  return {
+    id: 'movement-tile-' + String(i + 1).padStart(2, '0'),
+    family,
+    meaning: family,   // kept name-compatible: onSelect/onConfirm pass this
+    draw(ctx, tl, t, bo) { fn(ctx, tl, t, bo || 0, i); },
   };
-  line(ins, ins, W - ins, ins); line(ins, H - ins, W - ins, H - ins);
-  line(ins, ins, ins, H - ins); line(W - ins, ins, W - ins, H - ins);
-  if (dbl) {
-    const j = gap * 1.15;
-    line(ins + j, ins + j, W - ins - j, ins + j); line(ins + j, H - ins - j, W - ins - j, H - ins - j);
-    line(ins + j, ins + j, ins + j, H - ins - j); line(W - ins - j, ins + j, W - ins - j, H - ins - j);
-  }
-}
-function ringDots(D, cx, cy, R, n, r, ph) {
-  for (let i = 0; i < n; i++) { const a = (ph || 0) + i / n * A_TAU; D.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, r }); }
-}
-function rayDots(D, cx, cy, a, R0, R1, r, curl) {
-  const st = GAP * 0.95, n = Math.max(1, Math.round((R1 - R0) / st));
-  for (let i = 0; i <= n; i++) { const f = i / n, R = R0 + (R1 - R0) * f, aa = a + (curl || 0) * f; D.push({ x: cx + Math.cos(aa) * R, y: cy + Math.sin(aa) * R, r }); }
-}
-function squareRing(D, cx, cy, R, r, ph) {
-  const c = [];
-  for (let i = 0; i < 4; i++) { const a = (ph || 0) + i / 4 * A_TAU; c.push([cx + Math.cos(a) * R, cy + Math.sin(a) * R]); }
-  for (let i = 0; i < 4; i++) {
-    const [x1, y1] = c[i], [x2, y2] = c[(i + 1) % 4];
-    const n = Math.max(1, Math.round(Math.hypot(x2 - x1, y2 - y1) / (GAP * 1.15)));
-    for (let j = 0; j < n; j++) D.push({ x: x1 + (x2 - x1) * j / n, y: y1 + (y2 - y1) * j / n, r });
-  }
-}
-function smallDiamond(D, cx, cy, R, r) {
-  [[0, -R], [R, 0], [0, R], [-R, 0]].forEach(([dx, dy]) => D.push({ x: cx + dx, y: cy + dy, r }));
-}
-// Almond/leaf petal OUTLINE (two mirrored edges) pointing along angle `a`.
-function petalOutline(D, cx, cy, a, R0, R1, wid, r) {
-  const ux = Math.cos(a), uy = Math.sin(a), px = -uy, py = ux, N = 6;
-  for (let s = 0; s <= N; s++) {
-    const f = s / N, R = R0 + (R1 - R0) * f, w = Math.sin(f * Math.PI) * wid;
-    D.push({ x: cx + ux * R + px * w, y: cy + uy * R + py * w, r });
-    D.push({ x: cx + ux * R - px * w, y: cy + uy * R - py * w, r });
-  }
-}
-
-// One composer draws every tile; `cfg.style` (0..13) selects the motif. `P0` is the
-// tile's base rotation (spin animation + a per-tile seed offset) so twins differ.
-function drawAzulejo(ctx, tl, t, cfg) {
-  const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = Math.min(tl.W, tl.H) / 2;
-  const D = [];
-  const breathe = 0.82 + 0.26 * Math.sin(t * 1.2 + cfg.seed);
-  const spin = cfg.anim === 'spin' ? t * 0.35 : cfg.anim === 'spin2' ? t * 0.55 : 0;
-  const bloom = cfg.anim === 'bloom' ? 1 + 0.12 * Math.sin(t * 1.1) : 1;
-  const sym = cfg.sym, P0 = spin + cfg.seed;   // base rotation → distinct orientation per tile
-
-  if (cfg.frame) frameDots(D, tl.W, tl.H, S * 0.08, b, cfg.frame === 2);
-  if (cfg.corner) {
-    const o = S * 0.22;
-    [[o, o], [tl.W - o, o], [o, tl.H - o], [tl.W - o, tl.H - o]].forEach(([x, y]) =>
-      ringDots(D, x, y, S * 0.07, cfg.corner === 2 ? 4 : 1, b, P0));
-  }
-
-  const s = cfg.style;
-  if (s === 0) {                     // rosette — petal rays + outer bead ring
-    ringDots(D, cx, cy, S * 0.15, sym, b, P0);
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.26, S * 0.66 * bloom, b);
-    ringDots(D, cx, cy, S * 0.8, sym * 2, b, -P0);
-    D.push({ x: cx, y: cy, r: b * 1.5 });
-  } else if (s === 1) {              // star burst
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.12, S * 0.86 * bloom, b);
-    ringDots(D, cx, cy, S * 0.44, sym, b, P0 + Math.PI / sym);
-    ringDots(D, cx, cy, S * 0.22, sym, b, P0);
-    D.push({ x: cx, y: cy, r: b * 1.6 });
-  } else if (s === 2) {              // concentric mandala rings
-    [0.24, 0.44, 0.62, 0.8].forEach((f, k) => ringDots(D, cx, cy, S * f * (k % 2 ? bloom : 1), sym * (k + 1), b, P0 * (k % 2 ? 1 : -1)));
-    D.push({ x: cx, y: cy, r: b * 1.7 });
-  } else if (s === 3) {              // cross + corner diamonds
-    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU, S * 0.1, S * 0.84 * bloom, b);
-    for (let i = 0; i < 4; i++) { const a = P0 + i / 4 * A_TAU + Math.PI / 4; smallDiamond(D, cx + Math.cos(a) * S * 0.46, cy + Math.sin(a) * S * 0.46, S * 0.1, b); }
-    ringDots(D, cx, cy, S * 0.24, 8, b, P0);
-    D.push({ x: cx, y: cy, r: b * 1.6 });
-  } else if (s === 4) {              // floral cross — big cardinal + small diagonal petals
-    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU, S * 0.14, S * 0.7 * bloom, b);
-    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU + Math.PI / 4, S * 0.14, S * 0.46, b);
-    ringDots(D, cx, cy, S * 0.8, 8, b, P0);
-    ringDots(D, cx, cy, S * 0.18, 8, b, -P0);
-  } else if (s === 5) {              // pinwheel — curved rays
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.1, S * 0.82, b, 0.95);
-    ringDots(D, cx, cy, S * 0.55, sym * 2, b, -P0);
-    D.push({ x: cx, y: cy, r: b * 1.5 });
-  } else if (s === 6) {              // nested rotated squares (lattice medallion)
-    [0.8, 0.56, 0.32].forEach((f, k) => squareRing(D, cx, cy, S * f, b, P0 + (k % 2 ? Math.PI / 4 : 0)));
-    smallDiamond(D, cx, cy, S * 0.14, b);
-    D.push({ x: cx, y: cy, r: b * 1.6 });
-  } else if (s === 7) {              // dense sunflower (two offset petal-ray rings)
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.3, S * 0.8 * bloom, b);
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + (i + 0.5) / sym * A_TAU, S * 0.16, S * 0.5, b);
-    ringDots(D, cx, cy, S * 0.12, sym, b, P0);
-    D.push({ x: cx, y: cy, r: b * 1.5 });
-  } else if (s === 8) {              // compass star — two crossed squares + points
-    squareRing(D, cx, cy, S * 0.6, b, P0);
-    squareRing(D, cx, cy, S * 0.6, b, P0 + Math.PI / 4);
-    for (let i = 0; i < 8; i++) rayDots(D, cx, cy, P0 + i / 8 * A_TAU, S * 0.6, S * 0.86 * bloom, b);
-    ringDots(D, cx, cy, S * 0.3, 8, b, P0);
-    D.push({ x: cx, y: cy, r: b * 1.6 });
-  } else if (s === 9) {              // concentric aligned squares + center plus
-    [0.82, 0.58, 0.34].forEach(f => squareRing(D, cx, cy, S * f, b, P0));
-    for (let i = 0; i < 4; i++) rayDots(D, cx, cy, P0 + i / 4 * A_TAU, 0, S * 0.24 * bloom, b);
-    D.push({ x: cx, y: cy, r: b * 1.6 });
-  } else if (s === 10) {             // all-over diamond lattice (repeating geometric)
-    const m = S * 0.16, step = GAP * 3.4;
-    let row = 0;
-    for (let y = m; y <= tl.H - m + 0.1; y += step, row++) {
-      const off = (row % 2) * step / 2;
-      for (let x = m + off; x <= tl.W - m + 0.1; x += step) smallDiamond(D, x, y, GAP * 0.9, b);
-    }
-  } else if (s === 11) {             // petal blossom — leaf-outline petals
-    for (let i = 0; i < sym; i++) petalOutline(D, cx, cy, P0 + i / sym * A_TAU, S * 0.16, S * 0.82 * bloom, S * 0.15, b);
-    ringDots(D, cx, cy, S * 0.1, sym, b, P0);
-    D.push({ x: cx, y: cy, r: b * 1.5 });
-  } else if (s === 12) {             // double spiral arms
-    for (let arm = 0; arm < 2; arm++) {
-      for (let i = 0; i <= 46; i++) { const th = i / 46 * 3 * A_TAU + P0 + arm * Math.PI, R = S * 0.06 + i / 46 * S * 0.82; D.push({ x: cx + Math.cos(th) * R, y: cy + Math.sin(th) * R, r: b }); }
-    }
-    D.push({ x: cx, y: cy, r: b * 1.6 });
-  } else {                           // s === 13 · ring of diamonds + inner rosette
-    for (let i = 0; i < sym; i++) { const a = P0 + i / sym * A_TAU; smallDiamond(D, cx + Math.cos(a) * S * 0.64, cy + Math.sin(a) * S * 0.64, S * 0.09, b); }
-    ringDots(D, cx, cy, S * 0.36, sym, b, P0 + Math.PI / sym);
-    for (let i = 0; i < sym; i++) rayDots(D, cx, cy, P0 + i / sym * A_TAU, S * 0.12, S * 0.28, b);
-    D.push({ x: cx, y: cy, r: b * 1.5 });
-  }
-
-  ctx.beginPath();
-  if (cfg.anim === 'twinkle') {
-    for (const d of D) { const k = 0.55 + 0.7 * Math.pow(0.5 + 0.5 * Math.sin(t * 2.2 + (d.x + d.y) * 0.05 + cfg.seed), 3); dot(ctx, d.x, d.y, d.r * k); }
-  } else if (cfg.anim === 'pulse') {
-    const front = ((t * 0.5) % 1) * S * 1.15, w = GAP * 3;
-    for (const d of D) { const dd = Math.abs(Math.hypot(d.x - cx, d.y - cy) - front), k = dd < w ? 1 + 0.9 * Math.cos(dd / w * Math.PI / 2) : 1; dot(ctx, d.x, d.y, d.r * k); }
-  } else if (cfg.anim === 'breathe') {
-    for (const d of D) dot(ctx, d.x, d.y, d.r * breathe);
-  } else {
-    for (const d of D) dot(ctx, d.x, d.y, d.r);
-  }
-  ctx.fill();
-}
-
-/* 28 tiles (4×7). Fixed meaning per index (index → symbol); each is dressed as a
-   distinct ornamental medallion — 14 motifs, with symmetry / animation / frame /
-   corner and a per-tile rotation seed all varied so none look alike. */
-const A_MEANINGS = ['healing', 'abundance', 'growth', 'flow', 'balance', 'cleansing', 'continuity', 'journey', 'renewal', 'protection', 'harmony', 'energy', 'ascent', 'aspiration', 'guidance', 'fertility', 'connection', 'luck', 'freedom', 'exploration', 'community', 'vitality', 'roots', 'strength', 'wisdom', 'eternity', 'rebirth', 'unity'];
-const A_SYMS = [8, 6, 12, 5, 8, 6, 10, 4, 8, 7];
-const A_ANIMS = ['breathe', 'spin', 'bloom', 'twinkle', 'pulse', 'spin2'];
-const TILES = A_MEANINGS.map((meaning, i) => {
-  const cfg = {
-    style: i % 14,
-    sym: A_SYMS[i % A_SYMS.length],
-    anim: A_ANIMS[i % A_ANIMS.length],
-    frame: (i % 4 === 0 ? 2 : 1),
-    corner: (i % 3),
-    seed: i * 0.9,
-  };
-  return { meaning, draw(ctx, tl, t) { drawAzulejo(ctx, tl, t, cfg); } };
 });
 
-export const TILE_MEANINGS = TILES.map(t => t.meaning);
+export const TILE_MEANINGS = TILES.map(t => t.family);
 
 // Confirmation overlay — a single ring sweeps out (orange) enlarging dots.
 function drawConfirm(ctx, tl, ce) {
@@ -318,20 +520,25 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   }
 
   function frame(now) {
-    const t = (now - t0) / 1000;
     for (const tl of tiles) {
       const appeared = (now - t0) >= tl.appearAt;
       const aTarget = appeared ? 1 : 0;
       tl.alpha += (aTarget - tl.alpha) * 0.16;
-      const settled = appeared && Math.abs(1 - tl.alpha) < 0.005;
-      if (settled) tl.alpha = 1;
+      if (appeared && Math.abs(1 - tl.alpha) < 0.005) tl.alpha = 1;
+      // Every tile has its OWN smooth clock; touch/hover only accelerates it a
+      // little (reinforcing the tile's motion — never changing its family).
+      const bo = (tl.i === selected || tl.i === chosen) ? 1 : (tl.hover ? 0.45 : 0);
+      const dt = Math.min(0.1, (now - (tl._last || now)) / 1000);
+      tl._last = now;
+      if (!tl.frozen) tl.clock = (tl.clock || 0) + dt * (1 + 0.45 * bo);
       const ctx = tl.ctx;
       ctx.clearRect(0, 0, tl.W, tl.H);
       ctx.globalAlpha = tl.alpha;
       ctx.fillStyle = tl.dotColor;   // dark dots on the yellow plate
-      ctx._dotScale = (tl.i === selected || tl.i === chosen) ? 1.3 : 1.0;
-      const localT = tl.frozen ? tl.frozenT : t;
-      TILES[tl.i].draw(ctx, tl, localT);
+      ctx._dotScale = 1;
+      drawTileFrame(ctx, tl);        // the tile's quiet dotted boundary
+      ctx._dotScale = 1 + 0.3 * bo;  // emphasized dots on touch/hover
+      TILES[tl.i].draw(ctx, tl, tl.clock || 0, bo);
       if (tl.i === chosen && tl.confirmT >= 0) { ctx.globalAlpha = tl.alpha; drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS)); }
       ctx.globalAlpha = 1;
     }
@@ -347,6 +554,9 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       e.preventDefault();
       setSelected(tl.i);
     });
+    // Hover/touch-over gently reinforces the tile's own motion.
+    tl.cell.addEventListener('pointerenter', () => { if (chosen < 0) tl.hover = true; });
+    tl.cell.addEventListener('pointerleave', () => { tl.hover = false; });
   });
 
   // Confirm the selected tile ("המשך") — play the ring, then fire onConfirm.

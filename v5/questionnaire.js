@@ -481,7 +481,48 @@ function pickTimeSymbol(hour){
 }
 
 window.__globeTest = { findCountry, pickGlobeSymbol, centers: SYMBOL_CULTURAL_CENTERS };  // dev/verification
+/* ── Movement stage: family → meaning-group symbol selection ────────────────
+   Each of the 28 tiles carries a fixed movementFamily (dot-tiles.js). The
+   picked tile answers "what energy drew the visitor?" — its family maps to a
+   meaning and a symbol group, from which ONE unused symbol is drawn. */
+const MOVEMENT_SYMBOL_GROUPS = {
+  PULSE:       ['anah', 'lotus', 'scarab', 'snake'],            // חיים · חיוניות · התחדשות
+  CENTER_PULL: ['circle', 'endlessknot', 'dharma', 'hexagram'], // איזון · אחדות · מרכז פנימי
+  EXPANSION:   ['rimon', 'cowrie', 'sun', 'fish'],              // שפע · צמיחה · ברכה
+  PATH:        ['vegvisir', 'algiz', 'solarcross', 'bird'],     // דרך · הכוונה · גילוי
+  PROTECTION:  ['hamsa', 'eye', 'diamond', 'pyramid'],          // הגנה · שמירה
+  CYCLE:       ['spiral', 'triskele', 'moon', 'triquetra'],     // מחזוריות · המשכיות · נצח
+  STABILITY:   ['djed', 'pentagram', 'horseshoe'],              // יציבות · חוזק · עמידות
+};
+const MOVEMENT_FALLBACK_GROUPS = {
+  PULSE:       ['EXPANSION', 'CYCLE'],
+  CENTER_PULL: ['STABILITY', 'CYCLE'],
+  EXPANSION:   ['PULSE', 'PATH'],
+  PATH:        ['CYCLE', 'CENTER_PULL'],
+  PROTECTION:  ['STABILITY', 'CENTER_PULL'],
+  CYCLE:       ['PATH', 'PULSE'],
+  STABILITY:   ['PROTECTION', 'CENTER_PULL'],
+};
+/* Used symbols are FILTERED FIRST (never picked-then-replaced); random among
+   what remains; exhausted group → fixed fallback groups in order; only then
+   any unused symbol from the full library. Never a duplicate on the talisman. */
+function pickMovementSymbol(family){
+  const used = new Set(st.chosenSymbols || []);
+  for(const g of [family, ...(MOVEMENT_FALLBACK_GROUPS[family] || [])]){
+    const free = (MOVEMENT_SYMBOL_GROUPS[g] || []).filter(k => !used.has(k));
+    if(free.length){
+      const sym = free[Math.floor(Math.random() * free.length)];
+      st.movementChoice = { family, group: g, symbol: sym };
+      console.log('[movement] symbol choice:', st.movementChoice);
+      return sym;
+    }
+  }
+  const all = Object.keys(SYMBOL_INFO_2D).filter(k => SYMBOLS_3D[k] && !used.has(k));
+  return all.length ? all[Math.floor(Math.random() * all.length)] : null;
+}
+
 window.__timeTest = { timePeriodForHour, pickTimeSymbol };  // dev/verification
+window.__movementTest = { pickMovementSymbol, groups: MOVEMENT_SYMBOL_GROUPS };  // dev/verification
 
 const COUNTRY_MOTIFS = {
   'מרוקו':'hamsa', 'אלג׳יריה':'yaz', 'תוניסיה':'nazar', 'לוב':'nazar',
@@ -1788,9 +1829,9 @@ function _renderQuestionImpl(idx){
     let picked = false;
     st._dotTiles = mountDotTiles(midContainer, {
       // Tapping a tile SELECTS it (no auto-advance) and lights up "המשך".
-      onSelect: (index, meaning) => {
-        const symbolKey = pickTileSymbol(meaning);
-        st.answers['life-wish'] = meaning;      // internal meaning (never shown)
+      onSelect: (index, family) => {
+        const symbolKey = pickMovementSymbol(family);
+        st.answers['life-wish'] = family;       // the movement family (never shown)
         st.lifeWishSymbol = symbolKey;          // mapped symbol, revealed later
         st._forcedSymbol = symbolKey;           // "המשך" → open the symbol window on THIS chosen symbol (not a random one)
         st.p5SymbolsByStage = st.p5SymbolsByStage || {};
