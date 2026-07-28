@@ -4872,7 +4872,22 @@ export function updateV5StepProgress(stageNum) {
     progressCurrent.textContent = String(currentStep + 1).padStart(2, '0');
   }
 
-  // Left progress rail — highlight the current step dot.
+  // Left progress rail — highlight the current step dot & bind click navigation
   const railDots = document.querySelectorAll('#step-rail li');
-  railDots.forEach((d, i) => d.classList.toggle('is-current', i === currentStep));
+  railDots.forEach((d, i) => {
+    d.classList.toggle('is-current', i === currentStep);
+    if (!d._boundClick) {
+      d._boundClick = true;
+      d.style.cursor = 'pointer';
+      d.setAttribute('role', 'button');
+      d.setAttribute('aria-label', `עבור לשלב ${i + 1}`);
+      d.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (i < QUESTIONS.length && i !== st.current) {
+          closeSymbolWindow();
+          transitionQuestion(i);
+        }
+      });
+    }
+  });
 }

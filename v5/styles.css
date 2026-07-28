@@ -7361,3 +7361,24 @@ html:not(.cursor-active) *::after {
               height 800ms cubic-bezier(0.76, 0, 0.24, 1),
               background-color 800ms cubic-bezier(0.76, 0, 0.24, 1) !important;
 }
+
+/* ── Remove up and down arrows on the right side progress bar ── */
+#step-prev-btn,
+#step-next-btn {
+  display: none !important;
+}
+
+/* ── Interactive right side step dots ── */
+#step-rail {
+  pointer-events: auto !important;
+}
+
+#step-rail li {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  transition: transform 0.2s ease, background-color 0.3s ease, opacity 0.3s ease !important;
+}
+
+#step-rail li:hover {
+  transform: scale(1.6) !important;
+}
