@@ -24,8 +24,8 @@ export function mountSymbolContour(container, objPath, opts = {}) {
   // intricate symbols alike draw at the same visual pace — a fixed wall-clock
   // duration made dot-heavy symbols rush. Clamped so no symbol feels endless
   // or instant. (drawMs, if passed, still overrides.)
-  const DOTS_PER_SEC = opts.dotsPerSec ?? 150;
-  let DRAW_MS = opts.drawMs ?? 2900;             // resolved per-symbol once dots exist
+  const DOTS_PER_SEC = opts.dotsPerSec ?? 250;
+  let DRAW_MS = opts.drawMs ?? 2000;             // resolved per-symbol once dots exist
   // Some OBJs are authored facing a non-frontal axis (e.g. a wheel whose face
   // lies in the YZ plane). The contour is a silhouette along Z, so such a model
   // would come out edge-on. rotateY/rotateX (radians) reorient it to its frontal
@@ -62,8 +62,8 @@ export function mountSymbolContour(container, objPath, opts = {}) {
       layers = groupConcentricLayers(components);
       totalDots = layers.reduce((acc, l) => acc + l.reduce((cAcc, c) => cAcc + c.length, 0), 0);
       
-      // Constant pace: duration follows the dot count clamped between 2200ms and 3200ms.
-      if (opts.drawMs == null) DRAW_MS = Math.max(2200, Math.min(3200, (totalDots / DOTS_PER_SEC) * 1000));
+      // Fast, snappy pace: duration follows dot count clamped between 1500ms and 2200ms.
+      if (opts.drawMs == null) DRAW_MS = Math.max(1500, Math.min(2200, (totalDots / DOTS_PER_SEC) * 1000));
       try { container.setAttribute('data-dot-count', String(totalDots)); } catch (_) {}
       rafId = requestAnimationFrame(frame);
     })
@@ -93,7 +93,7 @@ export function mountSymbolContour(container, objPath, opts = {}) {
       const layerFrac = Math.max(0, Math.min(1, (frac - start) / (end - start)));
       if (layerFrac <= 0) return;
 
-      const easedFrac = layerFrac < 0.5 ? 2 * layerFrac * layerFrac : 1 - Math.pow(-2 * layerFrac + 2, 2) / 2;
+      const easedFrac = layerFrac;
 
       layerComps.forEach(comp => {
         const visibleCount = Math.floor(comp.length * easedFrac);
