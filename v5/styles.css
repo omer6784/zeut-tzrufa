@@ -82,8 +82,8 @@ html { overflow: hidden; }
   position: fixed;
   top: 0;
   left: 0;
-  width: 1360px;
-  height: 768px;
+  width: calc(1360 * var(--sx));
+  height: calc(768 * var(--sy));
   z-index: 10;
   overflow: hidden;
   will-change: transform;
@@ -106,8 +106,8 @@ body::-webkit-scrollbar-thumb {
 .screen-panel {
   position: fixed;
   inset: 0;
-  width: 1360px;
-  height: 768px;
+  width: calc(1360 * var(--sx));
+  height: calc(768 * var(--sy));
   overflow: hidden;
 }
 
@@ -698,7 +698,7 @@ body::-webkit-scrollbar-thumb {
 /* ─── Questionnaire Layout ────────────────────────────────── */
 #section-3 {
   background: #fffae6;
-  height: 768px;
+  height: calc(768 * var(--sy));
   overflow: hidden;
 }
 
@@ -1338,7 +1338,7 @@ body::-webkit-scrollbar-thumb {
 .prof-grid {
   position: fixed;
   left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
-  top: calc(85 * var(--sy)); bottom: calc(768px - 726 * var(--sy));
+  top: calc(85 * var(--sy)); bottom: calc((768 - 726) * var(--sy));
   transform: translateY(-50px);
   display: flex; align-items: center; justify-content: center;
   z-index: 8; pointer-events: none;
@@ -2176,7 +2176,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 /* ─── Layout container — sits inside the chrome inset ─────── */
 #section-3 {
   background: var(--q-cream);
-  height: 768px;
+  height: calc(768 * var(--sy));
   overflow: hidden;
   transition: opacity 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s,
               transform 0.9s cubic-bezier(0.4,0,0.2,1) 0.15s,
@@ -2184,8 +2184,8 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 }
 #questionnaire-layout {
   padding-top: var(--q-top-total);
-  height: 768px;
-  width: 1360px;
+  height: calc(768 * var(--sy));
+  width: calc(1360 * var(--sx));
   box-sizing: border-box;
   position: relative;
   overflow: hidden;
@@ -2555,7 +2555,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] #paths-game {
   position: fixed;
   left: calc(100 * var(--sx));
-  width: calc(1360px - 200 * var(--sx));
+  width: calc((1360 - 200) * var(--sx));
   top: calc(126 * var(--sy));                 /* just under the instruction note (bottom ≈116) */
   height: calc((622 - 126) * var(--sy));      /* down to just above the title (top ≈630) */
   max-width: none;
@@ -2585,7 +2585,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
   left: 50%;
-  bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
+  bottom: calc((768 - 668) * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
   top: auto;
   transform: translate(-50%, 26px);
   width: min(480px, 460px);   /* slightly smaller (was 571/540) */
@@ -3632,8 +3632,8 @@ body.theme-negative {
   display: grid !important;
   grid-template-columns: var(--col-1) var(--col-2) var(--col-3) !important;
   grid-template-rows: var(--row-1) var(--row-2) var(--row-3) !important;
-  width: 1360px !important;
-  height: 768px !important;
+  width: calc(1360 * var(--sx)) !important;
+  height: calc(768 * var(--sy)) !important;
   padding-top: 0 !important;
   padding-left: 0 !important;
   margin: 0 !important;
@@ -3809,7 +3809,7 @@ body.theme-negative {
 }
 #section-3.stage-2-view,
 #section-3.stage-2-active {
-  --col-1: 1360px !important;
+  --col-1: calc(1360 * var(--sx)) !important;
   --col-2: 0px !important;
   --col-3: 0px !important;
   --row-1: 0px !important;
@@ -6057,7 +6057,7 @@ body.theme-negative .finish-blink {
   position: absolute !important;
   inset: 0 !important;
   background: url('/image/v5-landing-glow.png') no-repeat center center !important;
-  background-size: 1360px auto !important;
+  background-size: calc(1360 * var(--sx)) auto !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   pointer-events: none !important;
@@ -6223,7 +6223,7 @@ html:not(.cursor-active) *::after {
      instruction row; overflow:hidden clips any dot that would spill past it. */
   position: fixed;
   left: calc(100 * var(--sx));
-  width: calc(1360px - 200 * var(--sx));
+  width: calc((1360 - 200) * var(--sx));
   top: calc(155 * var(--sy));
   height: calc((650 - 155) * var(--sy));   /* ends above the raised bottom grid line (656) */
   overflow: hidden;
@@ -6367,7 +6367,7 @@ html:not(.cursor-active) *::after {
   left: calc(100 * var(--sx)) !important;
   right: calc(100 * var(--sx)) !important;
   top: calc(85 * var(--sy)) !important;
-  bottom: calc(768px - 726 * var(--sy)) !important;   /* extend down to the bottom grid line (lowers the thumb row) */
+  bottom: calc((768 - 726) * var(--sy)) !important;   /* extend down to the bottom grid line (lowers the thumb row) */
   width: auto !important; height: auto !important;
   display: flex !important; flex-direction: column;
   /* Above #q-header (z-index 10), which otherwise covers the right frequency
@@ -6975,7 +6975,7 @@ html:not(.cursor-active) *::after {
   left: 50%;
   right: auto;
   transform: translateX(-50%);
-  bottom: calc(768px - 726 * var(--sy) + 355px);
+  bottom: calc((768 - 726) * var(--sy) + 355px);
   display: flex; direction: ltr; gap: 6px; align-items: center; justify-content: center;
   pointer-events: none;
   opacity: 0; transition: opacity 0.35s ease;
@@ -7003,7 +7003,7 @@ html:not(.cursor-active) *::after {
   right: auto;
   transform: translateX(-50%);
   width: clamp(180px, 22vw, 250px);
-  bottom: calc(768px - 726 * var(--sy) + 460px);
+  bottom: calc((768 - 726) * var(--sy) + 460px);
   display: flex; flex-direction: column; align-items: center;
 }
 .name-stage.ns-locked .ns-caret { display: none; }
@@ -7376,4 +7376,47 @@ html:not(.cursor-active) *::after {
 
 #step-rail li:hover {
   transform: scale(1.6) !important;
+}
+
+/* ── PORTRAIT: movement tiles re-flow 7×4 → 4×7 (same 28 tiles, same
+   interleaved families) — WIDTH-bound with square cells, centred between
+   the frame lines. ── */
+html.portrait #section-3[data-stage="2"] .dot-tiles-inner {
+  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-rows: repeat(7, 1fr) !important;
+  aspect-ratio: 4 / 7 !important;
+  width: calc(100% - 60px) !important;
+  height: auto !important;
+  max-height: calc(100% - 90px) !important;   /* breathing room above (instruction) + below */
+  max-width: none !important;
+}
+/* Tiles stage forward button: the 4×7 grid claims the whole frame, so "המשך"
+   moves from the (now occupied) top-left corner to the bottom band, centred —
+   the same seat it takes on the other portrait stages. */
+html.portrait #section-3[data-stage="2"] .stage-band .sb-btn {
+  top: auto !important;
+  bottom: calc((768 - 726) * var(--sy) + 40px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+html.portrait #section-3[data-stage="2"] .stage-band .sb-btn:not(.is-disabled) {
+  animation: sb-btn-breathe 1.8s ease-in-out infinite !important;
+}
+
+/* ── PORTRAIT: symbol window card — the landscape 54%×68% turns into a
+   narrow sliver on the tall canvas; re-proportion for reading + touch. ── */
+html.portrait #symbol-window .sw-frame {
+  width: 78%;
+  height: 52%;
+}
+
+/* ── PORTRAIT: editor — the embedded jewel keeps its 9:16 face and sits
+   centred; the landscape height-bound stretch made it a full-height slab. ── */
+html.portrait #editor-view .ed-jewel {
+  width: 560px;
+}
+html.portrait #editor-view .ed-jewel-frame {
+  height: auto;
+  width: 100%;
+  aspect-ratio: 9 / 16;
 }

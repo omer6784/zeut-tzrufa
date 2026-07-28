@@ -82,7 +82,10 @@ function ensureBuilt() {
     }
   });
 
-  document.body.appendChild(kbEl);
+  // Inside the scaled letterbox wrapper so the keyboard lives in LOGICAL
+  // coordinates like the rest of the interface (its position:fixed then
+  // resolves against the transformed #app-viewport on every screen scale).
+  (document.getElementById('app-viewport') || document.body).appendChild(kbEl);
   return kbEl;
 }
 

@@ -766,6 +766,23 @@ body.theme-negative #v5-landing-title {
 }
 body.theme-negative #section-3 { --grid-dot: #f5f5ed; }
 
+/* ════════════════════════════════════════════════════════════════
+   PORTRAIT MODE — the exhibition touch panel (Acer PM161QT, 1080×1920).
+   The SAME 1360×768 authoring coordinates are re-projected onto a
+   1080×1920 logical canvas: x-values compress by 1080/1360, y-values
+   expand by 1920/768. The construction grid, margins and every
+   sx/sy-anchored element keep their PROPORTIONAL place, so the frame
+   reads as designed-for-portrait rather than a shrunken landscape.
+   The `portrait` class is set by the fit script in index.html.
+   ════════════════════════════════════════════════════════════════ */
+html.portrait, html.portrait #section-3 {
+  --sx: calc(1080px / 1360);
+  --sy: calc(1920px / 768);
+}
+html.portrait #app-viewport {
+  width: 1080px; height: 1920px;
+}
+
 /* Coloured stages — mirror their real full-screen background into --stage-plate
    so the transition cover morphs to the correct next-stage colour. Keep these in
    sync with the matching `#section-3[data-stage="N"] { background }` rules. */
@@ -808,7 +825,7 @@ body.theme-negative #section-3 { --grid-dot: #f5f5ed; }
 .stage-grid .sg-h {
   left: 0;
   top: var(--y);
-  width: 1360px;
+  width: calc(1360 * var(--sx));
   height: var(--grid-dot-size);
   transform: translateY(-50%);
   background-size: var(--grid-dot-gap) var(--grid-dot-size);
@@ -824,7 +841,7 @@ body.theme-negative #section-3 { --grid-dot: #f5f5ed; }
   position: fixed;   /* fixed → clipped by #app-viewport (overflow:visible), NOT by section-3's overflow:hidden, so it can rise past y0 into the top letterbox without being cut */
   top: 0;
   transform: translateY(-32px);   /* raised 20px (was -12px); no longer clipped since it's fixed to the wrapper */
-  left: calc(1360px - 160 * var(--sx));   /* moved 10 left (was -150 → -160 from the right edge) */
+  left: calc((1360 - 160) * var(--sx));   /* moved 10 left (was -150 → -160 from the right edge) */
   width: calc(140 * var(--sx));          /* 200 − 60 = 140 wide */
   height: calc(85 * var(--sy));          /* down to the top horizontal */
   display: flex;

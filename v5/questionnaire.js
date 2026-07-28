@@ -2065,8 +2065,10 @@ function runStage0Choreography(){
       const lcx = (R.left + R.width / 2 - av.left) / AS;   // title's current logical centre
       const lcy = (R.top + R.height / 2 - av.top) / AS;
       const lw = R.width / AS;
-      const L = 100, Rt = 1360 - 100;                   // central-rectangle sides (logical)
-      const T = 85, B = 656;                            // top line → raised bottom line
+      // Authoring coords (1360×768) → logical canvas via the portrait remap factors.
+      const kx = (window.__logicalW || 1360) / 1360, ky = (window.__logicalH || 768) / 768;
+      const L = 100 * kx, Rt = (1360 - 100) * kx;       // central-rectangle sides (logical)
+      const T = 85 * ky, B = 656 * ky;                  // top line → raised bottom line
       const S = lw ? ((Rt - L) * 0.86) / lw : 1.6;
       const cx = (L + Rt) / 2, cy = (T + B) / 2;
       const dx = cx - lcx, dy = cy - lcy;
@@ -2998,6 +3000,7 @@ function enterCompletion(){
   if (_completionTeardown) { try { _completionTeardown(); } catch (_) {} }
   _completionTeardown = mountCompletion({ /* onSendGif wired in Part B (GIF capture + email service) */ });
 }
+window.__openEditor = enterEditor; window.__openCompletion = enterCompletion;  // dev/verification
 export function setStage(stageNum) {
   const stepsRow = document.querySelector('.q-header-steps-row');
   if (!stepsRow) return;

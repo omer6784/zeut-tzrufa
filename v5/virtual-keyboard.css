@@ -10,9 +10,9 @@
      remaining width to its LEFT. */
   right: calc(100 * var(--sx));
   left: auto;
-  bottom: calc(768px - 726 * var(--sy) + 4px);   /* rests just on the bottom grid line */
+  bottom: calc((768 - 726) * var(--sy) + 4px);   /* rests just on the bottom grid line */
   transform: translateY(0);
-  width: calc((1360px - 200 * var(--sx)) * 0.74);
+  width: calc(((1360 - 200) * var(--sx)) * 0.74);
   z-index: 1000;
   background: #e2bc71;
   border: 1px solid #ff601a;
@@ -38,7 +38,7 @@
    which shares this element (appended to <body>) — keeps its own docked position. */
 body:has(#section-3.origin-input-phase) #virtual-keyboard {
   right: calc(100 * var(--sx) + 80px);    /* 20 further right (was +100) */
-  bottom: calc(768px - 726 * var(--sy) + 94px);   /* 10 further up (was +84) */
+  bottom: calc((768 - 726) * var(--sy) + 94px);   /* 10 further up (was +84) */
 }
 /* Enlarge it a touch. Scoped to :not(.vk-hidden) so the .vk-hidden slide-out
    (translateY 110%) still wins when the keyboard is dismissed. Grows up-left from
@@ -53,7 +53,7 @@ body:has(.name-stage) #virtual-keyboard {
   left: calc(100 * var(--sx) + 90px) !important;
   right: calc(100 * var(--sx) + 90px) !important;
   transform: none !important;
-  bottom: calc(768px - 726 * var(--sy) + 66px) !important;
+  bottom: calc((768 - 726) * var(--sy) + 66px) !important;
   width: auto !important;
   max-width: none !important;
   padding: 8px clamp(8px, 1.2vw, 14px) !important;
@@ -158,4 +158,17 @@ body.theme-negative #virtual-keyboard .vk-key:active {
     height: clamp(34px, 6vh, 46px);
     font-size: clamp(16px, 4.8vw, 20px);
   }
+}
+
+/* ── PORTRAIT (1080×1920): the origin-phase keyboard spans the full frame
+   width and rests above the bottom grid line; no scale (it is already at
+   finger size), so it can never overflow the frame. */
+html.portrait body:has(#section-3.origin-input-phase) #virtual-keyboard {
+  left: calc(100 * var(--sx) + 6px);
+  right: calc(100 * var(--sx) + 6px);
+  width: auto;
+  bottom: calc((768 - 726) * var(--sy) + 8px);
+}
+html.portrait body:has(#section-3.origin-input-phase) #virtual-keyboard:not(.vk-hidden) {
+  transform: none;
 }

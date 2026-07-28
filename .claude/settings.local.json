@@ -495,7 +495,20 @@
       "Bash(npx vite *)",
       "Bash(awk 'NR>=4900 && NR<=5100' v5/questionnaire.js)",
       "Bash(curl -s \"http://localhost:5173/questionnaire.js\")",
-      "Bash(curl -s \"http://localhost:5173/\")"
+      "Bash(curl -s \"http://localhost:5173/\")",
+      "Bash(perl -pi -e ' *)",
+      "Bash(perl -pi -e \"s/calc\\\\\\(1360px - 200 \\\\* var\\\\\\(--sx\\\\\\)\\\\\\)/calc\\(\\(1360 - 200\\) * var\\(--sx\\)\\)/g; s/calc\\\\\\(1360px - 100 \\\\* var\\\\\\(--sx\\\\\\)\\\\\\)/calc\\(\\(1360 - 100\\) * var\\(--sx\\)\\)/g;\" completion.js editor.js)",
+      "Bash(perl -pi -e \"s/calc\\\\\\(1360px - 100 \\\\* var\\\\\\(--sx\\\\\\)\\\\\\)/calc\\(\\(1360 - 100\\) * var\\(--sx\\)\\)/g; s/calc\\\\\\(1360px - 200 \\\\* var\\\\\\(--sx\\\\\\)\\\\\\)/calc\\(\\(1360 - 200\\) * var\\(--sx\\)\\)/g;\" index.html)",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=172/styles.css?v=173/; s/geometric\\\\.css\\\\?v=38/geometric.css?v=39/; s/stage1\\\\.css\\\\?v=195/stage1.css?v=196/;' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=196/stage1.css?v=197/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=197/stage1.css?v=198/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=198/stage1.css?v=199/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=199/stage1.css?v=200/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=200/stage1.css?v=201/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=201/stage1.css?v=202/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=203/stage1.css?v=204/' index.html)",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=174/styles.css?v=175/' index.html)",
+      "Bash(cd \"/Users/omershushan/.claude/projects/-Users-omershushan-Desktop-final-project-code/memory\" *)"
     ]
   },
   "hooks": {

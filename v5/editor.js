@@ -35,11 +35,11 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   view.dir = 'rtl';
   view.innerHTML = `
     <div class="ed-grid stage-grid" aria-hidden="true">
-      <span class="sg-v" style="--x: calc(1360px - 200 * var(--sx)); --h: 85;"></span>
+      <span class="sg-v" style="--x: calc((1360 - 200) * var(--sx)); --h: 85;"></span>
       <span class="sg-v" style="--x: calc(200 * var(--sx)); --h: 85;"></span>
       <span class="sg-h" style="--y: calc(85 * var(--sy));"></span>
       <span class="sg-v" style="--x: calc(100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
-      <span class="sg-v" style="--x: calc(1360px - 100 * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
+      <span class="sg-v" style="--x: calc((1360 - 100) * var(--sx)); --y: calc(85 * var(--sy)); --h: 668;"></span>
       <span class="sg-h" style="--y: calc(706 * var(--sy));"></span>
     </div>
     <div class="grid-logo ed-logo" aria-hidden="true"><img src="/image/v5-stage1/logotype.png" alt="זהות צרופה" /></div>

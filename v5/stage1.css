@@ -632,7 +632,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   position: fixed !important;
   left: auto !important;
   right: 750px !important;   /* moved 100px right (was 850px) — more of the globe on screen */
-  top: calc(var(--q-top-total) + (768px - var(--q-top-total) - clamp(110px, 99.84px, 150px)) / 2) !important;
+  top: calc(var(--q-top-total) + (768 * var(--sy) - var(--q-top-total) - clamp(110px, 99.84px, 150px)) / 2) !important;
   transform: translateY(calc(-50% - 30px)) !important;   /* raised 30px (was 20) */
   width: min(537.6px, 470px) !important;   /* shrunk a touch (was 520px) */
   height: min(537.6px, 470px) !important;
@@ -653,7 +653,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      horizontal divider that sits just above the keyboard/text band (so the
      continents fill the upper region and clear the keyboard). --kb-band is the
      keyboard/text band height; 46px = keyboard's 26px lift + 20px gap. */
-  width: calc(1360px - 200 * var(--sx)) !important;
+  width: calc((1360 - 200) * var(--sx)) !important;
   height: calc((726 - 85) * var(--sy) - 46px - var(--kb-band)) !important;
   left: calc(100 * var(--sx)) !important;
   right: auto !important;
@@ -673,9 +673,9 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      line to just before the keyboard's left edge. Vertically centred against
      the keyboard band. */
   left: calc(100 * var(--sx)) !important;
-  right: calc(100 * var(--sx) + (1360px - 200 * var(--sx)) * 0.66 + 28px) !important;
+  right: calc(100 * var(--sx) + ((1360 - 200) * var(--sx)) * 0.66 + 28px) !important;
   top: auto !important;
-  bottom: calc(768px - 726 * var(--sy) + 26px) !important;   /* keyboard bottom line */
+  bottom: calc((768 - 726) * var(--sy) + 26px) !important;   /* keyboard bottom line */
   height: var(--kb-band) !important;   /* ≈ keyboard height */
   width: auto !important;
   max-width: none !important;
@@ -700,7 +700,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      --kb-band) down to the bottom grid line (706·sy) — so it separates the
      writing line from the keyboard without reaching up into the map. Same dot
      size/spacing as the fixed grid. */
-  right: calc(100 * var(--sx) + (1360px - 200 * var(--sx)) * 0.66 + 14px) !important;
+  right: calc(100 * var(--sx) + ((1360 - 200) * var(--sx)) * 0.66 + 14px) !important;
   left: auto !important;
   top: calc(726 * var(--sy) - 46px - var(--kb-band)) !important;
   height: calc(46px + var(--kb-band)) !important;
@@ -1175,7 +1175,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
 #section-3[data-stage="0"] #roots-done {
   position: fixed !important;
   right: calc(122 * var(--sx)) !important;
-  left: calc(1360px - 122 * var(--sx) - var(--story-w)) !important;
+  left: calc((1360 - 122) * var(--sx) - var(--story-w)) !important;
   margin: 0 auto !important;
   width: max-content !important;
   top: calc(100 * var(--sy) + 178px) !important;   /* above the title */
@@ -1517,7 +1517,7 @@ html, body {
      so they can never leave the rectangle. NB: `N * var(--sx)` — --sx is a length. */
   position: fixed;
   left: calc(100 * var(--sx));
-  width: calc(1360px - 200 * var(--sx));
+  width: calc((1360 - 200) * var(--sx));
   top: calc(155 * var(--sy));                 /* clears the top instruction row */
   height: calc((650 - 155) * var(--sy));      /* ends above the raised bottom grid line (656) */
   z-index: 5;
@@ -1738,8 +1738,8 @@ html, body {
   /* Bottom anchored EXACTLY to the interface's bottom grid line (726·sy) — was 61.44px,
      which left the digit band + its vertical grid dividers ~19px short of the line
      (they floated, not connected). Now the band reaches the bottom line. */
-  top: 84.48px !important; bottom: calc(768px - 726 * var(--sy)) !important;
-  left: 108.8px !important; right: 108.8px !important;
+  top: calc(84.48 * var(--sy)) !important; bottom: calc((768 - 726) * var(--sy)) !important;
+  left: calc(108.8 * var(--sx)) !important; right: calc(108.8 * var(--sx)) !important;
   width: auto !important; height: auto !important;
   z-index: 6 !important;
   pointer-events: auto !important;
@@ -2115,4 +2115,141 @@ html.landing-cream #section-1:not(.morphing) #btn-symbol-library,
 html.landing-cream #section-1:not(.morphing) #ui-crosshair,
 html.landing-cream #section-1:not(.morphing) #ui-bottom-left .ui-v {
   color: #282828 !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PORTRAIT (Acer PM161QT 1080×1920) — per-screen layout corrections.
+   The --sx/--sy remap (geometric.css) carries the construction grid and
+   every grid-anchored element; the rules here re-seat the elements that
+   were tuned with raw px / % for the landscape composition. Same graphic
+   language, same mechanisms — layout only. Kept in ONE block, loaded last.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Opening screen ── */
+/* Tagline sits just above the logotype instead of 17% (which the tall
+   canvas turns into a far-away strip). */
+html.portrait #section-1 #ui-top-left {
+  top: 36% !important;
+  font-size: 15px !important;
+}
+/* CTA clears the bottom grid line (the line lands ~105px from the bottom
+   in portrait) and gets a finger-sized pad. */
+html.portrait #section-1 #cta-anchor {
+  bottom: 170px !important;
+  font-size: 18px !important;
+  padding: 18px 36px !important;
+}
+/* Logotype a touch wider — 680px was 50% of the landscape width; keep a
+   similar visual weight on the 1080-wide canvas. */
+html.portrait #v5-landing-title {
+  width: min(70%, 760px);
+}
+
+/* ── Globe (origin) stage ── */
+/* The landscape rule pins the globe with right:750px (off-canvas at 1080 wide).
+   Portrait: centre it under the title, a touch larger for the finger. */
+html.portrait #section-3[data-stage="0"] #q-input-wrap.roots-active .roots-widget:not(.state-input) .roots-canvas-wrap {
+  right: 50% !important;
+  transform: translate(50%, -50%) !important;
+  top: 59% !important;
+  width: 620px !important;
+  height: 620px !important;
+}
+
+/* ── Stage-band forward button ("סימנתי"/"המשך") ──
+   Its absolute anchor inside .stage-band lands mid-canvas on the tall
+   portrait grid; pin it to the canvas bottom band instead (same visual
+   place it holds in landscape — centred above the bottom grid line). */
+/* Low specificity ON PURPOSE: stages that pin the button top-left with their
+   own !important rules (colour, tiles, globe) must keep winning; this only
+   catches the default centred-bottom-band placement. */
+html.portrait .stage-band .sb-btn {
+  position: fixed !important;
+  bottom: calc((768 - 726) * var(--sy) + 55px) !important;  /* just above the bottom grid line */
+  left: 50% !important;
+}
+/* Globe MARKING phase: the button sits above the big title; the portrait title
+   starts lower, so seat it in the gap between the instruction and the title. */
+html.portrait #section-3[data-stage="0"]:not(.q-color-stage) .stage-band .sb-btn {
+  top: calc(215 * var(--sy)) !important;
+}
+
+/* ── Globe INPUT phase (portrait): stacked composition ──
+   Map fills the top of the frame; the writing line + "הוסף"/"הזנתי" buttons
+   sit centred BENEATH it; the keyboard is docked full-width above the bottom
+   grid line (virtual-keyboard.css). --kb-band mirrors the keyboard's real
+   portrait height so the map/divider stack clears it. */
+html.portrait #section-3 { --kb-band: 292px; }
+html.portrait #section-3[data-stage="0"] #q-input-wrap.roots-active .roots-widget.state-input .roots-canvas-wrap {
+  width: calc((1360 - 200) * var(--sx)) !important;
+  height: calc((726 - 85) * var(--sy) - var(--kb-band) - 170px) !important;
+  left: calc(100 * var(--sx)) !important;
+  top: calc(85 * var(--sy)) !important;
+}
+html.portrait #section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls {
+  left: calc(100 * var(--sx)) !important;
+  right: calc(100 * var(--sx)) !important;
+  top: auto !important;
+  bottom: calc((768 - 726) * var(--sy) + 8px + var(--kb-band) + 18px) !important;
+  height: auto !important;
+  --input-w: min(430px, 86%) !important;
+}
+/* The writing line loses its landscape nudges (they pushed it into the
+   keyboard band). */
+html.portrait #section-3[data-stage="0"] .roots-widget.state-input .roots-input-row {
+  margin-top: 0 !important;
+  transform: none !important;
+}
+/* The keyboard/input vertical divider belongs to the side-by-side landscape
+   composition — the portrait stack has no gap to divide. */
+html.portrait #section-3[data-stage="0"] .roots-widget.state-input .roots-map-controls::before {
+  display: none !important;
+}
+/* Horizontal map/input divider re-seated above the stacked input band. */
+html.portrait #section-3[data-stage="0"] .roots-widget.state-input::before {
+  top: calc(726 * var(--sy) - var(--kb-band) - 160px) !important;
+}
+
+/* ── Light-point stage: the dotted prompt fits inside the portrait frame ── */
+html.portrait #section-3[data-stage="1"] .s2-prompt {
+  width: min(880px, 86%) !important;
+}
+
+/* ── PORTRAIT typography + touch bump ──
+   The exhibition panel renders logical px 1:1 (landscape screens scaled them
+   ×1.41), so the reading sizes are lifted to hold legibility at a 50–70cm
+   standing distance. Hierarchy and colours untouched — sizes only. */
+html.portrait #q-instruction,
+html.portrait .stage-band .sb-note {
+  font-size: 16px !important;
+}
+html.portrait .stage-band .sb-btn {
+  font-size: 17px !important;
+  padding: 0.6em 2.4em !important;
+}
+html.portrait #q-btn-symbol-library,
+html.portrait #section-1 #btn-symbol-library {
+  font-size: 14px !important;
+}
+html.portrait #symbol-window .sw-label { font-size: 21px; }
+html.portrait #symbol-window .sw-value { font-size: 18px; }
+html.portrait #symbol-window .sw-btn,
+html.portrait #symbol-window button {
+  font-size: 16px;
+  padding: 0.7em 1.9em;
+}
+html.portrait .ed-note { font-size: 16px !important; }
+html.portrait .roots-input { font-size: 22px !important; }
+html.portrait .roots-add-country, html.portrait .roots-finish, html.portrait #roots-done {
+  font-size: 16px !important;
+  padding: 0.55em 1.6em !important;
+}
+/* Continent labels on the globe canvas are drawn in-canvas (scale with it);
+   the list of chosen origin countries under the writing line: */
+html.portrait #selected-origins-list { font-size: 16px !important; }
+
+/* Time-wheel confirm button — readable + finger-sized on the panel. */
+html.portrait .tw-confirm {
+  font-size: 16px !important;
+  padding: 14px 32px !important;
 }
