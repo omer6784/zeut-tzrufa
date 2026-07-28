@@ -43,7 +43,6 @@ const MOTIF_OBJ = {
   pyramid:  '/pyramid.obj',
   anah:     '/anah.obj',
   djed:     '/djed.obj',
-  artichoke: '/artichoke.obj',
   horseshoe: '/horseshoe.obj',
   spiral:    '/spiral.obj',
   moon:      '/moon.obj',

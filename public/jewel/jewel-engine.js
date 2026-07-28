@@ -68,9 +68,8 @@ const PROFILES = {
   dharma:  { file: "Dharma.obj",   type: "shell", grid: 4.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                          // continuous Y spin
   vegvisir:{ file: "VEGVISIR.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "spinY" },                          // placeholder animation
   pyramid: { file: "pyramid.obj",  type: "shell", grid: 4.4, dotSize: 3.4, targetSize: 300, motion: "swayY" },                          // placeholder animation
-  // ── artichoke / horseshoe / spiral / moon / tiltan — same shell + depth-shaded
+  // ── horseshoe / spiral / moon / tiltan — same shell + depth-shaded
   //    language as the rest; each keeps the animation from its symbols-3d entry.
-  artichoke:{ file: "artichoke.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "pulse" },                        // breathing
   horseshoe:{ file: "horseshoe.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" },           // flat OBJ → depth-boosted; gentle sway
   spiral:   { file: "spiral.obj",    type: "shell", grid: 4.4, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // continuous Y spin
   moon:     { file: "moon.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "pendant" },                      // gentle sway
@@ -116,24 +115,24 @@ const GALLERY_BGS = [
 // axis, like a finished piece). Symbols use the 3 palette colours the card's
 // background doesn't (same rule as the real jewel).
 const GALLERY_CONFIGS = [
-  ['rimon', 'fish', 'djed', 'horseshoe', 'artichoke', 'anah'],
+  ['rimon', 'fish', 'djed', 'horseshoe', 'sun', 'anah'],
   ['hamsa', 'eye', 'moon', 'lotus', 'spiral', 'scarab'],
   ['pyramid', 'tiltan', 'vegvisir', 'fish', 'rimon', 'moon'],
   ['eye', 'hamsa', 'dharma', 'horseshoe', 'lotus', 'djed'],
-  ['scarab', 'anah', 'spiral', 'artichoke', 'moon', 'fish'],
+  ['scarab', 'anah', 'spiral', 'bird', 'moon', 'fish'],
   ['rimon', 'lotus', 'eye', 'tiltan', 'pyramid', 'horseshoe'],
   ['moon', 'fish', 'hamsa', 'djed', 'spiral', 'vegvisir'],
-  ['anah', 'rimon', 'artichoke', 'eye', 'dharma', 'tiltan'],
+  ['anah', 'rimon', 'cowrie', 'eye', 'dharma', 'tiltan'],
   ['horseshoe', 'moon', 'lotus', 'scarab', 'fish', 'hamsa'],
   ['djed', 'pyramid', 'spiral', 'rimon', 'eye', 'moon'],
-  ['tiltan', 'vegvisir', 'hamsa', 'artichoke', 'fish', 'lotus'],
+  ['tiltan', 'vegvisir', 'hamsa', 'snake', 'fish', 'lotus'],
   ['eye', 'moon', 'rimon', 'horseshoe', 'anah', 'spiral'],
   ['lotus', 'dharma', 'fish', 'pyramid', 'moon', 'scarab'],
-  ['hamsa', 'rimon', 'tiltan', 'eye', 'horseshoe', 'artichoke'],
+  ['hamsa', 'rimon', 'tiltan', 'eye', 'horseshoe', 'diamond'],
   ['spiral', 'fish', 'moon', 'djed', 'lotus', 'vegvisir'],
   ['scarab', 'eye', 'rimon', 'anah', 'moon', 'hamsa'],
   ['pyramid', 'horseshoe', 'lotus', 'tiltan', 'fish', 'dharma'],
-  ['moon', 'artichoke', 'hamsa', 'spiral', 'eye', 'rimon'],
+  ['moon', 'hexagram', 'hamsa', 'spiral', 'eye', 'rimon'],
   ['djed', 'fish', 'lotus', 'moon', 'scarab', 'tiltan'],
   ['rimon', 'eye', 'horseshoe', 'vegvisir', 'moon', 'anah'],
 ];

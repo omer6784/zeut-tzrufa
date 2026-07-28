@@ -3165,7 +3165,7 @@ function getRandomSymbol() {
    already used (never hard-locking a single symbol per meaning). */
 const TILE_SYMBOL_CANDIDATES = {
   healing:     ['scarab', 'lotus', 'moon'],
-  abundance:   ['rimon', 'artichoke'],
+  abundance:   ['rimon', 'cowrie'],
   growth:      ['spiral', 'tiltan'],
   flow:        ['fish', 'rimon'],
   balance:     ['anah', 'dharma'],
@@ -3184,7 +3184,7 @@ const TILE_SYMBOL_CANDIDATES = {
   luck:        ['horseshoe', 'tiltan', 'fish'],
   freedom:     ['fish', 'moon'],
   exploration: ['vegvisir', 'spiral'],
-  community:   ['rimon', 'artichoke'],
+  community:   ['rimon', 'cowrie'],
   vitality:    ['scarab', 'lotus'],
   roots:       ['anah', 'djed'],
   strength:    ['djed', 'pyramid'],

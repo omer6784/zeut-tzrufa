@@ -23,7 +23,7 @@ export function mountHamsaPendulum(container) {
       '/jewel/objs/eye.obj', '/jewel/objs/hamsa.obj', '/jewel/objs/scarab.obj',
       '/jewel/objs/rimon.obj', '/jewel/objs/fish.obj', '/jewel/objs/lotus.obj',
       '/jewel/objs/Dharma.obj', '/jewel/objs/anah.obj', '/jewel/objs/djed.obj',
-      '/jewel/objs/VEGVISIR.obj', '/jewel/objs/pyramid.obj', '/jewel/objs/artichoke.obj',
+      '/jewel/objs/VEGVISIR.obj', '/jewel/objs/pyramid.obj',
       '/jewel/objs/spiral.obj', '/jewel/objs/tiltan.obj',
     ];
     // Story/recording frame (demo.html loads index.html with ?story=1) forces the

@@ -170,21 +170,6 @@ export const SYMBOLS_3D = {
     },
   },
 
-  /* Artichoke — SHELL sampler; the user's own motion: a slow breathing pulse
-     (grows and shrinks), like the lotus, so the bulb feels alive. */
-  artichoke: {
-    obj: '/artichoke.obj',
-    sampler: 'shell',
-    sample: { GRID_SPACING: 4 },
-    color: 0xf5f5ed,                                  // placeholder — dynamic on display
-    dotSize: (size) => Math.max(1.4, size * 0.02),
-    animate: (obj, tMs) => {
-      const p = (Math.sin(tMs * 0.0027 - Math.PI / 2) + 1) / 2;   // 0..1 breathing
-      const s = 1 + 0.18 * p;
-      obj.scale.set(s, s, s);
-    },
-  },
-
   /* Horseshoe — a FLAT silhouette (planar OBJ), so it uses the MASK sampler
      (filled + depth-layered) like the hamsa/eye. Motion: a gentle pendant sway,
      as a horseshoe hangs. */

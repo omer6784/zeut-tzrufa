@@ -494,7 +494,6 @@ const BUILT = [
   { key: 'pyramid',   svg: 'triangle' },
   { key: 'rimon',     svg: 'pomegranate' },
   { key: 'fish',      svg: 'ichthys' },
-  { key: 'artichoke', svg: 'artichoke' },
   { key: 'horseshoe', svg: 'horseshoe' },
   { key: 'spiral',    svg: 'spiral' },
   { key: 'moon',      svg: 'moon' },
