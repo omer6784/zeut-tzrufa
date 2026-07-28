@@ -180,7 +180,8 @@ export const SYMBOLS_3D = {
     color: 0xf5f5ed,                                  // placeholder — dynamic on display
     dotSize: (size) => Math.max(1.4, size * 0.02),
     animate: (obj, tMs) => {
-      obj.rotation.z = Math.sin(tMs * 0.0027) * 0.14;   // gentle sway
+      obj.rotation.y = Math.sin(tMs * 0.0011) * 0.3;    // small right-left turn (well under a half spin)
+      obj.rotation.z = Math.sin(tMs * 0.0027) * 0.1;    // with a touch of the old hang
     },
   },
 
@@ -206,7 +207,8 @@ export const SYMBOLS_3D = {
     color: 0xf5f5ed,                                  // placeholder — dynamic on display
     dotSize: (size) => Math.max(1.4, size * 0.02),
     animate: (obj, tMs) => {
-      obj.rotation.z = Math.sin(tMs * 0.0022) * 0.14;   // gentle sway
+      obj.rotation.y = Math.sin(tMs * 0.0011) * 0.3;    // small right-left turn (well under a half spin)
+      obj.rotation.z = Math.sin(tMs * 0.0022) * 0.1;    // with a touch of the old hang
     },
   },
 
@@ -291,7 +293,7 @@ export const SYMBOLS_3D = {
   endlessknot: {
     obj: '/endlessknot.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
     color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
-    animate: (obj, tMs) => { obj.rotation.z = Math.sin(tMs * 0.0022) * 0.14; }, // gentle pendant sway
+    animate: (obj, tMs) => { obj.rotation.z = Math.sin(tMs * 0.0022) * 0.14; obj.rotation.y = Math.sin(tMs * 0.0011) * 0.18; }, // pendant sway + tiny side turn (shows the depth)
   },
 
   triquetra: {

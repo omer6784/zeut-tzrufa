@@ -70,9 +70,9 @@ const PROFILES = {
   pyramid: { file: "pyramid.obj",  type: "shell", grid: 4.4, dotSize: 3.4, targetSize: 300, motion: "swayY" },                          // placeholder animation
   // ── horseshoe / spiral / moon / tiltan — same shell + depth-shaded
   //    language as the rest; each keeps the animation from its symbols-3d entry.
-  horseshoe:{ file: "horseshoe.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" },           // flat OBJ → depth-boosted; gentle sway
+  horseshoe:{ file: "horseshoe.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayYSmall" },       // small right-left turn
   spiral:   { file: "spiral.obj",    type: "shell", grid: 4.4, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // continuous Y spin
-  moon:     { file: "moon.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "pendant" },                      // gentle sway
+  moon:     { file: "moon.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayYSmall" },                  // small right-left turn
   tiltan:   { file: "tiltan.obj",    type: "shell", grid: 4.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // continuous Y spin
   // ── authored (generated) symbols — North-African / Berber set. All are FLAT
   //    extrusions (tools/gen-symbols.mjs), so zScale boosts their depth shading
@@ -89,7 +89,7 @@ const PROFILES = {
   algiz:      { file: "algiz.obj",       type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },   // protection rune
   triskele:   { file: "triskele.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 2, motion: "spinY" },   // triple spiral — turns
   solarcross: { file: "solarcross.obj",  type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "spinY" },              // sun wheel — turns
-  endlessknot:{ file: "endlessknot.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" }, // hangs + sways
+  endlessknot:{ file: "endlessknot.obj", type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendantSway" }, // hangs + sways, tiny side turn shows the depth
   triquetra:  { file: "triquetra.obj",   type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 2, motion: "spinY" }    // Celtic knot — turns
 };
 const BUILD_KEYS = Object.keys(PROFILES); // build all up-front (~0.3s)
@@ -903,6 +903,8 @@ function symbolAngles(motion, mt, k) {
     if (motion === "swayY") ry = sin(mt * 0.018) * 0.45 * k;
     else if (motion === "spinY") ry = (mt * 0.01) * k;
     else if (motion === "pendant") { rz = sin(mt * 0.045) * 0.32 * k; rx = sin(mt * 0.09) * 0.06 * k; }
+    else if (motion === "swayYSmall") ry = sin(mt * 0.018) * 0.3 * k;   // a small right-left turn — well under a half spin
+    else if (motion === "pendantSway") { rz = sin(mt * 0.045) * 0.32 * k; rx = sin(mt * 0.09) * 0.06 * k; ry = sin(mt * 0.014) * 0.18 * k; }   // pendant hang + a tiny side turn that reveals the depth
     else if (motion === "eyeFlip") ry = lerp(-HALF_PI, HALF_PI, (sin(mt * 0.018) + 1) * 0.5) * k;
     else if (motion === "hamsaFlip") rx = -lerp(0, PI, (sin(mt * 0.018) + 1) * 0.5) * k;
   }
