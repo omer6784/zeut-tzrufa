@@ -7389,6 +7389,7 @@ body.cv-typing #completion-view .cv-modal { align-items: flex-start; padding-top
    interleaved families) — WIDTH-bound with square cells, centred between
    the frame lines. ── */
 html.portrait #section-3[data-stage="2"] .dot-tiles-inner {
+  transform: translateY(-10px) !important;   /* raised 10 */
   grid-template-columns: repeat(4, 1fr) !important;
   grid-template-rows: repeat(7, 1fr) !important;
   aspect-ratio: 4 / 7 !important;
@@ -7434,6 +7435,6 @@ html.portrait #editor-view .ed-jewel-frame {
    frame and the tiles (and their touch targets) grow with it. Landscape only;
    portrait has its own width-bound 4×7 layout. ── */
 html:not(.portrait) #section-3[data-stage="2"] .dot-tiles-inner {
-  transform: scale(1.22);
+  transform: translateY(-10px) scale(1.22);
   transform-origin: center center;
 }
