@@ -58,7 +58,12 @@ function readResolvedPalette(sec) {
   return { bg, grid };
 }
 
-export function crossfadeStage({ sec, estimate, applyContent, duration = 900, contentAt = 0.85, onStart, onDone } = {}) {
+function easeCubic(t) {
+  // cubic-bezier(0.76, 0, 0.24, 1) smooth ease-in-out curve
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+export function crossfadeStage({ sec, estimate, applyContent, duration = 800, contentAt = 0.85, onStart, onDone } = {}) {
   if (!sec) { try { applyContent && applyContent(); } catch (_) {} onDone && onDone(); return; }
 
   // FROM = what is on screen right now.
@@ -66,19 +71,10 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 900, co
   const fromBg = parse(cs0.backgroundColor);
   const fromGrid = parse(cs0.getPropertyValue('--grid-dot'));
 
-  // The crossfade recolours the FIXED interface grid + chrome ONLY — never the
-  // stage's own content. #middle-q-container holds that content (the central
-  // element); pin its --grid-dot to its current colour so the EXITING content keeps
-  // its own colours through the melt (it simply swaps out at contentAt) instead of
-  // inheriting the recolouring meant for the fixed frame. (The symbol window lives
-  // on <body>, already outside this scope and closed before the transition.)
   const mid = document.getElementById('middle-q-container');
   const midGridPin = mid ? getComputedStyle(mid).getPropertyValue('--grid-dot').trim() : '';
   if (mid && midGridPin) mid.style.setProperty('--grid-dot', midGridPin);
 
-  // Phase-A target = a rough estimate of the next palette (the exact value is read
-  // for real at the swap and corrected in phase B — see below — so the estimate need
-  // not be perfect, only roughly the right direction).
   const estBg = estimate && estimate.bg ? parse(estimate.bg) : fromBg;
   const estGrid = estimate && estimate.grid ? parse(estimate.grid) : fromGrid;
 
@@ -90,17 +86,11 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 900, co
   let segBg = estBg, segGrid = estGrid;   // phase-B start (value held at contentAt)
   let toBg = estBg, toGrid = estGrid;     // phase-B target (real, read at the swap)
 
-  // The content swap + completion are milestones that MUST happen even if rAF is
-  // throttled/paused (kiosk browsers, unfocused tabs), so drive them off timers;
-  // rAF only smooths the colour melt in between. This guarantees the transition
-  // always completes instead of stalling with the content never swapping.
   function doSwap() {
     if (swapped) return;
     swapped = true;
     segBg = estBg.slice(); segGrid = estGrid.slice();
     try { applyContent && applyContent(); } catch (_) {}
-    // Release the exiting-content colour pin so the NEW content takes the stage's
-    // own colours (not the pinned old ones).
     const m2 = document.getElementById('middle-q-container');
     if (m2) m2.style.removeProperty('--grid-dot');
     const real = readResolvedPalette(sec);
@@ -110,8 +100,8 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 900, co
     if (finished) return;
     finished = true;
     cancelAnimationFrame(raf);
-    doSwap();                       // ensure the content is in even if we jumped straight here
-    sec.style.backgroundColor = '';           // hand the colours back to the (matching) stage CSS
+    doSwap();
+    sec.style.backgroundColor = '';
     sec.style.removeProperty('--grid-dot');
     sec.style.transition = prevTransition;
     onDone && onDone();
@@ -123,18 +113,15 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 900, co
   cancelAnimationFrame(raf);
   function frame(now) {
     if (finished) return;
-    const t = clamp01((now - t0) / duration);
+    const rawT = clamp01((now - t0) / duration);
     let bg, grid;
-    if (t < contentAt) {
-      const p = t / contentAt;    // Phase A: current → estimated next palette
+    if (rawT < contentAt) {
+      const p = easeCubic(rawT / contentAt);    // Phase A: current → estimated next palette
       bg = [mix(fromBg[0], estBg[0], p), mix(fromBg[1], estBg[1], p), mix(fromBg[2], estBg[2], p)];
       grid = [mix(fromGrid[0], estGrid[0], p), mix(fromGrid[1], estGrid[1], p), mix(fromGrid[2], estGrid[2], p)];
     } else {
-      // At contentAt the previous content leaves and the next enters (its own anim);
-      // then read the stage's REAL palette and finish the melt onto it — no jump,
-      // even if the estimate was off or the stage is JS-tinted.
       doSwap();
-      const p = (t - contentAt) / (1 - contentAt);
+      const p = easeCubic((rawT - contentAt) / (1 - contentAt));
       bg = [mix(segBg[0], toBg[0], p), mix(segBg[1], toBg[1], p), mix(segBg[2], toBg[2], p)];
       grid = [mix(segGrid[0], toGrid[0], p), mix(segGrid[1], toGrid[1], p), mix(segGrid[2], toGrid[2], p)];
     }

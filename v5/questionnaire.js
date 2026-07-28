@@ -2644,7 +2644,7 @@ function advance(){
   // grows and turns everything dark (the light-point stage's own bg), the fixed
   // grid recolours in step, then the stage assembles underneath (see its 'words'
   // branch: dots cascade in, title fades in last).
-  if(sym) openSymbolWindow(sym, { onContinue: goNext, plainClose: true });
+  if(sym) openSymbolWindow(sym, { onContinue: goNext });
   else goNext();
 }
 function goPrev(){

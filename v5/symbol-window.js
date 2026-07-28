@@ -135,76 +135,35 @@ function ensureWindow() {
     if (covering) return;                      // guard double-press
     btn.classList.add('is-pressed');           // lock in the orange state
     const cb = continueHandler;
-    // Plain close: no grow-cover. Fade the window out and build the next stage
-    // underneath at the same time — it runs its own gradual entry (e.g. the
-    // light-point stage assembling on the bare grid).
-    if (plainClose) {
-      setTimeout(() => {
-        winEl.style.transition = 'opacity 0.55s ease';
-        winEl.style.opacity = '0';
-        if (cb) cb();                          // next stage assembles as the window fades
-        setTimeout(() => {
-          closeSymbolWindow();
-          winEl.style.transition = ''; winEl.style.opacity = '';
-        }, 580);
-      }, 160);
-      return;
-    }
     const frame = winEl.querySelector('.sw-frame');
-    const sec = document.getElementById('section-3');
-    const startStage = sec ? sec.getAttribute('data-stage') : null;
-    const srcGrid = sec ? sec.querySelector('.stage-grid') : null;
-    covering = true;                           // protect this cover from external closeSymbolWindow
-    winEl.classList.add('is-covering');
+    covering = true;
 
-    // Keep the FIXED grid visible on top of the growing frame: clone the active
-    // stage's grid lines into an overlay above it, starting at the CURRENT grid
-    // colour. It recolours to the next stage's grid colour in step with the
-    // frame's background (below), so the grid never disappears — it only morphs.
-    if (srcGrid && gridOverlay) {
-      gridOverlay.innerHTML = srcGrid.innerHTML;
-      gridOverlay.style.setProperty('--grid-dot', gridColorOf(sec) || gridColorOf(srcGrid));
-      gridOverlay.classList.add('is-shown');
-    }
-    // Beat so the orange press reads, then a ONE-WAY choreography:
-    //   1. the frame grows to fill the screen (still its dark colour);
-    //   2. once it reaches full size, its colour flips to the NEXT stage's bg;
-    //   3. the window is hidden instantly (its colour already matches the stage
-    //      built underneath) — the frame transition is disabled first so removing
-    //      the cover classes never animates a collapse ("closes inward").
-    // Recolour to the next stage's ACTUAL background, read live once that stage
-    // has rendered (its data-stage differs), so orange/dark/cream stages each
-    // match seamlessly. `coverBg` overrides; a cap stops us waiting forever when
-    // the continue leads somewhere without a stage panel (e.g. finish).
-    const finish = () => {
-      frame.style.transition = 'none';             // 3. no collapse on reset
-      winEl.style.transition = 'none';
-      winEl.style.opacity = '0';                   //    hide instantly (seamless)
-      covering = false;                            //    release: the real teardown may run now
-      closeSymbolWindow();
-      setTimeout(() => {
-        frame.style.transition = '';
-        winEl.style.transition = '';
-        winEl.style.opacity = '';
-      }, 30);
-    };
-    const recolour = (waited) => {
-      const rendered = !sec || sec.getAttribute('data-stage') !== startStage;
-      if (!rendered && waited < 500) { setTimeout(() => recolour(waited + 60), 60); return; }
-      frame.style.setProperty('--sw-cover-bg', coverBg || effectiveStageBg());
-      frame.classList.add('is-cover-color');         // 2. at end of growth → recolour to next bg
-      // Morph the grid overlay to the next stage's grid colour, in step with bg.
-      if (gridOverlay && gridOverlay.classList.contains('is-shown')) {
-        const nextGrid = gridColorOf(sec);
-        if (nextGrid) gridOverlay.style.setProperty('--grid-dot', nextGrid);
-      }
-      setTimeout(finish, 340);
-    };
+    // Step 1: Content inside symbol modal fades out cleanly (250ms)
+    winEl.classList.add('is-fading-content');
+
     setTimeout(() => {
-      frame.classList.add('is-cover');                 // 1. expand (dark)
-      setTimeout(() => { if (cb) cb(); }, 160);        //    build next stage under the cover
-      setTimeout(() => recolour(0), 470);              // 2. once grown, recolour to the rendered stage
-    }, 140);
+      // Step 2: Symmetrical Card Expansion from center (800ms) + Color crossfade (800ms)
+      frame.style.setProperty('--sw-target-bg', coverBg || effectiveStageBg());
+      frame.classList.add('is-expanding-card');
+
+      // Trigger next stage build & color lerp underneath
+      if (cb) cb();
+
+      // Step 3: Card covers 100% of viewport → absorb into next stage plate & close modal
+      setTimeout(() => {
+        frame.style.transition = 'none';
+        winEl.style.transition = 'none';
+        winEl.style.opacity = '0';
+        winEl.classList.remove('is-fading-content', 'is-expanding-card');
+        covering = false;
+        closeSymbolWindow();
+        setTimeout(() => {
+          frame.style.transition = '';
+          winEl.style.transition = '';
+          winEl.style.opacity = '';
+        }, 50);
+      }, 820);
+    }, 250);
   });
   return winEl;
 }

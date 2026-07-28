@@ -7327,3 +7327,37 @@ html:not(.cursor-active) *::after {
   clip-path: none !important;
   display: block !important;
 }
+
+/* ── Unified Symmetrical Card Expansion & Color Melt Stage Transition ── */
+#symbol-window {
+  transition: opacity 0.3s ease;
+}
+
+#symbol-window .sw-frame {
+  transition: width 0.8s cubic-bezier(0.76, 0, 0.24, 1),
+              height 0.8s cubic-bezier(0.76, 0, 0.24, 1),
+              background-color 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+/* Step 1: All content inside symbol modal fades out cleanly (250ms) */
+#symbol-window.is-fading-content .sw-frame > *,
+#symbol-window.is-fading-content .sw-frame::before {
+  opacity: 0 !important;
+  transition: opacity 250ms ease !important;
+}
+
+/* Step 2: Background card expands symmetrically from center outwards to fill screen (800ms) */
+#symbol-window .sw-frame.is-expanding-card {
+  transform: scale(1) !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  background-color: var(--sw-target-bg, #282828) !important;
+  transition: width 800ms cubic-bezier(0.76, 0, 0.24, 1),
+              height 800ms cubic-bezier(0.76, 0, 0.24, 1),
+              background-color 800ms cubic-bezier(0.76, 0, 0.24, 1) !important;
+}
