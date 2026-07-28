@@ -8,9 +8,12 @@
    colour interpolation — from the current stage's palette to the next
    stage's, in sync and at one rate.
 
-   Only once the colour crossfade is ~done (contentAt) does the stage's own
-   unique content swap in, via its EXISTING dedicated entry animation. The
-   colour melt is what connects the stages, not the screens entering/leaving.
+   The stage's own content swaps in near the end of the melt (contentAt) but
+   is HELD INVISIBLE until the melt fully finishes — so no stage imagery ever
+   appears before the next stage's background, grid and surrounding chrome
+   (logo, step counter, library link, step dots, side text) are in place.
+   Only then does the content fade in (its own entry animation runs beneath).
+   The colour melt is what connects the stages, not screens entering/leaving.
    Same mechanism for every pair, forwards and back. */
 
 let raf = 0;
@@ -86,11 +89,31 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 800, co
   let segBg = estBg, segGrid = estGrid;   // phase-B start (value held at contentAt)
   let toBg = estBg, toGrid = estGrid;     // phase-B target (real, read at the swap)
 
+  // The incoming stage's CONTENT containers (everything unique to a stage —
+  // the central cell, the dark light-point layer, the instruction + forward
+  // button band). The fixed chrome (grid, logo, step counter, library link,
+  // step dots, side text) lives outside these and is never touched.
+  const HOLD_SELECTOR = '#q-main-cell, .stage2, .stage-band, #q-instruction';
+  let held = [];
+  function holdContent() {
+    held = Array.from(document.querySelectorAll(HOLD_SELECTOR));
+    for (const el of held) { el.style.transition = 'none'; el.style.opacity = '0'; }
+  }
+  function releaseContent() {
+    const els = held; held = [];
+    requestAnimationFrame(() => {
+      for (const el of els) { el.style.transition = 'opacity 0.5s ease'; el.style.opacity = '1'; }
+      setTimeout(() => {
+        for (const el of els) { el.style.removeProperty('opacity'); el.style.removeProperty('transition'); }
+      }, 650);
+    });
+  }
   function doSwap() {
     if (swapped) return;
     swapped = true;
     segBg = estBg.slice(); segGrid = estGrid.slice();
     try { applyContent && applyContent(); } catch (_) {}
+    holdContent();   // the new content stays invisible until the melt finishes
     const m2 = document.getElementById('middle-q-container');
     if (m2) m2.style.removeProperty('--grid-dot');
     const real = readResolvedPalette(sec);
@@ -104,6 +127,7 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 800, co
     sec.style.backgroundColor = '';
     sec.style.removeProperty('--grid-dot');
     sec.style.transition = prevTransition;
+    releaseContent();   // bg + grid + chrome are settled — NOW the content fades in
     onDone && onDone();
   }
   const swapTimer = setTimeout(doSwap, duration * contentAt);
