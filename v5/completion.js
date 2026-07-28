@@ -4,7 +4,11 @@
    dotted-frame buttons: back to the opening screen, and "send me as a GIF"
    (which opens an email modal). "שלח" captures the animated talisman from a
    hidden display iframe, encodes it to a GIF (gifenc), and POSTs it to the
-   Netlify function that emails it via Resend. */
+   Netlify function that emails it via Resend.
+   The exhibition panel has NO physical keyboard, so the email field drives the
+   interface's own on-screen keyboard (virtual-keyboard.js) — without it a
+   visitor cannot type an address at all and nothing can ever be sent. */
+import { attachKeyboardTo, openKeyboardFor, detachKeyboard } from './virtual-keyboard.js';
 
 /* Poll `cond` until true or timeout (ms). */
 function waitFor(cond, timeout) {
@@ -77,10 +81,13 @@ export function mountCompletion({ } = {}) {
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   view.querySelector('#cv-home').addEventListener('click', () => location.reload());
+  // On-screen keyboard for the email field (touch panel has no real keyboard).
+  attachKeyboardTo(emailEl, 'email');
   view.querySelector('#cv-gif').addEventListener('click', () => {
     msgEl.textContent = '';
     modal.hidden = false;
-    setTimeout(() => emailEl.focus(), 50);
+    document.body.classList.add('cv-typing');   // lifts the keyboard above this page
+    setTimeout(() => openKeyboardFor(emailEl), 60);
   });
   // The modal's second button goes BACK TO THE OPENING SCREEN (was "ביטול" that
   // merely closed the modal) — a full reload, same as the main "חזור" button.
@@ -166,6 +173,8 @@ export function mountCompletion({ } = {}) {
     const email = emailEl.value.trim();
     if (!EMAIL_RE.test(email)) { msgEl.textContent = 'כתובת מייל לא תקינה'; return; }
     sendBtn.disabled = true;
+    detachKeyboard();
+    document.body.classList.remove('cv-typing');
     msgEl.textContent = 'מכין את ה-GIF…';
     try {
       const gif = await captureGifBase64();
@@ -201,5 +210,10 @@ export function mountCompletion({ } = {}) {
     }
   });
 
-  return function teardown() { try { jewel.remove(); } catch (_) {} try { view.remove(); } catch (_) {} };
+  return function teardown() {
+    try { detachKeyboard(); } catch (_) {}
+    document.body.classList.remove('cv-typing');
+    try { jewel.remove(); } catch (_) {}
+    try { view.remove(); } catch (_) {}
+  };
 }

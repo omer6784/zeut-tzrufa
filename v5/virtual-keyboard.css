@@ -177,3 +177,28 @@ html.portrait body:has(#section-3.origin-input-phase) #virtual-keyboard {
 html.portrait body:has(#section-3.origin-input-phase) #virtual-keyboard:not(.vk-hidden) {
   transform: none;
 }
+
+/* ── Completion page (email-for-GIF): the completion view is a full-screen
+   overlay at z-index 1500, so the keyboard must rise above it; it spans the
+   frame and rests on the bottom grid line, like the name stage. ── */
+body.cv-typing #virtual-keyboard {
+  z-index: 2000 !important;
+  left: calc(100 * var(--sx) + 90px) !important;
+  right: calc(100 * var(--sx) + 90px) !important;
+  width: auto !important;
+  max-width: none !important;
+  transform: none !important;
+  bottom: calc((768 - 726) * var(--sy) + 20px) !important;
+}
+html.portrait body.cv-typing #virtual-keyboard {
+  left: calc(100 * var(--sx) + 6px) !important;
+  right: calc(100 * var(--sx) + 6px) !important;
+}
+
+/* Email layout — 4 rows of narrow keys; latin glyphs read better a touch smaller. */
+#virtual-keyboard.vk-email .vk-key {
+  height: clamp(40px, 48px, 54px);
+  font-size: clamp(13px, 19px, 21px);
+  font-family: 'ArbelG', sans-serif;
+  text-transform: none;
+}

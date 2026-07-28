@@ -517,7 +517,8 @@
       "Bash(awk -F: '$1 > 2000 && $1 < 2500')",
       "Bash(awk 'NR>=4675 && NR<=5330 && \\(/return \\\\{/ || /revealAtSink/ || /demoApi|api = \\\\{|analyze/\\)' questionnaire.js)",
       "Bash(awk 'NR>5200,NR<5330' questionnaire.js)",
-      "Bash(curl -s -i -X POST https://hilarious-smakager-1e1ff8.netlify.app/.netlify/functions/send-gif -H 'Content-Type: application/json' -d '{}')"
+      "Bash(curl -s -i -X POST https://hilarious-smakager-1e1ff8.netlify.app/.netlify/functions/send-gif -H 'Content-Type: application/json' -d '{}')",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=178/styles.css?v=179/' index.html)"
     ]
   },
   "hooks": {

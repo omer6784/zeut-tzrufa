@@ -7240,6 +7240,8 @@ html:not(.cursor-active) *::after {
 .cv-btn-dark { --b: #282828; }
 
 /* Email modal */
+/* While the on-screen keyboard is up, the dialog lifts clear of it. */
+body.cv-typing #completion-view .cv-modal { align-items: flex-start; padding-top: calc(150 * var(--sy)); }
 #completion-view .cv-modal {
   position: absolute; inset: 0; z-index: 70;
   background: rgba(40, 40, 40, 0.55);

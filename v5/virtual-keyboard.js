@@ -1,6 +1,9 @@
-/* virtual-keyboard.js — Hebrew on-screen keyboard.
-   Bound on demand to a text input; appears when input is focused,
-   hides on outside click. Heavy-condensed styling — see virtual-keyboard.css. */
+/* virtual-keyboard.js — on-screen keyboard for the touch panel.
+   Two layouts: Hebrew (names, countries) and EMAIL — latin letters, digits and
+   the address characters, because an email address cannot be typed on a Hebrew
+   keyboard and the panel has no physical one. Bound on demand to a text input;
+   appears when the input is touched, hides on outside click. Styling lives in
+   virtual-keyboard.css. */
 
 import './virtual-keyboard.css';
 
@@ -9,9 +12,40 @@ const HEBREW_ROWS = [
   ['ש','ד','ג','כ','ע','י','ח','ל','ך','ף'],
   ['ז','ס','ב','ה','נ','מ','צ','ת','ץ'],
 ];
+/* Email layout: qwerty + the digits and the few symbols an address needs. */
+const EMAIL_ROWS = [
+  ['1','2','3','4','5','6','7','8','9','0'],
+  ['q','w','e','r','t','y','u','i','o','p'],
+  ['a','s','d','f','g','h','j','k','l','_'],
+  ['z','x','c','v','b','n','m','-','.','@'],
+];
 
 let kbEl = null;
 let boundInput = null;
+let layout = 'hebrew';
+
+/* Rebuild the key rows in `mode` ('hebrew' | 'email'), keeping the control row. */
+function setLayout(mode) {
+  if (!kbEl || layout === mode) { layout = mode; return; }
+  layout = mode;
+  const rows = mode === 'email' ? EMAIL_ROWS : HEBREW_ROWS;
+  kbEl.querySelectorAll('.vk-row:not(.vk-row-controls)').forEach(r => r.remove());
+  const controls = kbEl.querySelector('.vk-row-controls');
+  rows.forEach((row) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'vk-row';
+    row.forEach((ch) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'vk-key';
+      btn.dataset.key = ch;
+      btn.textContent = ch;
+      rowEl.appendChild(btn);
+    });
+    kbEl.insertBefore(rowEl, controls);
+  });
+  kbEl.classList.toggle('vk-email', mode === 'email');
+}
 
 function ensureBuilt() {
   if (kbEl) return kbEl;
@@ -126,13 +160,14 @@ function hide() {
 }
 
 /** Attach the keyboard to a single text input. Idempotent per-input. */
-export function attachKeyboardTo(input) {
+export function attachKeyboardTo(input, mode = 'hebrew') {
   if (!input || input.dataset.vkBound === '1') return;
   input.dataset.vkBound = '1';
+  input.dataset.vkLayout = mode;
   ensureBuilt();
 
   // Only open on explicit USER interaction — never on programmatic focus.
-  const open = () => { boundInput = input; show(); };
+  const open = () => { boundInput = input; setLayout(mode); show(); };
   input.addEventListener('pointerdown', open);
   input.addEventListener('click', open);
   input.addEventListener('touchstart', open, { passive: true });
@@ -143,6 +178,7 @@ export function attachKeyboardTo(input) {
 export function openKeyboardFor(input) {
   if (!input) return;
   boundInput = input;
+  setLayout(input.dataset.vkLayout || 'hebrew');
   show();
   input.focus();
 }
