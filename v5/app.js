@@ -1765,7 +1765,7 @@ function initTouchSound() {
       // delicate.
       const g = ctx.createGain();
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.22, t + 0.005);   // raised for the exhibition headphones
+      g.gain.exponentialRampToValueAtTime(0.4, t + 0.005);    // raised again for the exhibition headphones
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.17);  // short, airy tail
       g.connect(ctx.destination);
       [[1296, 1], [2592, 0.14]].forEach(([f, level]) => {
@@ -1810,7 +1810,7 @@ function initIdleReset() {
 function initBackgroundMusic() {
   const music = new Audio('/sounds/bg-432hz.m4a');
   music.loop = true;
-  music.volume = 0.85;   // raised for the exhibition headphones
+  music.volume = 1;      // full — the exhibition headphones are weak
   music.preload = 'auto';
   let started = false;
   const start = () => {
