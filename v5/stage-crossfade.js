@@ -127,7 +127,7 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 800, co
     }
     sec.style.backgroundColor = rgb(bg);
     sec.style.setProperty('--grid-dot', rgb(grid));
-    if (t < 1) raf = requestAnimationFrame(frame);
+    if (rawT < 1) raf = requestAnimationFrame(frame);
     else { clearTimeout(doneTimer); clearTimeout(swapTimer); finish(); }
   }
   raf = requestAnimationFrame(frame);
