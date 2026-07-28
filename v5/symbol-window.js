@@ -158,7 +158,12 @@ function ensureWindow() {
         frame.style.transition = 'none';
         winEl.style.transition = 'none';
         winEl.style.opacity = '0';
-        winEl.classList.remove('is-fading-content', 'is-expanding-card');
+        winEl.classList.remove('is-fading-content');
+        // The expand class + its target colour live on the FRAME. They MUST be
+        // cleared here, or the next stage's window opens already full-screen in
+        // the previous stage's colour instead of as the dark card.
+        frame.classList.remove('is-expanding-card');
+        frame.style.removeProperty('--sw-target-bg');
         covering = false;
         closeSymbolWindow();
         setTimeout(() => {
@@ -399,7 +404,12 @@ export function closeSymbolWindow() {
   clearTypeTimers();
   winEl.classList.remove('is-open', 'is-covering');
   const frame = winEl.querySelector('.sw-frame');
-  if (frame) { frame.classList.remove('is-cover', 'is-cover-color'); frame.style.removeProperty('--sw-cover-bg'); }
+  if (frame) {
+    frame.classList.remove('is-cover', 'is-cover-color', 'is-expanding-card');
+    frame.style.removeProperty('--sw-cover-bg');
+    frame.style.removeProperty('--sw-target-bg');
+  }
+  winEl.classList.remove('is-fading-content');
   const contBtn = winEl.querySelector('.sw-continue');
   if (contBtn) contBtn.classList.remove('is-pressed');
   const gridOverlay = winEl.querySelector('.sw-grid-overlay');
