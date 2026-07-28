@@ -2515,40 +2515,10 @@ function playGematriaFinale(name, total, onDone){
   });
   const climbMs = 450 + values.length * STEP + 700;
 
-  // 2. the total's dots draw the ornament frame around the content rectangle
+  // Finish directly without drawing the ornament frame canvas around the stage
   setTimeout(() => {
     document.getElementById('ns-ornament')?.remove();
-    const cv = document.createElement('canvas');
-    cv.id = 'ns-ornament';
-    sec.appendChild(cv);
-    const W = sec.clientWidth, H = sec.clientHeight;
-    cv.width = W; cv.height = H;
-    const cs = getComputedStyle(document.documentElement);
-    const sx = parseFloat(cs.getPropertyValue('--sx')) || 1;
-    const sy = parseFloat(cs.getPropertyValue('--sy')) || 1;
-    const x0 = 100 * sx, x1 = W - 100 * sx, y0 = 85 * sy, y1 = 706 * sy;
-    const cx = (x0 + x1) / 2, cyc = (y0 + y1) / 2;
-    const kx = ((x1 - x0) / 2 - 30) / (ORNAMENT_GEOM.hw + ORNAMENT_GEOM.r2);
-    const ky = ((y1 - y0) / 2 - 26) / (ORNAMENT_GEOM.hh + ORNAMENT_GEOM.r2);
-    const dots = buildOrnamentDots(total);
-    const ctx = cv.getContext('2d');
-    ctx.fillStyle = '#282828';
-    // Constant drawing pace (like the symbol contours) — clamped so tiny and
-    // huge gematria values alike feel deliberate.
-    const DUR = Math.max(1600, Math.min(4200, dots.length / 140 * 1000));
-    const t0 = performance.now();
-    (function draw(){
-      if(!cv.isConnected) return;
-      const f = Math.min(1, (performance.now() - t0) / DUR);
-      const upto = Math.floor(dots.length * f);
-      ctx.clearRect(0, 0, W, H);
-      for(let i = 0; i < upto; i++){
-        const d = dots[i];
-        ctx.beginPath(); ctx.arc(cx + d.x * kx, cyc + d.y * ky, 2.6, 0, Math.PI * 2); ctx.fill();
-      }
-      if(f < 1) requestAnimationFrame(draw);
-      else setTimeout(() => onDone && onDone(), 650);
-    })();
+    if (onDone) onDone();
   }, climbMs);
 }
 function submitChoiceAnswer(val){
