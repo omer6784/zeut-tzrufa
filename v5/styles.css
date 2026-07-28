@@ -1326,13 +1326,14 @@ body::-webkit-scrollbar-thumb {
   transition: opacity 0.4s ease, transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease;
 }
 .dot-tile:hover {
-  transform: scale(1.04);
+  transform: scale(1.03);
   z-index: 3;
 }
 .dot-tile.is-selected {
-  transform: scale(1.08);
+  transform: scale(1.04);
   z-index: 5;
-  box-shadow: 0 0 0 2px #fb5716, 0 6px 18px rgba(0,0,0,0.25);
+  filter: brightness(0.82);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
 }
 
 /* ── "מה תחום העיסוק שלך?" — 8 profession-category cards (profession-cards.js) ──
