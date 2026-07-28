@@ -17,6 +17,21 @@
    Same mechanism for every pair, forwards and back. */
 
 let raf = 0;
+/* Elements currently held invisible by a transition, tracked at MODULE level so
+   any later call (or the safety net) can always give them back — a stage must
+   never be left blank because a release step was missed. */
+let heldEls = [];
+let heldSafety = 0;
+function releaseHeld() {
+  clearTimeout(heldSafety); heldSafety = 0;
+  const els = heldEls; heldEls = [];
+  if (!els.length) return;
+  for (const el of els) el.style.transition = 'opacity 0.5s ease';
+  for (const el of els) el.style.opacity = '1';
+  setTimeout(() => {
+    for (const el of els) { el.style.removeProperty('opacity'); el.style.removeProperty('transition'); }
+  }, 650);
+}
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const mix = (a, b, t) => Math.round(a + (b - a) * t);
 
@@ -81,6 +96,7 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 800, co
   const estBg = estimate && estimate.bg ? parse(estimate.bg) : fromBg;
   const estGrid = estimate && estimate.grid ? parse(estimate.grid) : fromGrid;
 
+  releaseHeld();   // never inherit a hold from an interrupted transition
   const prevTransition = sec.style.transition;
   sec.style.transition = 'none';   // we own the colours; no CSS transition may fight us
   onStart && onStart();
@@ -94,19 +110,14 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 800, co
   // button band). The fixed chrome (grid, logo, step counter, library link,
   // step dots, side text) lives outside these and is never touched.
   const HOLD_SELECTOR = '#q-main-cell, .stage2, .stage-band, #q-instruction';
-  let held = [];
   function holdContent() {
-    held = Array.from(document.querySelectorAll(HOLD_SELECTOR));
-    for (const el of held) { el.style.transition = 'none'; el.style.opacity = '0'; }
-  }
-  function releaseContent() {
-    const els = held; held = [];
-    requestAnimationFrame(() => {
-      for (const el of els) { el.style.transition = 'opacity 0.5s ease'; el.style.opacity = '1'; }
-      setTimeout(() => {
-        for (const el of els) { el.style.removeProperty('opacity'); el.style.removeProperty('transition'); }
-      }, 650);
-    });
+    heldEls = Array.from(document.querySelectorAll(HOLD_SELECTOR));
+    for (const el of heldEls) { el.style.transition = 'none'; el.style.opacity = '0'; }
+    // Safety net: whatever happens to this transition (a throttled frame loop, a
+    // stage that swaps its own DOM, an exception downstream), the content is
+    // ALWAYS given back shortly after the melt would have ended.
+    clearTimeout(heldSafety);
+    heldSafety = setTimeout(releaseHeld, duration + 900);
   }
   function doSwap() {
     if (swapped) return;
@@ -127,7 +138,7 @@ export function crossfadeStage({ sec, estimate, applyContent, duration = 800, co
     sec.style.backgroundColor = '';
     sec.style.removeProperty('--grid-dot');
     sec.style.transition = prevTransition;
-    releaseContent();   // bg + grid + chrome are settled — NOW the content fades in
+    releaseHeld();      // bg + grid + chrome are settled — NOW the content fades in
     onDone && onDone();
   }
   const swapTimer = setTimeout(doSwap, duration * contentAt);

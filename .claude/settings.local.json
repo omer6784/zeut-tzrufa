@@ -513,7 +513,10 @@
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=177/styles.css?v=178/; s/geometric\\\\.css\\\\?v=39/geometric.css?v=40/; s/stage1\\\\.css\\\\?v=207/stage1.css?v=208/' index.html)",
       "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=208/stage1.css?v=209/' index.html)",
       "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=209/stage1.css?v=210/' index.html)",
-      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=210/stage1.css?v=211/' index.html)"
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=210/stage1.css?v=211/' index.html)",
+      "Bash(awk -F: '$1 > 2000 && $1 < 2500')",
+      "Bash(awk 'NR>=4675 && NR<=5330 && \\(/return \\\\{/ || /revealAtSink/ || /demoApi|api = \\\\{|analyze/\\)' questionnaire.js)",
+      "Bash(awk 'NR>5200,NR<5330' questionnaire.js)"
     ]
   },
   "hooks": {
