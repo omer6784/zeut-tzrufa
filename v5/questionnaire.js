@@ -2676,7 +2676,7 @@ function advance(){
   // grows and turns everything dark (the light-point stage's own bg), the fixed
   // grid recolours in step, then the stage assembles underneath (see its 'words'
   // branch: dots cascade in, title fades in last).
-  if(sym) openSymbolWindow(sym, { onContinue: goNext });
+  if(sym) openSymbolWindow(sym, { onContinue: goNext, plainClose: true });
   else goNext();
 }
 function goPrev(){
@@ -2687,20 +2687,18 @@ function goPrev(){
   }
 }
 function goSkip(){ if(st.current<QUESTIONS.length-1) transitionQuestion(st.current+1); }
-/* Rough per-stage palette (by QUESTION index) — only the phase-A DIRECTION of the
-   colour crossfade. The exact target is read live from the stage itself at the swap
-   (85%) and the melt finishes onto that, so these need not be pixel-exact; they just
-   keep the first ~85% heading the right way (esp. for the JS-tinted time stage).
-   { bg, grid } mirror each stage's background + --grid-dot. */
+/* Per-stage palette (by QUESTION index) — phase-A direction of the colour crossfade.
+   { bg, grid } mirror each stage's background + --grid-dot so the surrounding
+   elements stay fixed in place while background & grid colors melt seamlessly. */
 const STAGE_PALETTE = {
   0: { bg: '#f5f5ed', grid: '#282828' },   // background — cream plate, dark grid
-  1: { bg: '#f5f5ed', grid: '#282828' },   // origin (globe) — cream, dark grid
-  2: { bg: '#ff601a', grid: '#f5f5ed' },   // roots (maze) — orange, cream grid
-  3: { bg: '#282828', grid: '#f5f5ed' },   // word (light-point) — dark, cream grid
-  4: { bg: '#e2bc71', grid: '#282828' },   // life-wish (tiles) — gold, dark grid
-  5: { bg: '#222020', grid: '#f5f5ed' },   // stars (time) — dark sky base, cream grid
-  6: { bg: '#ff5003', grid: '#f5f5ed' },   // personal (profession) — orange, cream grid
-  7: { bg: '#282828', grid: '#f5f5ed' },   // name — dark, cream grid
+  1: { bg: '#f5f5ed', grid: '#282828' },   // origin (globe) — cream plate, dark grid
+  2: { bg: '#ff601a', grid: '#f5f5ed' },   // roots (paths) — orange plate, cream grid
+  3: { bg: '#282828', grid: '#f5f5ed' },   // word (light-point) — dark plate, cream grid
+  4: { bg: '#e2bc71', grid: '#282828' },   // life-wish (tiles) — gold plate, dark grid
+  5: { bg: '#222020', grid: '#f5f5ed' },   // stars (time) — dark sky plate, cream grid
+  6: { bg: '#ff5003', grid: '#f5f5ed' },   // personal (profession) — orange plate, cream grid
+  7: { bg: '#282828', grid: '#f5f5ed' },   // name — dark plate, cream grid
 };
 function transitionQuestion(next){
   // Snapshot how many symbols the jewel carries as we ENTER the next stage, so a
