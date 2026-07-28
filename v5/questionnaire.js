@@ -1,5 +1,5 @@
 /* questionnaire.js — Identity Forging v6 — Icon Talisman */
-import { initRootsWidget } from './roots.js';
+import { initRootsWidget, findCountry } from './roots.js';
 import { mountArtifact3D, unmountArtifact3D, assetsReady } from './artifact3d.js';
 import { attachKeyboardTo, detachKeyboard, openKeyboardFor } from './virtual-keyboard.js';
 import { showSymbolInfo, hideSymbolInfo, SYMBOL_INFO as SYMBOL_INFO_2D } from './symbol-info.js';
@@ -371,6 +371,75 @@ const SHAPES = {
    Maps a country name (as selected in the roots/globe widget)
    to one of the SHAPES keys above. Unmapped countries fall back
    to a deterministic hash-based pick from ICON_KEYS. */
+/* ── Globe stage: cultural-center symbol selection ─────────────────────────
+   Each jewel symbol has ONE cultural center — the place most identified with
+   it WITHIN THIS PROJECT's conceptual language (not necessarily where it was
+   "invented"). The stage picks the unused symbol whose center is closest (real
+   Haversine distance) to ANY of the countries the visitor entered. */
+const SYMBOL_CULTURAL_CENTERS = {
+  hamsa:      { country: 'מרוקו',   latitude: 31.7,  longitude: -7.1 },
+  circle:     { country: 'מרוקו',   latitude: 31.7,  longitude: -7.1 },
+  sun:        { country: 'מרוקו',   latitude: 31.7,  longitude: -7.1 },
+  diamond:    { country: 'מרוקו',   latitude: 31.7,  longitude: -7.1 },
+  pentagram:  { country: 'מרוקו',   latitude: 31.7,  longitude: -7.1 },
+  pyramid:    { country: 'מרוקו',   latitude: 31.7,  longitude: -7.1 },
+  fish:       { country: 'מרוקו',   latitude: 31.7,  longitude: -7.1 },
+  bird:       { country: 'אלג׳יריה', latitude: 28.0,  longitude: 1.7 },
+  eye:        { country: 'מצרים',   latitude: 26.8,  longitude: 30.8 },
+  scarab:     { country: 'מצרים',   latitude: 26.8,  longitude: 30.8 },
+  anah:       { country: 'מצרים',   latitude: 26.8,  longitude: 30.8 },
+  djed:       { country: 'מצרים',   latitude: 26.8,  longitude: 30.8 },
+  lotus:      { country: 'מצרים',   latitude: 26.8,  longitude: 30.8 },
+  snake:      { country: 'מצרים',   latitude: 26.8,  longitude: 30.8 },
+  hexagram:   { country: 'ישראל',   latitude: 31.4,  longitude: 35.0 },
+  rimon:      { country: 'ישראל',   latitude: 31.4,  longitude: 35.0 },
+  moon:       { country: 'עיראק',   latitude: 33.2,  longitude: 43.7 },
+  cowrie:     { country: 'גאנה',    latitude: 7.9,   longitude: -1.0 },
+  dharma:     { country: 'הודו',    latitude: 20.6,  longitude: 78.9 },
+  endlessknot:{ country: 'נפאל',    latitude: 28.4,  longitude: 84.1 },
+  vegvisir:   { country: 'איסלנד',  latitude: 64.9,  longitude: -19.0 },
+  algiz:      { country: 'נורווגיה', latitude: 60.5,  longitude: 8.5 },
+  solarcross: { country: 'שוודיה',  latitude: 60.1,  longitude: 18.6 },
+  triskele:   { country: 'אירלנד',  latitude: 53.4,  longitude: -8.2 },
+  triquetra:  { country: 'אירלנד',  latitude: 53.4,  longitude: -8.2 },
+  tiltan:     { country: 'אירלנד',  latitude: 53.4,  longitude: -8.2 },
+  spiral:     { country: 'אירלנד',  latitude: 53.4,  longitude: -8.2 },
+  horseshoe:  { country: 'אנגליה',  latitude: 52.4,  longitude: -1.5 },
+};
+/* Real great-circle distance (km) — never a naive lat/lon difference. */
+function haversineKm(lat1, lon1, lat2, lon2){
+  const R = 6371, toR = Math.PI / 180;
+  const dLat = (lat2 - lat1) * toR, dLon = (lon2 - lon1) * toR;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*toR) * Math.cos(lat2*toR) * Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+/* One symbol for the entered countries: for every UNUSED symbol take its
+   minimum distance to ANY entered country (no averaging), then pick the
+   overall closest. Already-chosen symbols are skipped (the next-closest wins). */
+function pickGlobeSymbol(geos){
+  if(!geos || !geos.length) return null;
+  const used = new Set(st.chosenSymbols || []);
+  const ranked = [];
+  for(const key in SYMBOL_CULTURAL_CENTERS){
+    if(used.has(key)) continue;
+    const c = SYMBOL_CULTURAL_CENTERS[key];
+    let best = Infinity, bestCountry = null;
+    for(const g of geos){
+      const d = haversineKm(g.lat, g.lon, c.latitude, c.longitude);
+      if(d < best){ best = d; bestCountry = g.name; }
+    }
+    ranked.push({ key, center: c, distanceKm: Math.round(best), country: bestCountry });
+  }
+  if(!ranked.length) return null;
+  ranked.sort((a, b) => a.distanceKm - b.distanceKm);
+  const pick = ranked[0];
+  st.globeChoice = { country: pick.country, symbol: pick.key, culturalCenter: pick.center, distanceKm: pick.distanceKm };
+  console.log('[globe] symbol choice:', st.globeChoice, '| ranking:', ranked.slice(0, 5));
+  return pick.key;
+}
+
+window.__globeTest = { findCountry, pickGlobeSymbol, centers: SYMBOL_CULTURAL_CENTERS };  // dev/verification
+
 const COUNTRY_MOTIFS = {
   'מרוקו':'hamsa', 'אלג׳יריה':'yaz', 'תוניסיה':'nazar', 'לוב':'nazar',
   'מצרים':'anah', 'תימן':'crescent', 'עיראק':'nazar', 'איראן':'sun',
@@ -1531,9 +1600,10 @@ function _renderQuestionImpl(idx){
     st._inputDemoStarted = false;   // arm the input-phase demo once per stage mount
     st._roots = initRootsWidget(document.getElementById('roots-host'),{
       targetEl: document.getElementById('artifact-canvas'),
-      onAdd:(name)=>{
+      onAdd:(name, geo)=>{
         if(!st.roots.includes(name)){
           st.roots.push(name);
+          if(geo){ st._originGeos = st._originGeos || []; st._originGeos.push({ name: geo.name, lat: geo.lat, lon: geo.lon }); }
           st.answers.origin = st.roots.join(', ');
           st.p5SymbolsByStage = st.p5SymbolsByStage || {};
           st.p5SymbolsByStage[0] = st.roots.map(getObjFileForCountry);
@@ -1544,6 +1614,10 @@ function _renderQuestionImpl(idx){
       },
       onDone:()=>{
         if(!st.answers.origin) st.answers.origin = st.roots.join(', ');
+        // Cultural-proximity selection: the closest unused symbol to any entered
+        // country becomes THIS stage's symbol (window + jewel).
+        const sym = pickGlobeSymbol(st._originGeos);
+        if(sym) st._forcedSymbol = sym;
         advance();
       },
     });

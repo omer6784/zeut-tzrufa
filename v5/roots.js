@@ -276,39 +276,146 @@ const CONTINENTS = [
 
 /* ── Country reference points: Hebrew name → [lat, lon] ── */
 const COUNTRIES = {
-  'מרוקו':[31.7,-7.1], 'אלג׳יריה':[28.0,1.7], 'תוניסיה':[33.9,9.5], 'לוב':[26.3,17.2],
-  'מצרים':[26.8,30.8], 'אתיופיה':[9.1,40.5], 'דרום אפריקה':[-30.6,22.9],
-  'תימן':[15.5,48.5], 'עיראק':[33.2,43.7], 'איראן':[32.4,53.7], 'סוריה':[34.8,38.9],
-  'לבנון':[33.8,35.8], 'ירדן':[30.6,36.2], 'תורכיה':[38.9,35.2], 'סעודיה':[23.9,45.1],
-  'איחוד האמירויות':[23.4,53.8], 'הודו':[20.6,78.9], 'אוזבקיסטן':[41.4,64.6],
-  'גאורגיה':[42.3,43.4], 'אזרבייג׳ן':[40.1,47.6], 'קזחסטן':[48.0,66.9],
-  'סין':[35.9,104.2], 'יפן':[36.2,138.3], 'תאילנד':[15.9,100.9], 'וייטנאם':[14.1,108.3],
+  // ── Middle East ──
+  'ישראל':[31.4,35.0], 'ירדן':[30.6,36.2], 'לבנון':[33.8,35.8], 'סוריה':[34.8,38.9],
+  'עיראק':[33.2,43.7], 'איראן':[32.4,53.7], 'סעודיה':[23.9,45.1], 'ערב הסעודית':[23.9,45.1],
+  'תימן':[15.5,48.5], 'עומאן':[21.5,55.9], 'איחוד האמירויות':[23.4,53.8], 'קטר':[25.4,51.2],
+  'בחריין':[26.0,50.5], 'כווית':[29.3,47.5], 'תורכיה':[38.9,35.2], 'טורקיה':[38.9,35.2],
+  'קפריסין':[35.1,33.4],
+  // ── North Africa ──
+  'מרוקו':[31.7,-7.1], 'אלג׳יריה':[28.0,1.7], "אלג'יריה":[28.0,1.7], 'תוניסיה':[33.9,9.5],
+  'לוב':[26.3,17.2], 'מצרים':[26.8,30.8], 'סודן':[12.9,30.2], 'מאוריטניה':[21.0,-10.9],
+  // ── Africa ──
+  'אתיופיה':[9.1,40.5], 'אריתריאה':[15.2,39.8], 'ג׳יבוטי':[11.8,42.6], 'סומליה':[5.2,46.2],
+  'קניה':[-0.0,37.9], 'טנזניה':[-6.4,34.9], 'אוגנדה':[1.4,32.3], 'רואנדה':[-1.9,29.9],
+  'בורונדי':[-3.4,29.9], 'דרום סודן':[6.9,31.3], 'צ׳אד':[15.5,18.7], 'ניז׳ר':[17.6,8.1],
+  'מאלי':[17.6,-4.0], 'סנגל':[14.5,-14.5], 'גמביה':[13.4,-15.3], 'גינאה':[9.9,-9.7],
+  'סיירה לאון':[8.5,-11.8], 'ליבריה':[6.4,-9.4], 'חוף השנהב':[7.5,-5.5], 'גאנה':[7.9,-1.0],
+  'טוגו':[8.6,0.8], 'בנין':[9.3,2.3], 'ניגריה':[9.1,8.7], 'קמרון':[7.4,12.4],
+  'גבון':[-0.8,11.6], 'קונגו':[-0.2,15.8], 'הרפובליקה הדמוקרטית של קונגו':[-4.0,21.8],
+  'אנגולה':[-11.2,17.9], 'זמביה':[-13.1,27.8], 'זימבבואה':[-19.0,29.2], 'מוזמביק':[-18.7,35.5],
+  'מלאווי':[-13.3,34.3], 'בוטסואנה':[-22.3,24.7], 'נמיביה':[-22.9,18.5], 'דרום אפריקה':[-30.6,22.9],
+  'מדגסקר':[-18.8,47.0], 'מאוריציוס':[-20.3,57.6], 'סיישל':[-4.7,55.5],
+  'בורקינה פאסו':[12.2,-1.6], 'גינאה ביסאו':[11.8,-15.2], 'גינאה המשוונית':[1.7,10.3],
+  'לסוטו':[-29.6,28.2], 'אסוואטיני':[-26.5,31.5], 'סווזילנד':[-26.5,31.5],
+  'הרפובליקה המרכז אפריקאית':[6.6,20.9], 'כף ורדה':[16.5,-23.0], 'קומורו':[-11.6,43.3],
+  // ── Europe ──
   'יוון':[39.0,21.8], 'בולגריה':[42.7,25.5], 'רומניה':[45.9,24.9], 'הונגריה':[47.1,19.5],
-  'אוקראינה':[48.4,31.2], 'רוסיה':[61.5,105.3], 'בלארוס':[53.7,27.9],
+  'אוקראינה':[48.4,31.2], 'רוסיה':[61.5,105.3], 'בלארוס':[53.7,27.9], 'מולדובה':[47.4,28.4],
   'גרמניה':[51.2,10.4], 'צרפת':[46.2,2.2], 'ספרד':[40.5,-3.7], 'איטליה':[41.9,12.6],
   'פולין':[51.9,19.1], 'פורטוגל':[39.4,-8.2], 'הולנד':[52.1,5.3], 'בלגיה':[50.5,4.5],
-  'אוסטריה':[47.5,14.6], 'שוויץ':[46.8,8.2], "צ'כיה":[49.8,15.5], 'סלובקיה':[48.7,19.7],
-  'קרואטיה':[45.1,15.2], 'סרביה':[44.0,21.0], 'ליטא':[55.2,23.9], 'לטביה':[56.9,24.6],
-  'אסטוניה':[58.6,25.0], 'אנגליה':[55.4,-3.4], 'בריטניה':[55.4,-3.4], 'אירלנד':[53.4,-8.2],
-  'שוודיה':[60.1,18.6], 'נורווגיה':[60.5,8.5], 'דנמרק':[56.3,9.5], 'פינלנד':[61.9,25.7],
-  'ארה"ב':[37.1,-95.7], 'אמריקה':[37.1,-95.7], 'קנדה':[56.1,-106.3], 'מקסיקו':[23.6,-102.5],
-  'ארגנטינה':[-38.4,-63.6], 'ברזיל':[-14.2,-51.9], "צ'ילה":[-35.7,-71.5],
-  'קולומביה':[4.6,-74.3], 'פרו':[-9.2,-75.0], 'ונצואלה':[6.4,-66.6], 'קובה':[21.5,-77.8],
-  'אוסטרליה':[-25.3,133.8], 'ניו זילנד':[-40.9,174.9], 'קוריאה':[36.5,127.8],
+  'אוסטריה':[47.5,14.6], 'שוויץ':[46.8,8.2], "צ'כיה":[49.8,15.5], 'צכיה':[49.8,15.5],
+  'סלובקיה':[48.7,19.7], 'סלובניה':[46.2,14.9], 'קרואטיה':[45.1,15.2], 'סרביה':[44.0,21.0],
+  'בוסניה':[43.9,17.7], 'בוסניה והרצגובינה':[43.9,17.7], 'מונטנגרו':[42.7,19.4],
+  'מקדוניה':[41.6,21.7], 'צפון מקדוניה':[41.6,21.7], 'אלבניה':[41.2,20.2], 'קוסובו':[42.6,20.9],
+  'ליטא':[55.2,23.9], 'לטביה':[56.9,24.6], 'אסטוניה':[58.6,25.0],
+  'אנגליה':[52.4,-1.5], 'בריטניה':[55.4,-3.4], 'סקוטלנד':[56.5,-4.2], 'ויילס':[52.1,-3.8],
+  'אירלנד':[53.4,-8.2], 'איסלנד':[64.9,-19.0],
+  'שוודיה':[60.1,18.6], 'שבדיה':[60.1,18.6], 'נורווגיה':[60.5,8.5], 'נורבגיה':[60.5,8.5],
+  'דנמרק':[56.3,9.5], 'פינלנד':[61.9,25.7], 'לוקסמבורג':[49.8,6.1], 'מלטה':[35.9,14.4],
+  'אנדורה':[42.5,1.5], 'מונקו':[43.7,7.4], 'סן מרינו':[43.9,12.5], 'ליכטנשטיין':[47.2,9.6],
+  'ארמניה':[40.1,45.0], 'גאורגיה':[42.3,43.4], 'גיאורגיה':[42.3,43.4], 'אזרבייג׳ן':[40.1,47.6],
+  // ── Asia ──
+  'הודו':[20.6,78.9], 'פקיסטן':[30.4,69.3], 'אפגניסטן':[33.9,67.7], 'בנגלדש':[23.7,90.4],
+  'נפאל':[28.4,84.1], 'בהוטן':[27.5,90.4], 'סרי לנקה':[7.9,80.8], 'המלדיביים':[3.2,73.2],
+  'סין':[35.9,104.2], 'יפן':[36.2,138.3], 'קוריאה':[36.5,127.8], 'דרום קוריאה':[36.5,127.8],
+  'צפון קוריאה':[40.3,127.5], 'מונגוליה':[46.9,103.8], 'טייוואן':[23.7,121.0],
+  'תאילנד':[15.9,100.9], 'וייטנאם':[14.1,108.3], 'לאוס':[19.9,102.5], 'קמבודיה':[12.6,105.0],
+  'מיאנמר':[21.9,95.9], 'בורמה':[21.9,95.9], 'מלזיה':[4.2,102.0], 'סינגפור':[1.35,103.8],
+  'אינדונזיה':[-0.8,113.9], 'הפיליפינים':[12.9,121.8], 'פיליפינים':[12.9,121.8],
+  'ברוניי':[4.5,114.7], 'מזרח טימור':[-8.9,125.7],
+  'קזחסטן':[48.0,66.9], 'אוזבקיסטן':[41.4,64.6], 'טורקמניסטן':[38.97,59.6],
+  'קירגיזסטן':[41.2,74.8], 'טג׳יקיסטן':[38.9,71.3],
+  // ── Americas ──
+  'ארה"ב':[37.1,-95.7], 'ארהב':[37.1,-95.7], 'ארצות הברית':[37.1,-95.7], 'אמריקה':[37.1,-95.7],
+  'קנדה':[56.1,-106.3], 'מקסיקו':[23.6,-102.5], 'גואטמלה':[15.8,-90.2], 'בליז':[17.2,-88.5],
+  'הונדורס':[15.2,-86.2], 'אל סלבדור':[13.8,-88.9], 'ניקרגואה':[12.9,-85.2],
+  'קוסטה ריקה':[9.7,-83.8], 'פנמה':[8.5,-80.8], 'קובה':[21.5,-77.8], 'ג׳מייקה':[18.1,-77.3],
+  'האיטי':[19.0,-72.3], 'הרפובליקה הדומיניקנית':[18.7,-70.2], 'הבהאמס':[25.0,-77.4],
+  'טרינידד וטובגו':[10.7,-61.2], 'ברבדוס':[13.2,-59.5],
+  'קולומביה':[4.6,-74.3], 'ונצואלה':[6.4,-66.6], 'גיאנה':[4.9,-58.9], 'סורינאם':[3.9,-56.0],
+  'אקוודור':[-1.8,-78.2], 'פרו':[-9.2,-75.0], 'ברזיל':[-14.2,-51.9], 'בוליביה':[-16.3,-63.6],
+  'פרגוואי':[-23.4,-58.4], "צ'ילה":[-35.7,-71.5], 'צילה':[-35.7,-71.5],
+  'ארגנטינה':[-38.4,-63.6], 'אורוגוואי':[-32.5,-55.8],
+  // ── Oceania ──
+  'אוסטרליה':[-25.3,133.8], 'ניו זילנד':[-40.9,174.9], 'פפואה גינאה החדשה':[-6.3,143.9],
+  'פיג׳י':[-17.7,178.0], 'סמואה':[-13.8,-172.1], 'טונגה':[-21.2,-175.2],
+  'איי שלמה':[-9.6,160.2], 'ונואטו':[-15.4,166.9],
   // Australia's six states (the continent button is already named אוסטרליה, so
   // the demo types a STATE as its example — and visitors may type one too).
   "ניו סאות' ויילס":[-31.8,147.0], 'ויקטוריה':[-36.9,144.3], 'קווינסלנד':[-22.6,144.6],
   'אוסטרליה המערבית':[-25.5,122.0], 'אוסטרליה הדרומית':[-30.0,135.8], 'טסמניה':[-42.0,146.6],
+};
+
+/* English (and other) aliases → the canonical Hebrew key above. Lookup is
+   case-insensitive and space/quote-normalized (see findCountry). */
+const COUNTRY_ALIASES = {
+  'israel':'ישראל', 'jordan':'ירדן', 'lebanon':'לבנון', 'syria':'סוריה', 'iraq':'עיראק',
+  'iran':'איראן', 'saudi arabia':'סעודיה', 'yemen':'תימן', 'oman':'עומאן', 'uae':'איחוד האמירויות',
+  'united arab emirates':'איחוד האמירויות', 'qatar':'קטר', 'bahrain':'בחריין', 'kuwait':'כווית',
+  'turkey':'תורכיה', 'turkiye':'תורכיה', 'cyprus':'קפריסין',
+  'morocco':'מרוקו', 'algeria':'אלג׳יריה', 'tunisia':'תוניסיה', 'libya':'לוב', 'egypt':'מצרים',
+  'sudan':'סודן', 'mauritania':'מאוריטניה', 'ethiopia':'אתיופיה', 'eritrea':'אריתריאה',
+  'djibouti':'ג׳יבוטי', 'somalia':'סומליה', 'kenya':'קניה', 'tanzania':'טנזניה', 'uganda':'אוגנדה',
+  'rwanda':'רואנדה', 'burundi':'בורונדי', 'south sudan':'דרום סודן', 'chad':'צ׳אד', 'niger':'ניז׳ר',
+  'mali':'מאלי', 'senegal':'סנגל', 'gambia':'גמביה', 'guinea':'גינאה', 'sierra leone':'סיירה לאון',
+  'liberia':'ליבריה', 'ivory coast':'חוף השנהב', "cote d'ivoire":'חוף השנהב', 'ghana':'גאנה',
+  'togo':'טוגו', 'benin':'בנין', 'nigeria':'ניגריה', 'cameroon':'קמרון', 'gabon':'גבון',
+  'congo':'קונגו', 'drc':'הרפובליקה הדמוקרטית של קונגו', 'angola':'אנגולה', 'zambia':'זמביה',
+  'zimbabwe':'זימבבואה', 'mozambique':'מוזמביק', 'malawi':'מלאווי', 'botswana':'בוטסואנה',
+  'namibia':'נמיביה', 'south africa':'דרום אפריקה', 'madagascar':'מדגסקר', 'mauritius':'מאוריציוס',
+  'seychelles':'סיישל', 'burkina faso':'בורקינה פאסו', 'lesotho':'לסוטו', 'eswatini':'אסוואטיני',
+  'cape verde':'כף ורדה',
+  'greece':'יוון', 'bulgaria':'בולגריה', 'romania':'רומניה', 'hungary':'הונגריה',
+  'ukraine':'אוקראינה', 'russia':'רוסיה', 'belarus':'בלארוס', 'moldova':'מולדובה',
+  'germany':'גרמניה', 'france':'צרפת', 'spain':'ספרד', 'italy':'איטליה', 'poland':'פולין',
+  'portugal':'פורטוגל', 'netherlands':'הולנד', 'holland':'הולנד', 'belgium':'בלגיה',
+  'austria':'אוסטריה', 'switzerland':'שוויץ', 'czech republic':'צ\'כיה', 'czechia':'צ\'כיה',
+  'slovakia':'סלובקיה', 'slovenia':'סלובניה', 'croatia':'קרואטיה', 'serbia':'סרביה',
+  'bosnia':'בוסניה', 'montenegro':'מונטנגרו', 'north macedonia':'מקדוניה', 'macedonia':'מקדוניה',
+  'albania':'אלבניה', 'kosovo':'קוסובו', 'lithuania':'ליטא', 'latvia':'לטביה', 'estonia':'אסטוניה',
+  'england':'אנגליה', 'uk':'בריטניה', 'united kingdom':'בריטניה', 'great britain':'בריטניה',
+  'britain':'בריטניה', 'scotland':'סקוטלנד', 'wales':'ויילס', 'ireland':'אירלנד',
+  'iceland':'איסלנד', 'sweden':'שוודיה', 'norway':'נורווגיה', 'denmark':'דנמרק',
+  'finland':'פינלנד', 'luxembourg':'לוקסמבורג', 'malta':'מלטה', 'armenia':'ארמניה',
+  'georgia':'גאורגיה', 'azerbaijan':'אזרבייג׳ן',
+  'india':'הודו', 'pakistan':'פקיסטן', 'afghanistan':'אפגניסטן', 'bangladesh':'בנגלדש',
+  'nepal':'נפאל', 'bhutan':'בהוטן', 'sri lanka':'סרי לנקה', 'maldives':'המלדיביים',
+  'china':'סין', 'japan':'יפן', 'korea':'קוריאה', 'south korea':'דרום קוריאה',
+  'north korea':'צפון קוריאה', 'mongolia':'מונגוליה', 'taiwan':'טייוואן', 'thailand':'תאילנד',
+  'vietnam':'וייטנאם', 'laos':'לאוס', 'cambodia':'קמבודיה', 'myanmar':'מיאנמר', 'burma':'מיאנמר',
+  'malaysia':'מלזיה', 'singapore':'סינגפור', 'indonesia':'אינדונזיה', 'philippines':'הפיליפינים',
+  'brunei':'ברוניי', 'east timor':'מזרח טימור', 'kazakhstan':'קזחסטן', 'uzbekistan':'אוזבקיסטן',
+  'turkmenistan':'טורקמניסטן', 'kyrgyzstan':'קירגיזסטן', 'tajikistan':'טג׳יקיסטן',
+  'usa':'ארה"ב', 'us':'ארה"ב', 'united states':'ארה"ב', 'united states of america':'ארה"ב',
+  'america':'ארה"ב', 'canada':'קנדה', 'mexico':'מקסיקו', 'guatemala':'גואטמלה', 'belize':'בליז',
+  'honduras':'הונדורס', 'el salvador':'אל סלבדור', 'nicaragua':'ניקרגואה',
+  'costa rica':'קוסטה ריקה', 'panama':'פנמה', 'cuba':'קובה', 'jamaica':'ג׳מייקה',
+  'haiti':'האיטי', 'dominican republic':'הרפובליקה הדומיניקנית', 'bahamas':'הבהאמס',
+  'trinidad':'טרינידד וטובגו', 'barbados':'ברבדוס', 'colombia':'קולומביה',
+  'venezuela':'ונצואלה', 'guyana':'גיאנה', 'suriname':'סורינאם', 'ecuador':'אקוודור',
+  'peru':'פרו', 'brazil':'ברזיל', 'bolivia':'בוליביה', 'paraguay':'פרגוואי', 'chile':"צ'ילה",
+  'argentina':'ארגנטינה', 'uruguay':'אורוגוואי',
+  'australia':'אוסטרליה', 'new zealand':'ניו זילנד', 'papua new guinea':'פפואה גינאה החדשה',
+  'fiji':'פיג׳י', 'samoa':'סמואה', 'tonga':'טונגה', 'solomon islands':'איי שלמה', 'vanuatu':'ונואטו',
 };
 const COUNTRY_KEYS = Object.keys(COUNTRIES).map(k=>({ key:k, n:norm(k) }));
 
 function norm(s){
   return (s||'').toString().trim().toLowerCase().replace(/["'׳״]/g,'').replace(/\s+/g,'');
 }
-function findCountry(input){
+export function findCountry(input){
   const n = norm(input); if(!n) return null;
-  for(const {key} of COUNTRY_KEYS) if(norm(key)===n) return { name:key, lat:COUNTRIES[key][0], lon:COUNTRIES[key][1] };
-  for(const {key,n:kn} of COUNTRY_KEYS) if(kn.includes(n)||n.includes(kn)) return { name:key, lat:COUNTRIES[key][0], lon:COUNTRIES[key][1] };
+  const hit = (key) => ({ name:key, lat:COUNTRIES[key][0], lon:COUNTRIES[key][1] });
+  // 1. exact Hebrew match
+  for(const {key} of COUNTRY_KEYS) if(norm(key)===n) return hit(key);
+  // 2. English / alias match (case-insensitive, space-normalized)
+  for(const a in COUNTRY_ALIASES) if(norm(a)===n) return hit(COUNTRY_ALIASES[a]);
+  // 3. substring fallback (Hebrew first, then aliases) — min 3 chars to avoid noise
+  if(n.length >= 3){
+    for(const {key,n:kn} of COUNTRY_KEYS) if(kn.includes(n)||n.includes(kn)) return hit(key);
+    for(const a in COUNTRY_ALIASES){ const an=norm(a); if(an.includes(n)||n.includes(an)) return hit(COUNTRY_ALIASES[a]); }
+  }
   return null;
 }
 
@@ -740,22 +847,51 @@ export function initRootsWidget(container, opts){
   function addCountry(){
     const raw=inputEl.value.trim(); if(!raw) return;
     const geo = findCountry(raw);
-    if(geo){
-      // The marker starts HIDDEN — an orange dotted line first travels from the
-      // writing line up to the country's map position, then vanishes and the dot +
-      // name appear.
-      const dot = { lon: geo.lon, lat: geo.lat, name: geo.name, _pending: true };
-      state.countryDots.push(dot);
-      const inr = inputEl.getBoundingClientRect();
-      const start = { x: inr.left + inr.width / 2, y: inr.top + inr.height / 2 };
-      const end = countryClientPos(geo.lon, geo.lat);
-      animateCountryLine(start, end, () => { dot._pending = false; });
+    if(!geo){
+      // Unrecognized country: a CLEAR message — never behave as if nothing was
+      // entered, and never add junk to the origins.
+      showInputError('המדינה "' + raw + '" לא זוהתה — נסו שם אחר');
+      inputEl.select?.();
+      return;
     }
-    if (onAdd) onAdd(raw);
+    // If the country sits outside the current map crop (framed on the chosen
+    // continents), EXPAND the view so its marker lands at its true position
+    // instead of off-frame (e.g. Japan when only Europe was selected).
+    { const v = state.view, pad = 6;
+      if(v && (geo.lon < v.lonMin || geo.lon > v.lonMax || geo.lat < v.latMin || geo.lat > v.latMax)){
+        v.lonMin = Math.min(v.lonMin, geo.lon - pad);
+        v.lonMax = Math.max(v.lonMax, geo.lon + pad);
+        v.latMin = Math.max(-89, Math.min(v.latMin, geo.lat - pad));
+        v.latMax = Math.min(89, Math.max(v.latMax, geo.lat + pad));
+      } }
+    // The marker starts HIDDEN — an orange dotted line first travels from the
+    // writing line up to the country's map position, then vanishes and the dot +
+    // name appear.
+    const dot = { lon: geo.lon, lat: geo.lat, name: geo.name, _pending: true };
+    state.countryDots.push(dot);
+    const inr = inputEl.getBoundingClientRect();
+    const start = { x: inr.left + inr.width / 2, y: inr.top + inr.height / 2 };
+    const end = countryClientPos(geo.lon, geo.lat);
+    animateCountryLine(start, end, () => { dot._pending = false; });
+    if (onAdd) onAdd(geo.name, geo);   // canonical name + real coordinates
     inputEl.value='';
     inputEl.focus();
     // First country added → "סיימתי" lights up (loses .is-dim).
     if(state.countryDots.length >= 1) finishBtn?.classList.remove('is-dim');
+  }
+  // Small transient error line under the country input.
+  let _errTimer = null;
+  function showInputError(msg){
+    let el = container.querySelector('.roots-input-error');
+    if(!el){
+      el = document.createElement('div');
+      el.className = 'roots-input-error';
+      el.style.cssText = 'font-family:ArbelG,sans-serif;font-size:12px;color:#ff601a;margin-top:6px;direction:rtl;min-height:15px;transition:opacity .3s ease;';
+      inputEl.parentElement?.appendChild(el);
+    }
+    el.textContent = msg; el.style.opacity = '1';
+    clearTimeout(_errTimer);
+    _errTimer = setTimeout(() => { el.style.opacity = '0'; }, 3200);
   }
   // Client-space position of a lon/lat on the settled map (canvas coords → screen).
   function countryClientPos(lon, lat){
