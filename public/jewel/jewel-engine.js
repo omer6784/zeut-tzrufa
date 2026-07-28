@@ -79,7 +79,7 @@ const PROFILES = {
   //    like the horseshoe. Thin frame shapes get a denser sampling grid.
   circle:   { file: "circle.obj",    type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // ring — wholeness
   sun:      { file: "sun.obj",       type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pulse" },             // radiant sun — breathes
-  bird:     { file: "bird.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },
+  bird:     { file: "bird.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayY" },                        // real model — true depth
   diamond:  { file: "diamond.obj",   type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Berber eye rhombus
   hexagram: { file: "hexagram.obj",  type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Seal of Solomon
   pentagram:{ file: "pentagram.obj", type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },
