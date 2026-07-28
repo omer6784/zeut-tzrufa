@@ -23,7 +23,7 @@ import { mountSymbolContour } from './symbol-contour.js';
    each play so rapid stage completions retrigger it cleanly. Autoplay is allowed
    because opening the window is driven by the user's button press. */
 const symbolSound = typeof Audio !== 'undefined' ? new Audio('/sounds/symbolsound.mp3') : null;
-if (symbolSound) symbolSound.preload = 'auto';
+if (symbolSound) { symbolSound.preload = 'auto'; symbolSound.volume = 1; }   // full level for the exhibition headphones
 function playSymbolSound() {
   if (!symbolSound) return;
   try { symbolSound.currentTime = 0; symbolSound.play().catch(() => {}); } catch (_) {}
