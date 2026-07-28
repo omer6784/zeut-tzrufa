@@ -2555,8 +2555,8 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   position: fixed;
   left: calc(100 * var(--sx));
   width: calc(1360px - 200 * var(--sx));
-  top: calc(150 * var(--sy));                 /* below the instruction strip */
-  height: calc((676 - 150) * var(--sy));      /* down to the bottom grid line */
+  top: calc(126 * var(--sy));                 /* just under the instruction note (bottom ≈116) */
+  height: calc((622 - 126) * var(--sy));      /* down to just above the title (top ≈630) */
   max-width: none;
   margin: 0;
   display: flex;
@@ -2569,10 +2569,13 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
    On entry it shows LARGE, then eases down a touch to make room for the title. */
 #section-3[data-stage="5"] .paths-game-svg {
   width: 100%; height: 100%;
+  transform: scale(1.05);                   /* enters a touch LARGE… */
   transition: transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);
 }
 #section-3[data-stage="5"] #paths-game.paths-shrunk .paths-game-svg {
-  transform: translateY(-9%) scale(0.84);   /* shrinks LESS when the title joins → bigger maze area */
+  transform: none;                          /* …and settles to FULL container size —
+                                               the maze now fills the whole free band
+                                               between the note and the title */
 }
 /* Title "מה המסלול שלך?" — a light dotted PNG that rises from beneath the maze and
    TYPES in (stepped clip reveal from the right, RTL), settling below the maze.
@@ -2580,11 +2583,11 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
    size it never spills below the line. */
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
-  left: 50%;
+  left: calc(50% - 200px);
   bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
   top: auto;
   transform: translate(-50%, 26px);
-  width: min(571.2px, 540px);
+  width: min(480px, 460px);   /* slightly smaller (was 571/540) */
   height: auto;
   z-index: 5;
   opacity: 0;
