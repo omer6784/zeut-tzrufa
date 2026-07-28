@@ -462,8 +462,8 @@ body::-webkit-scrollbar-thumb {
   position: fixed;
   /* Back INSIDE the small top-right grid box — the extra -100px raise pushed the
      readout above the frame edge, off-screen on the real full-screen kiosk. */
-  top: calc(85 * var(--sy) / 2 - 23px);   /* vertically centred in the 0…85·sy strip */
-  right: calc(100 * var(--sx) - 16px);    /* horizontally centred in the 200·sx-wide box */
+  top: calc(85 * var(--sy) / 2 - 43px);   /* raised 20 */
+  right: calc(100 * var(--sx) - 46px);    /* moved 30 right */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -6258,6 +6258,8 @@ html:not(.cursor-active) *::after {
 .s2-deco-drift { animation: s2-float 7s ease-in-out infinite; }
 /* A pressed ACTIVE point holds still and grows gently while its line is drawn. */
 .gold-dot-pick.s2-selected { animation: none; }
+/* The drag to the gate must never be stolen by the browser's own panning. */
+.gold-dot-pick, #s2-dots-container, #stage2-float-dots { touch-action: none; }
 .gold-dot-pick.s2-selected .gold-dot-img { transform: scale(1.35); }
 @keyframes s2-float {
   0%, 100% { transform: translate(0, 0); }
@@ -7238,7 +7240,7 @@ html:not(.cursor-active) *::after {
   background-position: top, bottom, left, right;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
 }
-.cv-btn-dark { --b: #282828; }
+.cv-btn-dark { --b: #f5f5ed; }   /* cream — both final buttons read as one pair on the orange plate */
 
 /* Email modal */
 /* While the on-screen keyboard is up, the dialog lifts clear of it. */

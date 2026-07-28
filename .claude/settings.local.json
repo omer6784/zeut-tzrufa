@@ -522,7 +522,8 @@
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=179/styles.css?v=180/; s/stage1\\\\.css\\\\?v=209/stage1.css?v=210/' index.html)",
       "Bash(perl -pi -e 's/jewel-engine\\\\.js\\\\?v=76/jewel-engine.js?v=77/' display.html)",
       "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=212/stage1.css?v=213/' index.html)",
-      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=181/styles.css?v=182/' index.html)"
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=181/styles.css?v=182/' index.html)",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=182/styles.css?v=183/' index.html)"
     ]
   },
   "hooks": {

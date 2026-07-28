@@ -2573,7 +2573,7 @@ function revealFirstStage(){
   const sidebar = document.getElementById('sidebar-tagline');
   const prevBtn = document.getElementById('step-prev-btn');
   const nextBtn = document.getElementById('step-next-btn');
-  const symText = symBtn ? symBtn.textContent.trim() : 'מאגר הסמלים';
+  const symText = symBtn ? symBtn.textContent.trim() : 'למסך הפתיחה';
 
   logo && logo.classList.add('is-in');
   if(symBtn){ symBtn.classList.add('is-in'); typewriterText(symBtn, symText, 75); }
@@ -2736,48 +2736,18 @@ function mountNameStage(host, initial){
   };
 }
 
-/* The gematria animation (plays on "סיום", once the keyboard has slid away):
-   1. each letter's value fades in beneath it, one after another, while the
-      RUNNING TOTAL climbs in the big dotted numerals below the line;
-   2. the total's dots then stream out and DRAW the jewel's ornament frame — the
-      exact buildOrnament geometry, scaled to the content rectangle — around the
-      whole stage, so the name's number visibly becomes the jewel's frame.
-   Calls onDone when the frame has fully drawn. */
+/* "סיום" on the name stage. The gematria number already climbed live while the
+   visitor typed — that IS the animation, so nothing is replayed here: the field
+   simply locks and the symbol window follows after a short beat. */
 function playGematriaFinale(name, total, onDone){
   const ns = st._nameStage;
   const sec = document.getElementById('section-3');
   if(!ns || !sec){ onDone && onDone(); return; }
   ns.root.classList.add('ns-locked');           // caret off, input frozen
-  const totalEl = ns.root.querySelector('.ns-total');
-  const values = [...ns.root.querySelectorAll('.ns-letter i')].filter(i => i.textContent);
-
-  const renderTotal = (n) => {
-    // Masked spans (not <img>) so the gold digit art takes the stage's own ink
-    // colour while keeping its dotted shapes — see .ns-total span in styles.css.
-    totalEl.innerHTML = String(Math.max(0, n | 0)).split('').map(d =>
-      `<span style="--d:url('/image/v5-stage6/${d}.png')"></span>`).join('');
-    totalEl.classList.remove('ns-pop'); void totalEl.offsetWidth; totalEl.classList.add('ns-pop');
-  };
-
-  // 1. values appear one by one; the total climbs with them
-  const STEP = 420;
-  totalEl.classList.add('is-on');
-  renderTotal(0);
-  let running = 0;
-  values.forEach((el, k) => {
-    setTimeout(() => {
-      el.classList.add('is-on');
-      running += parseInt(el.textContent, 10) || 0;
-      renderTotal(running);
-    }, 450 + k * STEP);
-  });
-  const climbMs = 450 + values.length * STEP + 700;
-
-  // Finish directly without drawing the ornament frame canvas around the stage
   setTimeout(() => {
     document.getElementById('ns-ornament')?.remove();
     if (onDone) onDone();
-  }, climbMs);
+  }, 520);
 }
 function submitChoiceAnswer(val){
   st.answers[QUESTIONS[st.current].id]=val;

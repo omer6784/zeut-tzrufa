@@ -93,7 +93,19 @@ export function mountLightGate({ arena, dots, onAbsorb, revealDelay = 0 } = {}) 
     if (phase !== 'dragging') return;
     removeEventListener('pointermove', onMove);
     removeEventListener('pointerup', onUp);
+    removeEventListener('pointercancel', onCancel);
+    try { sel.releasePointerCapture(e.pointerId); } catch (_) {}
     if (inGate(e.clientX, e.clientY)) commit(e); else cancel();
+  }
+  // A touch stream can be taken away mid-drag (the browser deciding to pan, a
+  // second finger, the panel dropping the contact). End cleanly instead of
+  // leaving a line hanging with no way to finish it.
+  function onCancel() {
+    if (phase !== 'dragging') return;
+    removeEventListener('pointermove', onMove);
+    removeEventListener('pointerup', onUp);
+    removeEventListener('pointercancel', onCancel);
+    cancel();
   }
   function cancel() {
     phase = 'idle';
@@ -111,8 +123,12 @@ export function mountLightGate({ arena, dots, onAbsorb, revealDelay = 0 } = {}) 
     const c = center(d);
     line = el('line', { class: 's2-drag-line', x1: c.x, y1: c.y, x2: c.x, y2: c.y });
     svg.appendChild(line);
+    // Own the pointer for the whole drag: the moves keep coming even when the
+    // finger travels off the little dot (which is most of the gesture).
+    try { d.setPointerCapture(e.pointerId); } catch (_) {}
     addEventListener('pointermove', onMove);
     addEventListener('pointerup', onUp);
+    addEventListener('pointercancel', onCancel);
   }
 
 
@@ -147,14 +163,29 @@ export function mountLightGate({ arena, dots, onAbsorb, revealDelay = 0 } = {}) 
 
     const DUR = 1050, t0 = performance.now();
     const ease = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+    let arrived = false;
+    const finishTravel = () => {
+      if (arrived) return;
+      arrived = true;
+      cancelAnimationFrame(raf);
+      clearTimeout(safety);
+      pt.setAttribute('cx', end.x); pt.setAttribute('cy', end.y);
+      for (const td of trail) td.el.style.opacity = '0';
+      arrive(pt, tg);
+    };
+    // The point's journey must ALWAYS complete: a dropped or throttled frame
+    // loop would otherwise leave it half-way down the trail and the stage would
+    // never move on. The frame loop animates it; this timer guarantees arrival.
+    const safety = setTimeout(finishTravel, DUR + 500);
     function step(now) {
+      if (arrived) return;
       const k = Math.min((now - t0) / DUR, 1), e = ease(k);
       const travelled = e * len;
       pt.setAttribute('cx', start.x + ux * travelled);
       pt.setAttribute('cy', start.y + uy * travelled);
       for (const td of trail) if (!td.done && td.dist <= travelled) { td.el.style.opacity = '0'; td.done = true; }
       if (k < 1) raf = requestAnimationFrame(step);
-      else arrive(pt, tg);
+      else finishTravel();
     }
     raf = requestAnimationFrame(step);
   }
@@ -179,6 +210,7 @@ export function mountLightGate({ arena, dots, onAbsorb, revealDelay = 0 } = {}) 
     removeEventListener('resize', onResize);
     removeEventListener('pointermove', onMove);
     removeEventListener('pointerup', onUp);
+    removeEventListener('pointercancel', onCancel);
     dots.forEach(d => {
       const h = handlers.get(d); if (h) d.removeEventListener('pointerdown', h);
       d.classList.remove('s2-selected', 's2-consumed', 's2-fade', 's2-hidden-by-gate');

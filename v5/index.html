@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spatial Interface — v5 geometric</title>
-  <link rel="stylesheet" href="styles.css?v=182" />
+  <link rel="stylesheet" href="styles.css?v=183" />
   <!-- v5 override layer: redraws the visual surface as outlines + nodes
        on top of v4's full functionality. styles.css stays first so its
        cascade order is preserved; geometric.css wins by being later. -->
@@ -142,7 +142,8 @@
     </div>
 
     <div id="ui-bottom-right"></div>
-    <a id="btn-symbol-library" href="/v2/symbol-library.html">מאגר הסמלים</a>
+    <!-- Top-left link: back to the opening screen (a reload IS the opening screen). -->
+    <a id="btn-symbol-library" href="/v5/">למסך הפתיחה</a>
 
     <!-- CTA -->
     <div id="cta-anchor">לחץ להתחלה</div>
@@ -175,8 +176,8 @@
       <span class="sg-h" style="--y: calc(726 * var(--sy));"></span>
     </div>
 
-    <!-- Symbol library button in top-left cell -->
-    <a id="q-btn-symbol-library" href="/v2/symbol-library.html">מאגר הסמלים</a>
+    <!-- Top-left cell: back to the opening screen, on every stage -->
+    <a id="q-btn-symbol-library" href="/v5/">למסך הפתיחה</a>
 
     <!-- Restart-stage button — permanent chrome, top-left of the central grid
          rectangle on every stage. -->

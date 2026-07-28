@@ -43,7 +43,7 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
       <span class="sg-h" style="--y: calc(706 * var(--sy));"></span>
     </div>
     <div class="grid-logo ed-logo" aria-hidden="true"><img src="/image/v5-stage1/logotype.png" alt="זהות צרופה" /></div>
-    <a class="ed-lib" href="/v2/symbol-library.html">מאגר הסמלים</a>
+    <a class="ed-lib" href="/v5/">למסך הפתיחה</a>
     <div class="ed-side" aria-hidden="true"><span class="ed-side-txt"></span></div>
     <div class="ed-jewel"><iframe class="ed-jewel-frame" src="/v5/display.html" title="התכשיט" tabindex="-1"></iframe></div>
     <div class="ed-note">${NOTE}</div>`;
