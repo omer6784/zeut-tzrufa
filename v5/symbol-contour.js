@@ -41,7 +41,8 @@ export function mountSymbolContour(container, objPath, opts = {}) {
   const ctx = canvas.getContext('2d');
   container.appendChild(canvas);
 
-  let dots = [];
+  let layers = [];
+  let totalDots = 0;
   let t0 = null;
   let doneFired = false;
   let rafId = null;
@@ -57,10 +58,13 @@ export function mountSymbolContour(container, objPath, opts = {}) {
       if (ROT_X) rotateX(vertices, ROT_X);
       normalizeModel(vertices, OBJ_SCALE);
       const mask = buildMask(vertices, faces);
-      dots = buildContourDots(mask);
-      // Constant pace: duration follows the dot count (unless drawMs was forced).
-      if (opts.drawMs == null) DRAW_MS = Math.max(2200, Math.min(5600, (dots.length / DOTS_PER_SEC) * 1000));
-      try { container.setAttribute('data-dot-count', String(dots.length)); } catch (_) {}
+      const components = buildContourComponents(mask);
+      layers = groupConcentricLayers(components);
+      totalDots = layers.reduce((acc, l) => acc + l.reduce((cAcc, c) => cAcc + c.length, 0), 0);
+      
+      // Constant pace: duration follows the dot count clamped between 2200ms and 3200ms.
+      if (opts.drawMs == null) DRAW_MS = Math.max(2200, Math.min(3200, (totalDots / DOTS_PER_SEC) * 1000));
+      try { container.setAttribute('data-dot-count', String(totalDots)); } catch (_) {}
       rafId = requestAnimationFrame(frame);
     })
     .catch(() => {});
@@ -68,20 +72,41 @@ export function mountSymbolContour(container, objPath, opts = {}) {
   function frame() {
     if (cancelled) return;
     if (t0 === null) t0 = performance.now();
-    const frac = dots.length ? Math.min((performance.now() - t0) / DRAW_MS, 1) : 0;
-    const visibleCount = Math.floor(dots.length * frac);
+    const frac = totalDots ? Math.min((performance.now() - t0) / DRAW_MS, 1) : 0;
 
     ctx.clearRect(0, 0, W, H);
     ctx.fillStyle = DOT_COLOR;
     const r = DOT_SIZE / 2;
-    for (let i = 0; i < visibleCount; i++) {
-      const d = dots[i];
-      ctx.beginPath();
-      ctx.arc(W / 2 + d.x, H / 2 - d.y, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
 
-    if (!doneFired && dots.length && frac >= 1) {
+    const numLayers = layers.length;
+    layers.forEach((layerComps, lIdx) => {
+      let start = 0, end = 1;
+      if (numLayers === 2) {
+        start = lIdx === 0 ? 0 : 0.35;
+        end = lIdx === 0 ? 0.65 : 1.0;
+      } else if (numLayers >= 3) {
+        if (lIdx === 0) { start = 0; end = 0.45; }
+        else if (lIdx === 1) { start = 0.30; end = 0.75; }
+        else { start = 0.60; end = 1.0; }
+      }
+
+      const layerFrac = Math.max(0, Math.min(1, (frac - start) / (end - start)));
+      if (layerFrac <= 0) return;
+
+      const easedFrac = layerFrac < 0.5 ? 2 * layerFrac * layerFrac : 1 - Math.pow(-2 * layerFrac + 2, 2) / 2;
+
+      layerComps.forEach(comp => {
+        const visibleCount = Math.floor(comp.length * easedFrac);
+        for (let i = 0; i < visibleCount; i++) {
+          const d = comp[i];
+          ctx.beginPath();
+          ctx.arc(W / 2 + d.x, H / 2 - d.y, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    });
+
+    if (!doneFired && totalDots && frac >= 1) {
       doneFired = true;
       if (typeof opts.onComplete === 'function') opts.onComplete();
     }
@@ -163,7 +188,7 @@ export function mountSymbolContour(container, objPath, opts = {}) {
     return false;
   }
 
-  function buildContourDots(mask) {
+  function buildContourComponents(mask) {
     const contour = [];
     for (let y = 1; y < H - 1; y++) {
       for (let x = 1; x < W - 1; x++) {
@@ -172,19 +197,46 @@ export function mountSymbolContour(container, objPath, opts = {}) {
         }
       }
     }
-    // A symbol's contour is usually SEVERAL separate lines (outer silhouette,
-    // holes, inner details). Ordering all points as one greedy path made the pen
-    // jump mid-line to whichever other line happened to be nearest. Instead:
-    // split into connected components, draw each line COMPLETELY (greedy walk
-    // along its adjacent pixels), then hop to the nearest next line — so the
-    // reveal reads as a hand finishing one stroke before starting another.
     const components = splitComponents(contour).map(orderComponent);
-    const ordered = chainComponents(components);
-    const out = [];
-    for (const comp of ordered) {
-      for (let i = 0; i < comp.length; i += SAMPLE_STEP) out.push(comp[i]);
-    }
-    return out;
+    return components;
+  }
+
+  function groupConcentricLayers(components) {
+    if (!components.length) return [];
+    
+    let maxR = 0;
+    const compData = components.map(comp => {
+      const sampled = [];
+      for (let i = 0; i < comp.length; i += SAMPLE_STEP) sampled.push(comp[i]);
+      let rSum = 0;
+      sampled.forEach(p => {
+        const r = Math.hypot(p.x, p.y);
+        rSum += r;
+        if (r > maxR) maxR = r;
+      });
+      const avgR = sampled.length ? rSum / sampled.length : 0;
+      return { comp: sampled, avgR };
+    });
+
+    if (maxR === 0) maxR = 1;
+    compData.forEach(item => { item.normR = item.avgR / maxR; });
+
+    // Group into 3 concentric layers: Outer (normR >= 0.62), Mid (0.32 <= normR < 0.62), Inner (normR < 0.32)
+    const layer0 = [], layer1 = [], layer2 = [];
+    compData.forEach(item => {
+      if (item.comp.length === 0) return;
+      if (item.normR >= 0.62) layer0.push(item.comp);
+      else if (item.normR >= 0.32) layer1.push(item.comp);
+      else layer2.push(item.comp);
+    });
+
+    const layers = [];
+    if (layer0.length) layers.push(layer0);
+    if (layer1.length) layers.push(layer1);
+    if (layer2.length) layers.push(layer2);
+
+    if (!layers.length) return [compData.map(d => d.comp)];
+    return layers;
   }
 
   /* Group contour pixels into connected components (grid-hash BFS; pixels within
