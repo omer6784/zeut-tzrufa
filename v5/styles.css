@@ -1292,7 +1292,7 @@ body::-webkit-scrollbar-thumb {
   justify-content: center;
   pointer-events: none;
 }
-#section-3[data-stage="2"] .dot-tiles-grid { height: 100%; top: 0; padding: 0 20px; }
+#section-3[data-stage="2"] .dot-tiles-grid { height: 100%; top: 0; padding: 0 6px; }
 
 
 
@@ -1315,7 +1315,7 @@ body::-webkit-scrollbar-thumb {
   height: 100%;
   min-width: 0;
   min-height: 0;
-  border-radius: 6px;
+  border-radius: 0;      /* right angles — the pressed orange plate is a true square */
   overflow: hidden;
   cursor: pointer;
   pointer-events: auto;
@@ -1329,6 +1329,7 @@ body::-webkit-scrollbar-thumb {
   z-index: 5;
   filter: none !important;
   box-shadow: none !important;
+  border-radius: 0 !important;   /* square corners on the orange plate */
   transform: scale(1.12);
 }
 
@@ -7263,9 +7264,11 @@ body.cv-typing #completion-view .cv-modal { align-items: flex-start; padding-top
 #completion-view .cv-modal-actions { display: flex; gap: 18px; justify-content: center; }
 #completion-view .cv-modal-msg { font-size: 12px; letter-spacing: 0.02em; min-height: 16px; color: #282828; }
 
-/* Editor "סיימתי" button — bottom-centre, leads to the completion page. */
+/* Editor "סיימתי" — sits directly UNDER the instruction note (top-right of the
+   content area), not adrift at the bottom of the screen. */
 #editor-view .ed-done {
-  position: fixed; left: 50%; bottom: calc(38 * var(--sy)); transform: translateX(-50%);
+  position: absolute; top: calc(85 * var(--sy) + 58px); right: calc(100 * var(--sx) + 20px);
+  left: auto; bottom: auto; transform: none;
   z-index: 40; cursor: pointer;
   padding: 13px 34px; border: none; border-radius: 0; background: transparent;
   font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 13.6px, 15px); letter-spacing: 0.03em;
@@ -7305,8 +7308,8 @@ body.cv-typing #completion-view .cv-modal { align-items: flex-start; padding-top
      wider than the container (never crossing the vertical grid lines) */
   height: 100% !important;
   width: auto !important;
-  max-width: calc(100% - 80px) !important;
-  max-height: calc(100% - 60px) !important;
+  max-width: calc(100% - 20px) !important;
+  max-height: calc(100% - 16px) !important;
   aspect-ratio: 7 / 4 !important;
   margin: auto !important;
   box-sizing: border-box !important;
@@ -7387,9 +7390,9 @@ html.portrait #section-3[data-stage="2"] .dot-tiles-inner {
   grid-template-columns: repeat(4, 1fr) !important;
   grid-template-rows: repeat(7, 1fr) !important;
   aspect-ratio: 4 / 7 !important;
-  width: calc(100% - 60px) !important;
+  width: calc(100% - 16px) !important;
   height: auto !important;
-  max-height: calc(100% - 90px) !important;   /* breathing room above (instruction) + below */
+  max-height: calc(100% - 60px) !important;   /* breathing room above (instruction) + below */
   max-width: none !important;
 }
 /* Tiles stage forward button: the 4×7 grid claims the whole frame, so "המשך"
@@ -7421,4 +7424,14 @@ html.portrait #editor-view .ed-jewel-frame {
   height: auto;
   width: 100%;
   aspect-ratio: 9 / 16;
+}
+
+/* ── Movement tiles are height-bound (square cells at 7×4), so the block can
+   only grow by taking more height. Rather than re-plumbing the container, the
+   whole block scales up about its own centre — it stays centred inside the
+   frame and the tiles (and their touch targets) grow with it. Landscape only;
+   portrait has its own width-bound 4×7 layout. ── */
+html:not(.portrait) #section-3[data-stage="2"] .dot-tiles-inner {
+  transform: scale(1.22);
+  transform-origin: center center;
 }

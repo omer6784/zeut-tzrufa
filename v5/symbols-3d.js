@@ -242,10 +242,8 @@ export const SYMBOLS_3D = {
   sun: {
     obj: '/sun.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
     color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
-    animate: (obj, tMs) => {                                                    // breathing pulse
-      const p = (Math.sin(tMs * 0.0027 - Math.PI / 2) + 1) / 2;
-      const s = 1 + 0.2 * p;
-      obj.scale.set(s, s, s);
+    animate: (obj, tMs) => {
+      obj.rotation.y = Math.sin(tMs * 0.0011) * 0.3;    // small right-left turn (well under a half spin)
     },
   },
   diamond: {
@@ -266,7 +264,7 @@ export const SYMBOLS_3D = {
   cowrie: {
     obj: '/cowrie.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },
     color: 0xf5f5ed, dotSize: (size) => Math.max(1.4, size * 0.02),
-    animate: (obj, tMs) => { obj.rotation.z = Math.sin(tMs * 0.0022) * 0.14; },// gentle pendant sway
+    animate: (obj, tMs) => { obj.rotation.y = Math.sin(tMs * 0.0011) * 0.3; },  // small right-left turn (shows its depth)
   },
   snake: {
     obj: '/snake.obj', sampler: 'shell', sample: { GRID_SPACING: 4 },

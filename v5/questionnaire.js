@@ -3091,7 +3091,7 @@ function enterArtifactView(){
    derives colours on its own any more (that independent derivation was why the
    colours could suddenly differ between the display and the editor page). */
 const JEWEL_PALETTE = ['#e2bc71', '#282828', '#ff5003', '#f5f5ed'];
-const JEWEL_DEFAULT_BG = '#282828';
+const JEWEL_DEFAULT_BG = '#ff5003';   // interface orange — what the jewel wears until the frequency stage picks a colour
 // Every stage symbol enters the jewel at this ONE size (0–100 scale; the engine
 // maps it to its internal factor). Uniform by design — only the editor pinch scales.
 const UNIFORM_SYMBOL_SIZE = 80;
@@ -4991,7 +4991,7 @@ function buildPathsGame(host, onSelect){
   // lane, so it can never be "sucked" onto a nearby line the user didn't choose.
   // A branch is taken ONLY at a junction node, and ONLY toward the branch the
   // cursor is actually pointing at — so the route is entirely the user's choice.
-  const MAX_IDX_STEP = 26;   // most samples the bead can slide per move (speed cap, prevents teleport)
+  const MAX_IDX_STEP = 70;   // most samples the bead can slide per move — generous, so a quick finger never outruns it (was 26: the bead lagged and felt stuck)
 
   // Nearest point on an edge's polyline to (mx,my): returns a float sample index.
   function projectOnEdge(edge, mx, my){
@@ -5031,12 +5031,12 @@ function buildPathsGame(host, onSelect){
       let bestE = null, bd = Infinity;
       for(const e of source.edgesOut){ const pr = projectOnEdge(e, mx, my); if(pr.d < bd){ bd = pr.d; bestE = e; } }
       const dSource = Math.hypot(source.x - mx, source.y - my);
-      if(!bestE || bd >= dSource - 0.5){ updateTrailSvg(); return 'TRACING'; }  // still pointing at the source → wait
+      if(!bestE || bd >= dSource + 8){ updateTrailSvg(); return 'TRACING'; }   // only wait while the finger is really still on the source (was a strict margin — the bead refused to set off)
       state.edge = bestE; state.fidx = 0;
     }
 
     let guard = 0;
-    while(guard++ < 6){
+    while(guard++ < 12){   // a fast drag can cross several junctions in one move
       const S = state.edge.samples, last = S.length - 1;
       const proj = projectOnEdge(state.edge, mx, my);
       // clamp the slide so the bead never teleports on a fast jump
@@ -5073,7 +5073,7 @@ function buildPathsGame(host, onSelect){
           if(pr.d < bd){ bd = pr.d; bestE = e; enterIdx = (node === e.from) ? 0 : e.samples.length - 1; }
         }
         const nodeDist = Math.hypot(nodePos.x - mx, nodePos.y - my);
-        if(bestE && bd < nodeDist - 0.5){
+        if(bestE && bd < nodeDist + 8){   // forgiving: a finger near the junction still picks its branch
           state.nodeVisits.push(node.id);                       // route analysis: junction crossed
           state.edge = bestE; state.fidx = enterIdx;
           continue;                                             // re-project on the chosen branch

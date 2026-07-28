@@ -52,7 +52,7 @@ export function mountCompletion({ } = {}) {
     <div class="cv-modal" id="cv-modal" hidden>
       <div class="cv-modal-box">
         <div class="cv-modal-title">קבלת התכשיט כ-GIF</div>
-        <input class="cv-modal-input" id="cv-email" type="email" inputmode="email" dir="rtl" placeholder="הזינו כתובת מייל" autocomplete="email" />
+        <input class="cv-modal-input" id="cv-email" type="email" inputmode="email" dir="ltr" placeholder="הזינו כתובת מייל" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="cv-email-nostore" data-lpignore="true" />
         <div class="cv-modal-actions">
           <button class="cv-btn cv-btn-dark" id="cv-send" type="button">שלח</button>
           <button class="cv-btn cv-btn-dark" id="cv-cancel" type="button">חזרה למסך הפתיחה</button>
@@ -192,6 +192,9 @@ export function mountCompletion({ } = {}) {
         throw e;
       }
       msgEl.textContent = 'נשלח! בדקו את תיבת המייל שלכם';
+      // The address is the visitor's — it is never kept: cleared from the field
+      // (and with it from the DOM) the moment it has been used.
+      emailEl.value = '';
     } catch (err) {
       // Surface WHICH stage died (capture vs server) — in the console in full,
       // and as a slightly more specific message on screen.
@@ -211,6 +214,7 @@ export function mountCompletion({ } = {}) {
   });
 
   return function teardown() {
+    try { emailEl.value = ''; } catch (_) {}   // never leave an address behind
     try { detachKeyboard(); } catch (_) {}
     document.body.classList.remove('cv-typing');
     try { jewel.remove(); } catch (_) {}

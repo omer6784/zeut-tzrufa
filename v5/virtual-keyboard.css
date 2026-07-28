@@ -37,9 +37,9 @@
    inside the grid rectangle. Scoped via body:has() so the name-stage keyboard —
    which shares this element (appended to <body>) — keeps its own docked position. */
 body:has(#section-3.origin-input-phase) #virtual-keyboard {
-  right: calc(100 * var(--sx));                   /* docked to the right grid line */
-  bottom: calc((768 - 726) * var(--sy) - 16px);   /* raised 20 (was -36) */
-  width: calc((1360 - 200) * var(--sx) * 0.79);   /* a touch wider to the sides (was 0.74) */
+  right: calc(100 * var(--sx) + 10px);            /* 10 left — clear of the right grid line */
+  bottom: calc((768 - 726) * var(--sy) + 10px);   /* raised again, so it sits BETWEEN the grid lines */
+  width: calc((1360 - 200) * var(--sx) * 0.79);
 }
 /* Slightly smaller keys for the origin keyboard — shorter + lighter while the
    board itself spreads a touch wider. */

@@ -687,7 +687,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   justify-content: flex-start !important;
   align-items: center !important;
   gap: 10px !important;
-  --input-w: min(260px, 96%) !important;   /* shorter writing line (was 340px) */
+  --input-w: min(210px, 92%) !important;   /* shorter writing line again */
   z-index: 1001 !important;   /* above the keyboard */
 }
 /* Dotted vertical divider in the gap between the keyboard and this input
@@ -1960,7 +1960,7 @@ html, body {
    reaches the line. On the time stage the middle container starts only ~16px below
    the grid line (its title sits on the right, not in the header), so a small lift —
    not the 79px measured on other stages. */
-#section-3[data-stage="3"] .tw-sky { top: -16px; }
+#section-3[data-stage="3"] .tw-sky { top: 1px; }   /* starts ON the top grid line — the sun clips there and never crosses it (the line moved down 20; the old -16px let the disc spill above) */
 
 /* ── Prompt artwork, right of the digit band (per the reference). Measured off
    the band (--tw-wheelh) rather than the container, so it stays locked to the

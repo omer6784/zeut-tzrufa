@@ -24,7 +24,7 @@ const PALETTE = [
   { hex: '#f5f5ed', name: 'קרם'  },
 ];
 const TAGLINE = 'זהות צרופה - עיצוב התכשיט האישי שלך';
-const NOTE = 'לחצו על הרקע, על המסגרת או על סמל לשינוי צבע · גררו סמל למעלה או למטה לשינוי הסדר · צבטו סמל להגדלה או להקטנה';
+const NOTE = 'לחצו על הרקע, המסגרת או הסמלים לשינוי צבע';
 
 export function mountEditor({ st, broadcast, symbolName, onDone }) {
   document.getElementById('editor-view')?.remove();

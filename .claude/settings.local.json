@@ -518,7 +518,11 @@
       "Bash(awk 'NR>=4675 && NR<=5330 && \\(/return \\\\{/ || /revealAtSink/ || /demoApi|api = \\\\{|analyze/\\)' questionnaire.js)",
       "Bash(awk 'NR>5200,NR<5330' questionnaire.js)",
       "Bash(curl -s -i -X POST https://hilarious-smakager-1e1ff8.netlify.app/.netlify/functions/send-gif -H 'Content-Type: application/json' -d '{}')",
-      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=178/styles.css?v=179/' index.html)"
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=178/styles.css?v=179/' index.html)",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=179/styles.css?v=180/; s/stage1\\\\.css\\\\?v=209/stage1.css?v=210/' index.html)",
+      "Bash(perl -pi -e 's/jewel-engine\\\\.js\\\\?v=76/jewel-engine.js?v=77/' display.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=212/stage1.css?v=213/' index.html)",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=181/styles.css?v=182/' index.html)"
     ]
   },
   "hooks": {

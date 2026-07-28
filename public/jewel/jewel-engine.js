@@ -78,12 +78,12 @@ const PROFILES = {
   //    extrusions (tools/gen-symbols.mjs), so zScale boosts their depth shading
   //    like the horseshoe. Thin frame shapes get a denser sampling grid.
   circle:   { file: "circle.obj",    type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model (patterned sphere) — turns, whole from every side
-  sun:      { file: "sun.obj",       type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "pulse" },                        // real model — radiant sun, rays breathe
+  sun:      { file: "sun.obj",       type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "swayYSmall" },                  // real model — small right-left turn shows its depth
   bird:     { file: "bird.obj",      type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayY" },                        // real model — true depth
   diamond:  { file: "diamond.obj",   type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model — rhombus frame, turns
   hexagram: { file: "hexagram.obj",  type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model — interwoven Seal of Solomon, turns
   pentagram:{ file: "pentagram.obj", type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, motion: "spinY" },                        // real model — star in its ring, turns
-  cowrie:   { file: "cowrie.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "pendant" },                      // real shell scan — true depth
+  cowrie:   { file: "cowrie.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayYSmall" },                  // real shell scan — small right-left turn shows its depth
   snake:    { file: "snake.obj",     type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayY" },                        // cobra icon — true depth
   // ── the four user-supplied OBJs (Jul 2026) — all authored frontal in XY. ──
   algiz:      { file: "algiz.obj",       type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },   // protection rune
@@ -217,7 +217,7 @@ function setup() {
     if (finishedBuildingAll) clearInterval(buildPump);
   }, 60);
 
-  setBackground(PALETTE.dark);   // default: dark-grey background + cream centre line
+  setBackground(PALETTE.orange);   // default: the interface ORANGE — the jewel wears it from the moment the visitor starts, until the frequency stage picks a colour
   window.dispatchEvent(new Event("jewel-loaded"));
 }
 
