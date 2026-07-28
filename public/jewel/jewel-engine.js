@@ -83,8 +83,8 @@ const PROFILES = {
   diamond:  { file: "diamond.obj",   type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Berber eye rhombus
   hexagram: { file: "hexagram.obj",  type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },             // Seal of Solomon
   pentagram:{ file: "pentagram.obj", type: "shell", grid: 3.6, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "spinY" },
-  cowrie:   { file: "cowrie.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "pendant" },           // gentle sway
-  snake:    { file: "snake.obj",     type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },
+  cowrie:   { file: "cowrie.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "pendant" },                      // real shell scan — true depth
+  snake:    { file: "snake.obj",     type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, motion: "swayY" },                        // cobra icon — true depth
   // ── the four user-supplied OBJs (Jul 2026) — all authored frontal in XY. ──
   algiz:      { file: "algiz.obj",       type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 3, motion: "swayY" },   // protection rune
   triskele:   { file: "triskele.obj",    type: "shell", grid: 4.2, dotSize: 3.4, targetSize: 300, zScale: 2, motion: "spinY" },   // triple spiral — turns
