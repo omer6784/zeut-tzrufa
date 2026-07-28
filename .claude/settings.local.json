@@ -511,7 +511,9 @@
       "Bash(cd \"/Users/omershushan/.claude/projects/-Users-omershushan-Desktop-final-project-code/memory\" *)",
       "Bash(awk -F'motion: ' '{print $2}')",
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=177/styles.css?v=178/; s/geometric\\\\.css\\\\?v=39/geometric.css?v=40/; s/stage1\\\\.css\\\\?v=207/stage1.css?v=208/' index.html)",
-      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=208/stage1.css?v=209/' index.html)"
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=208/stage1.css?v=209/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=209/stage1.css?v=210/' index.html)",
+      "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=210/stage1.css?v=211/' index.html)"
     ]
   },
   "hooks": {

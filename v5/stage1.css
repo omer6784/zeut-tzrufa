@@ -673,7 +673,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      line to just before the keyboard's left edge. Vertically centred against
      the keyboard band. */
   left: calc(100 * var(--sx)) !important;
-  right: calc(100 * var(--sx) + (1360 - 200) * var(--sx) * 0.74 + 60px) !important;   /* ends at the re-docked keyboard's left edge */
+  right: calc(100 * var(--sx) + (1360 - 200) * var(--sx) * 0.79 + 12px) !important;   /* ends at the widened keyboard's left edge */
   top: auto !important;
   bottom: calc((768 - 726) * var(--sy) + 26px) !important;   /* keyboard bottom line */
   height: var(--kb-band) !important;   /* ≈ keyboard height */
@@ -700,7 +700,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
      --kb-band) down to the bottom grid line (706·sy) — so it separates the
      writing line from the keyboard without reaching up into the map. Same dot
      size/spacing as the fixed grid. */
-  right: calc(100 * var(--sx) + (1360 - 200) * var(--sx) * 0.74 + 46px) !important;   /* in the gap left of the keyboard */
+  right: calc(100 * var(--sx) + (1360 - 200) * var(--sx) * 0.79 + 6px) !important;   /* in the gap left of the keyboard */
   left: auto !important;
   top: calc(726 * var(--sy) - 46px - var(--kb-band)) !important;
   height: calc(46px + var(--kb-band)) !important;
@@ -2252,4 +2252,14 @@ html.portrait #selected-origins-list { font-size: 16px !important; }
 html.portrait .tw-confirm {
   font-size: 16px !important;
   padding: 14px 32px !important;
+}
+
+/* Origin input phase (landscape): the buttons row fits the narrowed writing
+   column beside the widened keyboard — lighter pads so "הזנתי, אפשר להמשיך"
+   and "הוסף" never cross the left grid line. */
+#section-3[data-stage="0"]:not(.q-color-stage) .roots-widget.state-input .roots-actions-row .roots-finish,
+#section-3[data-stage="0"]:not(.q-color-stage) .roots-widget.state-input .roots-actions-row #roots-finish,
+#section-3[data-stage="0"]:not(.q-color-stage) .roots-widget.state-input .roots-actions-row .roots-add-country {
+  padding: 10px 12px !important;
+  white-space: nowrap !important;
 }
