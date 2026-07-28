@@ -486,7 +486,10 @@
       "Bash(ioreg -lw0 -n atc0-dpphy -r -d3)",
       "Bash(pmset -g batt)",
       "Bash(pmset -g)",
-      "Bash(system_profiler SPPowerDataType)"
+      "Bash(system_profiler SPPowerDataType)",
+      "Bash(awk -F: '$1 > 4200 && $1 < 5200')",
+      "Bash(node -e \"1\")",
+      "Bash(npx --no-install esbuild v5/questionnaire.js --outfile=/dev/null --bundle=false)"
     ]
   },
   "hooks": {

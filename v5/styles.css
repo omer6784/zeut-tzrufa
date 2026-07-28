@@ -2581,21 +2581,23 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] .paths-title {
   position: fixed;
   left: 50%;
-  bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px */
+  bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px (raised 50px from the earlier 100px) */
   top: auto;
-  transform: translate(-50%, 0) !important;
+  transform: translate(-50%, 26px);
   width: min(571.2px, 540px);
   height: auto;
-  z-index: 10 !important;
-  opacity: 1 !important;
-  clip-path: none !important;
+  z-index: 5;
+  opacity: 0;
+  clip-path: inset(0 0 0 100%);
+  transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
   pointer-events: none;
 }
 #section-3[data-stage="5"] .paths-title.is-in {
-  opacity: 1 !important;
-  transform: translate(-50%, 0) !important;
-  clip-path: none !important;
+  opacity: 1;
+  transform: translate(-50%, 0);
+  animation: paths-type 0.8s steps(13, end) 0.3s forwards;
 }
+@keyframes paths-type { to { clip-path: inset(0 0 0 0); } }
 
 /* ── Path stage on the ORANGE background — explicit colour scheme ── */
 #section-3[data-stage="5"] { background: #ff5003 !important; }
@@ -2618,13 +2620,10 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 #section-3[data-stage="5"] #step-prev-btn svg,
 #section-3[data-stage="5"] #step-next-btn svg { stroke: #282828 !important; }
 
-#section-3[data-stage="5"] .paths-rail {
-  stroke: #f5f5ed !important;
-  stroke-width: 3.5px !important;
-  stroke-dasharray: 6 6 !important;
-  stroke-linecap: round !important;
-  opacity: 1 !important;
-}
+/* Maze rails → cream. ONLY the colour is overridden — the width/dash pattern
+   comes from the base .paths-rail rule (0.1-dash + round caps = the interface's
+   DOT language), not solid dashes. */
+#section-3[data-stage="5"] .paths-rail { stroke: #f5f5ed !important; }
 #section-3[data-stage="5"] .paths-ink-trail {
   stroke: #f5f5ed !important;        /* user's drawn trail → cream */
   stroke-width: 1.6 !important;      /* a touch thicker than before (1.3) */

@@ -1620,11 +1620,13 @@ function _renderQuestionImpl(idx){
       // title "מה המסלול שלך?" rises from beneath it + types in, settling below.
       const pg = document.getElementById('paths-game');
       const ptitle = document.querySelector('#section-3 .paths-title');
-      if (pg) pg.classList.add('paths-shrunk');
-      if (ptitle) ptitle.classList.add('is-in');
+      // Until the PNG is added, hide it so no broken-image box shows.
+      if (ptitle) ptitle.addEventListener('error', () => { ptitle.style.display = 'none'; }, { once: true });
       st._pathsEntryTimers = st._pathsEntryTimers || [];
       const pT = (fn, ms) => st._pathsEntryTimers.push(setTimeout(fn, ms));
-      lockInput(); pT(() => runMazeDemo(), 1200);   // ghost-hand demo once mounted
+      pT(() => { if (pg) pg.classList.add('paths-shrunk'); }, 1200);
+      pT(() => { if (ptitle) ptitle.classList.add('is-in'); }, 1950);
+      lockInput(); pT(() => runMazeDemo(), 2400);   // ghost-hand demo once the maze has settled
     }
   } else if(q.type==='time'){
     wrap.innerHTML = '';
@@ -4423,27 +4425,26 @@ function buildPathsGame(host, onSelect){
   // grid nodes. Corners are SHARP: they form where a horizontal edge meets a
   // vertical edge at a shared node. Sampled to an even polyline that drives both
   // the dotted render and the path-locked tracer.
-  function sampleBezierRoute(p0, p3, step = 12) {
-    const dx = p3.x - p0.x, dy = p3.y - p0.y;
-    const p1 = { x: p0.x + dx * 0.45, y: p0.y + dy * 0.15 };
-    const p2 = { x: p0.x + dx * 0.55, y: p3.y - dy * 0.15 };
-    const dist = Math.hypot(dx, dy);
-    const n = Math.max(3, Math.round(dist / step));
+  function resampleRoute(pts, step){
+    const cum = [0];
+    for(let i = 1; i < pts.length; i++) cum[i] = cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y);
+    const total = cum[cum.length - 1] || 1;
+    const n = Math.max(2, Math.round(total / step));
     const out = [];
-    for (let k = 0; k <= n; k++) {
-      const t = k / n;
-      const mt = 1 - t;
-      const mt2 = mt * mt, mt3 = mt2 * mt;
-      const t2 = t * t, t3 = t2 * t;
-      const x = mt3 * p0.x + 3 * mt2 * t * p1.x + 3 * mt * t2 * p2.x + t3 * p3.x;
-      const y = mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y;
-      out.push({ x, y, t });
+    let seg = 0;
+    for(let k = 0; k <= n; k++){
+      const target = total * (k / n);
+      while(seg < pts.length - 2 && cum[seg + 1] < target) seg++;
+      const segLen = (cum[seg + 1] - cum[seg]) || 1;
+      const f = (target - cum[seg]) / segLen;
+      out.push({ x: pts[seg].x + (pts[seg + 1].x - pts[seg].x) * f, y: pts[seg].y + (pts[seg + 1].y - pts[seg].y) * f, t: k / n });
     }
-    return { samples: out, p1, p2 };
+    return out;
   }
   function mkEdge(from, to, type){
-    const { samples, p1, p2 } = sampleBezierRoute(from, to, 12);
-    let d = `M${from.x.toFixed(1)} ${from.y.toFixed(1)} C${p1.x.toFixed(1)} ${p1.y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}, ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
+    const samples = resampleRoute([{ x: from.x, y: from.y }, { x: to.x, y: to.y }], 13);
+    let d = `M${samples[0].x.toFixed(1)} ${samples[0].y.toFixed(1)}`;
+    for(let i = 1; i < samples.length; i++) d += ` L${samples[i].x.toFixed(1)} ${samples[i].y.toFixed(1)}`;
     const e = { id: edges.length, from, to, samples, d, type: type || 'side' };
     edges.push(e);
     from.edgesOut.push(e);
@@ -4451,57 +4452,84 @@ function buildPathsGame(host, onSelect){
     return e;
   }
 
-  // ───── 5 Distinct Flowing Routes (מסלולים זורמים) ─────
-  // 5 distinct, elegant flowing paths from Right (entry) to Left (exit).
-  const NUM_ROUTES = 5;
-  const NUM_COLS = 6;
-  const routeNodes = [];
+  // ───── Winding orthogonal maze (matches the reference) ─────
+  // A dense grid of NY rows × NX columns. We carve a winding maze on it with a
+  // randomised depth-first walk, then BRAID it (add back some skipped edges) so
+  // the corridors wind AND meet at junctions with loops — the dense, irregular
+  // weave of the reference. Every segment is a deduped UNIT edge (no overlaps),
+  // corners are sharp, and the whole thing is one connected system.
+  const NY = 10, NX = 19;   // coarser grid (was 14×26) → wider gaps between paths, easier to grab by touch
+  const gx = c => X_MIN + (X_MAX - X_MIN) * (c / (NX - 1));
+  const gy = r => Y_MIN + (Y_MAX - Y_MIN) * (r / (NY - 1));
+  const MID = (NY - 1) >> 1;
 
-  const source = mkNode(W - X_MIN, H / 2, Y_MIN, Y_MAX);
-  source.isSource = true;
+  const nodeAt = {};
+  const getNode = (c, r) => {
+    const k = c + ',' + r;
+    return nodeAt[k] || (nodeAt[k] = mkNode(gx(c), gy(r), Y_MIN, Y_MAX));
+  };
+  const edgeAt = {};                                     // dedupe: one segment ⇒ one edge
+  const unitEdge = (c1, r1, c2, r2) => {
+    const a = c1 + ',' + r1, b = c2 + ',' + r2;
+    const k = a < b ? a + '|' + b : b + '|' + a;
+    return edgeAt[k] || (edgeAt[k] = mkEdge(getNode(c1, r1), getNode(c2, r2), 'primary'));
+  };
 
-  const exitNode = mkNode(X_MIN, H / 2, Y_MIN, Y_MAX);
-  exitNode.isSink = true;
-  exitNode.symbol = PATHS_SYMBOL_POOL[Math.floor(Math.random() * PATHS_SYMBOL_POOL.length)];
+  // 1) Randomised depth-first carve — winding corridors that visit every cell.
+  const seen = new Uint8Array(NX * NY);
+  const idx = (c, r) => c * NY + r;
+  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  const stack = [[0, MID]]; seen[idx(0, MID)] = 1;
+  while(stack.length){
+    const [c, r] = stack[stack.length - 1];
+    const nb = [];
+    for(const [dc, dr] of DIRS){ const nc = c + dc, nr = r + dr; if(nc >= 0 && nc < NX && nr >= 0 && nr < NY && !seen[idx(nc, nr)]) nb.push([nc, nr]); }
+    if(!nb.length){ stack.pop(); continue; }
+    const [nc, nr] = nb[(Math.random() * nb.length) | 0];
+    unitEdge(c, r, nc, nr); seen[idx(nc, nr)] = 1; stack.push([nc, nr]);
+  }
+  // 2) Braid — add back some skipped edges so corridors meet in loops/junctions.
+  for(let c = 0; c < NX; c++) for(let r = 0; r < NY; r++){
+    if(c + 1 < NX && Math.random() < 0.2) unitEdge(c, r, c + 1, r);
+    if(r + 1 < NY && Math.random() < 0.2) unitEdge(c, r, c, r + 1);
+  }
+  // clean horizontal lead-in at the entry and exit
+  unitEdge(0, MID, 1, MID);
+  unitEdge(NX - 1, MID, NX - 2, MID);
+
+  const source = getNode(0, MID); source.isSource = true;
+  const exitNode = getNode(NX - 1, MID); exitNode.isSink = true;
   const sinks = [exitNode];
+  exitNode.symbol = PATHS_SYMBOL_POOL[Math.floor(Math.random() * PATHS_SYMBOL_POOL.length)];
+  // ONE clean straight corridor along the MID row from entry to exit. Built via
+  // unitEdge so any segment the maze already carved there is REUSED (deduped) —
+  // no overlapping/doubled dots, and the tracer passes cleanly.
+  for (let c = 0; c < NX - 1; c++) unitEdge(c, MID, c + 1, MID);
 
-  // Intermediate nodes along 5 graceful flowing routes
-  for (let r = 0; r < NUM_ROUTES; r++) {
-    const rNodes = [];
-    const baseY = Y_MIN + (Y_MAX - Y_MIN) * ((r + 0.5) / NUM_ROUTES);
-    for (let c = 1; c < NUM_COLS - 1; c++) {
-      const x = W - X_MIN - (W - 2 * X_MIN) * (c / (NUM_COLS - 1));
-      const wave = Math.sin((c / NUM_COLS) * Math.PI * 2 + r * 1.2) * 36;
-      const y = Math.max(Y_MIN + 30, Math.min(Y_MAX - 30, baseY + wave));
-      const n = mkNode(x, y, Y_MIN, Y_MAX);
-      rNodes.push(n);
-    }
-    routeNodes.push(rNodes);
+  // 3) No dead-ends: every cell must reach ≥2 corridors, so a traced path never
+  //    stops in mid-air — from each degree-1 cell carve one extra edge to a random
+  //    grid neighbour (source/exit are the trace endpoints, left as they are).
+  const degOf = n => n.edgesOut.length + n.edgesIn.length;
+  for(let c = 0; c < NX; c++) for(let r = 0; r < NY; r++){
+    const n = getNode(c, r);
+    if(n === source || n === exitNode || degOf(n) >= 2) continue;
+    const cand = DIRS.map(([dc, dr]) => [c + dc, r + dr]).filter(([nc, nr]) => nc >= 0 && nc < NX && nr >= 0 && nr < NY);
+    for(let i = cand.length - 1; i > 0; i--){ const j = (Math.random() * (i + 1)) | 0; [cand[i], cand[j]] = [cand[j], cand[i]]; }
+    for(const [nc, nr] of cand){ if(degOf(n) >= 2) break; unitEdge(c, r, nc, nr); }
   }
 
-  // Connect source (right) to first node of each route
-  for (let r = 0; r < NUM_ROUTES; r++) {
-    mkEdge(source, routeNodes[r][0], 'primary');
-  }
+  nodes.forEach(n => { n.isJunction = false; });        // no prominent junction dots
 
-  // Connect along each route to exitNode (left)
-  for (let r = 0; r < NUM_ROUTES; r++) {
-    for (let c = 0; c < routeNodes[r].length - 1; c++) {
-      mkEdge(routeNodes[r][c], routeNodes[r][c + 1], 'primary');
-    }
-    mkEdge(routeNodes[r][routeNodes[r].length - 1], exitNode, 'primary');
-  }
-
-  // Add cross-route branches so user can switch between routes during drag
-  for (let c = 1; c < NUM_COLS - 2; c++) {
-    for (let r = 0; r < NUM_ROUTES - 1; r++) {
-      if ((r + c) % 2 === 0) {
-        mkEdge(routeNodes[r][c], routeNodes[r + 1][c + 1], 'side');
-      }
-    }
-  }
-
-  nodes.forEach(n => { n.isJunction = false; });
+  // Flip horizontally so the ENTRY (source) is on the RIGHT and the EXIT on the
+  // LEFT — right-to-left, matching the Hebrew interface. Coordinates and edge
+  // paths are mirrored together, so the tracer keeps working unchanged.
+  nodes.forEach(n => { n.x = W - n.x; });
+  edges.forEach(e => {
+    for(const s of e.samples) s.x = W - s.x;
+    let pd = `M${e.samples[0].x.toFixed(1)} ${e.samples[0].y.toFixed(1)}`;
+    for(let i=1;i<e.samples.length;i++) pd += ` L${e.samples[i].x.toFixed(1)} ${e.samples[i].y.toFixed(1)}`;
+    e.d = pd;
+  });
 
   // ───── Render: one dark DOTTED centreline per edge (rounded corners come from
   //       the sampled arcs). ─────
@@ -4819,12 +4847,18 @@ function buildPathsGame(host, onSelect){
   // ── Demo API — drives a WINDING source→exit trace (+ the real white trail) for
   //    the ghost-hand stage demo. Purely visual; resetDemo() clears it after. ──
   function _neighbours(node){ const nb = []; node.edgesOut.forEach(e => nb.push(e.to)); node.edgesIn.forEach(e => nb.push(e.from)); return nb; }
+  // Shortest source→exit route (BFS, fewest hops) that is NOT the straight middle
+  // corridor — moves along the MID row (MID→adjacent MID) are forbidden, so the
+  // path must dip off the middle at least once.
   function _shortestRoute(){
+    const midY = source.y;
+    const onMid = n => Math.abs(n.y - midY) < 1;
     const q = [source], prev = new Map([[source, null]]);
     while(q.length){
       const node = q.shift();
       if(node === exitNode) break;
       for(const nb of _neighbours(node)){
+        if(onMid(node) && onMid(nb)) continue;   // skip the straight MID corridor
         if(!prev.has(nb)){ prev.set(nb, node); q.push(nb); }
       }
     }
@@ -4858,7 +4892,6 @@ function buildPathsGame(host, onSelect){
     resetDemo(){ resetToSource(); },
   };
 }
-
 export function updateV5StepProgress(stageNum) {
   const currentStep = (stageNum !== undefined) ? stageNum : (st.current || 0);
   
