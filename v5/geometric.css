@@ -840,7 +840,7 @@ html.portrait #app-viewport {
 .grid-logo {
   position: fixed;   /* fixed → clipped by #app-viewport (overflow:visible), NOT by section-3's overflow:hidden, so it can rise past y0 into the top letterbox without being cut */
   top: 0;
-  transform: translateY(-32px);   /* raised 20px (was -12px); no longer clipped since it's fixed to the wrapper */
+  transform: translateY(-2px);   /* lowered 30px (was -32px) */
   left: calc((1360 - 160) * var(--sx));   /* moved 10 left (was -150 → -160 from the right edge) */
   width: calc(140 * var(--sx));          /* 200 − 60 = 140 wide */
   height: calc(85 * var(--sy));          /* down to the top horizontal */

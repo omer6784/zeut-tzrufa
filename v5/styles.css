@@ -5784,7 +5784,7 @@ body.theme-negative #section-3[data-stage="2"] {
      previous ~42px header centre → ~12px. */
   position: fixed !important;
   left: 50%;
-  top: calc(42 * var(--sy) - 30px);   /* raised 30px; same line as the "מאגר הסמלים" link */
+  top: calc(42 * var(--sy));   /* lowered back 30px, with the "מאגר הסמלים" link */
   transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
