@@ -309,30 +309,19 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     const t = (now - t0) / 1000;
     for (const tl of tiles) {
       const appeared = (now - t0) >= tl.appearAt;
-      // Never dim the other tiles — every tile stays fully lit whether or not one is
-      // selected/chosen; only its MOTION (not its brightness) marks the pick.
       const aTarget = appeared ? 1 : 0;
       tl.alpha += (aTarget - tl.alpha) * 0.16;
-      // STATIC by default; only the tile the visitor TAPPED (selected) shows its
-      // movement — no hover. The confirming tile also animates.
-      const animated = (tl.i === selected || tl.i === chosen);
-      // A settled static tile is pixel-identical every frame — skip its redraw
-      // entirely (28 medallions × hundreds of arcs per frame otherwise). It is
-      // repainted once (tl.settledPaint) and again only when its state changes
-      // (select/deselect/resize reset settledPaint below).
       const settled = appeared && Math.abs(1 - tl.alpha) < 0.005;
       if (settled) tl.alpha = 1;
-      if (!animated && settled && tl.settledPaint) continue;
       const ctx = tl.ctx;
       ctx.clearRect(0, 0, tl.W, tl.H);
       ctx.globalAlpha = tl.alpha;
       ctx.fillStyle = tl.dotColor;   // dark dots on the yellow plate
       ctx._dotScale = (tl.i === selected || tl.i === chosen) ? 1.3 : 1.0;
-      const localT = tl.frozen ? tl.frozenT : (animated ? t : STATIC_T);
+      const localT = tl.frozen ? tl.frozenT : t;
       TILES[tl.i].draw(ctx, tl, localT);
       if (tl.i === chosen && tl.confirmT >= 0) { ctx.globalAlpha = tl.alpha; drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS)); }
       ctx.globalAlpha = 1;
-      tl.settledPaint = !animated && settled;
     }
     raf = requestAnimationFrame(frame);
   }
