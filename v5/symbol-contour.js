@@ -62,12 +62,19 @@ export function mountSymbolContour(container, objPath, opts = {}) {
       layers = groupConcentricLayers(components);
       totalDots = layers.reduce((acc, l) => acc + l.reduce((cAcc, c) => cAcc + c.length, 0), 0);
       
+      if (!totalDots) {
+        if (!doneFired) { doneFired = true; if (typeof opts.onComplete === 'function') opts.onComplete(); }
+        return;
+      }
+
       // Fast, snappy pace: duration follows dot count clamped between 1500ms and 2200ms.
       if (opts.drawMs == null) DRAW_MS = Math.max(1500, Math.min(2200, (totalDots / DOTS_PER_SEC) * 1000));
       try { container.setAttribute('data-dot-count', String(totalDots)); } catch (_) {}
       rafId = requestAnimationFrame(frame);
     })
-    .catch(() => {});
+    .catch(() => {
+      if (!doneFired) { doneFired = true; if (typeof opts.onComplete === 'function') opts.onComplete(); }
+    });
 
   function frame() {
     if (cancelled) return;
@@ -96,9 +103,11 @@ export function mountSymbolContour(container, objPath, opts = {}) {
       const easedFrac = layerFrac;
 
       layerComps.forEach(comp => {
+        if (!comp || !comp.length) return;
         const visibleCount = Math.floor(comp.length * easedFrac);
         for (let i = 0; i < visibleCount; i++) {
           const d = comp[i];
+          if (!d) continue;
           ctx.beginPath();
           ctx.arc(W / 2 + d.x, H / 2 - d.y, r, 0, Math.PI * 2);
           ctx.fill();

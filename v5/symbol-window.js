@@ -378,7 +378,7 @@ export function openSymbolWindow(motif, opts = {}) {
   }, 900));
 
   // Safety: never leave the text stuck blank if onComplete never fires.
-  seqTimers.push(setTimeout(() => revealText(el, info), 5000));
+  seqTimers.push(setTimeout(() => revealText(el, info), 2200));
 
   return el;
 }
