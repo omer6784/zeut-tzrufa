@@ -4485,84 +4485,62 @@ function buildPathsGame(host, onSelect){
     return e;
   }
 
-  // ───── Winding orthogonal maze (matches the reference) ─────
-  // A dense grid of NY rows × NX columns. We carve a winding maze on it with a
-  // randomised depth-first walk, then BRAID it (add back some skipped edges) so
-  // the corridors wind AND meet at junctions with loops — the dense, irregular
-  // weave of the reference. Every segment is a deduped UNIT edge (no overlaps),
-  // corners are sharp, and the whole thing is one connected system.
-  const NY = 10, NX = 19;   // coarser grid (was 14×26) → wider gaps between paths, easier to grab by touch
-  const gx = c => X_MIN + (X_MAX - X_MIN) * (c / (NX - 1));
-  const gy = r => Y_MIN + (Y_MAX - Y_MIN) * (r / (NY - 1));
-  const MID = (NY - 1) >> 1;
+  // ───── 6 Flowing Routes (מסלולים זורמים) ─────
+  // 6 distinct, elegant flowing paths from Right (entry) to Left (6 exits).
+  const NUM_ROUTES = 6;
+  const NUM_COLS = 7;
+  const routeNodes = [];
 
-  const nodeAt = {};
-  const getNode = (c, r) => {
-    const k = c + ',' + r;
-    return nodeAt[k] || (nodeAt[k] = mkNode(gx(c), gy(r), Y_MIN, Y_MAX));
-  };
-  const edgeAt = {};                                     // dedupe: one segment ⇒ one edge
-  const unitEdge = (c1, r1, c2, r2) => {
-    const a = c1 + ',' + r1, b = c2 + ',' + r2;
-    const k = a < b ? a + '|' + b : b + '|' + a;
-    return edgeAt[k] || (edgeAt[k] = mkEdge(getNode(c1, r1), getNode(c2, r2), 'primary'));
-  };
+  const source = mkNode(W - X_MIN, H / 2, Y_MIN, Y_MAX);
+  source.isSource = true;
 
-  // 1) Randomised depth-first carve — winding corridors that visit every cell.
-  const seen = new Uint8Array(NX * NY);
-  const idx = (c, r) => c * NY + r;
-  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  const stack = [[0, MID]]; seen[idx(0, MID)] = 1;
-  while(stack.length){
-    const [c, r] = stack[stack.length - 1];
-    const nb = [];
-    for(const [dc, dr] of DIRS){ const nc = c + dc, nr = r + dr; if(nc >= 0 && nc < NX && nr >= 0 && nr < NY && !seen[idx(nc, nr)]) nb.push([nc, nr]); }
-    if(!nb.length){ stack.pop(); continue; }
-    const [nc, nr] = nb[(Math.random() * nb.length) | 0];
-    unitEdge(c, r, nc, nr); seen[idx(nc, nr)] = 1; stack.push([nc, nr]);
-  }
-  // 2) Braid — add back some skipped edges so corridors meet in loops/junctions.
-  for(let c = 0; c < NX; c++) for(let r = 0; r < NY; r++){
-    if(c + 1 < NX && Math.random() < 0.2) unitEdge(c, r, c + 1, r);
-    if(r + 1 < NY && Math.random() < 0.2) unitEdge(c, r, c, r + 1);
-  }
-  // clean horizontal lead-in at the entry and exit
-  unitEdge(0, MID, 1, MID);
-  unitEdge(NX - 1, MID, NX - 2, MID);
-
-  const source = getNode(0, MID); source.isSource = true;
-  const exitNode = getNode(NX - 1, MID); exitNode.isSink = true;
-  const sinks = [exitNode];
-  exitNode.symbol = PATHS_SYMBOL_POOL[Math.floor(Math.random() * PATHS_SYMBOL_POOL.length)];
-  // ONE clean straight corridor along the MID row from entry to exit. Built via
-  // unitEdge so any segment the maze already carved there is REUSED (deduped) —
-  // no overlapping/doubled dots, and the tracer passes cleanly.
-  for (let c = 0; c < NX - 1; c++) unitEdge(c, MID, c + 1, MID);
-
-  // 3) No dead-ends: every cell must reach ≥2 corridors, so a traced path never
-  //    stops in mid-air — from each degree-1 cell carve one extra edge to a random
-  //    grid neighbour (source/exit are the trace endpoints, left as they are).
-  const degOf = n => n.edgesOut.length + n.edgesIn.length;
-  for(let c = 0; c < NX; c++) for(let r = 0; r < NY; r++){
-    const n = getNode(c, r);
-    if(n === source || n === exitNode || degOf(n) >= 2) continue;
-    const cand = DIRS.map(([dc, dr]) => [c + dc, r + dr]).filter(([nc, nr]) => nc >= 0 && nc < NX && nr >= 0 && nr < NY);
-    for(let i = cand.length - 1; i > 0; i--){ const j = (Math.random() * (i + 1)) | 0; [cand[i], cand[j]] = [cand[j], cand[i]]; }
-    for(const [nc, nr] of cand){ if(degOf(n) >= 2) break; unitEdge(c, r, nc, nr); }
+  // Create 6 exit nodes (sinks) on the left
+  const sinks = [];
+  for (let r = 0; r < NUM_ROUTES; r++) {
+    const y = Y_MIN + (Y_MAX - Y_MIN) * ((r + 0.5) / NUM_ROUTES);
+    const sink = mkNode(X_MIN, y, Y_MIN, Y_MAX);
+    sink.isSink = true;
+    sink.symbol = PATHS_SYMBOL_POOL[r % PATHS_SYMBOL_POOL.length];
+    sinks.push(sink);
   }
 
-  nodes.forEach(n => { n.isJunction = false; });        // no prominent junction dots
+  // Create intermediate nodes along 6 flowing routes
+  for (let r = 0; r < NUM_ROUTES; r++) {
+    const rNodes = [];
+    const baseY = Y_MIN + (Y_MAX - Y_MIN) * ((r + 0.5) / NUM_ROUTES);
+    for (let c = 1; c < NUM_COLS - 1; c++) {
+      const x = W - X_MIN - (W - 2 * X_MIN) * (c / (NUM_COLS - 1));
+      const wave = Math.sin((c / NUM_COLS) * Math.PI * 2 + r * 1.1) * 32;
+      const y = Math.max(Y_MIN + 25, Math.min(Y_MAX - 25, baseY + wave));
+      const n = mkNode(x, y, Y_MIN, Y_MAX);
+      rNodes.push(n);
+    }
+    routeNodes.push(rNodes);
+  }
 
-  // Flip horizontally so the ENTRY (source) is on the RIGHT and the EXIT on the
-  // LEFT — right-to-left, matching the Hebrew interface. Coordinates and edge
-  // paths are mirrored together, so the tracer keeps working unchanged.
-  nodes.forEach(n => { n.x = W - n.x; });
-  edges.forEach(e => {
-    for(const s of e.samples) s.x = W - s.x;
-    let pd = `M${e.samples[0].x.toFixed(1)} ${e.samples[0].y.toFixed(1)}`;
-    for(let i=1;i<e.samples.length;i++) pd += ` L${e.samples[i].x.toFixed(1)} ${e.samples[i].y.toFixed(1)}`;
-    e.d = pd;
-  });
+  // Connect source to first column of nodes
+  for (let r = 0; r < NUM_ROUTES; r++) {
+    mkEdge(source, routeNodes[r][0], 'primary');
+  }
+
+  // Connect along each route
+  for (let r = 0; r < NUM_ROUTES; r++) {
+    for (let c = 0; c < routeNodes[r].length - 1; c++) {
+      mkEdge(routeNodes[r][c], routeNodes[r][c + 1], 'primary');
+    }
+    mkEdge(routeNodes[r][routeNodes[r].length - 1], sinks[r], 'primary');
+  }
+
+  // Add gentle cross-route bridges to allow choosing between routes
+  for (let c = 1; c < NUM_COLS - 2; c++) {
+    for (let r = 0; r < NUM_ROUTES - 1; r++) {
+      if ((r + c) % 2 === 0) {
+        mkEdge(routeNodes[r][c], routeNodes[r + 1][c + 1], 'side');
+      }
+    }
+  }
+
+  nodes.forEach(n => { n.isJunction = false; });
 
   // ───── Render: one dark DOTTED centreline per edge (rounded corners come from
   //       the sampled arcs). ─────

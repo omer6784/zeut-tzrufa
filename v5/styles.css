@@ -2588,20 +2588,13 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
   bottom: calc(768px - 668 * var(--sy) - 50px);   /* lowered 50px */
   top: auto;
   transform: translate(-50%, 26px);
-  font-family: 'ArbelG', sans-serif;
-  font-weight: 300 !important;
-  font-size: clamp(20px, 2.4vw, 32px);
-  color: #f5f5ed !important;
-  letter-spacing: 0.04em;
-  text-align: center;
-  direction: rtl;
+  width: min(571.2px, 540px);
+  height: auto;
   z-index: 5;
   opacity: 0;
   clip-path: inset(0 0 0 100%);
   transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
   pointer-events: none;
-  filter: none !important;
-  text-shadow: none !important;
 }
 #section-3[data-stage="5"] .paths-title.is-in {
   opacity: 1;
