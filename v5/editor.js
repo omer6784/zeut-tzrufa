@@ -51,7 +51,22 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   (document.getElementById('app-viewport') || document.body).appendChild(view);
 
   const editAt = (i) => (st.artifactEdits[i] = st.artifactEdits[i] || {});
-  const push = () => { try { broadcast(); } catch (_) {} };
+  // Apply the current state to THIS page's preview only (the editor's jewel is
+  // an iframe of the display, so it normally updates through the same
+  // broadcast). Used while the teaching demo plays.
+  const previewOnly = () => {
+    const j = engine();
+    if (!j) return;
+    if (st.background && j.setBackground) j.setBackground(st.background);
+    if (j.applyEdits) j.applyEdits({ symbols: st.artifactEdits || [], frameColor: st.frameColor || null });
+  };
+  // The ghost-hand demo changes colours to TEACH the gesture — that is not the
+  // visitor's jewel, so it must never travel to the big display. The demo's
+  // changes stay in this page's preview; every real edit broadcasts live.
+  const push = () => {
+    if (demoGuard) { previewOnly(); return; }
+    try { broadcast(); } catch (_) {}
+  };
 
   // ---- undo / redo history -------------------------------------------------
   // The snapshot covers EVERYTHING the editor can change: colours, edits, AND the
