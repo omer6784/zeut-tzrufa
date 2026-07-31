@@ -2966,6 +2966,7 @@ function enterCompletion(){
   const h = st.pendantLayout?.height || LH || 480;
   st.finalJewelryState = buildArtifactData(w, h);
   try { localStorage.setItem(FINAL_JEWELRY_KEY, JSON.stringify(st.finalJewelryState)); } catch (_) {}
+  archiveFinishedJewel(st.finalJewelryState);   // it joins the display's idle gallery
   broadcastArtifact();   // push the frozen snapshot to every display before the GIF page mounts
   if (_completionTeardown) { try { _completionTeardown(); } catch (_) {} }
   _completionTeardown = mountCompletion({ /* onSendGif wired in Part B (GIF capture + email service) */ });
@@ -3195,6 +3196,27 @@ window.addEventListener('opening-morph-start', () => {
   st.background = null;
   broadcastArtifact();
 });
+
+/* A finished talisman joins the gallery of real creations shown on the display
+   while the interface is idle. Only the symbol sequence is kept — that IS the
+   piece as the gallery draws it — newest last, most recent 80, and never the
+   same sequence twice. */
+const GALLERY_ARCHIVE_KEY = 'zehut-gallery-archive';
+function archiveFinishedJewel(data){
+  try {
+    const keys = (data && data.symbols3d) || [];
+    if (!Array.isArray(keys) || keys.length < 2) return;
+    const sig = keys.join(',');
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(GALLERY_ARCHIVE_KEY) || '[]'); } catch(_) { list = []; }
+    if (!Array.isArray(list)) list = [];
+    list = list.filter(k => Array.isArray(k) && k.join(',') !== sig);
+    list.push(keys.slice());
+    if (list.length > 80) list = list.slice(list.length - 80);
+    localStorage.setItem(GALLERY_ARCHIVE_KEY, JSON.stringify(list));
+    _artifactBC?.postMessage({ type: 'gallery' });   // a display already open picks it up now
+  } catch(_) { /* best-effort: the gallery falls back to the authored set */ }
+}
 
 function broadcastArtifact(){
   try {

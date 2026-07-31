@@ -192,7 +192,7 @@ function setup() {
   buildQueue = BUILD_KEYS.slice();
 
   window.__jewel = {
-    setSymbols, reset, setBackground, setGematria, applyEdits, setGallery, setSymbolSizes,
+    setSymbols, reset, setBackground, setGematria, applyEdits, setGallery, setGalleryPool, setSymbolSizes,
     setSymbolColors, getLayout, setHighlight,
     isReady: () => finishedBuildingAll,
     captureFrames
@@ -459,10 +459,28 @@ const GALLERY_BG_PAL = [PALETTE.tan, PALETTE.cream, PALETTE.orange, PALETTE.dark
 // A big reservoir of talismans to draw from — the fixed 20 plus generated ones —
 // so cells can keep swapping to fresh, different pieces.
 let galleryPool = null;
+let realPool = null;     // talismans visitors actually finished (newest first)
 function buildGalleryPool() {
-  const pool = GALLERY_CONFIGS.slice();
-  for (let k = pool.length; k < 60; k++) pool.push(galleryConfigFor(k));
+  // Real creations lead; the authored set only fills in behind them, so an
+  // exhibition that has run for a while shows visitors' own pieces.
+  const seen = new Set();
+  const pool = [];
+  const add = (keys) => {
+    if (!Array.isArray(keys) || keys.length < 2) return;
+    const k = keys.join(',');
+    if (seen.has(k)) return;         // never the same talisman twice in the pool
+    seen.add(k); pool.push(keys.slice());
+  };
+  (realPool || []).forEach(add);
+  GALLERY_CONFIGS.forEach(add);
+  for (let k = pool.length; k < 60; k++) add(galleryConfigFor(k));
   galleryPool = pool;
+}
+/* The display feeds in the archive of finished talismans. */
+function setGalleryPool(list) {
+  realPool = Array.isArray(list) ? list.filter(Array.isArray) : null;
+  galleryPool = null;
+  if (galleryMode && finishedBuildingAll) buildGallery();
 }
 // Build ONE card's content (symbols + centre line + frame) for a cell. `gem`
 // varies the frame. Returns null if no symbols are ready.
@@ -522,9 +540,14 @@ function triggerSwap() {
   const free = galleryCards.filter(c => !c.swap);
   if (!free.length) return;
   const card = free[Math.floor(random(free.length))];
-  const cur = card.keys.join(',');
+  // Never show the same talisman twice at once, and never swap a card to what it
+  // already shows — the wall keeps turning over different pieces.
+  const onScreen = new Set(galleryCards.map(c => (c.swap && c.swap.keys ? c.swap.keys : c.keys).join(',')));
   let keys = null;
-  for (let t = 0; t < 12 && !keys; t++) { const cand = galleryPool[Math.floor(random(galleryPool.length))]; if (cand.join(',') !== cur) keys = cand; }
+  for (let t = 0; t < 24 && !keys; t++) {
+    const cand = galleryPool[Math.floor(random(galleryPool.length))];
+    if (!onScreen.has(cand.join(','))) keys = cand;
+  }
   if (!keys) return;
   // A completely different talisman: also switch to a different background colour —
   // one that differs from this card's own AND from its 4-neighbours, so adjacent

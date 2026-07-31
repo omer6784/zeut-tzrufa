@@ -71,12 +71,27 @@ function applyActivity(state) {
   if (window.__jewel && window.__jewel.setGallery) window.__jewel.setGallery(idle);
 }
 
+// ── The idle gallery shows talismans people actually FINISHED ──────────────
+// Every completed piece (the visitor pressed "סיימתי" after the editor) is kept
+// in this archive; the gallery draws from it, newest first, and only falls back
+// to the authored set while there are too few real ones.
+const GALLERY_ARCHIVE_KEY = 'zehut-gallery-archive';
+function readArchive() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(GALLERY_ARCHIVE_KEY) || '[]');
+    return Array.isArray(raw) ? raw.filter(Array.isArray).slice().reverse() : [];   // newest first
+  } catch (_) { return []; }
+}
+function pushArchiveToJewel() {
+  if (window.__jewel && window.__jewel.setGalleryPool) window.__jewel.setGalleryPool(readArchive());
+}
+
 // The engine sets window.__jewel in its p5 setup() and fires 'jewel-loaded'.
 function whenJewelReady(cb) {
   if (window.__jewel) cb();
   else window.addEventListener('jewel-loaded', cb, { once: true });
 }
-whenJewelReady(() => { applyData(latest); applyActivity(activity); });
+whenJewelReady(() => { pushArchiveToJewel(); applyData(latest); applyActivity(activity); });
 
 // Live updates from the main interface (same-origin, any tab/window).
 try {
@@ -86,6 +101,7 @@ try {
       if (!e.data) return;
       if (e.data.type === 'artifact' && e.data.payload) applyData(e.data.payload);
       else if (e.data.type === 'activity') applyActivity(e.data.state);
+      else if (e.data.type === 'gallery') pushArchiveToJewel();   // a visitor just finished a piece
     };
   }
 } catch (_) { /* BroadcastChannel unsupported — storage fallback covers it */ }
@@ -97,5 +113,7 @@ window.addEventListener('storage', (e) => {
     try { applyData(JSON.parse(e.newValue)); } catch (_) { /* ignore */ }
   } else if (e.key === ACTIVITY_STORAGE_KEY && e.newValue) {
     applyActivity(e.newValue);
+  } else if (e.key === GALLERY_ARCHIVE_KEY) {
+    pushArchiveToJewel();
   }
 });
