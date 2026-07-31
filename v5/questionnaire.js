@@ -3200,12 +3200,15 @@ window.addEventListener('opening-morph-start', () => {
 /* A finished talisman joins the gallery of real creations shown on the display
    while the interface is idle. Only the symbol sequence is kept — that IS the
    piece as the gallery draws it — newest last, most recent 80, and never the
-   same sequence twice. */
+   same sequence twice. Only COMPLETE pieces qualify: a run that skipped stages
+   (the step dots allow it) arrives with fewer than six symbols and is not a
+   finished talisman, so it never reaches the wall. */
 const GALLERY_ARCHIVE_KEY = 'zehut-gallery-archive';
+const GALLERY_FULL_STACK = 6;   // one symbol from each of the six symbol-giving stages
 function archiveFinishedJewel(data){
   try {
     const keys = (data && data.symbols3d) || [];
-    if (!Array.isArray(keys) || keys.length < 2) return;
+    if (!Array.isArray(keys) || keys.length < GALLERY_FULL_STACK) return;
     const sig = keys.join(',');
     let list = [];
     try { list = JSON.parse(localStorage.getItem(GALLERY_ARCHIVE_KEY) || '[]'); } catch(_) { list = []; }

@@ -79,7 +79,9 @@ const GALLERY_ARCHIVE_KEY = 'zehut-gallery-archive';
 function readArchive() {
   try {
     const raw = JSON.parse(localStorage.getItem(GALLERY_ARCHIVE_KEY) || '[]');
-    return Array.isArray(raw) ? raw.filter(Array.isArray).slice().reverse() : [];   // newest first
+    // Only complete six-symbol pieces belong on the wall (a run that skipped
+    // stages is not a finished talisman) — also filters anything older.
+    return Array.isArray(raw) ? raw.filter(k => Array.isArray(k) && k.length >= 6).reverse() : [];   // newest first
   } catch (_) { return []; }
 }
 function pushArchiveToJewel() {
