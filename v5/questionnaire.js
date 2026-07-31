@@ -2543,31 +2543,15 @@ function runTimeDemo(){
     await gh.sleep(260); if(dead()) return abort();
     // Actually scroll the wheel forward ~6h while the hand drags up — the sky,
     // sun and digits change together (the hand motion is synced to the duration).
+    // ONE drag: the hours and the MINUTES turn together, so it reads as a single
+    // gesture over the whole clock — not a second demo afterwards.
     const DUR = 2600;
-    if(wheel && wheel.demoScrollBy) wheel.demoScrollBy(6, DUR);
+    if(wheel && wheel.demoScrollBy) wheel.demoScrollBy(6, DUR, null, 25);
     const N = 26;
     for(let i = 1; i <= N && !dead(); i++){ gh.place(sc.x, sc.y - 120 * (i / N)); await gh.sleep(DUR / N); }
     if(dead()) return abort();
     await gh.sleep(280);
     gh.open();
-    // …then the MINUTES: the hand moves onto the minute wheels and scrolls them
-    // too, so it is clear that they are scrollable as well, not only the hours.
-    const mWheel = document.querySelector('#section-3 .tw-mt') || document.querySelector('#section-3 .tw-mu');
-    if(mWheel){
-      const mc = _center(mWheel);
-      gh.move(mc.x, mc.y);
-      await gh.sleep(560); if(dead()) return abort();
-      gh.grab(true);
-      await gh.sleep(220); if(dead()) return abort();
-      const MDUR = 1700;
-      if(wheel && wheel.demoScrollMinutesBy) wheel.demoScrollMinutesBy(25, MDUR);
-      const MN = 18;
-      for(let i = 1; i <= MN && !dead(); i++){ gh.place(mc.x, mc.y - 70 * (i / MN)); await gh.sleep(MDUR / MN); }
-      if(dead()) return abort();
-      await gh.sleep(240);
-      gh.open();
-      await gh.sleep(200);
-    }
     const conf = document.querySelector('.tw-confirm');
     if(conf){
       const cc = _center(conf);

@@ -292,31 +292,20 @@ export function mountTimeWheel(host, { onDone, onHour } = {}){
   // The demo drives the REAL wheel so the sun, sky colour and the digits all
   // change exactly as they would under a finger — not just a hand gliding by.
   teardown.demoSetHour = (h) => { userTouched = false; absMinutes = wmod(h, 24) * 60; hourManual = 0; hRender = hourTarget(); frameUpdate(); };
-  teardown.demoScrollBy = (deltaHours, durMs = 2400, onEnd) => {
+  /* Scrolls the hours AND (optionally) the minutes as ONE motion — both wheels
+     turning together in a single loop. They cannot be driven by two calls: each
+     would cancel the other's animation frame. */
+  teardown.demoScrollBy = (deltaHours, durMs = 2400, onEnd, deltaMinutes = 0) => {
     stopAnim();
     userTouched = false;
-    const startH = hourManual, targetH = hourManual + deltaHours, t0 = performance.now();
+    const startH = hourManual, targetH = hourManual + deltaHours;
+    const startM = absMinutes, targetM = absMinutes + deltaMinutes;
+    const t0 = performance.now();
     const ease = t => 1 - Math.pow(1 - t, 3);
     const step = (now) => {
       const k = Math.min((now - t0) / durMs, 1);
       hourManual = startH + (targetH - startH) * ease(k);
-      hRender = hourTarget();
-      frameUpdate();
-      if(k < 1) raf = requestAnimationFrame(step);
-      else { snap(); onEnd && onEnd(); }
-    };
-    raf = requestAnimationFrame(step);
-  };
-  /* Same as demoScrollBy, but for the MINUTES — so the demo can show that the
-     minute wheels scroll too, not just the hours. */
-  teardown.demoScrollMinutesBy = (deltaMin, durMs = 1700, onEnd) => {
-    stopAnim();
-    userTouched = false;
-    const start = absMinutes, target = absMinutes + deltaMin, t0 = performance.now();
-    const ease = t => 1 - Math.pow(1 - t, 3);
-    const step = (now) => {
-      const k = Math.min((now - t0) / durMs, 1);
-      absMinutes = start + (target - start) * ease(k);
+      if(deltaMinutes) absMinutes = startM + (targetM - startM) * ease(k);
       hRender = hourTarget();
       frameUpdate();
       if(k < 1) raf = requestAnimationFrame(step);
