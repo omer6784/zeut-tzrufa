@@ -808,8 +808,20 @@ export function initRootsWidget(container, opts){
     //    it exits (still phase 'globe'). ──
     s3?.classList.add('roots-exiting');   // slide-out (globe + title + grid)
     s3?.classList.add('roots-marked');    // persistent: keeps title gone, moves instruction
-    doneBtn.hidden = true;
-    controlsEl.hidden = true;
+    // The picker's own content leaves the same way everything else does — a
+    // fade — instead of blinking out the moment the phase flips. Only the
+    // CONTENT fades; the grid and the frame around it are untouched.
+    [doneBtn, controlsEl].forEach((el) => {
+      if (!el) return;
+      el.style.pointerEvents = 'none';
+      // Animated directly rather than through a class: these elements carry
+      // their own CSS transition lists (button colours), which would otherwise
+      // decide whether the opacity ramps at all.
+      const FADE = 420;
+      try { el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: FADE, easing: 'ease', fill: 'forwards' }); }
+      catch (_) { el.style.opacity = '0'; }
+      setTimeout(() => { el.hidden = true; el.style.opacity = ''; el.style.pointerEvents = ''; }, FADE + 40);
+    });
     // ── Phase B (after the exit): reveal the flat world map — the chosen
     //    continents start filling in dot-by-dot. ──
     setTimeout(()=>{

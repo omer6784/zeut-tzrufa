@@ -2281,3 +2281,16 @@ input, textarea, select, button, a, canvas, svg, iframe, video,
 [contenteditable], [draggable], [role], [tabindex] {
   cursor: none !important;
 }
+
+/* Globe → countries: the picker's own content (the "סימנתי" button and the
+   continent controls) fades out with the globe and title instead of blinking
+   away — animated in roots.js, since those elements carry their own transition
+   lists. Content only: the construction grid and everything around it stay. */
+/* The shared band button leaves the same way (it is absolutely positioned, so
+   fading it changes no layout). */
+#section-3.origin-input-phase .stage-band .sb-btn {
+  display: block !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.42s ease !important;
+}
