@@ -890,8 +890,16 @@ export function initRootsWidget(container, opts){
     if(!el){
       el = document.createElement('div');
       el.className = 'roots-input-error';
-      el.style.cssText = 'font-family:ArbelG,sans-serif;font-size:12px;color:#ff601a;margin-top:6px;direction:rtl;min-height:15px;transition:opacity .3s ease;';
-      inputEl.parentElement?.appendChild(el);
+      // Sits UNDER the writing line, a touch smaller than the interface text so
+      // it reads as a quiet note rather than another instruction.
+      // Hangs UNDER the writing line itself (the row is the containing block), so
+      // it never pushes the buttons below it. A touch smaller than the interface
+      // text — a quiet note, not another instruction.
+      el.style.cssText = 'position:absolute;top:100%;left:0;right:0;margin-top:7px;'
+        + 'font-family:ArbelG,sans-serif;font-size:10.5px;letter-spacing:0.02em;color:#ff601a;'
+        + 'direction:rtl;text-align:center;line-height:1.3;pointer-events:none;transition:opacity .3s ease;';
+      const row = inputEl.closest('.roots-input-row') || inputEl.parentElement;
+      row?.appendChild(el);
     }
     el.textContent = msg; el.style.opacity = '1';
     clearTimeout(_errTimer);
