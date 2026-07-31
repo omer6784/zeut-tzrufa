@@ -137,8 +137,10 @@ export function mountCompletion({ } = {}) {
       // timeout is a generous safety net only.
       const to = setTimeout(() => { if (!settled) { settled = true; reject(new Error('capture timeout')); } }, 25000);
       win.__jewel.captureFrames({
-        // 100 frames × 66ms → a ~6.6s GIF (double the original length).
-        count: 100, intervalMs: 66, size: 600,
+        // 60 frames × 66ms → a ~4s loop at 15fps. Fewer, FULL-quality frames beat
+        // more frames that the size guard then has to throw away (dropping every
+        // second frame is what made the motion stutter).
+        count: 60, intervalMs: 66, size: 600,
         onFrame: (data, w, h) => { frames.push({ data: new Uint8ClampedArray(data), w, h }); },
         onDone: () => { if (!settled) { settled = true; clearTimeout(to); resolve(); } },
       });
@@ -152,19 +154,39 @@ export function mountCompletion({ } = {}) {
     // is too big, re-encode with every 2nd frame at double the delay (SAME total
     // duration, half the data), repeating until it fits.
     const BINARY_LIMIT = 4.4 * 1024 * 1024;   // ×4/3 as base64 ≈ 5.9MB body < 6MB cap
+    // ONE palette for the whole animation, built from pixels sampled across the
+    // loop. A palette per frame made the dots shimmer (each frame quantised its
+    // colours slightly differently) and wrote a colour table into every frame;
+    // a single global table is both truer to the screen and much smaller — which
+    // is what keeps the export under the limit at full frame rate.
+    const buildGlobalPalette = () => {
+      const picks = [];
+      for (let i = 0; i < frames.length; i += Math.max(1, Math.round(frames.length / 8))) picks.push(frames[i]);
+      const per = picks[0].data.length;
+      const merged = new Uint8ClampedArray(per * picks.length);
+      picks.forEach((f, i) => merged.set(f.data, i * per));
+      return quantize(merged, 256);
+    };
     let step = 1, delay = 66, bytes = null;
-    for (let attempt = 0; attempt < 4; attempt++) {
+    const palette = buildGlobalPalette();
+    for (let attempt = 0; attempt < 3; attempt++) {
       const enc = GIFEncoder();
+      let first = true;
       for (let i = 0; i < frames.length; i += step) {
         const f = frames[i];
-        const palette = quantize(f.data, 256);
         const index = applyPalette(f.data, palette);
-        enc.writeFrame(index, f.w, f.h, { palette, delay });
+        // Only the first frame carries the palette — the rest reuse it as the
+        // GIF's global colour table (no per-frame tables, no colour flicker).
+        enc.writeFrame(index, f.w, f.h, first ? { palette, delay } : { delay });
+        first = false;
       }
       enc.finish();
       bytes = enc.bytes();
+      const kept = Math.ceil(frames.length / step);
+      console.info(`[GIF] ${kept}/${frames.length} frames @ ${delay}ms · ${frames[0].w}×${frames[0].h} · ${(bytes.length / 1048576).toFixed(2)}MB`
+        + (bytes.length <= BINARY_LIMIT ? ' · full quality' : ' · over the limit, re-encoding'));
       if (bytes.length <= BINARY_LIMIT) break;
-      step *= 2; delay *= 2;
+      step *= 2; delay *= 2;   // last resort only
     }
     return bytesToBase64(bytes);
   }

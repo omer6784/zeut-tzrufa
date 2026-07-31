@@ -7472,3 +7472,14 @@ html:not(.portrait) #section-3[data-stage="2"] .dot-tiles-inner {
   0%, 100% { opacity: 1; }
   50%      { opacity: 0.82; }
 }
+
+/* Completion page: both buttons read CREAM — dotted frame and label alike — on
+   the orange plate. (The label was coming out dark: nothing in the app's own
+   sheets sets it, so the browser's default button colour was winning over the
+   inherited value.) */
+#completion-view .cv-btn,
+#completion-view .cv-btn.cv-btn-dark,
+#completion-view .cv-modal .cv-btn {
+  color: #f5f5ed !important;
+  --b: #f5f5ed;
+}
