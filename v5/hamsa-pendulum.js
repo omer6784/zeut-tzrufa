@@ -35,9 +35,12 @@ export function mountHamsaPendulum(container) {
     // Story/recording frame (demo.html loads index.html with ?story=1) forces the
     // eye so the portrait opening matches the mockup; the exhibition stays random.
     const STORY_MODE = /[?&]story=1\b/.test(window.location.search);
+    // ?pendulum=bird pins one symbol — for checking a specific model's cord.
+    const forced = (window.location.search.match(/[?&]pendulum=([a-zA-Z]+)/) || [])[1];
+    const forcedPath = forced && SYMBOL_OBJS.find(f => f.toLowerCase().includes('/' + forced.toLowerCase() + '.obj'));
     const fileName = STORY_MODE
       ? '/jewel/objs/eye.obj'
-      : SYMBOL_OBJS[Math.floor(Math.random() * SYMBOL_OBJS.length)];
+      : (forcedPath || SYMBOL_OBJS[Math.floor(Math.random() * SYMBOL_OBJS.length)]);
 
     // Per-symbol base orientation so every OBJ faces the viewer (frontal). Some
     // OBJs are modelled edge-on / lying flat; a base rotate turns their face to +Z.
@@ -114,7 +117,7 @@ export function mountHamsaPendulum(container) {
     // from the letters art) — so the cord reads as slung over the bar.
     const STORY_RESH_BAR_FRAC = 0.52;
 
-    let objectMinY = 0, objectMaxY = 0;
+    let objectMinY = 0, objectMaxY = 0, objectAttachY = 0;
     let cordAnchorY = 0, cordPivotY = 0, cordAttachY = 0;
     let halfD = 1, halfW = 1;
     let canvasEl = null;        // the p5 canvas element, for measuring its screen rect
@@ -271,6 +274,18 @@ export function mountHamsaPendulum(container) {
     function getObjectBounds() {
       objectMinY = Infinity; objectMaxY = -Infinity;
       for (const v of vertices) { objectMinY = p.min(objectMinY, v.y); objectMaxY = p.max(objectMaxY, v.y); }
+      // Where the cord can actually GRIP the symbol: the highest point that sits
+      // near the cord line (x ≈ 0), not the model's highest point overall. On a
+      // shape whose top is off to one side — a bird's head, a horseshoe's arm —
+      // the global top is nowhere near the centre, so a cord ending there stops
+      // in empty space and the symbol looks unheld. Widen the band until it
+      // catches something; fall back to the global top.
+      objectAttachY = Infinity;
+      for (let band = OBJ_SCALE * 0.06; band <= OBJ_SCALE * 0.5; band *= 1.8) {
+        for (const v of vertices) if (Math.abs(v.x) <= band && Math.abs(v.z) <= band * 2) objectAttachY = p.min(objectAttachY, v.y);
+        if (isFinite(objectAttachY)) break;
+      }
+      if (!isFinite(objectAttachY)) objectAttachY = objectMinY;
     }
 
     /* ── Shell sampling — ray-cast the surface front/back + sides into a dotted
@@ -398,9 +413,9 @@ export function mountHamsaPendulum(container) {
     function buildCordDots() {
       staticCordDots = []; movingCordDots = [];
       const measured = computeCordTopY();
-      // Attach a touch INTO the symbol's top (objectMinY is the topmost point) so the
-      // cord clearly HOLDS it — no floating gap between the last cord dot and the symbol.
-      cordAttachY = objectMinY + 10;
+      // Attach a touch INTO the symbol's top AT THE CORD LINE, so the cord clearly
+      // HOLDS it — no floating gap between the last cord dot and the symbol.
+      cordAttachY = objectAttachY + 10;
       cordAnchorY = (measured != null) ? measured : CORD_TOP_Y_FALLBACK;
       cordPivotY = cordAnchorY;
       // ONE static dot at the anchor (the pivot, ON the grid line — the rotation-aware
