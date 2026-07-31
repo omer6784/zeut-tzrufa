@@ -26,7 +26,9 @@ const HAND_SVG = `
   </g>
 </svg>`;
 
-let hand = null, ripple = null, token = 0;
+let hand = null, ripple = null, guide = null, token = 0;
+let demoLive = false;      // a stage demo is on screen right now
+let aborted = false;       // the visitor touched — every running sequence must drain
 
 function ensure() {
   if (hand) return;
@@ -37,11 +39,45 @@ function ensure() {
   ripple = document.createElement('span');
   ripple.className = 'demo-ripple';
   hand.appendChild(ripple);
+  // The guide label rides WITH the hand (a child, so it needs no animation of
+  // its own): a short dotted connector in the interface's own dot language and
+  // the stage's EXISTING instruction text — no tooltip, box, frame or shadow.
+  guide = document.createElement('span');
+  guide.className = 'dh-guide';
+  guide.innerHTML = '<span class="dh-line"></span><span class="dh-text"></span>';
+  hand.appendChild(guide);
   document.body.appendChild(hand);
 }
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-function moveTo(x, y) { hand.style.left = x + 'px'; hand.style.top = y + 'px'; }
+/* The stage's own instruction element — its text becomes the label while the
+   demo runs, and it is put back the moment the visitor takes over. */
+/* TRIAL SCOPE: the guide (bigger hand + travelling label) is switched on for the
+   PATHS stage only for now; every other stage keeps the demo exactly as it was.
+   Widening it later is a one-line change here. */
+const GUIDE_STAGES = ['5'];
+function guideAllowed() {
+  const sec = document.getElementById('section-3');
+  return !!sec && GUIDE_STAGES.includes(sec.dataset.stage);
+}
+function stageNote() {
+  const els = [document.querySelector('#section-3 .stage-band .sb-note'), document.getElementById('q-instruction')];
+  return els.find(e => e && e.textContent.trim() && e.offsetParent !== null) || null;
+}
+/* Label side chosen from where the hand IS: never off-screen, never over the
+   element being demonstrated. */
+function placeGuide(x, y) {
+  if (!guide) return;
+  const W = window.innerWidth, H = window.innerHeight;
+  guide.classList.remove('to-left', 'to-right', 'to-top');
+  const room = 300;
+  if (x > W - room) guide.classList.add('to-left');
+  else if (x < room) guide.classList.add('to-right');
+  else guide.classList.add(x > W / 2 ? 'to-left' : 'to-right');
+  if (y < 90 || H - y < 90) guide.classList.add('to-top');
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, aborted ? 0 : ms));
+function moveTo(x, y) { hand.style.left = x + 'px'; hand.style.top = y + 'px'; placeGuide(x, y); }
 function pulse() { ripple.classList.remove('is-go'); void ripple.offsetWidth; ripple.classList.add('is-go'); }
 
 /* Low-level primitives for stages that must sync the hand with their own state
@@ -50,8 +86,14 @@ export function getGhostHand() {
   ensure();
   return {
     el: hand, sleep,
-    show(tone) { hand.classList.toggle('is-dark', tone === 'dark'); hand.classList.add('is-on'); },
-    hide() { hand.classList.remove('is-on', 'is-grab'); },
+    show(tone) {
+      if (aborted) return;
+      hand.classList.toggle('is-dark', tone === 'dark');
+      hand.classList.add('is-on');
+      hand.classList.toggle('is-demo', guideAllowed());   // is-demo: ~18% larger + slower — it reads as a guide, not the cursor
+      startGuide();
+    },
+    hide() { hand.classList.remove('is-on', 'is-grab', 'is-demo'); endGuide(); },
     // Jump to a point with no glide — use before show() so the hand appears
     // already on target instead of flashing in from the corner.
     place(x, y) { const tr = hand.style.transition; hand.style.transition = 'none'; moveTo(x, y); void hand.offsetWidth; hand.style.transition = tr; },
@@ -65,6 +107,40 @@ export function getGhostHand() {
     async tapPoint() { hand.classList.add('is-point'); pulse(); await sleep(260); },
   };
 }
+
+/* Take the stage's existing instruction out of its fixed slot and onto the
+   hand; put it back when the demo ends. */
+function startGuide() {
+  if (demoLive || aborted || !guideAllowed()) return;
+  demoLive = true;
+  const note = stageNote();
+  const text = note ? note.textContent.trim() : '';
+  guide.querySelector('.dh-text').textContent = text;
+  guide.classList.toggle('is-on', !!text);
+  if (note) { note.dataset.dhHidden = '1'; note.style.visibility = 'hidden'; }
+}
+function endGuide() {
+  demoLive = false;
+  if (guide) guide.classList.remove('is-on');
+  document.querySelectorAll('[data-dh-hidden]').forEach(n => {
+    n.style.visibility = '';
+    delete n.dataset.dhHidden;
+  });
+}
+/* The visitor's FIRST touch: the demo stops at once, the label + connector go,
+   the hand returns to its normal size — and that same touch does its work (the
+   input lock lets it through, see lockInput). Sequences already in flight drain
+   instantly because sleep() returns immediately once aborted. */
+export function handoffToUser() {
+  if (aborted) return;
+  aborted = true;
+  token++;
+  if (hand) hand.classList.remove('is-on', 'is-grab', 'is-point', 'is-demo');
+  endGuide();
+  unlockInput();
+}
+/* Every stage entry starts a fresh demo state (a new stage may demo again). */
+export function resetDemoState() { aborted = false; endGuide(); }
 
 /* points: array of {x,y} screen coords to tap in sequence; loops until stopped.
    opts.tone: 'light' (default, cream) or 'dark' — pick for contrast on the stage. */
@@ -113,7 +189,14 @@ let _lockRelease = null;
 const _LOCK_TYPES = ['pointerdown', 'pointerup', 'pointermove', 'touchstart', 'touchmove', 'touchend', 'wheel', 'click', 'contextmenu', 'keydown', 'keypress', 'keyup', 'input', 'beforeinput'];
 export function lockInput() {
   if (_lockRelease) return;
-  const swallow = (e) => { if (e.isTrusted) { e.preventDefault(); e.stopImmediatePropagation(); } };
+  const START = { pointerdown: 1, touchstart: 1, mousedown: 1 };
+  const swallow = (e) => {
+    if (!e.isTrusted) return;
+    // The first real touch BOTH stops the demo and counts as the visitor's own
+    // action — it is never swallowed, so nothing has to be pressed twice.
+    if (START[e.type]) { handoffToUser(); return; }
+    e.preventDefault(); e.stopImmediatePropagation();
+  };
   const opts = { capture: true, passive: false };
   _LOCK_TYPES.forEach(t => document.addEventListener(t, swallow, opts));
   window.__inputLocked = true;   // the touch-sound checks this (its window-capture listener fires first)

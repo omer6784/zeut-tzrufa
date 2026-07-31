@@ -15,7 +15,7 @@
    plays once on entry to teach the tap-to-edit idea (same idiom as the stages).
    ──────────────────────────────────────────────────────────────────────── */
 
-import { getGhostHand, lockInput, unlockInput } from './demo-hand.js';
+import { getGhostHand, lockInput, unlockInput, resetDemoState } from './demo-hand.js';
 
 const PALETTE = [
   { hex: '#ff5003', name: 'כתום' },
@@ -390,6 +390,7 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     await gh.sleep(250);
     finish();                                   // restore → the visitor starts clean
   }
+  resetDemoState();   // the editor teaches again, even after a handoff on the last stage
   const demoTimer = setTimeout(runEditorDemo, 1400);
 
   // ---- left wordmark typewriter (matches the stage sidebar) ----------------

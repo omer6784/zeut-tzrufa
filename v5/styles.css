@@ -7438,3 +7438,43 @@ html:not(.portrait) #section-3[data-stage="2"] .dot-tiles-inner {
   transform: translateY(-10px) scale(1.22);
   transform-origin: center center;
 }
+
+/* ── Demo guide: the hand teaches, and the stage's OWN instruction rides with it
+   ────────────────────────────────────────────────────────────────────────────
+   While a stage demonstrates, the hand grows ~18% and slows a touch so it reads
+   as a guide rather than the visitor's cursor, and the stage's existing
+   instruction leaves its fixed slot to sit beside the hand, joined by a short
+   dotted connector in the interface's own dot language. No tooltip, box, frame
+   or shadow — just the text and the dots. The whole thing is one element, so it
+   moves with the hand by construction. */
+.demo-hand.is-demo {
+  transform: translate(-28%, -18%) scale(1.18);
+  transition: left 0.95s cubic-bezier(0.4, 0, 0.2, 1),
+              top 0.95s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.4s ease, transform 0.18s ease;
+}
+.demo-hand.is-demo.is-grab { transform: translate(-28%, -18%) scale(1.04); }
+.dh-guide {
+  position: absolute; top: 46%; display: none; align-items: center; gap: 8px;
+  pointer-events: none; white-space: nowrap;
+}
+.demo-hand.is-demo .dh-guide.is-on { display: flex; }
+.dh-guide .dh-text {
+  font-family: 'ArbelG', sans-serif; font-size: 13px; letter-spacing: 0.03em;
+  color: currentColor; direction: rtl;
+}
+/* Connector — the SAME dot size and pitch as every dotted line in the interface. */
+.dh-guide .dh-line {
+  width: 34px; height: var(--grid-dot-size, 1.6px); flex: none;
+  background-image: radial-gradient(circle, currentColor calc(var(--grid-dot-size, 1.6px) / 2), transparent calc(var(--grid-dot-size, 1.6px) / 2 + 0.35px));
+  background-size: var(--grid-dot-gap, 5.5px) var(--grid-dot-size, 1.6px);
+  background-repeat: repeat-x;
+}
+.dh-guide.to-right { left: 100%; flex-direction: row; margin-left: 4px; }
+.dh-guide.to-left  { right: 100%; flex-direction: row-reverse; margin-right: 4px; }
+.dh-guide.to-top   { top: auto; bottom: 100%; margin-bottom: 6px; }
+
+/* ── One pointer at a time ──────────────────────────────────────────────────
+   The interface draws its own hand, so the native cursor must never appear
+   beside it — on any control, canvas, drag, popup or stage. */
+*, *::before, *::after { cursor: none !important; }
