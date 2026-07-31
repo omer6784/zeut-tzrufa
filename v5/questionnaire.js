@@ -8,7 +8,7 @@ import { SYMBOLS_3D } from './symbols-3d.js';
 import { mountTimeWheel } from './time-wheel.js';
 import { mountLightGate } from './light-gate.js';
 import { mountCalibration } from './calibration.js';
-import { playHandDemo, stopHandDemo, getGhostHand, lockInput, unlockInput, resetDemoState } from './demo-hand.js';
+import { playHandDemo, stopHandDemo, getGhostHand, lockInput, unlockInput } from './demo-hand.js';
 import { mountDotTiles } from './dot-tiles.js';
 import { crossfadeStage } from './stage-crossfade.js';
 import { mountDrive } from './drive.js';
@@ -1318,9 +1318,6 @@ function buildHatchSVG(){
 }
 
 function renderQuestion(idx){
-  // A new stage may teach again: clear any handoff from the previous one (and
-  // any label/connector it left behind).
-  resetDemoState();
   // Plain swap — NO View-Transition crossfade. Stage-to-stage transitions are
   // handled solely by the unified colour crossfade (crossfadeStage), which swaps
   // the content itself; a browser screen-crossfade here would be a second, generic
