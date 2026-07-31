@@ -12,7 +12,7 @@ import { playHandDemo, stopHandDemo, getGhostHand, lockInput, unlockInput } from
 import { mountDotTiles } from './dot-tiles.js';
 import { crossfadeStage } from './stage-crossfade.js';
 import { mountDrive } from './drive.js';
-import { mountProfessionCards } from './profession-cards.js';
+import { pickSymbolForWord, SYMBOL_VALUES as DRIVE_SYMBOL_VALUES } from './drive-words.js';
 import { mountEditor } from './editor.js';
 import { mountCompletion } from './completion.js';
 
@@ -556,6 +556,7 @@ function pickLightSymbol(family){
   return all.length ? all[Math.floor(Math.random() * all.length)] : null;
 }
 window.__lightTest = { pickLightSymbol, groups: LIGHT_POINT_SYMBOL_GROUPS };  // dev/verification
+window.__driveTest = { pickSymbolForWord, values: DRIVE_SYMBOL_VALUES };      // dev/verification
 
 const COUNTRY_MOTIFS = {
   'מרוקו':'hamsa', 'אלג׳יריה':'yaz', 'תוניסיה':'nazar', 'לוב':'nazar',
@@ -726,7 +727,7 @@ const QUESTIONS = [
   /* Stages 6–7 are placeholders for now (fixed grid stays, no middle content):
      6 = "שעה" (not built yet), 7 = empty. The former stars stage is retired. */
   { id:'stars',     label:'שעה',        text:'',                              type:'time',        styleStage:3 },
-  { id:'personal',  label:'עיסוק',      text:'מה תחום\nהעיסוק שלך?',           type:'drive',       styleStage:4 },
+  { id:'personal',  label:'כוח מניע',   text:'מה מניע\nאותך?',                type:'drive',       styleStage:4 },
   { id:'name',      label:'שם',         text:'הזינו את שמכם המלא',             type:'text',   placeholder:'כתבי את שמך...', styleStage:6 },
 ];
 
@@ -738,7 +739,7 @@ const INSTRUCTIONS = {
   word: 'מתחו קו בין הנקודה לעיגול',
   roots: 'גררו את הנקודה במסלול שאתם בוחרים',
   stars: 'גללו ובחרו את השעה הרצויה',
-  personal: 'בחרו את תחום העיסוק שלכם',
+  personal: 'בחרו את המילה שמושכת אתכם',
   'life-wish': 'בחרו את האופן בו תרצו לנוע',
   name: 'הזינו את שמכם המלא',
 };
@@ -1945,11 +1946,19 @@ function _renderQuestionImpl(idx){
     // otherwise overwrite the mounted field.
     wrap.classList.add('drive-active');
     wrap.innerHTML = '';
-    st._driveTeardown = mountProfessionCards(wrap, {
-      onSelect: (label, symbol) => {
+    st._driveTeardown = mountDrive(wrap, {
+      onSelect: (word) => {
         st.answers = st.answers || {};
-        st.answers.personal = label;
-        st._forcedSymbol = symbol;
+        st.answers.personal = word;
+        // No word→symbol map. The word and every symbol carry the same four
+        // values (הגנה · צמיחה · חיבור · דרך); the visitor's profile is this
+        // word weighted with everything the earlier stages already gave them,
+        // and the symbol is the closest unused match to that whole journey.
+        const context = (st.chosenSymbols || []).slice();
+        const res = pickSymbolForWord(word, context, context, Object.keys(SYMBOL_INFO_2D).filter(k => SYMBOLS_3D[k]));
+        st.driveChoice = { word, profile: res.profile, symbol: res.symbol, top: res.ranked.slice(0, 4) };
+        console.log('[drive] symbol choice:', st.driveChoice);
+        if (res.symbol) st._forcedSymbol = res.symbol;
         armBand(advance);              // light up "המשך"; the press continues
       },
     });
@@ -2338,53 +2347,52 @@ function runTilesDemo(){
    It resets the pick afterwards so the visitor starts clean. Input is locked for
    its duration (lockInput). */
 function runProfDemo(){
-  const pc = st._driveTeardown;
-  if(!pc || !pc.cardCenter || !document.querySelector('.prof-grid')) return;
-  const idx = 6;   // "בנייה והנדסה" — the gear reads clearly
+  // The words float free, so the demo simply APPROACHES one: the hand drifts in
+  // and the word answers by leaning toward it, growing and glowing (drive.js
+  // does that from the real pointer distance) — showing the pull rather than a
+  // press. Illustrative only: it never selects for the visitor.
+  const field = document.getElementById('drive-field');
+  const words = field ? [...field.querySelectorAll('.drive-word')] : [];
+  if(!words.length) return;
   const my = st._profDemoToken = (st._profDemoToken || 0) + 1;
   lockInput();
   const cleanup = () => unlockInput();
 
   (async () => {
     const gh = getGhostHand();
-    const dead = () => my !== st._profDemoToken || !document.querySelector('.prof-grid');
+    const dead = () => my !== st._profDemoToken || !document.getElementById('drive-field');
     const abort = () => { gh.hide(); cleanup(); };
-    const c = pc.cardCenter(idx);
-    if(!c) return abort();
+    // A word near the middle of the field reads best.
+    const fr = field.getBoundingClientRect();
+    const target = words.reduce((best, el) => {
+      const r = el.getBoundingClientRect();
+      const d = Math.hypot(r.left + r.width / 2 - (fr.left + fr.width / 2), r.top + r.height / 2 - (fr.top + fr.height / 2));
+      return (!best || d < best.d) ? { el, d, r } : best;
+    }, null);
+    if(!target) return abort();
+    const cx = target.r.left + target.r.width / 2, cy = target.r.top + target.r.height / 2;
+
     await gh.sleep(300); if(dead()) return abort();
-    gh.open(); gh.place(c.x, (window.innerHeight || 900) + 60); gh.show('dark');
-    await gh.sleep(90); if(dead()) return abort();
-
-    // 1. point to a card and tap it → it selects (others dim, "המשך" lights)
-    gh.point(true);
-    gh.move(c.x, c.y);
-    await gh.sleep(650); if(dead()) return abort();
-    await gh.tapPoint();
-    pc.selectCard(idx);
-    await gh.sleep(900); if(dead()) return abort();
-
-    // 2. move to "המשך" and press it (illustrative — does not actually advance)
-    gh.open();
-    const btn = document.querySelector('.stage-band .sb-btn');
-    if(btn){
-      const b = btn.getBoundingClientRect();
-      gh.move(b.left + b.width / 2, b.top + b.height / 2);
-      await gh.sleep(700); if(dead()) return abort();
-      btn.classList.add('is-pressed');
-      await gh.tap();
-      btn.classList.remove('is-pressed');
+    gh.open(); gh.place(cx + 150, (window.innerHeight || 900) + 60); gh.show('dark');
+    await gh.sleep(120); if(dead()) return abort();
+    // Drift in slowly — the word feels it coming and reaches back.
+    const N = 16;
+    for(let i = 1; i <= N && !dead(); i++){
+      const f = i / N;
+      const x = cx + 150 * (1 - f), y = cy + 120 * (1 - f);
+      gh.move(x, y);
+      window.dispatchEvent(new PointerEvent('pointermove', { clientX: x, clientY: y, bubbles: true }));
+      await gh.sleep(70);
     }
-    await gh.sleep(450);
-    // Reset so the visitor starts clean: clear the pick + re-dim "המשך".
-    pc.deselect();
-    const sb = ensureStageBand();
-    if(sb){ sb.btn.classList.add('is-disabled'); st._stageContinue = null; }
-    st._forcedSymbol = null;
+    if(dead()) return abort();
+    gh.point(true);
+    await gh.sleep(900); if(dead()) return abort();
+    gh.open();
+    await gh.sleep(400);
     gh.hide(); cleanup();
   })();
 }
 
-/* Screen-space centre of a DOM/SVG element. */
 function _center(el){ if(!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
 
 /* Ghost-hand demo for the LIGHT-POINT stage: an open hand presses a FIXED yellow

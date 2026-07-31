@@ -530,7 +530,13 @@
       "Bash(awk -F: '$1>4930 && $1<5040')",
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=184/styles.css?v=185/' index.html)",
       "Bash(perl -pi -e 's/jewel-engine\\\\.js\\\\?v=77/jewel-engine.js?v=78/' display.html)",
-      "Bash(node --check hamsa-pendulum.js)"
+      "Bash(node --check hamsa-pendulum.js)",
+      "Bash(awk -F: '$1>1940 && $1<2000')",
+      "Bash(sed -e 's|const DRIVE = \\\\['\\\\''lotus'\\\\'','\\\\''dharma'\\\\'','\\\\''anah'\\\\'','\\\\''eye'\\\\'','\\\\''rimon'\\\\'','\\\\''tiltan'\\\\'','\\\\''djed'\\\\'','\\\\''hamsa'\\\\''\\\\];|const DRIVE_G = { art:['\\\\''lotus'\\\\'','\\\\''spiral'\\\\'','\\\\''triskele'\\\\'','\\\\''moon'\\\\''], sci:['\\\\''dharma'\\\\'','\\\\''circle'\\\\'','\\\\''hexagram'\\\\'','\\\\''endlessknot'\\\\''], edu:['\\\\''anah'\\\\'','\\\\''scarab'\\\\'','\\\\''djed'\\\\'','\\\\''vegvisir'\\\\''], med:['\\\\''eye'\\\\'','\\\\''hamsa'\\\\'','\\\\''algiz'\\\\'','\\\\''horseshoe'\\\\''], biz:['\\\\''rimon'\\\\'','\\\\''sun'\\\\'','\\\\''fish'\\\\'','\\\\''cowrie'\\\\''], nat:['\\\\''tiltan'\\\\'','\\\\''lotus'\\\\'','\\\\''fish'\\\\'','\\\\''snake'\\\\''], eng:['\\\\''djed'\\\\'','\\\\''pyramid'\\\\'','\\\\''diamond'\\\\'','\\\\''pentagram'\\\\''], com:['\\\\''hamsa'\\\\'','\\\\''triquetra'\\\\'','\\\\''solarcross'\\\\'','\\\\''bird'\\\\''] };|' -e 's|const d = DRIVE.filter\\(k => !used.has\\(k\\)\\); out.push\\(d.length ? pickSkewed\\(d, rnd\\) : pick\\(DRIVE, rnd\\)\\);|out.push\\(draw\\(DRIVE_G, pickSkewed\\(Object.keys\\(DRIVE_G\\), rnd\\), used, rnd\\)\\);|' /private/tmp/claude-501/-Users-omershushan-Desktop-final-project-code/ce2894cd-0dff-4c67-829d-9d8541009103/scratchpad/skew.mjs)",
+      "Bash(node /private/tmp/claude-501/-Users-omershushan-Desktop-final-project-code/ce2894cd-0dff-4c67-829d-9d8541009103/scratchpad/skew2.mjs)",
+      "Bash(node --check drive.js)",
+      "Bash(curl -s \"http://localhost:5173/v5/styles.css?v=187\")",
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=185/styles.css?v=188/' index.html)"
     ]
   },
   "hooks": {

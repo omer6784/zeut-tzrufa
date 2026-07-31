@@ -13,7 +13,7 @@
    the small drift, because the packing keeps a padding wider than the drift.
    ──────────────────────────────────────────────────────────────────────── */
 
-import { DISPLAY_WORDS, symbolForWord } from './drive-words.js';
+import { DISPLAY_WORDS } from './drive-words.js';
 
 /* Deterministic PRNG (mulberry32) — same sequence every mount. */
 function makeRng(seed) {
@@ -150,6 +150,36 @@ export function mountDrive(host, opts = {}) {
   //    tab where requestAnimationFrame is paused.
   setTimeout(() => field.classList.add('is-in'), 40);
 
+  // 3b. Mutual pull. A word does not just sit and wait to be picked: as the
+  //     visitor comes near, it LEANS toward them, grows a little, takes a soft
+  //     halo and breathes. Everything else keeps drifting as before — so the
+  //     approach feels like the word answering, not a hover state.
+  const MAGNET_R = 190;       // how far a word can feel the visitor
+  const MAGNET_PULL = 16;     // px it may lean toward them
+  // Driven straight off the pointer (no animation loop): 14 words is nothing to
+  // measure, the CSS transition does the smoothing, and it keeps working even
+  // when frame callbacks are throttled.
+  function onPointer(e) {
+    if (chosen || !placed) return;
+    const px = e.clientX, py = e.clientY;
+    for (const el of nodes) {
+      const r = el.getBoundingClientRect();
+      const dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height / 2);
+      const d = Math.hypot(dx, dy);
+      const k = d < MAGNET_R ? (1 - d / MAGNET_R) : 0;   // 0 far away → 1 right on it
+      const e2 = k * k;                                   // eases in as they close
+      el.style.setProperty('--pull-x', (dx / (d || 1) * MAGNET_PULL * e2).toFixed(1) + 'px');
+      el.style.setProperty('--pull-y', (dy / (d || 1) * MAGNET_PULL * e2).toFixed(1) + 'px');
+      el.style.setProperty('--near', e2.toFixed(3));
+      el.classList.toggle('is-near', k > 0.12);
+    }
+  }
+  function stopMagnet() {
+    removeEventListener('pointermove', onPointer);
+    nodes.forEach(el => { el.classList.remove('is-near'); el.style.setProperty('--near', '0'); });
+  }
+  addEventListener('pointermove', onPointer, { passive: true });
+
   // 4. Selection. (`chosen` is declared above so layout() freezes once a word is
   //    picked — no re-layout mid-animation.)
   const select = (el) => {
@@ -157,8 +187,8 @@ export function mountDrive(host, opts = {}) {
     chosen = true;
     if (ro) { try { ro.disconnect(); } catch (_) {} ro = null; }
     const word = el.dataset.word;
-    const symbol = symbolForWord(word);
     field.classList.add('is-choosing');
+    stopMagnet();
 
     // scatter the others outward from the chosen word, fading
     const cx = parseFloat(el.style.left), cy = parseFloat(el.style.top);
@@ -178,7 +208,7 @@ export function mountDrive(host, opts = {}) {
 
     // after it has settled centre-stage, dissolve it into dots that stream to
     // the jewel, then hand back to the questionnaire.
-    setTimeout(() => dissolveToDots(el, () => onSelect(word, symbol)), 900);
+    setTimeout(() => dissolveToDots(el, () => onSelect(word)), 900);
   };
 
   // dot dissolve: sample points across the word box, fly them toward the jewel
@@ -216,6 +246,7 @@ export function mountDrive(host, opts = {}) {
   // st._driveTeardown() (like every other mount*). Removes the body-level field
   // so the words never linger onto other stages.
   return () => {
+    stopMagnet();
     if (ro) { try { ro.disconnect(); } catch (_) {} ro = null; }
     retryTimers.forEach(clearTimeout);
     try { field.remove(); } catch (_) {}
