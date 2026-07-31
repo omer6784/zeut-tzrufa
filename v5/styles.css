@@ -1317,7 +1317,7 @@ body::-webkit-scrollbar-thumb {
   min-height: 0;
   border-radius: 0;      /* right angles — the pressed orange plate is a true square */
   overflow: hidden;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   pointer-events: auto;
   transition: opacity 0.4s ease, transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.28s ease;
 }
@@ -1357,7 +1357,7 @@ body::-webkit-scrollbar-thumb {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 2px;
   /* No plate — the cards float directly on the orange stage. */
-  cursor: pointer; pointer-events: auto;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */ pointer-events: auto;
   opacity: 0; transform: translateY(14px);
   transition: opacity 0.5s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -1382,7 +1382,7 @@ body::-webkit-scrollbar-thumb {
   height: 100%;
 }
 .dot-tile.is-dimmed { opacity: 0.5; }
-.dot-tile.is-chosen { cursor: default; }
+.dot-tile.is-chosen { cursor: none;   /* was: default — the interface draws its own pointer */ }
 
 #word-field {
   position: relative;
@@ -1560,7 +1560,7 @@ body::-webkit-scrollbar-thumb {
   line-height: 1;
   color: #282828;
   white-space: nowrap;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   /* Always rendered (opacity 1) so a throttled/frozen tab can never leave the
      words invisible; the entrance is a short RISE (transform), which stays
      visible even if the transition is paused. */
@@ -2687,7 +2687,7 @@ body.theme-negative .q-progress-sep { background: rgba(255, 250, 230, 0.2); }
 }
 .paths-source {
   fill: #ff601a;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   transition: r 0.18s ease-out;
 }
 .paths-source.active { r: 2.5px; }
@@ -6075,7 +6075,7 @@ body.theme-negative .finish-blink {
 html:not(.cursor-active) *,
 html:not(.cursor-active) *::before,
 html:not(.cursor-active) *::after {
-  cursor: auto !important;
+  cursor: none;   /* was: auto — the interface draws its own pointer */
 }
 
 #btn-restart {
@@ -6170,13 +6170,13 @@ html:not(.cursor-active) *::after {
   align-items: center;
   justify-content: center;
   text-align: center;
-  cursor: default;
+  cursor: none;   /* was: default — the interface draws its own pointer */
   transition: color 0.12s ease, background-color 0.12s ease;
   border-radius: 0;
 }
 
 .word-grid-letter.is-word {
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
 }
 
 /* Hovering any letter of a word highlights the whole word with a #e2bc71
@@ -6211,7 +6211,7 @@ html:not(.cursor-active) *::after {
   justify-content: center;
   background: transparent;
   border: none;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   color: var(--q-dark, #efede9);
   padding: 0;
 }
@@ -6319,7 +6319,7 @@ html:not(.cursor-active) *::after {
 .bg-swatches { display:flex; gap:3.2%; width:100%; height:100%; min-height:476.16px; align-items:stretch; justify-content:center; }
 .bg-swatch {
   flex:1 1 0; position:relative; background:var(--sw);
-  border:0; padding:0; margin:0; cursor:pointer; display:block; outline:none;
+  border:0; padding:0; margin:0; cursor: none;   /* was: pointer — the interface draws its own pointer */ display:block; outline:none;
   transition:transform .25s ease;
 }
 .bg-swatch:hover { transform:scale(1.05); }
@@ -6379,7 +6379,7 @@ html:not(.cursor-active) *::after {
 }
 #calib-host {
   position: relative; flex: 1 1 auto; width: 100%; min-height: 0;
-  touch-action: none; cursor: pointer;
+  touch-action: none; cursor: none;   /* was: pointer — the interface draws its own pointer */
   /* The canvas paints its own #282828 field; the whole stage is dark (below). */
 }
 
@@ -6440,7 +6440,7 @@ html:not(.cursor-active) *::after {
     var(--grid-dot-size) var(--grid-dot-gap);
   background-position: top, bottom, left, right;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   transition: transform 0.42s cubic-bezier(0.2, 0.85, 0.3, 1), opacity 0.32s ease,
               background-color 0.15s ease, color 0.15s ease;
 }
@@ -6453,7 +6453,7 @@ html:not(.cursor-active) *::after {
 .calib-continue.is-disabled {
   --grid-dot: rgba(245, 245, 237, 0.22);
   color: rgba(245, 245, 237, 0.3) !important;
-  pointer-events: none; cursor: default;
+  pointer-events: none; cursor: none;   /* was: default — the interface draws its own pointer */
 }
 .calib-continue.is-pressed {
   background-color: #ff5003 !important;
@@ -6502,7 +6502,7 @@ html:not(.cursor-active) *::after {
 .stage-band .sb-btn {
   position: absolute; left: 50%; bottom: calc(80 * var(--sy));    /* ABOVE the bottom grid line (y726) */
   transform: translateX(-50%);
-  pointer-events: auto; cursor: pointer;
+  pointer-events: auto; cursor: none;   /* was: pointer — the interface draws its own pointer */
   font-family: 'ArbelG', sans-serif;
   font-size: clamp(13px, 12.92px, 16px); letter-spacing: 0.02em;
   color: var(--grid-dot) !important;   /* beat the generic #section-3 button colour */
@@ -6529,7 +6529,7 @@ html:not(.cursor-active) *::after {
 }
 /* Dimmed / unusable until the stage arms it (e.g. the frequency pick). */
 .stage-band .sb-btn.is-disabled {
-  opacity: 0.32; pointer-events: none; cursor: default;
+  opacity: 0.32; pointer-events: none; cursor: none;   /* was: default — the interface draws its own pointer */
 }
 /* When ENABLED (not disabled) the button breathes — grows/shrinks like the globe
    "הוסף" button. The keyframe keeps the centring translateX(-50%) so it stays put. */
@@ -6858,7 +6858,7 @@ html:not(.cursor-active) *::after {
     var(--grid-dot-size) var(--grid-dot-gap) !important;
   background-position: top, bottom, left, right !important;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y !important;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   transition: background-color .15s ease, color .15s ease;
 }
 /* "המשך" — cream dotted frame, fills the landing orange on press. */
@@ -7095,7 +7095,7 @@ html:not(.cursor-active) *::after {
 }
 #editor-view .ed-swatches { display: flex; gap: 10px; }
 #editor-view .ed-sw {
-  width: 26px; height: 26px; border-radius: 50%; cursor: pointer; padding: 0;
+  width: 26px; height: 26px; border-radius: 50%; cursor: none;   /* was: pointer — the interface draws its own pointer */ padding: 0;
   background: var(--sw); border: 1px solid rgba(40,40,40,0.25);
   transition: transform .12s ease, box-shadow .12s ease;
 }
@@ -7104,7 +7104,7 @@ html:not(.cursor-active) *::after {
 /* Blocked = the current background colour: picking it would blend the frame /
    symbol into the background, so it's dimmed, crossed and unclickable. */
 #editor-view .ed-sw.is-blocked {
-  opacity: 0.22; pointer-events: none; cursor: default; position: relative;
+  opacity: 0.22; pointer-events: none; cursor: none;   /* was: default — the interface draws its own pointer */ position: relative;
 }
 #editor-view .ed-sw.is-blocked::after {
   content: ''; position: absolute; left: 15%; right: 15%; top: 50%;
@@ -7115,7 +7115,7 @@ html:not(.cursor-active) *::after {
    reorders the stack, two-finger pinch scales a symbol (editor.js). */
 #editor-view .ed-gesture {
   position: absolute; inset: 0; z-index: 3;
-  touch-action: none; cursor: grab;
+  touch-action: none; cursor: none;   /* was: grab — the interface draws its own pointer */
 }
 
 #editor-view .ed-chips { display: flex; flex-wrap: wrap; gap: 9px; }
@@ -7125,7 +7125,7 @@ html:not(.cursor-active) *::after {
 #editor-view .ed-chip {
   position: relative;
   font-family: 'ArbelG', sans-serif; font-size: clamp(10px, 11.56px, 13px);
-  padding: 7px 14px; border: none; border-radius: 0; cursor: pointer;
+  padding: 7px 14px; border: none; border-radius: 0; cursor: none;   /* was: pointer — the interface draws its own pointer */
   background: transparent; color: #282828; --grid-dot: #282828;
   transition: color .12s ease, background .12s ease;
 }
@@ -7176,10 +7176,10 @@ html:not(.cursor-active) *::after {
   font-family: 'ArbelG', sans-serif; font-size: 15px; line-height: 1;
   width: 34px; height: 30px; display: flex; align-items: center; justify-content: center;
   background: transparent; color: #282828; border: 1px solid rgba(40,40,40,0.35);
-  border-radius: 4px; cursor: pointer; transition: background .12s ease, color .12s ease, opacity .12s ease;
+  border-radius: 4px; cursor: none;   /* was: pointer — the interface draws its own pointer */ transition: background .12s ease, color .12s ease, opacity .12s ease;
 }
 #editor-view .ed-act:hover:not(:disabled) { background: #282828; color: #f5f5ed; }
-#editor-view .ed-act:disabled { opacity: 0.3; cursor: default; }
+#editor-view .ed-act:disabled { opacity: 0.3; cursor: none;   /* was: default — the interface draws its own pointer */ }
 #editor-view .ed-act.ed-orig {
   width: auto; padding: 0 14px; font-size: clamp(10px, 11.56px, 13px);
   margin-inline-start: auto; border-color: rgba(255,80,3,0.55); color: #ff5003;
@@ -7192,10 +7192,10 @@ html:not(.cursor-active) *::after {
   font-family: 'ArbelG', sans-serif; font-size: clamp(10px, 11.56px, 13px);
   color: #282828; min-width: 44px;
 }
-#editor-view .ed-ctrl input[type="range"] { flex: 1; accent-color: #ff5003; cursor: pointer; }
+#editor-view .ed-ctrl input[type="range"] { flex: 1; accent-color: #ff5003; cursor: none;   /* was: pointer — the interface draws its own pointer */ }
 #editor-view .ed-pad { display: flex; gap: 6px; }
 #editor-view .ed-pad button {
-  width: 30px; height: 30px; border-radius: 6px; cursor: pointer; font-size: 15px;
+  width: 30px; height: 30px; border-radius: 6px; cursor: none;   /* was: pointer — the interface draws its own pointer */ font-size: 15px;
   background: transparent; color: #282828; border: 1px solid rgba(40,40,40,0.35);
   transition: background .12s ease, color .12s ease;
 }
@@ -7230,7 +7230,7 @@ html:not(.cursor-active) *::after {
   position: relative;
   padding: 13px 30px;
   font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 13.6px, 15px); letter-spacing: 0.03em;
-  color: var(--b); background: transparent; border: none; border-radius: 0; cursor: pointer;
+  color: var(--b); background: transparent; border: none; border-radius: 0; cursor: none;   /* was: pointer — the interface draws its own pointer */
   background-image:
     radial-gradient(circle, var(--b) 0.8px, transparent 1.1px),
     radial-gradient(circle, var(--b) 0.8px, transparent 1.1px),
@@ -7271,7 +7271,7 @@ body.cv-typing #completion-view .cv-modal { align-items: flex-start; padding-top
 #editor-view .ed-done {
   position: absolute; top: calc(85 * var(--sy) + 58px); right: calc(100 * var(--sx) + 20px);
   left: auto; bottom: auto; transform: none;
-  z-index: 40; cursor: pointer;
+  z-index: 40; cursor: none;   /* was: pointer — the interface draws its own pointer */
   padding: 13px 34px; border: none; border-radius: 0; background: transparent;
   font-family: 'ArbelG', sans-serif; font-size: clamp(12px, 13.6px, 15px); letter-spacing: 0.03em;
   color: #282828;
@@ -7376,7 +7376,7 @@ body.cv-typing #completion-view .cv-modal { align-items: flex-start; padding-top
 }
 
 #step-rail li {
-  cursor: pointer !important;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   pointer-events: auto !important;
   transition: transform 0.2s ease, background-color 0.3s ease, opacity 0.3s ease !important;
 }

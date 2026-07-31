@@ -144,7 +144,7 @@ html, body {
   background: transparent !important;
   border: none !important;
   border-radius: 0;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   padding: 0;
   color: #ff5003 !important;   /* arrows in every stage, incl. dark backgrounds */
   font-family: 'ArbelG', sans-serif;
@@ -285,7 +285,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   font-family: 'ArbelG', sans-serif !important;
   font-size: clamp(10px, 12.24px, 12px) !important;
   letter-spacing: 0.02em !important;
-  cursor: pointer !important;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   transition: background 200ms ease, color 200ms ease !important;
 }
 #section-3[data-stage="0"] #q-btn-back-home:hover {
@@ -479,7 +479,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   justify-content: center !important;
   gap: 7px !important;
   white-space: nowrap !important;
-  cursor: pointer !important;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   transition: opacity 200ms ease !important;
   padding: 0 !important;
   line-height: 1 !important;
@@ -936,7 +936,7 @@ body:has(#middle-q-container.q-layout-origin) #virtual-keyboard .vk-key.is-press
   color: #ff5003 !important;
   font-family: 'ArbelG', sans-serif !important;
   font-size: clamp(11px, 12.24px, 13px) !important;
-  cursor: pointer !important;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   pointer-events: auto !important;
   z-index: 30 !important;
   transition: opacity 0.2s ease !important;
@@ -1090,7 +1090,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   font-size: clamp(10px, 11.56px, 13px) !important;
   letter-spacing: 0.03em !important;
   padding: 9px 16px !important;
-  cursor: pointer !important;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   white-space: nowrap !important;
   transition: background-color 0.15s ease, color 0.15s ease !important;
 }
@@ -1121,7 +1121,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  cursor: pointer !important;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   pointer-events: auto !important;
   transition: background-color 0.15s ease, color 0.15s ease !important;
   /* Breathe as a WHOLE — the scale sits on the button so the label grows with
@@ -1342,7 +1342,7 @@ body.theme-negative #section-3[data-stage="0"] .stage1-panel .s1p-title {
   border-radius: 999px !important;
   padding: 10px 22px !important;
   font-family: 'ArbelG', sans-serif !important;
-  cursor: pointer !important;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
 }
 #section-3[data-stage="0"] .roots-btn.ghost,
 #section-3[data-stage="0"] .roots-back {
@@ -1527,7 +1527,7 @@ html, body {
 .gold-dot-pick {
   position: absolute;
   transform: translate(-50%, -50%);
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   pointer-events: auto;
   z-index: 10;
   display: flex;
@@ -1617,7 +1617,7 @@ html, body {
   text-decoration: underline;
   text-underline-offset: 3px;
   white-space: nowrap;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   box-shadow: none;
   direction: rtl;
   transition: opacity 0.2s ease;
@@ -1845,12 +1845,12 @@ html, body {
   overflow: hidden;                 /* clips the neighbours — a hard cut, no fade */
   position: relative;
   touch-action: none;               /* we drive the drag ourselves */
-  cursor: grab;
+  cursor: none;   /* was: grab — the interface draws its own pointer */
   user-select: none; -webkit-user-select: none;
 }
 /* four single-digit cells + a narrower colon cell — one digit each, big */
 .tw-ht, .tw-hu, .tw-mt, .tw-mu { width: clamp(74px, 136px, 158px); }
-.tw-wheel.is-grabbing { cursor: grabbing; }
+.tw-wheel.is-grabbing { cursor: none;   /* was: grabbing — the interface draws its own pointer */ }
 /* one single-digit cell — absolutely placed, moved only by transform */
 .tw-num {
   position: absolute; left: 0; right: 0; top: 0;
@@ -1913,7 +1913,7 @@ html, body {
   font-weight: 400;
   font-size: clamp(10px, 11.56px, 13px);
   letter-spacing: 0.03em;
-  cursor: pointer;
+  cursor: none;   /* was: pointer — the interface draws its own pointer */
   transform-origin: center;
   animation: dotted-frame-breathe 1.8s ease-in-out infinite;   /* grow / shrink */
   transition: color 0.15s ease;
@@ -2262,4 +2262,22 @@ html.portrait .tw-confirm {
 #section-3[data-stage="0"]:not(.q-color-stage) .roots-widget.state-input .roots-actions-row .roots-add-country {
   padding: 10px 12px !important;
   white-space: nowrap !important;
+}
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   ONE POINTER, EVERYWHERE. The interface draws its own hand (#cursor / the
+   demo hand), so the operating system's cursor must never be visible — not on
+   a button, a link, a text field, a canvas, a slider, a modal, an overlay,
+   during a drag, a transition, a stage change, or for a single frame while
+   something re-renders. This is a project-wide rule: it covers every element,
+   every pseudo-element, every state, and any component or library that sets a
+   cursor of its own.
+   ════════════════════════════════════════════════════════════════════════ */
+html, body,
+*, *::before, *::after,
+*:hover, *:active, *:focus, *:focus-visible, *:disabled,
+input, textarea, select, button, a, canvas, svg, iframe, video,
+[contenteditable], [draggable], [role], [tabindex] {
+  cursor: none !important;
 }

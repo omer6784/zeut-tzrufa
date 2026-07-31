@@ -4856,7 +4856,7 @@ function buildPathsGame(host, onSelect){
   let svgInner = '';
   edges.forEach(e => { svgInner += `<path class="paths-rail" d="${e.d}"/>`; });
   svgInner += `<path class="paths-ink-trail" d=""/>`;
-  svgInner += `<g class="paths-source-group" style="cursor: pointer;">`;
+  svgInner += `<g class="paths-source-group" style="cursor: none;">`;
   svgInner += `<circle class="paths-source" cx="${source.x.toFixed(1)}" cy="${source.y.toFixed(1)}" r="3"/>`;
   svgInner += `<circle class="paths-source-hit" cx="${source.x.toFixed(1)}" cy="${source.y.toFixed(1)}" r="48" fill="transparent" pointer-events="all"/>`;
   svgInner += `</g>`;
@@ -5342,7 +5342,7 @@ export function updateV5StepProgress(stageNum) {
     d.classList.toggle('is-current', i === currentStep);
     if (!d._boundClick) {
       d._boundClick = true;
-      d.style.cursor = 'pointer';
+      d.style.cursor = 'none';
       d.setAttribute('role', 'button');
       d.setAttribute('aria-label', `עבור לשלב ${i + 1}`);
       d.addEventListener('click', (e) => {
