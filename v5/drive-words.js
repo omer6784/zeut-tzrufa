@@ -108,10 +108,26 @@ export function rankSymbols(profile, availableKeys = null) {
 }
 
 /* The stage's answer: the best-matching symbol not already worn. */
+/* How close a symbol may be to the best match and still be considered its
+   equal. Several symbols usually answer the same forces almost identically —
+   picking strictly the top one made the same word always return the same
+   symbol; drawing among the near-equals keeps the match honest and lets the
+   same word lead to different pieces. */
+const NEAR_TIE = 6;   // score points (0–100 scale) — a real "just as close" band
+
 export function pickSymbolForWord(word, contextKeys = [], usedKeys = [], availableKeys = null) {
   const profile = buildProfile(word, contextKeys);
   const ranked = rankSymbols(profile, availableKeys);
   const used = new Set(usedKeys);
-  const chosen = ranked.find(r => !used.has(r.key)) || ranked[0] || null;
-  return { symbol: chosen ? chosen.key : null, profile, ranked };
+  const free = ranked.filter(r => !used.has(r.key));
+  if (!free.length) return { symbol: ranked[0] ? ranked[0].key : null, profile, ranked };
+  const near = free.filter(r => r.score >= free[0].score - NEAR_TIE);
+  // Weighted draw: the closest match is the most likely, the ones just behind
+  // it are still possible. The answer stays true to the word, but the same word
+  // no longer always yields the same symbol.
+  const weights = near.map(r => Math.pow(1 + (r.score - (free[0].score - NEAR_TIE)) / NEAR_TIE, 2));
+  const total = weights.reduce((a, b) => a + b, 0);
+  let roll = Math.random() * total, chosen = near[near.length - 1];
+  for (let i = 0; i < near.length; i++) { roll -= weights[i]; if (roll <= 0) { chosen = near[i]; break; } }
+  return { symbol: chosen.key, profile, ranked, tied: near.map(r => r.key) };
 }

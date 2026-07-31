@@ -432,9 +432,16 @@ function pickGlobeSymbol(geos){
   }
   if(!ranked.length) return null;
   ranked.sort((a, b) => a.distanceKm - b.distanceKm);
-  const pick = ranked[0];
+  // Several symbols often share ONE cultural centre — Morocco alone carries
+  // seven — so the closest distance is usually a TIE. Taking ranked[0] always
+  // handed back the same symbol (whoever happened to be first in the table);
+  // now the tie is drawn fairly among the equally-close ones. The result is
+  // just as true to the country, and two visitors entering מרוקו no longer
+  // receive the same symbol every time.
+  const closest = ranked.filter(r => r.distanceKm === ranked[0].distanceKm);
+  const pick = closest[Math.floor(Math.random() * closest.length)];
   st.globeChoice = { country: pick.country, symbol: pick.key, culturalCenter: pick.center, distanceKm: pick.distanceKm };
-  console.log('[globe] symbol choice:', st.globeChoice, '| ranking:', ranked.slice(0, 5));
+  console.log('[globe] symbol choice:', st.globeChoice, '| tied at', ranked[0].distanceKm + 'km:', closest.map(r => r.key), '| ranking:', ranked.slice(0, 5));
   return pick.key;
 }
 
