@@ -538,7 +538,8 @@
       "Bash(curl -s \"http://localhost:5173/v5/styles.css?v=187\")",
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=185/styles.css?v=188/' index.html)",
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=188/styles.css?v=189/; s/stage1\\\\.css\\\\?v=213/stage1.css?v=214/' index.html)",
-      "Bash(node --check time-wheel.js)"
+      "Bash(node --check time-wheel.js)",
+      "Bash(node --check editor.js)"
     ]
   },
   "hooks": {

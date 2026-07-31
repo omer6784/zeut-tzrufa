@@ -3086,11 +3086,25 @@ function computeSymbolColors(){
   const bg = String(st.background || JEWEL_DEFAULT_BG).toLowerCase();
   const pool = JEWEL_PALETTE.filter(c => c !== bg);
   const stored = st.chosenSymbolColors || [];
-  st.chosenSymbolColors = (st.chosenSymbols || []).map((_, i) => {
+  // Keep every colour that still reads against the new background…
+  const out = (st.chosenSymbols || []).map((_, i) => {
     const c = stored[i];
-    return (c && String(c).toLowerCase() !== bg) ? c : pool[i % pool.length];
+    return (c && String(c).toLowerCase() !== bg) ? String(c).toLowerCase() : null;
   });
-  return st.chosenSymbolColors.slice();
+  // …and give each symbol that WOULD have blended in the colour that is missing
+  // from the others (least used if all three are present), so a recoloured
+  // background never leaves two symbols sharing a shade unnecessarily.
+  for(let i = 0; i < out.length; i++){
+    if(out[i]) continue;
+    let best = pool[0], bestN = Infinity;
+    for(const c of pool){
+      const n = out.reduce((k, v, j) => k + (j !== i && v === c ? 1 : 0), 0);
+      if(n < bestN){ bestN = n; best = c; }
+    }
+    out[i] = best;
+  }
+  st.chosenSymbolColors = out;
+  return out.slice();
 }
 
 function buildArtifactData(width,height){

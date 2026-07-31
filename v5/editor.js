@@ -58,6 +58,7 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     const j = engine();
     if (!j) return;
     if (st.background && j.setBackground) j.setBackground(st.background);
+    if (j.setSymbolColors) j.setSymbolColors((st.chosenSymbolColors || []).slice());
     if (j.applyEdits) j.applyEdits({ symbols: st.artifactEdits || [], frameColor: st.frameColor || null });
   };
   // The ghost-hand demo changes colours to TEACH the gesture — that is not the
@@ -120,9 +121,28 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   // MANUALLY-recoloured symbol matching the new background revert to automatic
   // (the auto paths never blend: the frame's auto map and the stored per-symbol
   // colours are both self-repairing against the background).
+  /* A new background must never swallow a symbol. Any symbol that would now be
+     the SAME colour as the plate is repainted in the colour that is missing
+     from the other symbols (the least used, if all three are present) — so the
+     recolour is visible immediately, including while the demo is showing it. */
   function fixBlends(newBg) {
-    if (st.frameColor === newBg) st.frameColor = null;
-    (st.artifactEdits || []).forEach((e) => { if (e && e.color === newBg) e.color = null; });
+    const bg = String(newBg || '').toLowerCase();
+    if (st.frameColor && String(st.frameColor).toLowerCase() === bg) st.frameColor = null;
+    const pool = PALETTE.map((c) => c.hex).filter((h) => h.toLowerCase() !== bg);
+    const cols = (st.chosenSymbolColors || []).slice();
+    const eff = (i) => String((((st.artifactEdits || [])[i]) || {}).color || cols[i] || '').toLowerCase();
+    (st.chosenSymbols || []).forEach((_, i) => {
+      if (eff(i) !== bg) return;
+      const others = (st.chosenSymbols || []).map((__, j) => (j === i ? null : eff(j))).filter(Boolean);
+      let best = pool[0], bestN = Infinity;
+      for (const h of pool) {
+        const n = others.filter((o) => o === h.toLowerCase()).length;
+        if (n < bestN) { bestN = n; best = h; }
+      }
+      if ((st.artifactEdits || [])[i]) st.artifactEdits[i].color = best;
+      cols[i] = best;
+    });
+    st.chosenSymbolColors = cols;
   }
 
   // ---- engine access + world-coordinate mapping ------------------------------
