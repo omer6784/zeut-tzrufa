@@ -307,6 +307,23 @@ export function mountTimeWheel(host, { onDone, onHour } = {}){
     };
     raf = requestAnimationFrame(step);
   };
+  /* Same as demoScrollBy, but for the MINUTES — so the demo can show that the
+     minute wheels scroll too, not just the hours. */
+  teardown.demoScrollMinutesBy = (deltaMin, durMs = 1700, onEnd) => {
+    stopAnim();
+    userTouched = false;
+    const start = absMinutes, target = absMinutes + deltaMin, t0 = performance.now();
+    const ease = t => 1 - Math.pow(1 - t, 3);
+    const step = (now) => {
+      const k = Math.min((now - t0) / durMs, 1);
+      absMinutes = start + (target - start) * ease(k);
+      hRender = hourTarget();
+      frameUpdate();
+      if(k < 1) raf = requestAnimationFrame(step);
+      else { snap(); onEnd && onEnd(); }
+    };
+    raf = requestAnimationFrame(step);
+  };
   // Back to the real Israel time (so the visitor starts fresh after the demo).
   teardown.demoReset = () => { userTouched = false; initAt(); };
 

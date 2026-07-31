@@ -2542,6 +2542,24 @@ function runTimeDemo(){
     if(dead()) return abort();
     await gh.sleep(280);
     gh.open();
+    // …then the MINUTES: the hand moves onto the minute wheels and scrolls them
+    // too, so it is clear that they are scrollable as well, not only the hours.
+    const mWheel = document.querySelector('#section-3 .tw-mt') || document.querySelector('#section-3 .tw-mu');
+    if(mWheel){
+      const mc = _center(mWheel);
+      gh.move(mc.x, mc.y);
+      await gh.sleep(560); if(dead()) return abort();
+      gh.grab(true);
+      await gh.sleep(220); if(dead()) return abort();
+      const MDUR = 1700;
+      if(wheel && wheel.demoScrollMinutesBy) wheel.demoScrollMinutesBy(25, MDUR);
+      const MN = 18;
+      for(let i = 1; i <= MN && !dead(); i++){ gh.place(mc.x, mc.y - 70 * (i / MN)); await gh.sleep(MDUR / MN); }
+      if(dead()) return abort();
+      await gh.sleep(240);
+      gh.open();
+      await gh.sleep(200);
+    }
     const conf = document.querySelector('.tw-confirm');
     if(conf){
       const cc = _center(conf);
