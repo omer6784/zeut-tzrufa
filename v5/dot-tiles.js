@@ -688,9 +688,6 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   const innerEl = document.createElement('div');
   innerEl.className = 'dot-tiles-inner';
   gridEl.appendChild(innerEl);
-  const counterEl = document.createElement('div');
-  counterEl.className = 'dot-gallery-count';
-  gridEl.appendChild(counterEl);
   host.appendChild(gridEl);
 
   // ?tiletest=1 → the six trial ornaments instead of the 28 (the stage, its
@@ -747,7 +744,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.92, galW * 0.75));
+    boxH = Math.max(60, Math.min(galH * 0.96, galW * 0.86));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
@@ -779,9 +776,9 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   let dragging = false, dragId = -1, lastX = 0, moved = 0, lastT = 0;
   let selected = -1, chosen = -1, chosenAt = 0, done = false, locked = false;
   let raf = 0, t0 = performance.now(), pulseAt = -1, hintDone = false;
-  // Half of the tile before and half of the tile after: their centres sit
-  // exactly on the frame lines the gallery is cut on.
-  const galStep = () => Math.max(boxW * 0.6, galW * 0.5);
+  // The tile before and the tile after stand close in — near enough that their
+  // edge shows past the centre plate, with no empty channel between them.
+  const galStep = () => galW * 0.45;
   const wrap = (v) => ((v % N) + N) % N;                       // the row is a loop
   const centreIndex = () => wrap(Math.round(pos));
 
@@ -811,7 +808,6 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       tl.alpha = (chosen >= 0 && tl.i !== chosen) ? 0.28 : (1 - 0.55 * Math.min(1, ad)) * enterEase;
       tl.cell.style.opacity = String(tl.alpha);
     }
-    counterEl.textContent = String(centreIndex() + 1).padStart(2, '0') + ' / ' + N;
   }
 
   function frame(now) {
