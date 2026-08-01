@@ -493,22 +493,24 @@ window.__globeTest = { findCountry, pickGlobeSymbol, centers: SYMBOL_CULTURAL_CE
    picked tile answers "what energy drew the visitor?" — its family maps to a
    meaning and a symbol group, from which ONE unused symbol is drawn. */
 const MOVEMENT_SYMBOL_GROUPS = {
-  PULSE:       ['anah', 'lotus', 'scarab', 'snake'],            // חיים · חיוניות · התחדשות
-  CENTER_PULL: ['circle', 'endlessknot', 'dharma', 'hexagram'], // איזון · אחדות · מרכז פנימי
-  EXPANSION:   ['rimon', 'cowrie', 'sun', 'fish'],              // שפע · צמיחה · ברכה
-  PATH:        ['vegvisir', 'algiz', 'solarcross', 'bird'],     // דרך · הכוונה · גילוי
-  PROTECTION:  ['hamsa', 'eye', 'diamond', 'pyramid'],          // הגנה · שמירה
-  CYCLE:       ['spiral', 'triskele', 'moon', 'triquetra'],     // מחזוריות · המשכיות · נצח
-  STABILITY:   ['djed', 'pentagram', 'horseshoe'],              // יציבות · חוזק · עמידות
+  protection: ['hamsa', 'eye', 'diamond', 'pyramid', 'pentagram', 'horseshoe', 'algiz', 'triquetra'],  // הגנה
+  abundance:  ['rimon', 'cowrie', 'fish', 'sun'],                                                      // שפע · פוריות · ברכה
+  renewal:    ['scarab', 'lotus', 'spiral', 'triskele', 'moon', 'snake'],                               // התחדשות · צמיחה (הנחש: ריפוי והתחדשות)
+  path:       ['vegvisir', 'dharma', 'solarcross', 'bird'],                                            // דרך · הכוונה · מסע
+  harmony:    ['circle', 'hexagram', 'endlessknot', 'triquetra', 'dharma'],                            // איזון · הרמוניה · חיבור
+  vitality:   ['anah', 'djed', 'sun', 'pyramid'],                                                      // חיים · חוזק · יציבות
+  luck:       ['tiltan', 'horseshoe', 'cowrie'],                                                       // מזל · הזדמנות
 };
+/* If every candidate of a group is already on the talisman, fall through to the
+   semantically NEAREST groups — never to a duplicate. */
 const MOVEMENT_FALLBACK_GROUPS = {
-  PULSE:       ['EXPANSION', 'CYCLE'],
-  CENTER_PULL: ['STABILITY', 'CYCLE'],
-  EXPANSION:   ['PULSE', 'PATH'],
-  PATH:        ['CYCLE', 'CENTER_PULL'],
-  PROTECTION:  ['STABILITY', 'CENTER_PULL'],
-  CYCLE:       ['PATH', 'PULSE'],
-  STABILITY:   ['PROTECTION', 'CENTER_PULL'],
+  protection: ['harmony', 'luck'],
+  abundance:  ['renewal', 'vitality'],
+  renewal:    ['abundance', 'path'],
+  path:       ['renewal', 'harmony'],
+  harmony:    ['protection', 'path'],
+  vitality:   ['abundance', 'protection'],
+  luck:       ['abundance', 'protection'],
 };
 /* Used symbols are FILTERED FIRST (never picked-then-replaced); random among
    what remains; exhausted group → fixed fallback groups in order; only then
