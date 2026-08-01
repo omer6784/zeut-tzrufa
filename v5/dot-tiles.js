@@ -513,6 +513,22 @@ const TILES = Array.from({ length: 28 }, (_, i) => {
 export const TILE_MEANINGS = TILES.map(t => t.meaningGroup);
 export const __TILE_DRAWS = { MEANING_DRAWS, MEANING_ORDER, TILES };   // dev/verification
 
+/* A quiet dotted BORDER for every tile — the tile's boundary in the dot
+   language (cached per size). Drawn under the ornament. */
+function drawTileFrame(ctx, tl) {
+  if (!tl.cache || !tl.cache.frame) {
+    const b = DOT / 2, ins = Math.min(tl.W, tl.H) * 0.06, gp = GAP * 1.7, F = [];
+    const line = (x0, y0, x1, y1) => {
+      const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / gp));
+      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b * 0.45 });
+    };
+    line(ins, ins, tl.W - ins, ins); line(ins, tl.H - ins, tl.W - ins, tl.H - ins);
+    line(ins, ins, ins, tl.H - ins); line(tl.W - ins, ins, tl.W - ins, tl.H - ins);
+    tl.cache = Object.assign(tl.cache || {}, { frame: F });
+  }
+  paint(ctx, tl.cache.frame);
+}
+
 // Confirmation overlay — a single ring sweeps out (orange) enlarging dots.
 function drawConfirm(ctx, tl, ce) {
   const g = grid(tl), b = DOT / 2, maxD = Math.hypot(tl.W, tl.H) / 2, width = GAP * 3.5, front = ce * (maxD + width);
@@ -645,6 +661,9 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   }
 
   function frame(now) {
+    // scheduled FIRST: a throw anywhere below must never be able to kill the
+    // loop and leave the whole row blank.
+    raf = requestAnimationFrame(frame);
     // physics: momentum, then a soft pull to the nearest tile
     if (!dragging && !locked) {
       pos += vel;
@@ -675,7 +694,6 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       if (tl.i === chosen && tl.confirmT >= 0) drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS));
       ctx.globalAlpha = 1;
     }
-    raf = requestAnimationFrame(frame);
   }
   ready = true;
   layoutFrame(t0);                 // the row is in place on the very first paint
