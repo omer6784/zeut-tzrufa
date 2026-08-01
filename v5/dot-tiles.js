@@ -10,7 +10,7 @@
    a short confirmation, then onChoose(index, meaning) fires. Each tile carries
    an internal meaning (never shown) that the caller maps to a symbol. */
 
-const DOT = 1.5;   // dot DIAMETER — small dots, close together: a fine dotted line
+const DOT = 1.0;   // dot DIAMETER — a fine dot, set close: the line is stippled, not beaded
 const GAP = 4.2;   // centre-to-centre pitch — denser grid → richer shapes per tile
 const TAU = Math.PI * 2;
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -75,10 +75,10 @@ function paint(ctx, dots) {
 const A_TAU = Math.PI * 2;
 // One pitch for every outline: the dots of a motif keep the same rhythm as the
 // interface's own grid, so the tile reads as drawn in the same material.
-const ST = GAP * 0.75;              // the pitch of a large outline
+const ST = GAP * 0.52;              // the pitch of a large outline
 // A small unit needs a finer pitch, or it stops being a shape and becomes a few
 // loose dots. Anything under a fifth of the ornament is drawn at this.
-const FINE = GAP * 0.55;
+const FINE = GAP * 0.38;
 // Every motif is drawn INSIDE this radius, so a clear margin of plate is always
 // left between the ornament and the tile's dotted frame.
 const ART_R = tl => Math.min(tl.W, tl.H) * 0.335;
@@ -652,7 +652,7 @@ const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
 
    The tiles, their drawings and their mapping to meaning + symbol are exactly
    as before; only the way they are shown and chosen changed. */
-const GAL_SCALE_MIN = 0.92;   // a neighbour — only a little smaller
+const GAL_SCALE_MIN = 0.84;   // a neighbour — a little smaller than the centre
 const CENTER_SCALE = 1;       // the active tile
 const DRAG_TAP_PX = 8;        // beyond this the gesture is a swipe, never a tap
 const FLICK_MAX = 2.6;        // how many tiles one strong flick may carry
@@ -726,7 +726,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.78, galW * 0.46));
+    boxH = Math.max(60, Math.min(galH * 0.84, galW * 0.53));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
