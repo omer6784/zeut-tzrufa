@@ -663,7 +663,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.52, galW * 0.29));
+    boxH = Math.max(60, Math.min(galH * 0.9, galW * 0.5));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
