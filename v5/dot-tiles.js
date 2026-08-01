@@ -75,7 +75,10 @@ function paint(ctx, dots) {
 const A_TAU = Math.PI * 2;
 // One pitch for every outline: the dots of a motif keep the same rhythm as the
 // interface's own grid, so the tile reads as drawn in the same material.
-const ST = GAP * 1.55;              // fewer, calmer dots along every outline
+const ST = GAP * 1.15;              // the pitch of a large outline
+// A small unit needs a finer pitch, or it stops being a shape and becomes a few
+// loose dots. Anything under a fifth of the ornament is drawn at this.
+const FINE = GAP * 0.8;
 // Every motif is drawn INSIDE this radius, so a clear margin of plate is always
 // left between the ornament and the tile's dotted frame.
 const ART_R = tl => Math.min(tl.W, tl.H) * 0.335;
@@ -467,6 +470,142 @@ const TILES = Array.from({ length: 28 }, (_, i) => {
   };
 });
 
+
+/* ── SIX TEST ORNAMENTS ────────────────────────────────────────────────────
+   A trial of the ornament LANGUAGE before the 28 are rebuilt in it. Each one is
+   a whole decorative unit, not an icon floating in a square: layered geometry,
+   radial symmetry, repeating units around a centre, built from ONE dot size
+   (a few accents at most 1.4×, never a large centre dot). Every motion happens
+   inside the geometry, so the ornament stays readable while it moves.
+
+   Shown only with ?tiletest=1 — the stage's own 28 tiles are untouched.
+   ──────────────────────────────────────────────────────────────────────── */
+
+// dots along an arc at an EVEN arc-length pitch (so density never changes)
+const arcAt = (D, cx, cy, R, a0, a1, step, r) => {
+  const n = Math.max(1, Math.round(Math.abs(a1 - a0) * R / step));
+  for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; push(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, r); }
+};
+// a ring broken into K repeating segments (fill = how much of each slot is drawn)
+const ringSegs = (D, cx, cy, R, K, fill, step, r, phase = 0) => {
+  const w = A_TAU / K * fill;
+  for (let k = 0; k < K; k++) { const a0 = phase + k * A_TAU / K - w / 2; arcAt(D, cx, cy, R, a0, a0 + w, step, r); }
+};
+// a closed regular polygon in dots
+const poly = (D, cx, cy, R, N, step, r, phase = 0) => {
+  for (let i = 0; i < N; i++) {
+    const a1 = phase + i / N * A_TAU, a2 = phase + (i + 1) / N * A_TAU;
+    seg(D, cx + Math.cos(a1) * R, cy + Math.sin(a1) * R, cx + Math.cos(a2) * R, cy + Math.sin(a2) * R, step, r);
+  }
+};
+// a petal drawn as an OUTLINE: two circular arcs from the core to the tip
+const leaf = (D, cx, cy, ang, r0, r1, W, step, r) => {
+  const L = r1 - r0, R = (W * W + (L / 2) * (L / 2)) / (2 * W), oy = R - W;
+  const ca = Math.cos(ang), sa = Math.sin(ang);
+  const put = (x, y) => push(D, cx + (r0 + x) * ca - y * sa, cy + (r0 + x) * sa + y * ca, r);
+  for (const side of [1, -1]) {
+    const a0 = Math.atan2(oy, -L / 2), a1 = Math.atan2(oy, L / 2);
+    const n = Math.max(3, Math.round(Math.abs(a1 - a0) * R / step));
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + (a1 - a0) * i / n;
+      put(L / 2 + Math.cos(a) * R, side * (-oy + Math.sin(a) * R));
+    }
+  }
+};
+const ACC = 1.35;    // the only accent allowed, and only on a few dots
+
+const TEST_DRAWS = [
+  // T1 · MEDALLION — an outer course, a ring of repeating diamonds, an inner
+  //      ring. Three clear layers, air between them.
+  //      Motion: the diamond course turns; the rings breathe against each other.
+  (ctx, tl, t) => {
+    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+    const br = 0.03 * Math.sin(t * 0.5);
+    const R1 = S * (1 + br), R3 = S * 0.30 * (1 - br), Rm = S * 0.64;
+    ring(D, cx, cy, R1, Math.round(A_TAU * R1 / ST), b);
+    ring(D, cx, cy, R3, Math.round(A_TAU * R3 / ST), b);
+    for (let k = 0; k < 8; k++) {
+      const a = t * 0.07 + k / 8 * A_TAU;
+      diamond(D, cx + Math.cos(a) * Rm, cy + Math.sin(a) * Rm, S * 0.21, FINE, b);
+    }
+    paint(ctx, D);
+  },
+
+  // T2 · ROSETTE — eight petals rooted on a small ring, tips on a broken course.
+  //      Motion: the petals open and close together.
+  (ctx, tl, t) => {
+    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+    const open = 0.9 + 0.1 * P(t * 0.5), r0 = S * 0.26;
+    for (let k = 0; k < 8; k++) leaf(D, cx, cy, k / 8 * A_TAU, r0, S * 0.90 * open, S * 0.20 * open, ST, b);
+    ring(D, cx, cy, r0, Math.round(A_TAU * r0 / ST), b);
+    paint(ctx, D);
+  },
+
+  // T3 · NESTED DIAMONDS — three frames, four small diamonds set on the
+  //      diagonals between the outer two. Motion: a wave passes outward.
+  (ctx, tl, t) => {
+    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+    const wave = (i) => 1 + 0.045 * Math.sin(t * 0.65 - i * 1.2);
+    [1, 0.64, 0.30].forEach((k, i) => diamond(D, cx, cy, S * k * wave(i), ST, b));
+    for (let k = 0; k < 4; k++) {
+      const a = Math.PI / 4 + k / 4 * A_TAU, R = S * 0.82 * wave(0.5);
+      diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * 0.19, FINE, b);
+    }
+    paint(ctx, D);
+  },
+
+  // T4 · INTERLACE — two squares locked into one eight-point star, on a ring.
+  //      Motion: the two turn against one another, the star opening and closing.
+  (ctx, tl, t) => {
+    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+    const turn = Math.sin(t * 0.35) * 0.16;
+    poly(D, cx, cy, S * 0.96, 4, ST, b, Math.PI / 4 + turn);
+    poly(D, cx, cy, S * 0.96, 4, ST, b, -turn);
+    const R = S * 0.30;
+    ring(D, cx, cy, R, Math.round(A_TAU * R / ST), b);
+    paint(ctx, D);
+  },
+
+  // T5 · SPIRAL — one arm walked at an even pitch, opening from the core.
+  //      Motion: the whole spiral turns, so the eye flows along the arm.
+  (ctx, tl, t) => {
+    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+    const turns = 2.2, R0 = S * 0.22, R1 = S * 0.94, spin = t * 0.13, step = ST;
+    let a = 0;                                          // one clean arm
+    while (a < turns * A_TAU) {
+      const R = R0 + (R1 - R0) * (a / (turns * A_TAU));
+      push(D, cx + Math.cos(a + spin) * R, cy + Math.sin(a + spin) * R, b);
+      a += step / Math.max(R, 1);
+    }
+    const Rc = S * 0.15;
+    ring(D, cx, cy, Rc, Math.round(A_TAU * Rc / FINE), b);      // the core it opens from
+    paint(ctx, D);
+  },
+
+  // T6 · AXES — a square frame, the two axes crossing it, a small square in each
+  //      quarter. Motion: the axes answer one another, in and out.
+  (ctx, tl, t) => {
+    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+    const m = S * 0.92, k = P(t * 0.5);
+    poly(D, cx, cy, m * Math.SQRT2, 4, ST, b, Math.PI / 4);
+    const hx = m * (0.55 + 0.40 * k), vy = m * (0.55 + 0.40 * (1 - k));
+    seg(D, cx - hx, cy, cx + hx, cy, ST, b);
+    seg(D, cx, cy - vy, cx, cy + vy, ST, b);
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) =>
+      poly(D, cx + sx * m * 0.55, cy + sy * m * 0.55, S * 0.24, 4, FINE, b, Math.PI / 4));
+    paint(ctx, D);
+  },
+];
+
+/* The six carry the first six meaning groups, so choosing one still runs the
+   stage's own flow untouched. */
+export const TEST_TILES = TEST_DRAWS.map((fn, i) => ({
+  id: 'test-tile-' + (i + 1),
+  meaningGroup: MEANING_ORDER[i],
+  meaning: MEANING_ORDER[i],
+  draw(ctx, tl, t, bo) { fn(ctx, tl, t, bo || 0, i); },
+}));
+
 export const TILE_MEANINGS = TILES.map(t => t.meaningGroup);
 export const __TILE_DRAWS = { MEANING_DRAWS, MEANING_ORDER, TILES };   // dev/verification
 
@@ -477,13 +616,16 @@ function drawTileFrame(ctx, tl) {
     const b = DOT / 2, ins = Math.min(tl.W, tl.H) * 0.06, gp = GAP * 1.7, F = [];
     const line = (x0, y0, x1, y1) => {
       const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / gp));
-      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b * 0.45 });
+      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b * 0.38 });
     };
     line(ins, ins, tl.W - ins, ins); line(ins, tl.H - ins, tl.W - ins, tl.H - ins);
     line(ins, ins, ins, tl.H - ins); line(tl.W - ins, ins, tl.W - ins, tl.H - ins);
     tl.cache = Object.assign(tl.cache || {}, { frame: F });
   }
+  const a = ctx.globalAlpha;
+  ctx.globalAlpha = a * 0.42;          // a boundary, quieter than anything inside
   paint(ctx, tl.cache.frame);
+  ctx.globalAlpha = a;
 }
 
 // Confirmation overlay — a single ring sweeps out (orange) enlarging dots.
@@ -510,8 +652,8 @@ const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
 
    The tiles, their drawings and their mapping to meaning + symbol are exactly
    as before; only the way they are shown and chosen changed. */
-const GAL_STEP = 1.18;        // real air between the tiles        // spacing between tiles, in tile-widths
-const GAL_SCALE_MIN = 0.84;   // a neighbour — only a little smaller
+const GAL_STEP = 1.26;        // real air between the tiles        // spacing between tiles, in tile-widths
+const GAL_SCALE_MIN = 0.92;   // a neighbour — only a little smaller
 const CENTER_SCALE = 1;       // the active tile
 const DRAG_TAP_PX = 8;        // beyond this the gesture is a swipe, never a tap
 const FLICK_MAX = 2.6;        // how many tiles one strong flick may carry
@@ -531,7 +673,10 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   gridEl.appendChild(counterEl);
   host.appendChild(gridEl);
 
-  const N = TILES.length;
+  // ?tiletest=1 → the six trial ornaments instead of the 28 (the stage, its
+  // mapping and its flow are untouched; without the flag nothing changes).
+  const SET = /[?&#]tiletest=1/.test(location.search + location.hash) ? TEST_TILES : TILES;
+  const N = SET.length;
   const tiles = [];
   for (let i = 0; i < N; i++) {
     const cell = document.createElement('div');
@@ -582,7 +727,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.82, galW * 0.5));
+    boxH = Math.max(60, Math.min(galH * 0.62, galW * 0.32));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
@@ -640,7 +785,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       tl.cell.style.zIndex = String(100 - Math.round(ad * 10));
       // presence follows distance too — the centre is the focus, the flanks hint
       // the focus is unmistakable: the centre is present, the flanks recede
-      tl.alpha = (chosen >= 0 && tl.i !== chosen) ? 0.28 : (1 - 0.45 * Math.min(1, ad)) * enterEase;
+      tl.alpha = (chosen >= 0 && tl.i !== chosen) ? 0.28 : (1 - 0.55 * Math.min(1, ad)) * enterEase;
       tl.cell.style.opacity = String(tl.alpha);
     }
     counterEl.textContent = String(centreIndex() + 1).padStart(2, '0') + ' / ' + N;
@@ -676,7 +821,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       ctx._dotScale = 1;
       drawTileFrame(ctx, tl);
       ctx._dotScale = 1 + 0.3 * bo;
-      TILES[tl.i].draw(ctx, tl, tl.clock || 0, bo);
+      SET[tl.i].draw(ctx, tl, tl.clock || 0, bo);
       if (tl.i === chosen && tl.confirmT >= 0) drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS));
       ctx.globalAlpha = 1;
     }
@@ -731,7 +876,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     pulseAt = performance.now();
     locked = true;                                               // no swiping mid-transition
     setTimeout(() => { locked = false; }, 420);
-    if (onSelect) onSelect(i, TILES[i].meaning);
+    if (onSelect) onSelect(i, SET[i].meaning);
   }
   function deselect() {
     if (chosen >= 0) return;
@@ -755,7 +900,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     tl.confirmT = 0;                       // the ornament goes on moving under it
     tl.cell.classList.add('is-chosen');
     locked = true;
-    setTimeout(() => { if (done) return; done = true; onConfirm && onConfirm(chosen, TILES[chosen].meaning); }, CONFIRM_MS + 120);
+    setTimeout(() => { if (done) return; done = true; onConfirm && onConfirm(chosen, SET[chosen].meaning); }, CONFIRM_MS + 120);
   }
 
   const onResize = () => sizeAll();
