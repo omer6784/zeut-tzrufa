@@ -7496,7 +7496,8 @@ html:not(.portrait) #section-3[data-stage="2"] .dot-gallery { padding-top: 0; }
    second. Only presence still eases. */
 .dot-gallery .dot-tile { transition: opacity .22s linear !important; }
 .dot-gallery .dot-tiles-inner {
-  position: absolute; left: 50%; top: 50%;
+  /* raised a touch above centre: the counter sits under the row */
+  position: absolute; left: 50%; top: 46%;
   width: 0; height: 0;
   display: block !important;       /* not a grid any more — tiles are placed */
   transform: none !important;
