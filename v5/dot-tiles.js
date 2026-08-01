@@ -662,7 +662,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.95, galW * 0.56));
+    boxH = Math.max(60, Math.min(galH * 0.9, galW * 0.375));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
@@ -694,10 +694,11 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   let dragging = false, dragId = -1, lastX = 0, moved = 0, lastT = 0;
   let selected = -1, notified = -1, chosen = -1, chosenAt = 0, done = false, locked = false;
   let raf = 0, t0 = performance.now(), pulseAt = -1, hintDone = false;
-  // Exactly HALF of the tile before and the tile after: their centres sit on the
-  // frame lines the gallery is cut on, and the tile is sized so their inner edge
-  // just clears the centre plate.
-  const galStep = () => galW * 0.5;
+  // The tile before and the tile after stand WHOLE inside the interface's own
+  // vertical grid lines — never running onto them — with only a narrow channel
+  // between them and the centre tile. The tile size above is set so the three
+  // together just fit between the lines.
+  const galStep = () => boxW * (0.5 + GAL_SCALE_MIN * 0.5) + galW * 0.018;
   const wrap = (v) => ((v % N) + N) % N;                       // the row is a loop
   const centreIndex = () => wrap(Math.round(pos));
 
