@@ -32,7 +32,7 @@ const rnd = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) 
 
 /* Rasterise a label into dot offsets around its own centre (once per word).
    Hebrew stays exact — the real glyphs are sampled, not approximated. */
-function dotsForLabel(label, fontPx) {
+function dotsForLabel(label, fontPx, pitch = PITCH) {
   const pad = Math.ceil(fontPx * 0.35);
   const c = document.createElement('canvas');
   const g = c.getContext('2d', { willReadFrequently: true });
@@ -46,8 +46,8 @@ function dotsForLabel(label, fontPx) {
   g.fillText(label, w / 2, h / 2);
   const px = g.getImageData(0, 0, w, h).data;
   const pts = [];
-  for (let y = 0; y < h; y += PITCH) {
-    for (let x = 0; x < w; x += PITCH) {
+  for (let y = 0; y < h; y += pitch) {
+    for (let x = 0; x < w; x += pitch) {
       if (px[((y | 0) * w + (x | 0)) * 4 + 3] > 110) pts.push({ x: x - w / 2, y: y - h / 2 });
     }
   }
@@ -71,7 +71,7 @@ export function mountDrive(host, opts = {}) {
   const words = DISPLAY_WORDS.map((w, i) => ({
     ...w, i,
     fs: 26 + Math.round(R() * 10),      // readable size — slight variety, no hierarchy
-    bigMul: 3.0 + R() * 1.4,            // its size inside the block: enormous
+    bigMul: 5.4 + R() * 2.6,            // its size at the start: enormous
     delay: R(),                         // its own moment in the unravelling
     driftA: R() * Math.PI * 2,
     driftS: 0.18 + R() * 0.16,
@@ -102,14 +102,17 @@ export function mountDrive(host, opts = {}) {
         // small and readable afterwards (scaling one set would just spread its
         // dots apart and the type would fall to pieces).
         w.cache = dotsForLabel(w.label, w.fs);
-        w.big = dotsForLabel(w.label, Math.round(w.fs * w.bigMul));
+        // The huge one is sampled at a PROPORTIONALLY coarser pitch and drawn
+        // with proportionally bigger dots: the same letter in the same dotted
+        // material, not a cloud of thousands of specks.
+        w.big = dotsForLabel(w.label, Math.round(w.fs * w.bigMul), PITCH * w.bigMul * 0.85);
       }
       w.hw = w.cache.w / 2; w.hh = w.cache.h / 2;
       w.x = w.hw + 12 + L() * Math.max(1, W - 2 * w.hw - 24);
       w.y = w.hh + 10 + L() * Math.max(1, H - 2 * w.hh - 20);
-      const a = L() * Math.PI * 2, rad = L() * Math.min(W, H) * 0.1;
-      w.bx = W / 2 + Math.cos(a) * rad;              // where it lies inside the block
-      w.by = H / 2 + Math.sin(a) * rad * 0.7;
+      // where the giant word stands at the start — spread over the whole canvas
+      w.bx = W * (0.18 + 0.64 * L());
+      w.by = H * (0.16 + 0.68 * L());
     }
     const PAD = 26;
     for (let it = 0; it < 240; it++) {
@@ -129,6 +132,13 @@ export function mountDrive(host, opts = {}) {
     }
   }
   layout();
+  // The canvas does not pull a webfont in by itself: rasterise once ArbelG is
+  // really there, or the letters come out in the browser's fallback face.
+  if (document.fonts && document.fonts.load) {
+    Promise.all([document.fonts.load('500 40px ArbelG'), document.fonts.load('500 220px ArbelG')])
+      .then(() => { for (const w of words) w.cache = null; layout(); })
+      .catch(() => {});
+  }
   const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => { if (spread < 0.02) layout(); }) : null;
   ro && ro.observe(field);
 
@@ -159,7 +169,10 @@ export function mountDrive(host, opts = {}) {
         else alpha = 1 - 0.55 * k;                                   // the rest recede
       }
       const layers = [];
-      if (mixTo < 1) layers.push({ set: w.big, s: 1 + (1 / w.bigMul - 1) * p, a: alpha * (1 - mixTo), rr: r * 1.25 });
+      if (mixTo < 1) {
+        const s = 1 + (1 / w.bigMul - 1) * p;
+        layers.push({ set: w.big, s, a: alpha * (1 - mixTo), rr: r * w.bigMul * 0.5 * s });
+      }
       if (mixTo > 0) layers.push({ set: w.cache, s: w.bigMul * (1 - p) + p, a: alpha * mixTo, rr: r });
       for (const L of layers) {
         if (L.a <= 0.01) continue;
