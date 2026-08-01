@@ -1,0 +1,16 @@
+# Long-lived caching for the heavy, rarely-changing assets: the kiosk reloads
+# itself every two minutes of idle, and without this every reload pulls the
+# models, the fonts and the ambient track down again.
+/*.obj
+  Cache-Control: public, max-age=2592000
+/jewel/objs/*
+  Cache-Control: public, max-age=2592000
+/sounds/*
+  Cache-Control: public, max-age=2592000
+/fonts/*
+  Cache-Control: public, max-age=2592000
+/image/*
+  Cache-Control: public, max-age=2592000
+# Vite's own bundles carry a content hash in their name, so they can be pinned.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
