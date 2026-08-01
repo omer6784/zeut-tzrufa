@@ -7494,7 +7494,18 @@ html:not(.portrait) #section-3[data-stage="2"] .dot-gallery { padding-top: 0; }
 /* The row is placed every frame from script, so the tiles must not carry a
    CSS transition of their own — it would lag a hand's drag by a third of a
    second. Only presence still eases. */
-.dot-gallery .dot-tile { transition: opacity .22s linear !important; }
+.dot-gallery .dot-tile {
+  /* A tile, not a card: a true square, a quiet dotted frame, nothing else —
+     no radius, no shadow, no glow, no gradient. The row is placed every frame
+     from script, so the tile carries no transform transition of its own; only
+     presence and the pressed plate ease. */
+  transition: opacity .22s linear, background-color .24s ease !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  background-image: none !important;
+}
+.dot-gallery .dot-tile:hover { transform: none; }        /* placement belongs to the script */
 .dot-gallery .dot-tiles-inner {
   /* raised a touch above centre: the counter sits under the row */
   position: absolute; left: 50%; top: 46%;
