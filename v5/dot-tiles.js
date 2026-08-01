@@ -66,7 +66,7 @@ function paint(ctx, dots) {
   // Two outlines meeting at a corner each put a dot there, and a dot drawn twice
   // reads as a blot. A coarse spatial hash drops only the true collisions — a dot
   // closer to an earlier one than a dot's own width — and leaves the rhythm alone.
-  const min2 = DOT * DOT * 0.81, cell = DOT, grid = new Map();
+  const min2 = DOT * DOT * 1.32, cell = DOT * 1.15, grid = new Map();
   ctx.beginPath();
   for (const d of dots) {
     const gx = Math.floor(d.x / cell), gy = Math.floor(d.y / cell);
@@ -187,15 +187,15 @@ const MEANING_DRAWS = {
       square(D, cx, cy, S, ST, b);
       square(D, cx, cy, S * 0.62 * k, ST, b);
       square(D, cx, cy, S * 0.26 * k, FINE, b);
-      corners4(D, cx, cy, S * 0.81, (x, y) => diamond(D, x, y, S * 0.13, FINE, b));
+      corners4(D, cx, cy, S * 0.80, (x, y) => diamond(D, x, y, S * 0.12, FINE, b));
       paint(ctx, D);
     },
     // 2. a diamond set in a square, turning a little within it
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
       square(D, cx, cy, S, ST, b);
-      poly(D, cx, cy, S * 1.04, 4, ST, b, Math.sin(t * 0.3) * 0.13);
-      diamond(D, cx, cy, S * 0.30, FINE, b);
+      poly(D, cx, cy, S * 0.70, 4, ST, b, Math.PI / 4 + Math.sin(t * 0.3) * 0.13);
+      diamond(D, cx, cy, S * 0.26, FINE, b);
       paint(ctx, D);
     },
     // 3. a frame with four brackets stepping toward the core
@@ -228,8 +228,8 @@ const MEANING_DRAWS = {
       for (let k = 0; k < 8; k++) {                              // eight rays of stepped diamonds
         const a = k / 8 * A_TAU;
         for (let j = 0; j < 2; j++) {
-          const R = (r0 + S * (0.30 + j * 0.34)) * open;
-          diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * (0.15 - j * 0.03), FINE, b);
+          const R = (r0 + S * (0.26 + j * 0.30)) * open;
+          diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * (0.13 - j * 0.02), FINE, b);
         }
       }
       ring(D, cx, cy, r0, Math.round(A_TAU * r0 / FINE), b);
@@ -277,10 +277,10 @@ const MEANING_DRAWS = {
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
       for (let k = 0; k < 4; k++) {
-        const f = frac(t * 0.13 + k / 4), R = S * (0.18 + 0.82 * f);
+        const f = frac(t * 0.13 + k / 4), R = S * (0.18 + 0.74 * f);
         ring(D, cx, cy, R, Math.max(10, Math.round(A_TAU * R / ST)), b);
       }
-      corners4(D, cx, cy, S * 0.80, (x, y) => diamond(D, x, y, S * 0.10, FINE, b));
+      corners4(D, cx, cy, S * 0.82, (x, y) => diamond(D, x, y, S * 0.10, FINE, b));
       paint(ctx, D);
     },
     // 10. concentric diamonds, a wave passing through them outward
@@ -320,27 +320,27 @@ const MEANING_DRAWS = {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
       const k = P(t * 0.5);
       square(D, cx, cy, S, ST, b);
-      seg(D, cx - S * (0.55 + 0.42 * k), cy, cx + S * (0.55 + 0.42 * k), cy, ST, b);
-      seg(D, cx, cy - S * (0.55 + 0.42 * (1 - k)), cx, cy + S * (0.55 + 0.42 * (1 - k)), ST, b);
+      seg(D, cx - S * (0.50 + 0.36 * k), cy, cx + S * (0.50 + 0.36 * k), cy, ST, b);
+      seg(D, cx, cy - S * (0.50 + 0.36 * (1 - k)), cx, cy + S * (0.50 + 0.36 * (1 - k)), ST, b);
       corners4(D, cx, cy, S * 0.52, (x, y) => square(D, x, y, S * 0.17, FINE, b));
       paint(ctx, D);
     },
     // 14. a diagonal crossing, its arms reaching out in turn
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const k1 = 0.78 + 0.20 * P(t * 0.5), k2 = 0.78 + 0.20 * P(t * 0.5 + Math.PI), d = S * 0.72;
-      seg(D, cx - d * k1, cy - d * k1, cx + d * k1, cy + d * k1, ST, b);
-      seg(D, cx - d * k2, cy + d * k2, cx + d * k2, cy - d * k2, ST, b);
+      const k1 = 0.78 + 0.18 * P(t * 0.5), k2 = 0.78 + 0.18 * P(t * 0.5 + Math.PI), d = S * 0.70, g = S * 0.26;
+      [[1, 1], [-1, -1]].forEach(([sx, sy]) => seg(D, cx + sx * g, cy + sy * g, cx + sx * d * k1, cy + sy * d * k1, ST, b));
+      [[1, -1], [-1, 1]].forEach(([sx, sy]) => seg(D, cx + sx * g, cy + sy * g, cx + sx * d * k2, cy + sy * d * k2, ST, b));
       corners4(D, cx, cy, S * 0.86, (x, y) => diamond(D, x, y, S * 0.12, FINE, b));
-      diamond(D, cx, cy, S * 0.20, FINE, b);
+      diamond(D, cx, cy, S * 0.16, FINE, b);
       paint(ctx, D);
     },
     // 15. mirrored chevron bands travelling out from the middle line
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const w = S * 0.86, h = S * 0.30;
+      const w = S * 0.86, h = S * 0.26;
       for (let k = 0; k < 3; k++) {
-        const f = frac(t * 0.16 + k / 3), off = S * (0.12 + 0.80 * f);
+        const f = frac(t * 0.16 + k / 3), off = S * (0.34 + 0.58 * f);
         seg(D, cx - w, cy - off + h, cx, cy - off, ST, b); seg(D, cx, cy - off, cx + w, cy - off + h, ST, b);
         seg(D, cx - w, cy + off - h, cx, cy + off, ST, b); seg(D, cx, cy + off, cx + w, cy + off - h, ST, b);
       }
@@ -351,8 +351,8 @@ const MEANING_DRAWS = {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
       const turn = Math.sin(t * 0.32) * 0.15;
       poly(D, cx, cy, S * 1.02, 4, ST, b, Math.PI / 4 + turn);
-      poly(D, cx, cy, S * 1.02, 4, ST, b, -turn);
-      const R = S * 0.30;
+      poly(D, cx, cy, S * 0.56, 4, ST, b, -turn);
+      const R = S * 0.26;
       ring(D, cx, cy, R, Math.round(A_TAU * R / FINE), b);
       paint(ctx, D);
     },
@@ -391,9 +391,9 @@ const MEANING_DRAWS = {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
       const turn = Math.sin(t * 0.28) * 0.12;
       ring(D, cx, cy, S, Math.round(A_TAU * S / ST), b);
-      poly(D, cx, cy, S * 0.82, 4, ST, b, Math.PI / 4 + turn);
-      poly(D, cx, cy, S * 0.82, 4, ST, b, turn);
-      const R = S * 0.22;
+      poly(D, cx, cy, S * 0.80, 4, ST, b, Math.PI / 4 + turn);
+      poly(D, cx, cy, S * 0.46, 4, ST, b, turn);
+      const R = S * 0.18;
       ring(D, cx, cy, R, Math.round(A_TAU * R / FINE), b);
       paint(ctx, D);
     },
@@ -404,7 +404,7 @@ const MEANING_DRAWS = {
     // 21. twelve spokes between two rings, reaching out together
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const R0 = S * 0.32, R1 = S * (0.74 + 0.22 * P(t * 0.55));
+      const R0 = S * 0.32, R1 = S * (0.62 + 0.20 * P(t * 0.55));
       ring(D, cx, cy, R0, Math.round(A_TAU * R0 / FINE), b);
       for (let k = 0; k < 12; k++) {
         const a = k / 12 * A_TAU;
@@ -416,10 +416,10 @@ const MEANING_DRAWS = {
     // 22. a course of small diamonds pushed outward and drawn back
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const R = S * (0.56 + 0.30 * P(t * 0.5));
+      const R = S * (0.48 + 0.24 * P(t * 0.5));
       for (let k = 0; k < 8; k++) {
         const a = k / 8 * A_TAU;
-        diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * 0.15, FINE, b);
+        diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * 0.13, FINE, b);
       }
       const Rc = S * 0.26;
       ring(D, cx, cy, Rc, Math.round(A_TAU * Rc / FINE), b);
@@ -430,7 +430,7 @@ const MEANING_DRAWS = {
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
       [0, 1, 2].forEach(i => {
-        const f = frac(t * 0.16 + i / 3), R = S * (0.26 + 0.74 * f);
+        const f = frac(t * 0.16 + i / 3), R = S * (0.26 + 0.68 * f);
         ringSegs(D, cx, cy, R, 6 + i * 6, 0.5, ST, b, i * 0.3);
       });
       const Rc = S * 0.16;
