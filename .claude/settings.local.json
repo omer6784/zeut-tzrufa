@@ -542,7 +542,8 @@
       "Bash(node --check editor.js)",
       "Bash(perl -pi -e 's/stage1\\\\.css\\\\?v=214/stage1.css?v=215/' index.html)",
       "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=190/styles.css?v=191/' index.html)",
-      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=192/styles.css?v=193/' index.html)"
+      "Bash(perl -pi -e 's/styles\\\\.css\\\\?v=192/styles.css?v=193/' index.html)",
+      "Bash(node --input-type=module -e \"import\\('./dot-tiles.js'\\).then\\(\\(\\)=>console.log\\('ok'\\)\\).catch\\(e=>console.log\\('ERR',e.message\\)\\)\")"
     ]
   },
   "hooks": {

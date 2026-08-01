@@ -1927,7 +1927,8 @@ function _renderQuestionImpl(idx){
     if (st._dotTiles) { try { st._dotTiles.teardown(); } catch (_) {} st._dotTiles = null; }
     let picked = false;
     st._dotTiles = mountDotTiles(midContainer, {
-      // Tapping a tile SELECTS it (no auto-advance) and lights up "המשך".
+      // The tile at the CENTRE of the row is the current candidate — no tap needed.
+      // It arms "המשך"; only pressing "המשך" commits it (onConfirm below).
       onSelect: (index, family) => {
         const symbolKey = pickMovementSymbol(family);
         st.answers['life-wish'] = family;       // the movement family (never shown)
@@ -1944,7 +1945,7 @@ function _renderQuestionImpl(idx){
         advance();
       },
     });
-    // Entrance stagger finishes, then the ghost-hand demo plays (tap a tile → "המשך").
+    // Entrance finishes, then the ghost-hand demo plays (swipe the row → "המשך").
     lockInput(); setTimeout(() => runTilesDemo(), st._dotTiles.appearMs + 500);
 
   } else if(q.type==='drive'){
@@ -2308,9 +2309,7 @@ function runInputDemo(){
 function runTilesDemo(){
   const dt = st._dotTiles;
   if(!dt || !document.querySelector('.dot-tiles-grid')) return;
-  const demoIdx = 10;   // a calm, legible tile (ORBIT / harmony)
   const my = st._tilesDemoToken = (st._tilesDemoToken || 0) + 1;
-  const sec = document.getElementById('section-3');
   lockInput();   // block visitor input until the demo finishes
   const cleanup = () => unlockInput();
 
@@ -2318,19 +2317,24 @@ function runTilesDemo(){
     const gh = getGhostHand();
     const dead = () => my !== st._tilesDemoToken || !st._dotTiles;
     const abort = () => { gh.hide(); cleanup(); };
-    const c = dt.tileCenter(demoIdx);
+    const c = dt.tileCenter(dt.centreIndex());
     if(!c) return abort();
     await gh.sleep(200); if(dead()) return abort();
     gh.open(); gh.place(c.x, (window.innerHeight || 900) + 60); gh.show('dark');
     await gh.sleep(90); if(dead()) return abort();
 
-    // 1. point to the tile and tap it → it selects (others dim, "המשך" lights)
+    // 1. the hand SWIPES the row: the next tile rides into the centre
     gh.point(true);
     gh.move(c.x, c.y);
-    await gh.sleep(650); if(dead()) return abort();
-    await gh.tapPoint();
-    dt.selectTile(demoIdx);           // programmatic "tap" → the tile starts moving
-    await gh.sleep(950); if(dead()) return abort();
+    await gh.sleep(600); if(dead()) return abort();
+    const span = Math.min(260, (window.innerWidth || 1000) * 0.22);
+    for(let k = 0; k < 2; k++){
+      dt.selectTile(dt.centreIndex() + 1);      // one tile along
+      gh.move(c.x - span, c.y);
+      await gh.sleep(520); if(dead()) return abort();
+      gh.move(c.x, c.y);
+      await gh.sleep(220); if(dead()) return abort();
+    }
 
     // 2. move to "המשך" and press it (illustrative — does not actually advance)
     gh.open();
@@ -2343,11 +2347,8 @@ function runTilesDemo(){
       await gh.tap();
       btn.classList.remove('is-pressed');
     }
-    await gh.sleep(450);
-    // Reset so the visitor starts clean: clear the pick and re-dim "המשך".
-    dt.deselect();
-    const sb = ensureStageBand();
-    if(sb){ sb.btn.classList.add('is-disabled'); st._stageContinue = null; }
+    await gh.sleep(400);
+    // The tile at the centre stays the candidate, so "המשך" stays live.
     gh.hide(); cleanup();
   })();
 }

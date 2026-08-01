@@ -154,321 +154,342 @@ const petal = (D, cx, cy, a, len, wide, step, r) => {
 /* Each draw(ctx, tl, t, bo, i): t = the tile's own smooth clock, bo = 0..1
    reinforcement (hover 0.45 / selected 1), i = tile index (stable randomness).
    The MOTION always grows out of the ornament's own structure. */
+/* ── Composition vocabulary ────────────────────────────────────────────────
+   Everything below is built from these: a square, a bracket, four corners, a
+   pair of axes. Each ornament is one whole geometric tile — layered frames, a
+   centre, and repeating units — never a figure, never a scatter. */
+const square = (D, cx, cy, h, step, r) => {
+  seg(D, cx - h, cy - h, cx + h, cy - h, step, r); seg(D, cx + h, cy - h, cx + h, cy + h, step, r);
+  seg(D, cx + h, cy + h, cx - h, cy + h, step, r); seg(D, cx - h, cy + h, cx - h, cy - h, step, r);
+};
+// an L bracket pointing into the tile, as on a zellige corner
+const bracket = (D, x, y, len, sx, sy, step, r) => {
+  seg(D, x, y, x + sx * len, y, step, r);
+  seg(D, x, y, x, y + sy * len, step, r);
+};
+const corners4 = (D, cx, cy, off, fn) => {
+  [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy], i) => fn(cx + sx * off, cy + sy * off, sx, sy, i));
+};
+const cross = (D, cx, cy, len, step, r) => {
+  seg(D, cx - len, cy, cx + len, cy, step, r); seg(D, cx, cy - len, cx, cy + len, step, r);
+};
+
 const MEANING_DRAWS = {
 
-  /* ═══ הגנה — ח'אתם, מסגרות, שער: מה שסוגר על ליבה ═══ */
+  /* ═══ הגנה — מסגרות שנסגרות על ליבה ═══ */
   protection: [
-    // 1. ח'אתם — the eight-point seal turning slowly on its own centre
+    // 1. three squares inside one another, four corner diamonds
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const turn = Math.sin(t * 0.22) * 0.09;
-      star(D, cx, cy, S * 0.94, S * 0.42, 8, ST, b, turn);
-      push(D, cx, cy, b * 1.7);
+      const k = 1 + 0.05 * Math.sin(t * 0.5);
+      square(D, cx, cy, S, ST, b);
+      square(D, cx, cy, S * 0.62 * k, ST, b);
+      square(D, cx, cy, S * 0.26 * k, FINE, b);
+      corners4(D, cx, cy, S * 0.81, (x, y) => diamond(D, x, y, S * 0.13, FINE, b));
       paint(ctx, D);
     },
-    // 2. two diamond frames — the guard passes from the outer to the inner
+    // 2. a diamond set in a square, turning a little within it
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const k = P(t * 0.4);
-      diamond(D, cx, cy, S, ST, b);
-      diamond(D, cx, cy, S * (0.46 + 0.08 * k), ST, b);
-      push(D, cx, cy, b * 1.7);
+      square(D, cx, cy, S, ST, b);
+      poly(D, cx, cy, S * 1.04, 4, ST, b, Math.sin(t * 0.3) * 0.13);
+      diamond(D, cx, cy, S * 0.30, FINE, b);
       paint(ctx, D);
     },
-    // 3. a square frame whose four corner keys step toward the core
+    // 3. a frame with four brackets stepping toward the core
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const m = S * 0.96, k = P(t * 0.45);
-      seg(D, cx - m, cy - m, cx + m, cy - m, ST, b); seg(D, cx - m, cy + m, cx + m, cy + m, ST, b);
-      seg(D, cx - m, cy - m, cx - m, cy + m, ST, b); seg(D, cx + m, cy - m, cx + m, cy + m, ST, b);
-      const d = m * (0.60 - 0.08 * k);
-      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => diamond(D, cx + sx * d, cy + sy * d, S * 0.24, ST, b));
-      push(D, cx, cy, b * 1.7);
+      const step = S * (0.66 - 0.06 * P(t * 0.5));
+      square(D, cx, cy, S, ST, b);
+      corners4(D, cx, cy, step, (x, y, sx, sy) => bracket(D, x, y, S * 0.30, -sx, -sy, FINE, b));
+      const R = S * 0.24;
+      ring(D, cx, cy, R, Math.round(A_TAU * R / FINE), b);
       paint(ctx, D);
     },
-    // 4. the horseshoe gate, breathing on its own base line
+    // 4. octagon within octagon, the layers waking in turn
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const R = S * (0.60 + 0.03 * Math.sin(t * 0.5)), base = cy + S * 0.92, spring = cy - S * 0.02;
-      const legN = Math.max(2, Math.round((base - spring) / ST));
-      for (let i = 0; i <= legN; i++) {
-        const y = base - (base - spring) * (i / legN);
-        push(D, cx - R, y, b); push(D, cx + R, y, b);
-      }
-      const aN = Math.max(6, Math.round(Math.PI * 1.2 * R / ST));
-      for (let i = 0; i <= aN; i++) {
-        const a = Math.PI * (1.10 - 1.20 * (i / aN));
-        push(D, cx + Math.cos(a) * R, spring - Math.sin(a) * R, b);
-      }
-      seg(D, cx - S * 0.96, base, cx + S * 0.96, base, ST, b);
+      const w = (i) => 1 + 0.045 * Math.sin(t * 0.6 - i * 1.3);
+      poly(D, cx, cy, S * w(0), 8, ST, b);
+      poly(D, cx, cy, S * 0.58 * w(1), 8, ST, b);
+      diamond(D, cx, cy, S * 0.22 * w(2), FINE, b);
       paint(ctx, D);
     },
   ],
 
-  /* ═══ שפע — ורדות, עלי כותרת, גרגרים: מה שמתרבה ═══ */
+  /* ═══ שפע — יחידות שמתרבות סביב מרכז ═══ */
   abundance: [
-    // 5. the seed rosette, opening and closing from its own centre
+    // 5. an eight-petal rosette rooted on its own ring
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const open = 0.86 + 0.14 * P(t * 0.5);                      // it opens from its centre
-      for (let k = 0; k < 6; k++) petal(D, cx, cy, k / 6 * A_TAU, S * 0.94 * open, S * 0.26 * open, ST, b);
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 6. quatrefoil — the four lobes swell together and let go
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const sw = 1 + 0.06 * Math.sin(t * 0.55);
-      for (let k = 0; k < 4; k++) {
-        const a = k / 4 * A_TAU - Math.PI / 2, R = S * 0.42 * sw, off = S * 0.52 * sw;
-        ring(D, cx + Math.cos(a) * off, cy + Math.sin(a) * off, R, Math.round(A_TAU * R / ST), b);
-      }
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 7. three grains on one line — the middle one holds the eye
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const sp = S * (0.66 + 0.05 * Math.sin(t * 0.45)), R = S * 0.27;
-      [-1, 0, 1].forEach(k => ring(D, cx + k * sp, cy, R, Math.round(A_TAU * R / ST), b));
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 8. an eight-petal flower turning slowly
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const a0 = t * 0.09;
-      for (let k = 0; k < 8; k++) petal(D, cx, cy, a0 + k / 8 * A_TAU, S * 0.92, S * 0.20, ST, b);
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-  ],
-
-  /* ═══ התחדשות — גלים, טבעות שנולדות, חלת דבש ═══ */
-  renewal: [
-    // 9. rings born at the centre and released outward
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      for (let k = 0; k < 3; k++) {
-        const f = frac(t * 0.15 + k / 3), R = S * (0.22 + 0.78 * f);
-        ring(D, cx, cy, R, Math.max(8, Math.round(A_TAU * R / ST)), b);
-      }
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 10. two waves running under one another
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const span = S * 1.92, n = Math.round(span / ST);
-      [-1, 1].forEach(s => {
-        for (let i = 0; i <= n; i++) {
-          const f = i / n, x = cx - span / 2 + span * f;
-          push(D, x, cy + s * S * 0.40 + Math.sin(f * A_TAU * 1.5 + t * 0.6 * s) * S * 0.22, b);
+      const open = 0.92 + 0.08 * P(t * 0.5), r0 = S * 0.28;
+      for (let k = 0; k < 8; k++) {                              // eight rays of stepped diamonds
+        const a = k / 8 * A_TAU;
+        for (let j = 0; j < 2; j++) {
+          const R = (r0 + S * (0.30 + j * 0.34)) * open;
+          diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * (0.15 - j * 0.03), FINE, b);
         }
-      });
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 11. a spiral flowing outward along its own arm
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const turns = 2.2, n = 34, a0 = t * 0.15;
-      for (let i = 0; i <= n; i++) {
-        const f = i / n, a = a0 + f * turns * A_TAU, R = S * (0.14 + 0.86 * f);
-        push(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, b);
       }
-      push(D, cx, cy, b * 1.7);
+      ring(D, cx, cy, r0, Math.round(A_TAU * r0 / FINE), b);
+      ring(D, cx, cy, S, Math.round(A_TAU * S / ST), b);
       paint(ctx, D);
     },
-    // 12. a honeycomb of seven cells, breathing as one body
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const R = S * (0.33 + 0.02 * Math.sin(t * 0.45)), dx = R * Math.sqrt(3), cells = [[0, 0]];
-      for (let k = 0; k < 6; k++) { const a = k / 6 * A_TAU + Math.PI / 6; cells.push([Math.cos(a) * dx, Math.sin(a) * dx]); }
-      cells.forEach(([ox, oy]) => {
-        for (let k = 0; k < 6; k++) {
-          const a1 = k / 6 * A_TAU, a2 = (k + 1) / 6 * A_TAU;
-          seg(D, cx + ox + Math.cos(a1) * R, cy + oy + Math.sin(a1) * R,
-                 cx + ox + Math.cos(a2) * R, cy + oy + Math.sin(a2) * R, ST, b);
-        }
-      });
-      paint(ctx, D);
-    },
-  ],
-
-  /* ═══ דרך — שברונים, צירים, הצטלבות ═══ */
-  path: [
-    // 13. three chevrons climbing, one behind the other
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const w = S * 0.86, h = S * 0.40, drift = frac(t * 0.18);
-      for (let k = 0; k < 3; k++) {
-        const y = cy + S * 0.92 - ((k + drift) % 3) * S * 0.72;
-        seg(D, cx - w, y + h, cx, y, ST, b); seg(D, cx, y, cx + w, y + h, ST, b);
-      }
-      paint(ctx, D);
-    },
-    // 14. the axis — two arms measured out from the centre and drawn back
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const reach = S * (0.72 + 0.24 * P(t * 0.5));
-      seg(D, cx - reach, cy, cx - S * 0.20, cy, ST, b);
-      seg(D, cx + S * 0.20, cy, cx + reach, cy, ST, b);
-      diamond(D, cx - reach, cy, S * 0.18, ST, b); diamond(D, cx + reach, cy, S * 0.18, ST, b);
-      push(D, cx, cy, b * 1.8);
-      paint(ctx, D);
-    },
-    // 15. the crossing — its two diagonals reach out in turn
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const k1 = 0.80 + 0.18 * P(t * 0.5), k2 = 0.80 + 0.18 * P(t * 0.5 + Math.PI), d = S * 0.72;
-      seg(D, cx - d * k1, cy - d * k1, cx + d * k1, cy + d * k1, ST, b);
-      seg(D, cx - d * k2, cy + d * k2, cx + d * k2, cy - d * k2, ST, b);
-      push(D, cx, cy, b * 1.8);
-      paint(ctx, D);
-    },
-    // 16. a folded path — the fold travels along it
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const sw = Math.sin(t * 0.5) * 0.12;
-      const V = [[-0.94, 0.52 + sw], [-0.31, -0.46 + sw], [0.31, 0.52 - sw], [0.94, -0.46 - sw]]
-        .map(([x, y]) => [cx + x * S, cy + y * S]);
-      for (let i = 0; i < V.length - 1; i++) seg(D, V[i][0], V[i][1], V[i + 1][0], V[i + 1][1], ST, b);
-      paint(ctx, D);
-    },
-  ],
-
-  /* ═══ הרמוניה — סריג, סימטריה, מאזן ═══ */
-  harmony: [
-    // 17. a net of five diamonds — the four answer the one
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const off = S * (0.56 + 0.05 * Math.sin(t * 0.5)), R = S * 0.34;
-      diamond(D, cx, cy, R, ST, b);
-      [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([sx, sy]) => diamond(D, cx + sx * off * 1.35, cy + sy * off * 1.35, R * 0.72, ST, b));
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 18. the seal inside its frame — one turns, the other holds
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      diamond(D, cx, cy, S, ST, b);
-      star(D, cx, cy, S * 0.44, S * 0.19, 8, ST, b, t * 0.11);
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 19. four around one — they breathe out and back together
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const off = S * (0.62 + 0.08 * Math.sin(t * 0.45));
-      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => diamond(D, cx + sx * off, cy + sy * off, S * 0.24, ST, b));
-      diamond(D, cx, cy, S * 0.30, ST, b);
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 20. two rings holding one another, one turning inside the other
+    // 6. a course of eight diamonds turning between two rings
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
       ring(D, cx, cy, S, Math.round(A_TAU * S / ST), b);
-      const R2 = S * 0.56;
-      ring(D, cx, cy, R2, Math.round(A_TAU * R2 / ST), b, t * 0.16);
-      push(D, cx, cy, b * 1.8);
+      const Rm = S * 0.62, R3 = S * 0.24;
+      for (let k = 0; k < 8; k++) {
+        const a = t * 0.07 + k / 8 * A_TAU;
+        diamond(D, cx + Math.cos(a) * Rm, cy + Math.sin(a) * Rm, S * 0.17, FINE, b);
+      }
+      ring(D, cx, cy, R3, Math.round(A_TAU * R3 / FINE), b);
+      paint(ctx, D);
+    },
+    // 7. a twelve-point star breathing inside its ring
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const k = 1 + 0.05 * Math.sin(t * 0.55);
+      ring(D, cx, cy, S, Math.round(A_TAU * S / ST), b);
+      star(D, cx, cy, S * 0.78 * k, S * 0.40 * k, 12, ST, b);
+      paint(ctx, D);
+    },
+    // 8. four rosettes around a centre, waking one after another
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      square(D, cx, cy, S, ST, b);
+      corners4(D, cx, cy, S * 0.55, (x, y, sx, sy, i) => {
+        const p = 1 + 0.10 * Math.sin(t * 0.7 - i * 1.57);
+        const R = S * 0.22 * p;
+        ring(D, x, y, R, Math.round(A_TAU * R / FINE), b);
+      });
+      const Rc = S * 0.20;
+      ring(D, cx, cy, Rc, Math.round(A_TAU * Rc / FINE), b);
       paint(ctx, D);
     },
   ],
 
-  /* ═══ חיוניות — שמש, קרניים, קרינה ═══ */
-  vitality: [
-    // 21. a sunburst — the eight rays reach out and draw back as one
+  /* ═══ התחדשות — טבעות ושכבות שנולדות מחדש ═══ */
+  renewal: [
+    // 9. four rings born at the centre and released outward
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const reach = 0.78 + 0.20 * P(t * 0.55);
-      for (let k = 0; k < 8; k++) {
-        const a = k / 8 * A_TAU;
-        seg(D, cx + Math.cos(a) * S * 0.30, cy + Math.sin(a) * S * 0.30,
-               cx + Math.cos(a) * S * reach, cy + Math.sin(a) * S * reach, ST, b);
+      for (let k = 0; k < 4; k++) {
+        const f = frac(t * 0.13 + k / 4), R = S * (0.18 + 0.82 * f);
+        ring(D, cx, cy, R, Math.max(10, Math.round(A_TAU * R / ST)), b);
       }
-      push(D, cx, cy, b * 1.8);
+      corners4(D, cx, cy, S * 0.80, (x, y) => diamond(D, x, y, S * 0.10, FINE, b));
       paint(ctx, D);
     },
-    // 22. a twelve-point star, turning
+    // 10. concentric diamonds, a wave passing through them outward
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      star(D, cx, cy, S, S * 0.50, 8, ST, b, t * 0.07);
-      push(D, cx, cy, b * 1.7);
+      [1, 0.72, 0.46, 0.22].forEach((k, i) => diamond(D, cx, cy, S * k * (1 + 0.05 * Math.sin(t * 0.65 - i * 1.1)), i > 1 ? FINE : ST, b));
       paint(ctx, D);
     },
-    // 23. the sun disc — its short rays grow and draw back together
+    // 11. a spiral opening from its core
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const R = S * 0.54;
-      ring(D, cx, cy, R, Math.round(A_TAU * R / ST), b);
-      const len = S * (0.20 + 0.14 * P(t * 0.6));
+      const turns = 2.2, R0 = S * 0.22, R1 = S * 0.94, spin = t * 0.12;
+      let a = 0;
+      while (a < turns * A_TAU) {
+        const R = R0 + (R1 - R0) * (a / (turns * A_TAU));
+        push(D, cx + Math.cos(a + spin) * R, cy + Math.sin(a + spin) * R, b);
+        a += ST / Math.max(R, 1);
+      }
+      const Rc = S * 0.14;
+      ring(D, cx, cy, Rc, Math.round(A_TAU * Rc / FINE), b);
+      paint(ctx, D);
+    },
+    // 12. three courses of segments, turning against one another
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      ringSegs(D, cx, cy, S, 12, 0.55, ST, b, t * 0.05);
+      ringSegs(D, cx, cy, S * 0.68, 8, 0.5, ST, b, -t * 0.07);
+      ringSegs(D, cx, cy, S * 0.36, 6, 0.45, FINE, b, t * 0.09);
+      paint(ctx, D);
+    },
+  ],
+
+  /* ═══ דרך — צירים, מעברים, כיוון ═══ */
+  path: [
+    // 13. the two axes inside a frame, four quarters marked
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const k = P(t * 0.5);
+      square(D, cx, cy, S, ST, b);
+      seg(D, cx - S * (0.55 + 0.42 * k), cy, cx + S * (0.55 + 0.42 * k), cy, ST, b);
+      seg(D, cx, cy - S * (0.55 + 0.42 * (1 - k)), cx, cy + S * (0.55 + 0.42 * (1 - k)), ST, b);
+      corners4(D, cx, cy, S * 0.52, (x, y) => square(D, x, y, S * 0.17, FINE, b));
+      paint(ctx, D);
+    },
+    // 14. a diagonal crossing, its arms reaching out in turn
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const k1 = 0.78 + 0.20 * P(t * 0.5), k2 = 0.78 + 0.20 * P(t * 0.5 + Math.PI), d = S * 0.72;
+      seg(D, cx - d * k1, cy - d * k1, cx + d * k1, cy + d * k1, ST, b);
+      seg(D, cx - d * k2, cy + d * k2, cx + d * k2, cy - d * k2, ST, b);
+      corners4(D, cx, cy, S * 0.86, (x, y) => diamond(D, x, y, S * 0.12, FINE, b));
+      diamond(D, cx, cy, S * 0.20, FINE, b);
+      paint(ctx, D);
+    },
+    // 15. mirrored chevron bands travelling out from the middle line
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const w = S * 0.86, h = S * 0.30;
+      for (let k = 0; k < 3; k++) {
+        const f = frac(t * 0.16 + k / 3), off = S * (0.12 + 0.80 * f);
+        seg(D, cx - w, cy - off + h, cx, cy - off, ST, b); seg(D, cx, cy - off, cx + w, cy - off + h, ST, b);
+        seg(D, cx - w, cy + off - h, cx, cy + off, ST, b); seg(D, cx, cy + off, cx + w, cy + off - h, ST, b);
+      }
+      paint(ctx, D);
+    },
+    // 16. two squares locked into an interlace, turning against each other
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const turn = Math.sin(t * 0.32) * 0.15;
+      poly(D, cx, cy, S * 1.02, 4, ST, b, Math.PI / 4 + turn);
+      poly(D, cx, cy, S * 1.02, 4, ST, b, -turn);
+      const R = S * 0.30;
+      ring(D, cx, cy, R, Math.round(A_TAU * R / FINE), b);
+      paint(ctx, D);
+    },
+  ],
+
+  /* ═══ הרמוניה — מאזן, סימטריה, סריג ═══ */
+  harmony: [
+    // 17. four focal diamonds breathing around one centre
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const off = S * (0.60 + 0.07 * Math.sin(t * 0.5));
+      square(D, cx, cy, S, ST, b);
+      [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([sx, sy]) => diamond(D, cx + sx * off, cy + sy * off, S * 0.20, FINE, b));
+      diamond(D, cx, cy, S * 0.26, FINE, b);
+      paint(ctx, D);
+    },
+    // 18. the eight-point seal, turning slowly inside its ring
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      ring(D, cx, cy, S, Math.round(A_TAU * S / ST), b);
+      star(D, cx, cy, S * 0.80, S * 0.36, 8, ST, b, Math.sin(t * 0.25) * 0.2);
+      paint(ctx, D);
+    },
+    // 19. a lattice of nine diamonds, a wave crossing it on the diagonal
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const u = S * 0.62;
+      for (let r = -1; r <= 1; r++) for (let c = -1; c <= 1; c++) {
+        const k = 1 + 0.14 * Math.sin(t * 0.7 - (r + c) * 1.1);
+        diamond(D, cx + c * u, cy + r * u, S * 0.24 * k, FINE, b);
+      }
+      paint(ctx, D);
+    },
+    // 20. a circle, a square and a diamond sharing one centre
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const turn = Math.sin(t * 0.28) * 0.12;
+      ring(D, cx, cy, S, Math.round(A_TAU * S / ST), b);
+      poly(D, cx, cy, S * 0.82, 4, ST, b, Math.PI / 4 + turn);
+      poly(D, cx, cy, S * 0.82, 4, ST, b, turn);
+      const R = S * 0.22;
+      ring(D, cx, cy, R, Math.round(A_TAU * R / FINE), b);
+      paint(ctx, D);
+    },
+  ],
+
+  /* ═══ חיוניות — התפשטות מהמרכז ═══ */
+  vitality: [
+    // 21. twelve spokes between two rings, reaching out together
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const R0 = S * 0.32, R1 = S * (0.74 + 0.22 * P(t * 0.55));
+      ring(D, cx, cy, R0, Math.round(A_TAU * R0 / FINE), b);
       for (let k = 0; k < 12; k++) {
         const a = k / 12 * A_TAU;
-        seg(D, cx + Math.cos(a) * (R + ST * 1.4), cy + Math.sin(a) * (R + ST * 1.4),
-               cx + Math.cos(a) * (R + ST * 1.4 + len), cy + Math.sin(a) * (R + ST * 1.4 + len), ST, b);
+        seg(D, cx + Math.cos(a) * R0, cy + Math.sin(a) * R0, cx + Math.cos(a) * R1, cy + Math.sin(a) * R1, ST, b);
       }
-      push(D, cx, cy, b * 1.8);
+      ring(D, cx, cy, S, Math.round(A_TAU * S / ST), b);
       paint(ctx, D);
     },
-    // 24. four diamonds carried outward along the diagonals, and back
+    // 22. a course of small diamonds pushed outward and drawn back
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const off = S * (0.52 + 0.24 * P(t * 0.5));
-      for (let k = 0; k < 4; k++) {
-        const a = Math.PI / 4 + k / 4 * A_TAU;
-        diamond(D, cx + Math.cos(a) * off, cy + Math.sin(a) * off, S * 0.26, ST, b);
+      const R = S * (0.56 + 0.30 * P(t * 0.5));
+      for (let k = 0; k < 8; k++) {
+        const a = k / 8 * A_TAU;
+        diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * 0.15, FINE, b);
       }
-      push(D, cx, cy, b * 1.8);
+      const Rc = S * 0.26;
+      ring(D, cx, cy, Rc, Math.round(A_TAU * Rc / FINE), b);
+      square(D, cx, cy, S, ST, b);
+      paint(ctx, D);
+    },
+    // 23. three courses of segments opening outward, one after another
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      [0, 1, 2].forEach(i => {
+        const f = frac(t * 0.16 + i / 3), R = S * (0.26 + 0.74 * f);
+        ringSegs(D, cx, cy, R, 6 + i * 6, 0.5, ST, b, i * 0.3);
+      });
+      const Rc = S * 0.16;
+      ring(D, cx, cy, Rc, Math.round(A_TAU * Rc / FINE), b);
+      paint(ctx, D);
+    },
+    // 24. a sixteen-point star turning on a quiet ring
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      star(D, cx, cy, S, S * 0.62, 16, ST, b, t * 0.05);
+      const R = S * 0.30;
+      ring(D, cx, cy, R, Math.round(A_TAU * R / FINE), b);
       paint(ctx, D);
     },
   ],
 
-  /* ═══ מזל — קמעות בפינות, תלתן, אריח מנוקד ═══ */
+  /* ═══ מזל — מרכז וארבע פינות ═══ */
   luck: [
-    // 25. four corner charms leaning toward the centre and back
+    // 25. a medallion with four corner rosettes
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const off = S * (0.64 + 0.06 * Math.sin(t * 0.5));
-      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) =>
-        star(D, cx + sx * off, cy + sy * off, S * 0.30, S * 0.12, 4, ST, b, Math.PI / 4));
-      diamond(D, cx, cy, S * 0.22, ST, b);
-      push(D, cx, cy, b * 1.7);
+      const br = 1 + 0.04 * Math.sin(t * 0.5);
+      [0.60, 0.42, 0.24].forEach((k, i) => {
+        const R = S * k * (i % 2 ? 2 - br : br);
+        ring(D, cx, cy, R, Math.round(A_TAU * R / (k < 0.3 ? FINE : ST)), b);
+      });
+      corners4(D, cx, cy, S * 0.74, (x, y, sx, sy, i) => {
+        const R = S * 0.15 * (1 + 0.12 * Math.sin(t * 0.8 - i * 1.57));
+        ring(D, x, y, R, Math.round(A_TAU * R / FINE), b);
+      });
       paint(ctx, D);
     },
-    // 26. the clover — four lobes turning gently on their centre
+    // 26. a seal held by four corner diamonds
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const a0 = Math.sin(t * 0.3) * 0.16;
+      star(D, cx, cy, S * 0.72, S * 0.32, 8, ST, b, t * 0.06);
+      corners4(D, cx, cy, S * 0.80, (x, y, sx, sy, i) =>
+        diamond(D, x, y, S * 0.14 * (1 + 0.14 * Math.sin(t * 0.7 - i * 1.57)), FINE, b));
+      paint(ctx, D);
+    },
+    // 27. five squares in a quincunx, the four circling the one
+    (ctx, tl, t) => {
+      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
+      const a0 = Math.sin(t * 0.3) * 0.16, off = S * 0.62;
       for (let k = 0; k < 4; k++) {
-        const a = a0 + Math.PI / 4 + k / 4 * A_TAU, R = S * 0.40, off = S * 0.50;
-        ring(D, cx + Math.cos(a) * off, cy + Math.sin(a) * off, R, Math.round(A_TAU * R / ST), b);
+        const a = a0 + Math.PI / 4 + k / 4 * A_TAU;
+        square(D, cx + Math.cos(a) * off, cy + Math.sin(a) * off, S * 0.20, FINE, b);
       }
-      push(D, cx, cy, b * 1.8);
+      square(D, cx, cy, S * 0.28, FINE, b);
+      square(D, cx, cy, S, ST, b);
       paint(ctx, D);
     },
-    // 27. a diamond within a diamond, each turning against the other
+    // 28. four brackets sliding in and out around a ring
     (ctx, tl, t) => {
       const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const k = P(t * 0.45);
-      diamond(D, cx, cy, S, ST, b);
-      const m = S * 0.50 * (0.92 + 0.12 * k);
-      seg(D, cx - m, cy - m, cx + m, cy - m, ST, b); seg(D, cx - m, cy + m, cx + m, cy + m, ST, b);
-      seg(D, cx - m, cy - m, cx - m, cy + m, ST, b); seg(D, cx + m, cy - m, cx + m, cy + m, ST, b);
-      push(D, cx, cy, b * 1.7);
-      paint(ctx, D);
-    },
-    // 28. five charms in a quincunx, the outer four drifting on their circle
-    (ctx, tl, t) => {
-      const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-      const a0 = Math.sin(t * 0.28) * 0.2, off = S * 0.68;
-      for (let k = 0; k < 4; k++) {
-        const a = a0 + k / 4 * A_TAU - Math.PI / 2;
-        star(D, cx + Math.cos(a) * off, cy + Math.sin(a) * off, S * 0.26, S * 0.10, 4, ST, b, Math.PI / 4);
-      }
-      star(D, cx, cy, S * 0.32, S * 0.13, 8, ST, b, 0);
-      push(D, cx, cy, b * 1.7);
+      const off = S * (0.86 - 0.10 * P(t * 0.5));
+      square(D, cx, cy, S, ST, b);
+      corners4(D, cx, cy, off, (x, y, sx, sy) => bracket(D, x, y, S * 0.34, -sx, -sy, FINE, b));
+      const R = S * 0.34;
+      ring(D, cx, cy, R, Math.round(A_TAU * R / ST), b);
+      diamond(D, cx, cy, S * 0.14, FINE, b);
       paint(ctx, D);
     },
   ],
@@ -492,16 +513,7 @@ const TILES = Array.from({ length: 28 }, (_, i) => {
 });
 
 
-/* ── SIX TEST ORNAMENTS ────────────────────────────────────────────────────
-   A trial of the ornament LANGUAGE before the 28 are rebuilt in it. Each one is
-   a whole decorative unit, not an icon floating in a square: layered geometry,
-   radial symmetry, repeating units around a centre, built from ONE dot size
-   (a few accents at most 1.4×, never a large centre dot). Every motion happens
-   inside the geometry, so the ornament stays readable while it moves.
-
-   Shown only with ?tiletest=1 — the stage's own 28 tiles are untouched.
-   ──────────────────────────────────────────────────────────────────────── */
-
+/* Helpers the ornaments are drawn with. */
 // dots along an arc at an EVEN arc-length pitch (so density never changes)
 const arcAt = (D, cx, cy, R, a0, a1, step, r) => {
   const n = Math.max(1, Math.round(Math.abs(a1 - a0) * R / step));
@@ -533,99 +545,6 @@ const leaf = (D, cx, cy, ang, r0, r1, W, step, r) => {
     }
   }
 };
-const ACC = 1;       // every dot the same size — the richness is the geometry
-
-const TEST_DRAWS = [
-  // T1 · MEDALLION — an outer course, a ring of repeating diamonds, an inner
-  //      ring. Three clear layers, air between them.
-  //      Motion: the diamond course turns; the rings breathe against each other.
-  (ctx, tl, t) => {
-    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-    const br = 0.03 * Math.sin(t * 0.5);
-    const R1 = S * (1 + br), R3 = S * 0.30 * (1 - br), Rm = S * 0.64;
-    ring(D, cx, cy, R1, Math.round(A_TAU * R1 / ST), b);
-    ring(D, cx, cy, R3, Math.round(A_TAU * R3 / ST), b);
-    for (let k = 0; k < 8; k++) {
-      const a = t * 0.07 + k / 8 * A_TAU;
-      diamond(D, cx + Math.cos(a) * Rm, cy + Math.sin(a) * Rm, S * 0.21, FINE, b);
-    }
-    paint(ctx, D);
-  },
-
-  // T2 · ROSETTE — eight petals rooted on a small ring, tips on a broken course.
-  //      Motion: the petals open and close together.
-  (ctx, tl, t) => {
-    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-    const open = 0.9 + 0.1 * P(t * 0.5), r0 = S * 0.26;
-    for (let k = 0; k < 8; k++) leaf(D, cx, cy, k / 8 * A_TAU, r0, S * 0.90 * open, S * 0.20 * open, ST, b);
-    ring(D, cx, cy, r0, Math.round(A_TAU * r0 / ST), b);
-    paint(ctx, D);
-  },
-
-  // T3 · NESTED DIAMONDS — three frames, four small diamonds set on the
-  //      diagonals between the outer two. Motion: a wave passes outward.
-  (ctx, tl, t) => {
-    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-    const wave = (i) => 1 + 0.045 * Math.sin(t * 0.65 - i * 1.2);
-    [1, 0.64, 0.30].forEach((k, i) => diamond(D, cx, cy, S * k * wave(i), ST, b));
-    for (let k = 0; k < 4; k++) {
-      const a = Math.PI / 4 + k / 4 * A_TAU, R = S * 0.82 * wave(0.5);
-      diamond(D, cx + Math.cos(a) * R, cy + Math.sin(a) * R, S * 0.19, FINE, b);
-    }
-    paint(ctx, D);
-  },
-
-  // T4 · INTERLACE — two squares locked into one eight-point star, on a ring.
-  //      Motion: the two turn against one another, the star opening and closing.
-  (ctx, tl, t) => {
-    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-    const turn = Math.sin(t * 0.35) * 0.16;
-    poly(D, cx, cy, S * 0.96, 4, ST, b, Math.PI / 4 + turn);
-    poly(D, cx, cy, S * 0.96, 4, ST, b, -turn);
-    const R = S * 0.30;
-    ring(D, cx, cy, R, Math.round(A_TAU * R / ST), b);
-    paint(ctx, D);
-  },
-
-  // T5 · SPIRAL — one arm walked at an even pitch, opening from the core.
-  //      Motion: the whole spiral turns, so the eye flows along the arm.
-  (ctx, tl, t) => {
-    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-    const turns = 2.2, R0 = S * 0.22, R1 = S * 0.94, spin = t * 0.13, step = ST;
-    let a = 0;                                          // one clean arm
-    while (a < turns * A_TAU) {
-      const R = R0 + (R1 - R0) * (a / (turns * A_TAU));
-      push(D, cx + Math.cos(a + spin) * R, cy + Math.sin(a + spin) * R, b);
-      a += step / Math.max(R, 1);
-    }
-    const Rc = S * 0.15;
-    ring(D, cx, cy, Rc, Math.round(A_TAU * Rc / FINE), b);      // the core it opens from
-    paint(ctx, D);
-  },
-
-  // T6 · AXES — a square frame, the two axes crossing it, a small square in each
-  //      quarter. Motion: the axes answer one another, in and out.
-  (ctx, tl, t) => {
-    const b = DOT / 2, cx = tl.W / 2, cy = tl.H / 2, S = ART_R(tl), D = [];
-    const m = S * 0.92, k = P(t * 0.5);
-    poly(D, cx, cy, m * Math.SQRT2, 4, ST, b, Math.PI / 4);
-    const hx = m * (0.55 + 0.40 * k), vy = m * (0.55 + 0.40 * (1 - k));
-    seg(D, cx - hx, cy, cx + hx, cy, ST, b);
-    seg(D, cx, cy - vy, cx, cy + vy, ST, b);
-    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) =>
-      poly(D, cx + sx * m * 0.55, cy + sy * m * 0.55, S * 0.24, 4, FINE, b, Math.PI / 4));
-    paint(ctx, D);
-  },
-];
-
-/* The six carry the first six meaning groups, so choosing one still runs the
-   stage's own flow untouched. */
-export const TEST_TILES = TEST_DRAWS.map((fn, i) => ({
-  id: 'test-tile-' + (i + 1),
-  meaningGroup: MEANING_ORDER[i],
-  meaning: MEANING_ORDER[i],
-  draw(ctx, tl, t, bo) { fn(ctx, tl, t, bo || 0, i); },
-}));
 
 export const TILE_MEANINGS = TILES.map(t => t.meaningGroup);
 export const __TILE_DRAWS = { MEANING_DRAWS, MEANING_ORDER, TILES };   // dev/verification
@@ -659,7 +578,9 @@ function drawConfirm(ctx, tl, ce) {
 
 // Every tile shares ONE look: the interface YELLOW plate with dark #282828 dots.
 const TILE_BG = '#e2bc71', TILE_DOT = '#282828';
-const SELECT_BG = ORANGE, SELECT_DOT = CREAM;   // pressed tile: the interface's own orange plate, cream dots
+// The tile at the centre is only the CANDIDATE: the stage's own gold, darkened a
+// touch. The ornament and frame keep the interface's dark.
+const CENTER_BG = '#d7ae60';
 // Tiles are STATIC — drawn at this frozen frame — and only animate while the
 // pointer is over them (hover / touch). STAGGER = per-tile entrance delay.
 const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
@@ -673,7 +594,7 @@ const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
 
    The tiles, their drawings and their mapping to meaning + symbol are exactly
    as before; only the way they are shown and chosen changed. */
-const GAL_SCALE_MIN = 0.84;   // a neighbour — a little smaller than the centre
+const GAL_SCALE_MIN = 0.78;   // a neighbour — a little smaller than the centre
 const CENTER_SCALE = 1;       // the active tile
 const DRAG_TAP_PX = 8;        // beyond this the gesture is a swipe, never a tap
 const FLICK_MAX = 2.6;        // how many tiles one strong flick may carry
@@ -690,9 +611,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   gridEl.appendChild(innerEl);
   host.appendChild(gridEl);
 
-  // ?tiletest=1 → the six trial ornaments instead of the 28 (the stage, its
-  // mapping and its flow are untouched; without the flag nothing changes).
-  const SET = /[?&#]tiletest=1/.test(location.search + location.hash) ? TEST_TILES : TILES;
+  const SET = TILES;
   const N = SET.length;
   const tiles = [];
   for (let i = 0; i < N; i++) {
@@ -744,7 +663,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.96, galW * 0.86));
+    boxH = Math.max(60, Math.min(galH * 0.52, galW * 0.29));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
@@ -774,11 +693,11 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   /* ── State: `pos` is the gallery's position in TILE UNITS (fractional). ── */
   let pos = 0, vel = 0;
   let dragging = false, dragId = -1, lastX = 0, moved = 0, lastT = 0;
-  let selected = -1, chosen = -1, chosenAt = 0, done = false, locked = false;
+  let selected = -1, notified = -1, chosen = -1, chosenAt = 0, done = false, locked = false;
   let raf = 0, t0 = performance.now(), pulseAt = -1, hintDone = false;
-  // The tile before and the tile after stand close in — near enough that their
-  // edge shows past the centre plate, with no empty channel between them.
-  const galStep = () => galW * 0.45;
+  // The tile before and the tile after stand WHOLE beside the centre one, with a
+  // narrow channel between them — the proportions of the reference.
+  const galStep = () => boxW * 0.5 + boxW * GAL_SCALE_MIN * 0.5 + boxW * 0.09;
   const wrap = (v) => ((v % N) + N) % N;                       // the row is a loop
   const centreIndex = () => wrap(Math.round(pos));
 
@@ -794,7 +713,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       const ad = Math.abs(d);
       const s = Math.max(GAL_SCALE_MIN, CENTER_SCALE - (CENTER_SCALE - GAL_SCALE_MIN) * Math.min(1, ad));
       const x = d * step + (1 - enterEase) * step * 1.6;        // the row slides in
-      const vis = ad < 1.65;                                    // the centre and one slice each side
+      const vis = ad < 1.6;                                     // the centre and one tile each side
       tl.cell.style.display = vis ? 'block' : 'none';
       if (!vis) continue;
       tl.scale = s;
@@ -805,12 +724,13 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       tl.cell.style.zIndex = String(100 - Math.round(ad * 10));
       // presence follows distance too — the centre is the focus, the flanks hint
       // the focus is unmistakable: the centre is present, the flanks recede
-      tl.alpha = (chosen >= 0 && tl.i !== chosen) ? 0.28 : (1 - 0.55 * Math.min(1, ad)) * enterEase;
+      tl.alpha = (chosen >= 0 && tl.i !== chosen) ? 0.28 : (1 - 0.5 * Math.min(1, ad)) * enterEase;
       tl.cell.style.opacity = String(tl.alpha);
     }
   }
 
   function frame(now) {
+    // the candidate follows the row, and the stage hears about it once it settles
     // scheduled FIRST: a throw anywhere below must never be able to kill the
     // loop and leave the whole row blank.
     raf = requestAnimationFrame(frame);
@@ -826,6 +746,11 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       }
     }
     layoutFrame(now);
+    if (chosen < 0) {
+      const c = centreIndex();
+      markCentre(c);
+      if (!dragging && Math.abs(vel) < 0.004) announce(c);
+    }
 
     for (const tl of tiles) {
       if (tl.cell.style.display === 'none') continue;
@@ -878,43 +803,46 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     if (moved <= DRAG_TAP_PX) {                                  // a tap, not a swipe
       const tgt = e && e.target && e.target.closest ? e.target.closest('.dot-tile') : null;
       const i = tgt ? Number(tgt.dataset.index) : -1;
-      if (i >= 0) {
-        if (i === centreIndex()) select(i);                       // only the centre can be chosen
-        else { let d = i - pos; d = ((d % N) + N) % N; if (d > N / 2) d -= N; pos += d * 0.999; vel = 0; }  // bring it to the centre first
-      }
+      // A tap is never a choice — it only brings a neighbour in to be looked at.
+      if (i >= 0 && i !== centreIndex()) { let d = i - pos; d = ((d % N) + N) % N; if (d > N / 2) d -= N; pos += d * 0.999; vel = 0; }
     }
   };
   gridEl.addEventListener('pointerup', endDrag);
   gridEl.addEventListener('pointercancel', () => { dragging = false; });
 
-  function select(i) {
-    if (chosen >= 0) return;
-    if (selected >= 0 && selected !== i) plate(tiles[selected], false);
-    selected = i;
-    plate(tiles[i], true);                                       // pressed → orange plate
-    pulseAt = performance.now();
-    locked = true;                                               // no swiping mid-transition
-    setTimeout(() => { locked = false; }, 420);
-    if (onSelect) onSelect(i, SET[i].meaning);
-  }
-  function deselect() {
-    if (chosen >= 0) return;
+  /* The candidate is whatever tile the row has brought to the centre — no tap
+     needed, and a tap never chooses. Exactly one tile carries the darker plate;
+     when another arrives, the one before it goes back to the stage's own gold. */
+  function markCentre(i) {
+    if (selected === i || chosen >= 0) return;
     if (selected >= 0) plate(tiles[selected], false);
-    selected = -1; pulseAt = -1;
+    selected = i;
+    plate(tiles[i], true);
+  }
+  function announce(i) {
+    if (notified === i || chosen >= 0) return;
+    notified = i;
+    if (onSelect) onSelect(i, SET[i].meaning);            // the stage arms "המשך" on this one
+  }
+  function deselect() {}                                  // there is always a candidate now
+
+  function plate(tl, on) {
+    tl.bgColor = on ? CENTER_BG : TILE_BG;
+    tl.cell.style.backgroundColor = tl.bgColor;
+    tl.cell.classList.toggle('is-current', !!on);
   }
 
-  /* Being at the centre is only where the eye is; PRESSING is the choice. Only
-     a press fills the plate — the ornament keeps moving, in cream. */
-  function plate(tl, on) {
-    tl.bgColor = on ? SELECT_BG : TILE_BG;
-    tl.dotColor = on ? SELECT_DOT : TILE_DOT;
-    tl.cell.style.backgroundColor = tl.bgColor;
-    tl.cell.classList.toggle('is-picked', !!on);
+  // Bring a tile to the centre (used by the stage's own demo).
+  function selectTile(i) {
+    let d = i - pos; d = ((d % N) + N) % N; if (d > N / 2) d -= N;
+    pos += d; vel = 0;
   }
 
   function confirm() {
-    if (chosen >= 0 || selected < 0) return;
-    chosen = selected; chosenAt = performance.now();
+    if (chosen >= 0) return;
+    const c = centreIndex();
+    announce(c);                                          // make sure the stage has this one
+    chosen = c; chosenAt = performance.now();
     const tl = tiles[chosen];
     tl.confirmT = 0;                       // the ornament goes on moving under it
     tl.cell.classList.add('is-chosen');
@@ -934,11 +862,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       try { gridEl.remove(); } catch (_) {}
     },
     confirm,
-    selectTile(i) {                       // used by the ghost-hand demo
-      let d = i - pos; d = ((d % N) + N) % N; if (d > N / 2) d -= N;
-      pos += d; vel = 0;
-      select(wrap(i));
-    },
+    selectTile,                           // used by the demo: bring a tile to the centre
     deselect,
     stopActive: noop,
     tileCenter(i) {
