@@ -21,6 +21,8 @@
    midday, sinking + deep orange toward sunset, cream moon at night.
    ══════════════════════════════════════════════════════════════ */
 
+import { tick } from './sfx.js';
+
 const DIGIT = i => `/image/v5-stage6/${i}.png`;
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -164,7 +166,16 @@ export function mountTimeWheel(host, { onDone, onHour } = {}){
     // evening/night → progressively dark). `alt` is the daylight factor.
     onHour && onHour(hf, alt);
   }
-  function frameUpdate(){ renderAll(); paintSun(); }
+  // The wheels click as they pass a whole hour / minute — one soft detent per
+  // step, wherever the movement came from (finger, momentum or the stage demo).
+  let lastH = null, lastM = null;
+  function detents(){
+    const h = Math.round(hourManual), m = Math.round(absMinutes);
+    if(lastH === null){ lastH = h; lastM = m; return; }
+    const steps = Math.abs(h - lastH) + Math.abs(m - lastM);
+    if(steps){ tick(steps > 2 ? 0.6 : 1); lastH = h; lastM = m; }
+  }
+  function frameUpdate(){ renderAll(); paintSun(); detents(); }
 
   // ── Snap + momentum ─────────────────────────────────────────
   let raf = 0, animTO = 0, wheelSnapTO = 0;

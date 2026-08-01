@@ -10,6 +10,8 @@
    a short confirmation, then onChoose(index, meaning) fires. Each tile carries
    an internal meaning (never shown) that the caller maps to a symbol. */
 
+import { sweep } from './sfx.js';
+
 const DOT = 0.8;   // dot DIAMETER — a fine dot, set close: the line is stippled, not beaded
 const GAP = 4.2;   // centre-to-centre pitch — denser grid → richer shapes per tile
 const TAU = Math.PI * 2;
@@ -700,6 +702,14 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   const centreIndex = () => wrap(Math.round(pos));
 
   function layoutFrame(now) {
+    // The candidate follows the row itself — under the finger, under momentum —
+    // and each tile that passes the centre gets its own swish, in the direction
+    // the row is travelling.
+    if (chosen < 0) {
+      const c = centreIndex();
+      if (selected >= 0 && c !== selected) sweep(vel >= 0 ? 1 : -1, Math.min(1, Math.abs(vel) * 8 + 0.3));
+      markCentre(c);
+    }
     const step = galStep();
     const enter = clamp01((now - t0) / ENTER_MS);
     const enterEase = 1 - Math.pow(1 - enter, 3);
@@ -745,11 +755,8 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       }
     }
     layoutFrame(now);
-    if (chosen < 0) {
-      const c = centreIndex();
-      markCentre(c);
-      if (!dragging && Math.abs(vel) < 0.004) announce(c);
-    }
+    // the stage is told which tile it is once the row comes to rest
+    if (chosen < 0 && !dragging && Math.abs(vel) < 0.004) announce(centreIndex());
 
     for (const tl of tiles) {
       if (tl.cell.style.display === 'none') continue;
