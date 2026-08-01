@@ -551,7 +551,8 @@
       "Bash(afinfo public/sounds/bg-432hz.m4a)",
       "Bash(afconvert -f m4af -d aac -b 48000 -s 3 loop.wav bg-loop.m4a)",
       "Bash(awk '{print \"encoded:\", $5}')",
-      "Bash(afinfo bg-loop.m4a)"
+      "Bash(afinfo bg-loop.m4a)",
+      "Bash(node --input-type=module -e \"import\\('./drive.js'\\).then\\(\\(\\)=>console.log\\('parse ok'\\)\\).catch\\(e=>console.log\\('ERR', e.message\\)\\)\")"
     ]
   },
   "hooks": {

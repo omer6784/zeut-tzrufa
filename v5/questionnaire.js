@@ -2358,13 +2358,13 @@ function runTilesDemo(){
    It resets the pick afterwards so the visitor starts clean. Input is locked for
    its duration (lockInput). */
 function runProfDemo(){
-  // The words float free, so the demo simply APPROACHES one: the hand drifts in
-  // and the word answers by leaning toward it, growing and glowing (drive.js
-  // does that from the real pointer distance) — showing the pull rather than a
-  // press. Illustrative only: it never selects for the visitor.
-  const field = document.getElementById('drive-field');
-  const words = field ? [...field.querySelectorAll('.drive-word')] : [];
-  if(!words.length) return;
+  // The words stand in a large typographic space, so the demo simply APPROACHES
+  // one: the hand drifts in and the word answers by leaning toward it, growing
+  // and gaining weight (drive.js does that from the real pointer distance) —
+  // showing the pull rather than a press. It never selects for the visitor.
+  const api = st._driveTeardown;
+  const pts = (api && api.wordPoints) ? api.wordPoints() : [];
+  if(!pts.length) return;
   const my = st._profDemoToken = (st._profDemoToken || 0) + 1;
   lockInput();
   const cleanup = () => unlockInput();
@@ -2373,15 +2373,10 @@ function runProfDemo(){
     const gh = getGhostHand();
     const dead = () => my !== st._profDemoToken || !document.getElementById('drive-field');
     const abort = () => { gh.hide(); cleanup(); };
-    // A word near the middle of the field reads best.
-    const fr = field.getBoundingClientRect();
-    const target = words.reduce((best, el) => {
-      const r = el.getBoundingClientRect();
-      const d = Math.hypot(r.left + r.width / 2 - (fr.left + fr.width / 2), r.top + r.height / 2 - (fr.top + fr.height / 2));
-      return (!best || d < best.d) ? { el, d, r } : best;
-    }, null);
+    // a big word reads best for the demonstration; otherwise whatever is there
+    const target = pts.find(p => p.tier === 'large') || pts.find(p => p.tier === 'huge') || pts[0];
     if(!target) return abort();
-    const cx = target.r.left + target.r.width / 2, cy = target.r.top + target.r.height / 2;
+    const cx = target.x, cy = target.y;
 
     await gh.sleep(300); if(dead()) return abort();
     gh.open(); gh.place(cx + 150, (window.innerHeight || 900) + 60); gh.show('dark');
