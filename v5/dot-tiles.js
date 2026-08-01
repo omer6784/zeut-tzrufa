@@ -10,7 +10,7 @@
    a short confirmation, then onChoose(index, meaning) fires. Each tile carries
    an internal meaning (never shown) that the caller maps to a symbol. */
 
-const DOT = 2.2;   // dot DIAMETER — bolder dots so each tile reads fuller
+const DOT = 1.5;   // dot DIAMETER — small dots, close together: a fine dotted line
 const GAP = 4.2;   // centre-to-centre pitch — denser grid → richer shapes per tile
 const TAU = Math.PI * 2;
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -75,10 +75,10 @@ function paint(ctx, dots) {
 const A_TAU = Math.PI * 2;
 // One pitch for every outline: the dots of a motif keep the same rhythm as the
 // interface's own grid, so the tile reads as drawn in the same material.
-const ST = GAP * 1.15;              // the pitch of a large outline
+const ST = GAP * 0.75;              // the pitch of a large outline
 // A small unit needs a finer pitch, or it stops being a shape and becomes a few
 // loose dots. Anything under a fifth of the ornament is drawn at this.
-const FINE = GAP * 0.8;
+const FINE = GAP * 0.55;
 // Every motif is drawn INSIDE this radius, so a clear margin of plate is always
 // left between the ornament and the tile's dotted frame.
 const ART_R = tl => Math.min(tl.W, tl.H) * 0.335;
@@ -512,7 +512,7 @@ const leaf = (D, cx, cy, ang, r0, r1, W, step, r) => {
     }
   }
 };
-const ACC = 1.35;    // the only accent allowed, and only on a few dots
+const ACC = 1;       // every dot the same size — the richness is the geometry
 
 const TEST_DRAWS = [
   // T1 · MEDALLION — an outer course, a ring of repeating diamonds, an inner
@@ -613,17 +613,17 @@ export const __TILE_DRAWS = { MEANING_DRAWS, MEANING_ORDER, TILES };   // dev/ve
    language (cached per size). Drawn under the ornament. */
 function drawTileFrame(ctx, tl) {
   if (!tl.cache || !tl.cache.frame) {
-    const b = DOT / 2, ins = Math.min(tl.W, tl.H) * 0.06, gp = GAP * 1.7, F = [];
+    const b = DOT / 2, ins = Math.min(tl.W, tl.H) * 0.06, gp = GAP * 1.15, F = [];
     const line = (x0, y0, x1, y1) => {
       const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / gp));
-      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b * 0.38 });
+      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b * 0.7 });
     };
     line(ins, ins, tl.W - ins, ins); line(ins, tl.H - ins, tl.W - ins, tl.H - ins);
     line(ins, ins, ins, tl.H - ins); line(tl.W - ins, ins, tl.W - ins, tl.H - ins);
     tl.cache = Object.assign(tl.cache || {}, { frame: F });
   }
   const a = ctx.globalAlpha;
-  ctx.globalAlpha = a * 0.42;          // a boundary, quieter than anything inside
+  ctx.globalAlpha = a * 0.5;           // a boundary, quieter than anything inside
   paint(ctx, tl.cache.frame);
   ctx.globalAlpha = a;
 }
@@ -652,7 +652,6 @@ const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
 
    The tiles, their drawings and their mapping to meaning + symbol are exactly
    as before; only the way they are shown and chosen changed. */
-const GAL_STEP = 1.26;        // real air between the tiles        // spacing between tiles, in tile-widths
 const GAL_SCALE_MIN = 0.92;   // a neighbour — only a little smaller
 const CENTER_SCALE = 1;       // the active tile
 const DRAG_TAP_PX = 8;        // beyond this the gesture is a swipe, never a tap
@@ -727,7 +726,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.62, galW * 0.32));
+    boxH = Math.max(60, Math.min(galH * 0.78, galW * 0.46));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
@@ -759,11 +758,14 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   let dragging = false, dragId = -1, lastX = 0, moved = 0, lastT = 0;
   let selected = -1, chosen = -1, chosenAt = 0, done = false, locked = false;
   let raf = 0, t0 = performance.now(), pulseAt = -1, hintDone = false;
+  // Half of the tile before and half of the tile after: their centres sit
+  // exactly on the frame lines the gallery is cut on.
+  const galStep = () => Math.max(boxW * 0.6, galW * 0.5);
   const wrap = (v) => ((v % N) + N) % N;                       // the row is a loop
   const centreIndex = () => wrap(Math.round(pos));
 
   function layoutFrame(now) {
-    const step = boxW * GAL_STEP;
+    const step = galStep();
     const enter = clamp01((now - t0) / ENTER_MS);
     const enterEase = 1 - Math.pow(1 - enter, 3);
     for (const tl of tiles) {
@@ -844,7 +846,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     if (!dragging || e.pointerId !== dragId) return;
     const x = px(e), dx = (x - lastX) / (screenScale || 1); lastX = x;
     moved += Math.abs(dx);
-    const step = boxW * GAL_STEP;
+    const step = galStep();
     const dpos = -dx / step;                                     // finger px → tile units
     pos += dpos;
     const now = performance.now(), dt = Math.max(8, now - lastT); lastT = now;
