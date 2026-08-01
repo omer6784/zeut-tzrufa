@@ -10,7 +10,7 @@
    a short confirmation, then onChoose(index, meaning) fires. Each tile carries
    an internal meaning (never shown) that the caller maps to a symbol. */
 
-const DOT = 1.0;   // dot DIAMETER — a fine dot, set close: the line is stippled, not beaded
+const DOT = 0.8;   // dot DIAMETER — a fine dot, set close: the line is stippled, not beaded
 const GAP = 4.2;   // centre-to-centre pitch — denser grid → richer shapes per tile
 const TAU = Math.PI * 2;
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -61,10 +61,31 @@ function grid(tl) {
 // Paint a dots array in ONE colour — whatever ctx.fillStyle currently holds
 // (the frame loop sets it to the tile's dot colour before drawing).
 function paint(ctx, dots) {
+  // Two outlines meeting at a corner each put a dot there, and a dot drawn twice
+  // reads as a blot. A coarse spatial hash drops only the true collisions — a dot
+  // closer to an earlier one than a dot's own width — and leaves the rhythm alone.
+  const min2 = DOT * DOT * 0.81, cell = DOT, grid = new Map();
   ctx.beginPath();
-  for (const d of dots) dot(ctx, d.x, d.y, d.r);
+  for (const d of dots) {
+    const gx = Math.floor(d.x / cell), gy = Math.floor(d.y / cell);
+    let clash = false;
+    for (let ox = -1; ox <= 1 && !clash; ox++) for (let oy = -1; oy <= 1 && !clash; oy++) {
+      const bucket = grid.get(((gx + ox) << 16) ^ (gy + oy));
+      if (!bucket) continue;
+      for (let i = 0; i < bucket.length; i += 2) {
+        const ddx = d.x - bucket[i], ddy = d.y - bucket[i + 1];
+        if (ddx * ddx + ddy * ddy < min2) { clash = true; break; }
+      }
+    }
+    if (clash) continue;
+    const key = (gx << 16) ^ gy;
+    const bucket = grid.get(key);
+    if (bucket) bucket.push(d.x, d.y); else grid.set(key, [d.x, d.y]);
+    dot(ctx, d.x, d.y, d.r);
+  }
   ctx.fill();
 }
+
 
 /* ── 28 movement tiles in SEVEN movement families (4 tiles each) ─────────────
    The visitor picks the motion that FEELS right; the family answers "what
@@ -75,10 +96,10 @@ function paint(ctx, dots) {
 const A_TAU = Math.PI * 2;
 // One pitch for every outline: the dots of a motif keep the same rhythm as the
 // interface's own grid, so the tile reads as drawn in the same material.
-const ST = GAP * 0.52;              // the pitch of a large outline
+const ST = GAP * 0.42;              // the pitch of a large outline
 // A small unit needs a finer pitch, or it stops being a shape and becomes a few
 // loose dots. Anything under a fifth of the ornament is drawn at this.
-const FINE = GAP * 0.38;
+const FINE = GAP * 0.30;
 // Every motif is drawn INSIDE this radius, so a clear margin of plate is always
 // left between the ornament and the tile's dotted frame.
 const ART_R = tl => Math.min(tl.W, tl.H) * 0.335;
@@ -613,10 +634,10 @@ export const __TILE_DRAWS = { MEANING_DRAWS, MEANING_ORDER, TILES };   // dev/ve
    language (cached per size). Drawn under the ornament. */
 function drawTileFrame(ctx, tl) {
   if (!tl.cache || !tl.cache.frame) {
-    const b = DOT / 2, ins = Math.min(tl.W, tl.H) * 0.06, gp = GAP * 1.15, F = [];
+    const b = DOT / 2, ins = Math.min(tl.W, tl.H) * 0.06, gp = ST, F = [];
     const line = (x0, y0, x1, y1) => {
       const L = Math.hypot(x1 - x0, y1 - y0), n = Math.max(1, Math.round(L / gp));
-      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b * 0.7 });
+      for (let i = 0; i <= n; i++) F.push({ x: x0 + (x1 - x0) * i / n, y: y0 + (y1 - y0) * i / n, r: b });
     };
     line(ins, ins, tl.W - ins, ins); line(ins, tl.H - ins, tl.W - ins, tl.H - ins);
     line(ins, ins, ins, tl.H - ins); line(tl.W - ins, ins, tl.W - ins, tl.H - ins);
@@ -726,7 +747,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     galW = Math.max(80, galW - ins.L - ins.R);
     // The centre tile claims the frame; its neighbours run off both edges and
     // are cut there — the gallery clips exactly on the interface's grid lines.
-    boxH = Math.max(60, Math.min(galH * 0.84, galW * 0.53));
+    boxH = Math.max(60, Math.min(galH * 0.92, galW * 0.75));
     boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     // Published as a variable the CSS applies with !important — the stage's own
