@@ -1749,7 +1749,10 @@ function initTouchSound() {
     // silent, and so is everything while a stage demo has input locked.
     if (window.__inputLocked) return;
     const t = e && e.target;
-    if (!(t && t.closest && t.closest('button, a, input, textarea, select, canvas, svg, .vk-key, .dot-tile, .ed-gesture, .prof-card, #step-rail li'))) return;
+    if (!(t && t.closest && t.closest('button, a, input, textarea, select, canvas, svg, .vk-key, .ed-gesture, .prof-card, #step-rail li'))) return;
+    // The movement gallery has its own voice — the swish of a tile passing the
+    // centre — so the press chime would only double it. Silent there.
+    if (t.closest('.dot-gallery')) return;
     const now = performance.now();
     if (now - last < 90) return;   // debounce double-fires (touch → pointer)
     last = now;
