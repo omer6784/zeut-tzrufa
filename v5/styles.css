@@ -7433,10 +7433,7 @@ html.portrait #editor-view .ed-jewel-frame {
    whole block scales up about its own centre — it stays centred inside the
    frame and the tiles (and their touch targets) grow with it. Landscape only;
    portrait has its own width-bound 4×7 layout. ── */
-html:not(.portrait) #section-3[data-stage="2"] .dot-tiles-inner {
-  transform: translateY(-10px) scale(1.22);
-  transform-origin: center center;
-}
+html:not(.portrait) #section-3[data-stage="2"] .dot-gallery { padding-top: 0; }
 
 /* ── "מה מניע אותך?" — the pull between a visitor and a word ──────────────
    As they come near, the word leans toward them, grows, takes a soft halo and
@@ -7481,4 +7478,48 @@ html:not(.portrait) #section-3[data-stage="2"] .dot-tiles-inner {
 #completion-view .cv-modal .cv-btn {
   color: #f5f5ed !important;
   --b: #f5f5ed;
+}
+
+/* ── Movement stage as a horizontal GALLERY ────────────────────────────────
+   One strip of tiles pushed by hand: the centre tile is the focus, its
+   neighbours flank it and hint at the rest. Positions and scales are set per
+   frame in dot-tiles.js (transform only — no layout thrash), so the row moves
+   with the finger at 60fps. */
+.dot-gallery {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;              /* the swipe belongs to the gallery */
+  user-select: none; -webkit-user-select: none;
+}
+/* The row is placed every frame from script, so the tiles must not carry a
+   CSS transition of their own — it would lag a hand's drag by a third of a
+   second. Only presence still eases. */
+.dot-gallery .dot-tile { transition: opacity .22s linear !important; }
+.dot-gallery .dot-tiles-inner {
+  position: absolute; left: 50%; top: 50%;
+  width: 0; height: 0;
+  display: block !important;       /* not a grid any more — tiles are placed */
+  transform: none !important;
+  max-width: none !important; max-height: none !important;
+  aspect-ratio: auto !important;
+}
+.dot-gallery .dot-tile,
+#section-3[data-stage="2"] .dot-gallery .dot-tile {
+  position: absolute !important; left: 0 !important; top: 0 !important;
+  width: var(--tile-size, 300px) !important;
+  height: var(--tile-size, 300px) !important;
+  max-width: none !important; max-height: none !important;
+  /* the box is centred on the row's axis */
+  margin-left: calc(var(--tile-size, 300px) / -2) !important;
+  margin-top: calc(var(--tile-size, 300px) / -2) !important;
+  transform-origin: center center;
+  will-change: transform, opacity;
+  aspect-ratio: 1 / 1 !important;
+}
+.dot-gallery .dot-tile-canvas { width: 100% !important; height: 100% !important; display: block; }
+/* The counter reads as part of the interface's own numbering, not a widget. */
+.dot-gallery-count {
+  position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
+  font-family: 'ArbelG', sans-serif; font-size: 11px; letter-spacing: 0.12em;
+  color: #282828; opacity: 0.55; pointer-events: none;
 }

@@ -528,19 +528,39 @@ const SELECT_BG = '#ff5003', SELECT_DOT = '#f5f5ed';   // pressed tile: orange p
 // pointer is over them (hover / touch). STAGGER = per-tile entrance delay.
 const STATIC_T = 2.2, STAGGER = 55, APPEAR_MS = 300;
 
+/* ── The stage is a horizontal GALLERY of the 28 tiles ─────────────────────
+   One tile sits at the centre at full size; its neighbours flank it, smaller,
+   so the row reads as a continuous strip you push with your hand rather than a
+   slideshow. Every tile keeps animating wherever it stands. Scale, position and
+   presence are all derived from a tile's distance from the centre, so nothing
+   "starts an animation" on arrival — it is one continuous state.
+
+   The tiles, their drawings and their mapping to meaning + symbol are exactly
+   as before; only the way they are shown and chosen changed. */
+const GAL_STEP = 0.92;        // spacing between tiles, in tile-widths
+const GAL_SCALE_MIN = 0.62;   // a distant tile
+const CENTER_SCALE = 1;       // the active tile
+const DRAG_TAP_PX = 8;        // beyond this the gesture is a swipe, never a tap
+const FLICK_MAX = 2.6;        // how many tiles one strong flick may carry
+const ENTER_MS = 520;
+
 export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   const noop = () => {};
   if (!host) return { teardown: noop, confirm: noop, selectTile: noop, stopActive: noop, deselect: noop, tileCenter: () => null, count: 0, appearMs: 0 };
 
   const gridEl = document.createElement('div');
-  gridEl.className = 'dot-tiles-grid';
+  gridEl.className = 'dot-tiles-grid dot-gallery';
   const innerEl = document.createElement('div');
   innerEl.className = 'dot-tiles-inner';
   gridEl.appendChild(innerEl);
+  const counterEl = document.createElement('div');
+  counterEl.className = 'dot-gallery-count';
+  gridEl.appendChild(counterEl);
   host.appendChild(gridEl);
 
+  const N = TILES.length;
   const tiles = [];
-  for (let i = 0; i < TILES.length; i++) {
+  for (let i = 0; i < N; i++) {
     const cell = document.createElement('div');
     cell.className = 'dot-tile';
     cell.dataset.index = String(i);
@@ -551,96 +571,174 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     innerEl.appendChild(cell);
     tiles.push({ i, cell, canvas, ctx: canvas.getContext('2d'), W: 0, H: 0,
       bgColor: TILE_BG, dotColor: TILE_DOT,
-      rnd: mulberry32(1000 + i * 7919), inten: 0.45, alpha: 0,
-      frozen: false, frozenT: 0, confirmT: -1, cache: null,
-      appearAt: i * STAGGER });   // enter one after another
+      rnd: mulberry32(1000 + i * 7919), inten: 0.45, alpha: 1,
+      frozen: false, frozenT: 0, confirmT: -1, cache: null, clock: i * 0.37 });
   }
 
-  function sizeTile(tl) {
-    const r = tl.cell.getBoundingClientRect();
+  /* ── Geometry. The tile box is square, sized off the gallery height. ── */
+  let boxW = 0, boxH = 0, galW = 0, ready = false;
+  let screenScale = 1;   // how much the whole interface is scaled on the way to the glass
+  function sizeAll() {
+    // LAYOUT pixels (clientWidth/Height), not getBoundingClientRect: the whole
+    // interface lives inside a scaled wrapper, and a size measured after that
+    // scale would be shrunk a second time when written back as CSS.
+    galW = gridEl.clientWidth || 1;
+    const galH = gridEl.clientHeight || 1;
+    screenScale = (gridEl.getBoundingClientRect().width || galW) / galW;
+    boxH = Math.max(60, Math.min(galH * 0.8, galW * 0.42));
+    boxW = boxH;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    tl.W = r.width; tl.H = r.height;
-    tl.canvas.width = Math.round(r.width * dpr); tl.canvas.height = Math.round(r.height * dpr);
-    tl.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    tl.cache = null;
-    tl.settledPaint = false;   // resized → repaint the settled frame once
+    // Published as a variable the CSS applies with !important — the stage's own
+    // grid rules size .dot-tile with !important and would otherwise win.
+    gridEl.style.setProperty('--tile-size', boxW + 'px');
+    for (const tl of tiles) {
+      tl.W = boxW; tl.H = boxH;
+      tl.canvas.width = Math.round(boxW * dpr); tl.canvas.height = Math.round(boxH * dpr);
+      tl.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      tl.cache = null;
+    }
+    if (ready) layoutFrame(performance.now());     // re-place the row at the new size
   }
-  const sizeAll = () => tiles.forEach(sizeTile);
   sizeAll();
+  // The stage reveals with a transform, so the gallery briefly reports a small
+  // box; re-measure whenever it settles (and once more shortly after mount)
+  // rather than freezing the tile size at whatever it was during the entrance.
+  const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => sizeAll()) : null;
+  ro && ro.observe(gridEl);
+  const sizeTimers = [80, 260, 620, 1200].map(ms => setTimeout(sizeAll, ms));
 
-  let selected = -1, chosen = -1, chosenAt = 0, done = false, raf = 0, t0 = performance.now();
+  /* ── State: `pos` is the gallery's position in TILE UNITS (fractional). ── */
+  let pos = 0, vel = 0;
+  let dragging = false, dragId = -1, lastX = 0, moved = 0, lastT = 0;
+  let selected = -1, chosen = -1, chosenAt = 0, done = false, locked = false;
+  let raf = 0, t0 = performance.now(), pulseAt = -1, hintDone = false;
+  const wrap = (v) => ((v % N) + N) % N;                       // the row is a loop
+  const centreIndex = () => wrap(Math.round(pos));
 
-  function setSelected(i) {
-    if (chosen >= 0) return;
-    selected = i;
-    tiles.forEach(o => {
-      const sel = o.i === i;
-      o.cell.classList.toggle('is-selected', sel);
-      o.cell.style.backgroundColor = sel ? SELECT_BG : TILE_BG;
-      o.dotColor = sel ? SELECT_DOT : TILE_DOT;
-      o.settledPaint = false;
-    });
-    if (onSelect) onSelect(i, TILES[i].meaning);
-  }
-  function deselect() {
-    if (chosen >= 0) return;
-    selected = -1;
-    tiles.forEach(o => {
-      o.cell.classList.remove('is-selected');
-      o.cell.style.backgroundColor = TILE_BG;
-      o.dotColor = TILE_DOT;
-      o.settledPaint = false;
-    });
+  function layoutFrame(now) {
+    const step = boxW * GAL_STEP;
+    const enter = clamp01((now - t0) / ENTER_MS);
+    const enterEase = 1 - Math.pow(1 - enter, 3);
+    for (const tl of tiles) {
+      // shortest signed distance from the centre, wrapped — so tiles that pass
+      // an end reappear at the other, one continuous loop with no duplicates.
+      let d = tl.i - pos;
+      d = ((d % N) + N) % N; if (d > N / 2) d -= N;
+      const ad = Math.abs(d);
+      const s = ad <= 1 ? CENTER_SCALE - (CENTER_SCALE - 0.8) * ad
+                        : Math.max(GAL_SCALE_MIN, 0.8 - (ad - 1) * 0.1);
+      const x = d * step + (1 - enterEase) * step * 1.6;        // the row slides in
+      const vis = ad < 3.4;
+      tl.cell.style.display = vis ? 'block' : 'none';
+      if (!vis) continue;
+      tl.scale = s;
+      const sel = (tl.i === chosen || tl.i === selected);
+      let pulse = 1;
+      if (pulseAt > 0) { const k = clamp01((now - pulseAt) / 260); pulse = sel ? 1 + 0.05 * Math.sin(k * Math.PI) : 1; }
+      tl.cell.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0) scale(${(s * pulse).toFixed(3)})`;
+      tl.cell.style.zIndex = String(100 - Math.round(ad * 10));
+      // presence follows distance too — the centre is the focus, the flanks hint
+      tl.alpha = (chosen >= 0 && tl.i !== chosen) ? 0.35 : (ad < 0.5 ? 1 : Math.max(0.42, 1 - (ad - 0.5) * 0.34)) * enterEase;
+      tl.cell.style.opacity = String(tl.alpha);
+    }
+    counterEl.textContent = String(centreIndex() + 1).padStart(2, '0') + ' / ' + N;
   }
 
   function frame(now) {
+    // physics: momentum, then a soft pull to the nearest tile
+    if (!dragging && !locked) {
+      pos += vel;
+      vel *= 0.92;
+      if (Math.abs(vel) < 0.004) {
+        vel = 0;
+        const target = Math.round(pos);
+        pos += (target - pos) * 0.18;                            // snap, never a jump
+        if (Math.abs(target - pos) < 0.0008) pos = target;
+      }
+    }
+    layoutFrame(now);
+
     for (const tl of tiles) {
-      const appeared = (now - t0) >= tl.appearAt;
-      const aTarget = appeared ? 1 : 0;
-      tl.alpha += (aTarget - tl.alpha) * 0.16;
-      if (appeared && Math.abs(1 - tl.alpha) < 0.005) tl.alpha = 1;
-      // Every tile has its OWN smooth clock; touch/hover only accelerates it a
-      // little (reinforcing the tile's motion — never changing its family).
-      const bo = (tl.i === selected || tl.i === chosen) ? 1 : (tl.hover ? 0.45 : 0);
+      if (tl.cell.style.display === 'none') continue;
+      const bo = (tl.i === selected || tl.i === chosen) ? 1 : 0;
       const dt = Math.min(0.1, (now - (tl._last || now)) / 1000);
       tl._last = now;
-      if (!tl.frozen) tl.clock = (tl.clock || 0) + dt * (1 + 0.45 * bo);
+      if (!tl.frozen) tl.clock = (tl.clock || 0) + dt * (1 + 0.45 * bo);   // never restarted
       const ctx = tl.ctx;
       ctx.clearRect(0, 0, tl.W, tl.H);
-      ctx.globalAlpha = tl.alpha;
-      ctx.fillStyle = tl.dotColor;   // dark dots on the yellow plate
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = tl.dotColor;
       ctx._dotScale = 1;
-      drawTileFrame(ctx, tl);        // the tile's quiet dotted boundary
-      ctx._dotScale = 1 + 0.3 * bo;  // emphasized dots on touch/hover
+      drawTileFrame(ctx, tl);
+      ctx._dotScale = 1 + 0.3 * bo;
       TILES[tl.i].draw(ctx, tl, tl.clock || 0, bo);
-      if (tl.i === chosen && tl.confirmT >= 0) { ctx.globalAlpha = tl.alpha; drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS)); }
+      if (tl.i === chosen && tl.confirmT >= 0) drawConfirm(ctx, tl, clamp01((now - chosenAt) / CONFIRM_MS));
       ctx.globalAlpha = 1;
     }
     raf = requestAnimationFrame(frame);
   }
+  ready = true;
+  layoutFrame(t0);                 // the row is in place on the very first paint
   raf = requestAnimationFrame(frame);
 
-  // No hover. A TAP selects the tile — it starts moving (so the visitor sees the
-  // movement they picked) and the others dim; "המשך" confirms it.
-  tiles.forEach(tl => {
-    tl.cell.addEventListener('pointerdown', e => {
-      if (chosen >= 0) return;
-      e.preventDefault();
-      setSelected(tl.i);
-    });
-    // Hover/touch-over gently reinforces the tile's own motion.
-    tl.cell.addEventListener('pointerenter', () => { if (chosen < 0) tl.hover = true; });
-    tl.cell.addEventListener('pointerleave', () => { tl.hover = false; });
-  });
+  // one small nudge after the row settles — a hint that it can be swiped
+  const hintTimer = setTimeout(() => { if (!hintDone && !dragging && chosen < 0) { hintDone = true; vel = -0.055; } }, ENTER_MS + 420);
 
-  // Confirm the selected tile ("המשך") — play the ring, then fire onConfirm.
+  /* ── Touch: drag the row, flick it, tap the centre to choose. ── */
+  const px = (e) => e.clientX;
+  gridEl.addEventListener('pointerdown', (e) => {
+    if (locked || chosen >= 0) return;
+    dragging = true; dragId = e.pointerId; lastX = px(e); moved = 0; lastT = performance.now(); vel = 0;
+    try { gridEl.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  gridEl.addEventListener('pointermove', (e) => {
+    if (!dragging || e.pointerId !== dragId) return;
+    const x = px(e), dx = (x - lastX) / (screenScale || 1); lastX = x;
+    moved += Math.abs(dx);
+    const step = boxW * GAL_STEP;
+    const dpos = -dx / step;                                     // finger px → tile units
+    pos += dpos;
+    const now = performance.now(), dt = Math.max(8, now - lastT); lastT = now;
+    vel = dpos * (16 / dt);                                      // carried into the release
+    layoutFrame(now);                                            // the row tracks the finger 1:1
+  });
+  const endDrag = (e) => {
+    if (!dragging || (e && e.pointerId !== dragId)) return;
+    dragging = false;
+    try { gridEl.releasePointerCapture(dragId); } catch (_) {}
+    vel = Math.max(-FLICK_MAX * 0.12, Math.min(FLICK_MAX * 0.12, vel));   // controlled flick
+    if (moved <= DRAG_TAP_PX) {                                  // a tap, not a swipe
+      const tgt = e && e.target && e.target.closest ? e.target.closest('.dot-tile') : null;
+      const i = tgt ? Number(tgt.dataset.index) : -1;
+      if (i >= 0) {
+        if (i === centreIndex()) select(i);                       // only the centre can be chosen
+        else { let d = i - pos; d = ((d % N) + N) % N; if (d > N / 2) d -= N; pos += d * 0.999; vel = 0; }  // bring it to the centre first
+      }
+    }
+  };
+  gridEl.addEventListener('pointerup', endDrag);
+  gridEl.addEventListener('pointercancel', () => { dragging = false; });
+
+  function select(i) {
+    if (chosen >= 0) return;
+    selected = i;
+    pulseAt = performance.now();
+    locked = true;                                               // no swiping mid-transition
+    setTimeout(() => { locked = false; }, 420);
+    if (onSelect) onSelect(i, TILES[i].meaning);
+  }
+  function deselect() {
+    if (chosen >= 0) return;
+    selected = -1; pulseAt = -1;
+  }
+
   function confirm() {
     if (chosen >= 0 || selected < 0) return;
     chosen = selected; chosenAt = performance.now();
     const tl = tiles[chosen];
     tl.frozen = true; tl.frozenT = (chosenAt - t0) / 1000; tl.confirmT = 0;
     tl.cell.classList.add('is-chosen');
-    /* No dimming of the other tiles — they stay fully lit. */
+    locked = true;
     setTimeout(() => { if (done) return; done = true; onConfirm && onConfirm(chosen, TILES[chosen].meaning); }, CONFIRM_MS + 120);
   }
 
@@ -648,14 +746,28 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   window.addEventListener('resize', onResize);
 
   return {
-    teardown() { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); try { gridEl.remove(); } catch (_) {} },
+    teardown() {
+      cancelAnimationFrame(raf); clearTimeout(hintTimer);
+      sizeTimers.forEach(clearTimeout);
+      ro && ro.disconnect();
+      window.removeEventListener('resize', onResize);
+      try { gridEl.remove(); } catch (_) {}
+    },
     confirm,
-    // Demo helpers: programmatic "tap" (selects → the tile starts moving) + reset,
-    // and a tile's screen centre.
-    selectTile(i) { setSelected(i); },
+    selectTile(i) {                       // used by the ghost-hand demo
+      let d = i - pos; d = ((d % N) + N) % N; if (d > N / 2) d -= N;
+      pos += d; vel = 0;
+      select(wrap(i));
+    },
     deselect,
-    tileCenter(i) { const tl = tiles[i]; if (!tl) return null; const r = tl.cell.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; },
-    count: tiles.length,
-    appearMs: tiles.length * STAGGER + APPEAR_MS,
+    stopActive: noop,
+    tileCenter(i) {
+      const tl = tiles[wrap(i)]; if (!tl) return null;
+      const r = tl.cell.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    },
+    centreIndex,
+    count: N,
+    appearMs: ENTER_MS + 500,
   };
 }
