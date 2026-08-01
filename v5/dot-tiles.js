@@ -562,10 +562,7 @@ function drawTileFrame(ctx, tl) {
     line(ins, ins, ins, tl.H - ins); line(tl.W - ins, ins, tl.W - ins, tl.H - ins);
     tl.cache = Object.assign(tl.cache || {}, { frame: F });
   }
-  const a = ctx.globalAlpha;
-  ctx.globalAlpha = a * 0.5;           // a boundary, quieter than anything inside
   paint(ctx, tl.cache.frame);
-  ctx.globalAlpha = a;
 }
 
 // Confirmation overlay — a single ring sweeps out (orange) enlarging dots.
@@ -723,9 +720,10 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
       tl.cell.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0) scale(${(s * pulse).toFixed(3)})`;
       tl.cell.style.zIndex = String(100 - Math.round(ad * 10));
       // presence follows distance too — the centre is the focus, the flanks hint
-      // the focus is unmistakable: the centre is present, the flanks recede
-      tl.alpha = (chosen >= 0 && tl.i !== chosen) ? 0.28 : (1 - 0.5 * Math.min(1, ad)) * enterEase;
-      tl.cell.style.opacity = String(tl.alpha);
+      // No fading: every tile is drawn at full strength. What marks the centre is
+      // its size and its darker plate, not a veil over its neighbours.
+      tl.alpha = 1;
+      tl.cell.style.opacity = '1';
     }
   }
 
