@@ -12,7 +12,7 @@ import { playHandDemo, stopHandDemo, getGhostHand, lockInput, unlockInput } from
 import { mountDotTiles } from './dot-tiles.js';
 import { crossfadeStage } from './stage-crossfade.js';
 import { mountDrive } from './drive.js';
-import { pickSymbolForWord, SYMBOL_VALUES as DRIVE_SYMBOL_VALUES } from './drive-words.js';
+import { pickSymbolForWord, MEANING_FAMILIES as DRIVE_FAMILIES } from './drive-words.js';
 import { mountEditor } from './editor.js';
 import { mountCompletion } from './completion.js';
 
@@ -565,7 +565,7 @@ function pickLightSymbol(family){
   return all.length ? all[Math.floor(Math.random() * all.length)] : null;
 }
 window.__lightTest = { pickLightSymbol, groups: LIGHT_POINT_SYMBOL_GROUPS };  // dev/verification
-window.__driveTest = { pickSymbolForWord, values: DRIVE_SYMBOL_VALUES };      // dev/verification
+window.__driveTest = { pickSymbolForWord, families: DRIVE_FAMILIES };          // dev/verification
 
 const COUNTRY_MOTIFS = {
   'מרוקו':'hamsa', 'אלג׳יריה':'yaz', 'תוניסיה':'nazar', 'לוב':'nazar',
@@ -748,7 +748,7 @@ const INSTRUCTIONS = {
   word: 'מתחו קו בין הנקודה לעיגול',
   roots: 'גררו את הנקודה במסלול שאתם בוחרים',
   stars: 'גללו ובחרו את השעה הרצויה',
-  personal: 'בחרו את המילה שמושכת אתכם',
+  personal: 'הפרידו בין המילים ובחרו את זו שמניעה אתכם',
   'life-wish': 'בחרו את האופן בו תרצו לנוע',
   name: 'הזינו את שמכם המלא',
 };
@@ -1959,14 +1959,15 @@ function _renderQuestionImpl(idx){
       onSelect: (word) => {
         st.answers = st.answers || {};
         st.answers.personal = word;
-        // No word→symbol map. The word and every symbol carry the same four
-        // values (הגנה · צמיחה · חיבור · דרך); the visitor's profile is this
-        // word weighted with everything the earlier stages already gave them,
-        // and the symbol is the closest unused match to that whole journey.
-        const context = (st.chosenSymbols || []).slice();
-        const res = pickSymbolForWord(word, context, context, Object.keys(SYMBOL_INFO_2D).filter(k => SYMBOLS_3D[k]));
-        st.driveChoice = { word, profile: res.profile, symbol: res.symbol, top: res.ranked.slice(0, 4) };
-        console.log('[drive] symbol choice:', st.driveChoice);
+        // Three layers, never a word wired to a symbol:
+        //   word → meaning family → the family's pool of existing symbols.
+        // Symbols already on the talisman are removed first; only if a whole
+        // family is worn does it fall through to the nearest family (never a
+        // random pick out of all 28). The chosen symbol then runs the
+        // interface's existing flow — symbol window + jewel — untouched.
+        const res = pickSymbolForWord(word, (st.chosenSymbols || []).slice());
+        st.driveChoice = { word, family: res.family, from: res.usedFamily, symbol: res.symbol, pool: res.pool };
+        console.log('[drive] word → family → symbol:', st.driveChoice);
         if (res.symbol) st._forcedSymbol = res.symbol;
         armBand(advance);              // light up "המשך"; the press continues
       },

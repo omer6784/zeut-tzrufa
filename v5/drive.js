@@ -1,254 +1,230 @@
 /* ────────────────────────────────────────────────────────────────────────
-   Stage 7 — "מה מניע אותך?"  ·  floating-words selector.
+   Stage 7 — "מה מניע אותך?"  ·  the word cluster.
 
-   Renders the DISPLAY_WORDS as independent, generously-spaced floating texts
-   (no cards / buttons / icons / boxes). They enter with a soft fade + short
-   drift, then hover slowly in place. Hover recolours a word to the interface
-   orange; a tap selects it: it turns #ff5003, grows slightly, the rest scatter
-   away, and the chosen word dissolves into dots that stream toward the jewel —
-   after which onSelect(word, symbol) hands control back to the questionnaire.
+   Every word is drawn as LETTERS MADE OF DOTS — each label is rasterised once
+   into the interface's own dot pitch, so the type is the same material as the
+   grid, the tiles and the frames. One canvas paints them all.
 
-   Layout is DETERMINISTIC (fixed seed) so the composition is identical every
-   load, and a relaxation pass guarantees no two words overlap — including under
-   the small drift, because the packing keeps a padding wider than the drift.
+   The stage opens as ONE dense typographic block: the words stacked over each
+   other, enormous, layered, deliberately unreadable — everything that can drive
+   a person, tangled together. The visitor puts a finger on the block and DRAGS:
+   the whole system answers at once, each word easing out along its own path
+   with its own small delay, shrinking from enormous to readable, until they
+   settle into an open composition with room to press. A tap hands the chosen
+   word back to the questionnaire, which runs the interface's existing symbol
+   flow (window + jewel) unchanged.
+
+   Touch screen: no hover anywhere. Words, families and symbol pools live in
+   drive-words.js.
    ──────────────────────────────────────────────────────────────────────── */
 
 import { DISPLAY_WORDS } from './drive-words.js';
 
-/* Deterministic PRNG (mulberry32) — same sequence every mount. */
-function makeRng(seed) {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+const INK = '#282828';
+const DOT_R = 1.15;          // dot RADIUS — the interface's own dot weight
+const PITCH = 4.0;           // gap between the dots that build a letter
+const SETTLE_MS = 1250;      // the rest of the unravelling once the hand lets go
+const DRIFT_PX = 3.5;        // how far a settled word may breathe
+
+const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+const rnd = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
+
+/* Rasterise a label into dot offsets around its own centre (once per word).
+   Hebrew stays exact — the real glyphs are sampled, not approximated. */
+function dotsForLabel(label, fontPx) {
+  const pad = Math.ceil(fontPx * 0.35);
+  const c = document.createElement('canvas');
+  const g = c.getContext('2d', { willReadFrequently: true });
+  const font = `500 ${fontPx}px ArbelG, sans-serif`;
+  g.font = font;
+  const w = Math.ceil(g.measureText(label).width) + pad * 2;
+  const h = Math.ceil(fontPx * 1.5) + pad * 2;
+  c.width = w; c.height = h;
+  g.font = font; g.textBaseline = 'middle'; g.textAlign = 'center'; g.direction = 'rtl';
+  g.fillStyle = '#000';
+  g.fillText(label, w / 2, h / 2);
+  const px = g.getImageData(0, 0, w, h).data;
+  const pts = [];
+  for (let y = 0; y < h; y += PITCH) {
+    for (let x = 0; x < w; x += PITCH) {
+      if (px[((y | 0) * w + (x | 0)) * 4 + 3] > 110) pts.push({ x: x - w / 2, y: y - h / 2 });
+    }
+  }
+  return { pts, w, h };
 }
-
-const SIZE_BUCKETS = {
-  s: [28, 31, 34],   // small
-  m: [38, 42, 46],   // medium
-  l: [50, 55, 60],   // large
-};
-// A fixed, balanced spread of sizes (more medium; no clustering of larges).
-const SIZE_PATTERN = ['m','l','s','m','s','l','m','s','m','l','s','m','s','l','m','s','m','l','s','m','s'];
-
-const DRIFT_MAX = 6;      // px a word may float from its anchor (small, gentle)
-const PAD = 26;           // min gap kept between word boxes (> drift + hover grow)
 
 export function mountDrive(host, opts = {}) {
   const onSelect = opts.onSelect || (() => {});
-  const words = DISPLAY_WORDS.slice();
-  const rng = makeRng(0x5EED17);       // fixed seed → identical composition each load
 
-  // Mount the field on <body>, NOT inside the stage's grid cell: the stage
-  // reveal + per-question track use CSS transforms on those ancestors, and a
-  // transformed ancestor re-bases position:fixed and can collapse it to 0×0.
-  // At <body> level the fixed overlay is always viewport-relative and stable.
   document.getElementById('drive-field')?.remove();
   const field = document.createElement('div');
   field.id = 'drive-field';
   field.dir = 'rtl';
-  field.setAttribute('aria-label', 'בחרו את הכוח שמוביל אתכם');
-  document.body.appendChild(field);
+  const canvas = document.createElement('canvas');
+  canvas.className = 'drive-canvas';
+  field.appendChild(canvas);
+  (document.getElementById('app-viewport') || document.body).appendChild(field);
+  const ctx = canvas.getContext('2d');
 
-  // 1. Create the word elements (two layers: outer carries drift + centring,
-  //    inner text carries colour + hover/select scale — so the two transforms
-  //    never fight).
-  const nodes = words.map((w, i) => {
-    const bucket = SIZE_PATTERN[i % SIZE_PATTERN.length];
-    const sizes = SIZE_BUCKETS[bucket];
-    const fs = sizes[Math.floor(rng() * sizes.length)];
-    const el = document.createElement('button');
-    el.type = 'button';
-    el.className = 'drive-word';
-    el.dataset.word = w;
-    el.style.fontSize = fs + 'px';
-    // per-word drift: small amplitude, unique direction, slow + desynchronised
-    const ang = rng() * Math.PI * 2;
-    const amp = DRIFT_MAX * (0.5 + rng() * 0.5);
-    el.style.setProperty('--dx', (Math.cos(ang) * amp).toFixed(1) + 'px');
-    el.style.setProperty('--dy', (Math.sin(ang) * amp).toFixed(1) + 'px');
-    el.style.setProperty('--dur', (7 + rng() * 5).toFixed(2) + 's');
-    el.style.setProperty('--ddelay', (-rng() * 6).toFixed(2) + 's');
-    el.style.setProperty('--enter-delay', (0.1 + i * 0.05).toFixed(2) + 's');
-    el.innerHTML = `<span class="dw-text">${w}</span>`;
-    field.appendChild(el);
-    return el;
-  });
+  const R = rnd(0x5EED17);
+  const words = DISPLAY_WORDS.map((w, i) => ({
+    ...w, i,
+    fs: 26 + Math.round(R() * 10),      // readable size — slight variety, no hierarchy
+    bigMul: 3.0 + R() * 1.4,            // its size inside the block: enormous
+    delay: R(),                         // its own moment in the unravelling
+    driftA: R() * Math.PI * 2,
+    driftS: 0.18 + R() * 0.16,
+    cache: null,
+  }));
 
-  // 2. Seed positions, then relax so nothing overlaps. IDEMPOTENT — a fresh
-  //    seeded RNG each call gives the SAME composition however many times it
-  //    runs, so we can safely re-layout when the field settles to its real size
-  //    (the stage reveal briefly reports a small/zero size, which would otherwise
-  //    pile every word in one corner). Measures real word widths.
-  const LAYOUT_SEED = 0x1234abcd;
-  let placed = false, lastW = 0, lastH = 0, chosen = false;
-  const layout = () => {
-    if (chosen) return true;
-    const fw = field.clientWidth, fh = field.clientHeight;
-    if (fw < 60 || fh < 60) return false;
-    if (fw === lastW && fh === lastH) return true;   // already placed at this size
-    lastW = fw; lastH = fh; placed = true;
-    const lr = makeRng(LAYOUT_SEED);                 // local → deterministic per size
-    const boxes = nodes.map((el) => {
-      const r = el.getBoundingClientRect();
-      return { el, hw: r.width / 2, hh: r.height / 2, x: 0, y: 0 };
-    });
-    // seeded initial centres inside a margin that fits each word
-    boxes.forEach((b) => {
-      const mx = b.hw + 10, my = b.hh + 8;
-      b.x = mx + lr() * Math.max(1, fw - 2 * mx);
-      b.y = my + lr() * Math.max(1, fh - 2 * my);
-    });
-    // relaxation: push overlapping pairs apart, keep inside the field
-    for (let iter = 0; iter < 260; iter++) {
-      for (let a = 0; a < boxes.length; a++) {
-        for (let c = a + 1; c < boxes.length; c++) {
-          const A = boxes[a], B = boxes[c];
-          const dx = B.x - A.x, dy = B.y - A.y;
-          const ox = A.hw + B.hw + PAD - Math.abs(dx);   // horizontal overlap
-          const oy = A.hh + B.hh + PAD - Math.abs(dy);    // vertical overlap
-          if (ox > 0 && oy > 0) {
-            // separate along the axis of least penetration
-            if (ox < oy) {
-              const push = (dx === 0 ? (a % 2 ? 1 : -1) : Math.sign(dx)) * ox / 2;
-              A.x -= push; B.x += push;
-            } else {
-              const push = (dy === 0 ? (a % 2 ? 1 : -1) : Math.sign(dy)) * oy / 2;
-              A.y -= push; B.y += push;
-            }
-          }
+  let W = 0, H = 0, dpr = 1;
+  let spread = 0;                       // 0 = one block · 1 = settled composition
+  let dragging = false, drag = null, dragAcc = 0, released = false;
+  let chosen = -1, chosenAt = 0;
+  let raf = 0; const t0 = performance.now(); let settleStart = 0;
+
+  /* The settled composition: seeded scatter, then relaxation so nothing
+     overlaps and every word keeps a finger-sized margin. */
+  function layout() {
+    const r = field.getBoundingClientRect();
+    W = Math.max(2, r.width); H = Math.max(2, r.height);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const L = rnd(0x1234abcd);
+    for (const w of words) {
+      if (!w.cache) {
+        // Rasterised at BOTH sizes, each at the same dot pitch — so the letters
+        // are equally dense whether the word is enormous inside the block or
+        // small and readable afterwards (scaling one set would just spread its
+        // dots apart and the type would fall to pieces).
+        w.cache = dotsForLabel(w.label, w.fs);
+        w.big = dotsForLabel(w.label, Math.round(w.fs * w.bigMul));
+      }
+      w.hw = w.cache.w / 2; w.hh = w.cache.h / 2;
+      w.x = w.hw + 12 + L() * Math.max(1, W - 2 * w.hw - 24);
+      w.y = w.hh + 10 + L() * Math.max(1, H - 2 * w.hh - 20);
+      const a = L() * Math.PI * 2, rad = L() * Math.min(W, H) * 0.1;
+      w.bx = W / 2 + Math.cos(a) * rad;              // where it lies inside the block
+      w.by = H / 2 + Math.sin(a) * rad * 0.7;
+    }
+    const PAD = 26;
+    for (let it = 0; it < 240; it++) {
+      for (let a = 0; a < words.length; a++) for (let b = a + 1; b < words.length; b++) {
+        const A = words[a], B = words[b];
+        const dx = B.x - A.x, dy = B.y - A.y;
+        const ox = A.hw + B.hw + PAD - Math.abs(dx), oy = A.hh + B.hh + PAD * 0.5 - Math.abs(dy);
+        if (ox > 0 && oy > 0) {
+          if (ox < oy) { const p = (dx === 0 ? (a % 2 ? 1 : -1) : Math.sign(dx)) * ox / 2; A.x -= p; B.x += p; }
+          else { const p = (dy === 0 ? (a % 2 ? 1 : -1) : Math.sign(dy)) * oy / 2; A.y -= p; B.y += p; }
         }
       }
-      // clamp inside the field (leave room for drift so it never spills either)
-      boxes.forEach((b) => {
-        const mx = b.hw + DRIFT_MAX + 4, my = b.hh + DRIFT_MAX + 4;
-        b.x = Math.max(mx, Math.min(fw - mx, b.x));
-        b.y = Math.max(my, Math.min(fh - my, b.y));
-      });
+      for (const w of words) {
+        w.x = Math.max(w.hw + DRIFT_PX + 6, Math.min(W - w.hw - DRIFT_PX - 6, w.x));
+        w.y = Math.max(w.hh + DRIFT_PX + 4, Math.min(H - w.hh - DRIFT_PX - 4, w.y));
+      }
     }
-    boxes.forEach((b) => { b.el.style.left = b.x + 'px'; b.el.style.top = b.y + 'px'; });
-    return true;
-  };
-
-  // Run now, and re-run whenever the field settles to a new valid size — covers
-  // the stage reveal/transition where the field is briefly small before it fills
-  // the content band. ResizeObserver is the primary signal; the timed retries are
-  // a fallback for environments/timings it might miss.
+  }
   layout();
-  let ro = null;
-  if (typeof ResizeObserver !== 'undefined') {
-    ro = new ResizeObserver(() => layout());
-    ro.observe(field);
-  }
-  const retryTimers = [60, 160, 340, 600, 1000].map(t => setTimeout(layout, t));
+  const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => { if (spread < 0.02) layout(); }) : null;
+  ro && ro.observe(field);
 
-  // 3. Entrance: fade + short move in, staggered — then drift begins (CSS).
-  //    setTimeout (not rAF) so the reveal still fires in a throttled/background
-  //    tab where requestAnimationFrame is paused.
-  setTimeout(() => field.classList.add('is-in'), 40);
+  // each word has its own delay, so the block unravels as a living system
+  const progress = (w) => easeOut(clamp01((spread - w.delay * 0.42) / (1 - w.delay * 0.42)));
 
-  // 3b. Mutual pull. A word does not just sit and wait to be picked: as the
-  //     visitor comes near, it LEANS toward them, grows a little, takes a soft
-  //     halo and breathes. Everything else keeps drifting as before — so the
-  //     approach feels like the word answering, not a hover state.
-  const MAGNET_R = 190;       // how far a word can feel the visitor
-  const MAGNET_PULL = 16;     // px it may lean toward them
-  // Driven straight off the pointer (no animation loop): 14 words is nothing to
-  // measure, the CSS transition does the smoothing, and it keeps working even
-  // when frame callbacks are throttled.
-  function onPointer(e) {
-    if (chosen || !placed) return;
-    const px = e.clientX, py = e.clientY;
-    for (const el of nodes) {
-      const r = el.getBoundingClientRect();
-      const dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height / 2);
-      const d = Math.hypot(dx, dy);
-      const k = d < MAGNET_R ? (1 - d / MAGNET_R) : 0;   // 0 far away → 1 right on it
-      const e2 = k * k;                                   // eases in as they close
-      el.style.setProperty('--pull-x', (dx / (d || 1) * MAGNET_PULL * e2).toFixed(1) + 'px');
-      el.style.setProperty('--pull-y', (dy / (d || 1) * MAGNET_PULL * e2).toFixed(1) + 'px');
-      el.style.setProperty('--near', e2.toFixed(3));
-      el.classList.toggle('is-near', k > 0.12);
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    const t = (now - t0) / 1000;
+    if (released && spread < 1) spread = clamp01(dragAcc + (1 - dragAcc) * ((now - settleStart) / SETTLE_MS));
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = INK;
+    for (const w of words) {
+      const p = progress(w);
+      const ang = t * w.driftS + w.driftA;
+      const dx = p > 0.995 ? Math.cos(ang) * DRIFT_PX : 0;
+      const dy = p > 0.995 ? Math.sin(ang * 0.8) * DRIFT_PX * 0.7 : 0;
+      const cx = w.bx + (w.x - w.bx) * p + dx;
+      const cy = w.by + (w.y - w.by) * p + dy;
+      // Cross from the big rasterisation to the small one around the midpoint:
+      // both are dense, so the word never dissolves into loose dots.
+      const mixTo = clamp01((p - 0.42) / 0.26);
+      let r = DOT_R, alpha = 1;
+      if (chosen >= 0) {
+        const k = clamp01((now - chosenAt) / 300);
+        if (w.i === chosen) r *= 1 + 0.3 * Math.sin(k * Math.PI);   // one gentle pulse
+        else alpha = 1 - 0.55 * k;                                   // the rest recede
+      }
+      const layers = [];
+      if (mixTo < 1) layers.push({ set: w.big, s: 1 + (1 / w.bigMul - 1) * p, a: alpha * (1 - mixTo), rr: r * 1.25 });
+      if (mixTo > 0) layers.push({ set: w.cache, s: w.bigMul * (1 - p) + p, a: alpha * mixTo, rr: r });
+      for (const L of layers) {
+        if (L.a <= 0.01) continue;
+        ctx.globalAlpha = L.a;
+        ctx.beginPath();
+        for (const d of L.set.pts) {
+          const x = cx + d.x * L.s, y = cy + d.y * L.s;
+          ctx.moveTo(x + L.rr, y); ctx.arc(x, y, L.rr, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
     }
+    ctx.globalAlpha = 1;
   }
-  function stopMagnet() {
-    removeEventListener('pointermove', onPointer);
-    nodes.forEach(el => { el.classList.remove('is-near'); el.style.setProperty('--near', '0'); });
-  }
-  addEventListener('pointermove', onPointer, { passive: true });
+  raf = requestAnimationFrame(frame);
 
-  // 4. Selection. (`chosen` is declared above so layout() freezes once a word is
-  //    picked — no re-layout mid-animation.)
-  const select = (el) => {
-    if (chosen || !placed) return;
-    chosen = true;
-    if (ro) { try { ro.disconnect(); } catch (_) {} ro = null; }
-    const word = el.dataset.word;
-    field.classList.add('is-choosing');
-    stopMagnet();
-
-    // scatter the others outward from the chosen word, fading
-    const cx = parseFloat(el.style.left), cy = parseFloat(el.style.top);
-    nodes.forEach((o) => {
-      if (o === el) return;
-      const ox = parseFloat(o.style.left) - cx, oy = parseFloat(o.style.top) - cy;
-      const d = Math.hypot(ox, oy) || 1;
-      o.style.setProperty('--scatter-x', (ox / d * 120).toFixed(0) + 'px');
-      o.style.setProperty('--scatter-y', (oy / d * 120).toFixed(0) + 'px');
-      o.classList.add('is-gone');
-    });
-
-    // the chosen word: recolour + grow, glide to the field centre
-    el.classList.add('is-chosen');
-    el.style.left = (field.clientWidth / 2) + 'px';
-    el.style.top = (field.clientHeight / 2) + 'px';
-
-    // after it has settled centre-stage, dissolve it into dots that stream to
-    // the jewel, then hand back to the questionnaire.
-    setTimeout(() => dissolveToDots(el, () => onSelect(word)), 900);
+  /* ── Touch: one drag opens the whole system; a tap picks a word. ── */
+  const local = (e) => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) }; };
+  const hit = (x, y) => {
+    if (spread < 0.85) return -1;
+    for (const w of words) {
+      const pad = 14;   // a comfortable target, though the word is only dots
+      if (Math.abs(x - w.x) <= w.hw + pad && Math.abs(y - w.y) <= w.hh * 0.8 + pad) return w.i;
+    }
+    return -1;
   };
+  const startSettle = () => { if (!released) { released = true; dragAcc = spread; settleStart = performance.now(); } };
 
-  // dot dissolve: sample points across the word box, fly them toward the jewel
-  // build area (falls back to straight up), then fire `done`.
-  function dissolveToDots(el, done) {
-    const wr = el.getBoundingClientRect();
-    const fr = field.getBoundingClientRect();
-    // aim point: centre of the interface pendant/jewel preview, else top-centre
-    const target = document.getElementById('artifact-canvas') || document.getElementById('artifact-col');
-    let tx, ty;
-    if (target) { const tr = target.getBoundingClientRect(); tx = tr.left + tr.width / 2 - fr.left; ty = tr.top + tr.height / 2 - fr.top; }
-    else { tx = fr.width / 2; ty = -80; }
-
-    el.querySelector('.dw-text').style.opacity = '0';
-    const N = 26;
-    for (let i = 0; i < N; i++) {
-      const d = document.createElement('span');
-      d.className = 'dw-dot';
-      const sx = (wr.left - fr.left) + rng() * wr.width;
-      const sy = (wr.top - fr.top) + rng() * wr.height;
-      d.style.left = sx + 'px';
-      d.style.top = sy + 'px';
-      d.style.setProperty('--fx', (tx - sx).toFixed(0) + 'px');
-      d.style.setProperty('--fy', (ty - sy).toFixed(0) + 'px');
-      d.style.setProperty('--fd', (0.05 + rng() * 0.18).toFixed(2) + 's');
-      field.appendChild(d);
-      requestAnimationFrame(() => d.classList.add('is-flying'));
+  canvas.addEventListener('pointerdown', (e) => {
+    if (chosen >= 0) return;
+    drag = { ...local(e), moved: 0 };
+    dragging = true;
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!dragging || chosen >= 0) return;
+    const p = local(e);
+    drag.moved += Math.hypot(p.x - drag.x, p.y - drag.y);
+    drag.x = p.x; drag.y = p.y;
+    if (!released) spread = clamp01(drag.moved / 260);       // the hand drives the opening
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!dragging) return;
+    dragging = false;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    const p = local(e);
+    if (drag.moved < 10) {                                    // a tap, not a drag
+      const i = hit(p.x, p.y);
+      if (i >= 0) return select(i);
+      startSettle();                                          // tapping the block opens it too
+      return;
     }
-    setTimeout(done, 780);
+    startSettle();                                            // carry on with inertia
+  });
+  canvas.addEventListener('pointercancel', () => { dragging = false; startSettle(); });
+
+  function select(i) {
+    if (chosen >= 0) return;
+    chosen = i; chosenAt = performance.now();
+    setTimeout(() => onSelect(words[i].label), 520);   // the existing symbol flow takes over
   }
 
-  nodes.forEach((el) => el.addEventListener('click', () => select(el)));
-
-  // Teardown — returned as a plain function so questionnaire.js can call it as
-  // st._driveTeardown() (like every other mount*). Removes the body-level field
-  // so the words never linger onto other stages.
   return () => {
-    stopMagnet();
-    if (ro) { try { ro.disconnect(); } catch (_) {} ro = null; }
-    retryTimers.forEach(clearTimeout);
+    cancelAnimationFrame(raf);
+    ro && ro.disconnect();
     try { field.remove(); } catch (_) {}
   };
 }

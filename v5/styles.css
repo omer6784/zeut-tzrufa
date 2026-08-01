@@ -1539,15 +1539,14 @@ body::-webkit-scrollbar-thumb {
    inset within the fixed grid frame so words never reach the nav / frame. */
 #drive-field {
   position: fixed;
-  left: 190.4px;
-  width: 979.2px;
-  top: 168.96px;
-  height: 430.08px;
-  direction: rtl;
-  overflow: visible;
+  left: calc(100 * var(--sx)); right: calc(100 * var(--sx));
+  top: calc(150 * var(--sy)); bottom: calc((768 - 700) * var(--sy));
   z-index: 6;
-  pointer-events: none;   /* only the words themselves are interactive */
+  pointer-events: auto;
+  touch-action: none;            /* the drag belongs to the stage, never the page */
+  direction: rtl;
 }
+#drive-field .drive-canvas { display: block; width: 100%; height: 100%; }
 #drive-field .drive-word { pointer-events: auto; }
 .drive-word {
   position: absolute;
