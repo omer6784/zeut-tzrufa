@@ -6585,6 +6585,8 @@ html:not(.cursor-active) *::after {
 /* The frequency stage's top-left "המשך" shares the exact same corner geometry —
    protect it from the same z:100 header. */
 #section-3.q-color-stage[data-stage="0"] .stage-band { z-index: 120; }
+/* "מה מניע אותך" now puts its "המשך" in that same corner — same protection. */
+#section-3[data-stage="4"] .stage-band { z-index: 120; }
 @keyframes sb-btn-breathe {
   0%, 100% { transform: translateX(-50%) scale(1); }
   50%      { transform: translateX(-50%) scale(1.06); }
