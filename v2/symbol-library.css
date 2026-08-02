@@ -82,7 +82,7 @@ body {
 #back-link {
   position: fixed;
   top: 22px;
-  left: 28px;
+  right: 28px;
   z-index: 100;
   font-family: 'ArbelG', sans-serif;
   font-size: 11px;
@@ -93,13 +93,13 @@ body {
   padding-bottom: 3px;
   border-bottom: 1px solid #f5f5ed;
   transition: opacity 0.2s ease;
-  direction: ltr;
+  direction: rtl;
 }
 #back-link:hover { opacity: 0.55; }
 
 /* ─── Symbol grid ────────────────────────────────────────── */
 #symbol-grid {
-  --cell: min((100vw - 96px) / 7, (100vh - 108px) / 4);
+  --cell: min((100vw - 96px) / 7, (100vh - 80px) / 4);
   display: grid;
   grid-template-columns: repeat(7, var(--cell));
   grid-auto-rows: var(--cell);
@@ -204,33 +204,24 @@ body {
   transform: translateY(0);
 }
 
-.info-name {
-  font-family: 'Shofar', 'ArbelG', sans-serif;
-  font-size: clamp(13px, 1.3vw, 18px);
-  font-weight: 400;
-  color: #f5f5ed;
-  line-height: 1.2;
-  margin-bottom: 6px;
-  letter-spacing: -0.01em;
-}
-
-.info-tradition {
-  font-family: 'ArbelG', sans-serif;
-  font-size: clamp(8px, 0.72vw, 10px);
-  font-weight: 400;
-  color: rgba(245, 245, 237, 0.6);
-  letter-spacing: 0.03em;
-  line-height: 1.4;
-  margin-bottom: 4px;
-}
-
+/* Name, origin and meaning all read at ONE size, in ArbelG Regular — no
+   typographic hierarchy inside the cell; only the colour separates them. */
+.info-name,
+.info-tradition,
 .info-meaning {
   font-family: 'ArbelG', sans-serif;
   font-size: clamp(8.5px, 0.78vw, 11px);
   font-weight: 400;
-  color: #f5f5ed;
-  line-height: 1.55;
+  line-height: 1.45;
   letter-spacing: 0.01em;
+  color: #f5f5ed;
+}
+
+.info-name { margin-bottom: 4px; }
+
+.info-tradition {
+  color: rgba(245, 245, 237, 0.6);
+  margin-bottom: 4px;
 }
 
 /* Thin separator between tradition and meaning */
@@ -239,43 +230,6 @@ body {
   height: 0;
   border-top: 0.8px solid rgba(245, 245, 237, 0.3);
   margin: 5px auto;
-}
-
-/* ─── Cell index number (quiet, archival) ────────────────── */
-.symbol-index {
-  position: absolute;
-  bottom: 8px;
-  left: 10px;
-  font-family: 'ArbelG', sans-serif;
-  font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  color: rgba(226, 188, 113, 0.55);
-  z-index: 2;
-  transition: color 0.25s ease;
-  direction: ltr;
-}
-
-.symbol-cell:hover .symbol-index {
-  color: rgba(226, 188, 113, 0.9);
-}
-
-/* ─── Footer ─────────────────────────────────────────────── */
-#lib-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding: 12px 32px 14px;
-  direction: ltr;
-}
-
-.lib-footer-text {
-  font-family: 'ArbelG', sans-serif;
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  color: rgba(245, 245, 237, 0.25);
 }
 
 /* ─── Entrance animation ─────────────────────────────────── */
@@ -297,16 +251,14 @@ body {
    whole set stays on one screen at any size. Only the margins give way. */
 @media (max-width: 700px) {
   #symbol-grid {
-    --cell: min((100vw - 32px) / 7, (100vh - 84px) / 4);
+    --cell: min((100vw - 32px) / 7, (100vh - 64px) / 4);
     margin-top: 42px;
   }
 
   #back-link {
     top: 16px;
-    left: 16px;
+    right: 16px;
   }
-
-  #lib-footer { padding: 8px 16px 10px; }
 }
 
 /* ─── Reduced motion ─────────────────────────────────────── */

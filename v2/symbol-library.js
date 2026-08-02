@@ -611,14 +611,8 @@ function buildGrid() {
     // is not fetched and rasterised all at once.
     artwork.dataset.motif = key;
 
-    // Index number
-    const index = document.createElement('span');
-    index.className = 'symbol-index';
-    index.textContent = String(idx + 1).padStart(2, '0');
-
     cell.appendChild(infoPanel);
     cell.appendChild(artwork);
-    cell.appendChild(index);
     grid.appendChild(cell);
 
     contourWatcher.observe(artwork);
