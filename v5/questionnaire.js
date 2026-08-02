@@ -451,8 +451,13 @@ function pickGlobeSymbol(geos){
    symbolic meaning and a defined symbol group, from which a single UNUSED
    symbol is drawn. */
 const TIME_PERIOD_GROUPS = {
-  SUNRISE: ['scarab', 'lotus', 'anah'],                    // התחדשות · התחלה · צמיחה (05:00–08:59)
-  DAY:     ['sun', 'snake', 'djed'],                       // חיים · כוח · חיוניות (09:00–15:59)
+  // The snake sits with the sunrise: shedding its skin is the oldest image of
+  // beginning again there is, and its recorded meaning here — renewal and
+  // healing — is the sunrise's, not the noon's.
+  SUNRISE: ['scarab', 'lotus', 'anah', 'snake'],           // התחדשות · התחלה · צמיחה (05:00–08:59)
+  // The pomegranate takes the day: a fruit that ripens in the sun, and the
+  // tradition's own image of yield and blessing. Light · yield · standing firm.
+  DAY:     ['sun', 'rimon', 'djed'],                       // חיים · שפע · יציבות (09:00–15:59)
   EVENING: ['circle', 'dharma', 'endlessknot', 'hexagram'],// איזון · הרמוניה · שלמות (16:00–19:59)
   NIGHT:   ['hamsa', 'eye', 'diamond', 'pyramid'],         // הגנה · ביטחון (20:00–04:59)
 };
