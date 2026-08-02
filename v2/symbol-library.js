@@ -498,7 +498,7 @@ function contourOptsFor(host) {
   const w = Math.max(80, Math.round(host.getBoundingClientRect().width));
   const size = Math.round(w * 2);                 // draw at twice the display size
   return { size, objScale: size * 0.64, dotSize: Math.max(2.4, size * 0.013), sampleStep: 3,
-           dotColor: '#282828', dotsPerSec: 900 };
+           dotColor: CREAM, dotsPerSec: 900 };
 }
 const MOTIF_OBJ = {
   hamsa: '/hamsa.obj', scarab: '/scarab.obj', eye: '/eye.obj', rimon: '/rimon.obj',
@@ -513,6 +513,11 @@ const MOTIF_OBJ = {
 /* The same per-motif turns the window applies: two models are authored facing
    the X axis, so their frontal silhouette needs a quarter turn. */
 const MOTIF_CONTOUR = { lotus: { rotateY: Math.PI / 2 }, dharma: { rotateY: Math.PI / 2 } };
+const CREAM = '#f5f5ed', ORANGE = '#ff5003';
+/* Which contour is mounted in which cell, so a chosen symbol can be REDRAWN in
+   the orange instead of being filtered — a canvas of dots cannot be recoloured
+   by a CSS filter without lying about the colour. */
+const mounted = new Map();
 
 /* ── The symbols BUILT in the interface (3D .obj + 2D contour), keyed by their
    interface motif key (see v5/symbol-window.js MOTIF_OBJ / symbol-info.js). The
@@ -558,12 +563,19 @@ const contourWatcher = new IntersectionObserver((entries) => {
     if (!e.isIntersecting) continue;
     const host = e.target;
     contourWatcher.unobserve(host);
-    const motif = host.dataset.motif;
-    const objPath = MOTIF_OBJ[motif];
-    if (!objPath) continue;
-    mountSymbolContour(host, objPath, Object.assign(contourOptsFor(host), MOTIF_CONTOUR[motif]));
+    drawContour(host, CREAM);
   }
 }, { rootMargin: '200px' });
+
+function drawContour(host, color) {
+  const motif = host.dataset.motif;
+  const objPath = MOTIF_OBJ[motif];
+  if (!objPath) return;
+  const prev = mounted.get(host);
+  if (prev) { try { prev.remove(); } catch (_) {} }
+  const opts = Object.assign(contourOptsFor(host), MOTIF_CONTOUR[motif], { dotColor: color });
+  mounted.set(host, mountSymbolContour(host, objPath, opts));
+}
 
 /* ── Build the grid ── */
 function buildGrid() {
@@ -615,8 +627,15 @@ function buildGrid() {
     // at a time; click again to close).
     cell.addEventListener('click', () => {
       const wasActive = cell.classList.contains('is-active');
-      grid.querySelectorAll('.symbol-cell.is-active').forEach(c => c.classList.remove('is-active'));
-      if (!wasActive) cell.classList.add('is-active');
+      grid.querySelectorAll('.symbol-cell.is-active').forEach(c => {
+        c.classList.remove('is-active');
+        const art = c.querySelector('.symbol-artwork');
+        if (art && mounted.has(art)) drawContour(art, CREAM);
+      });
+      if (!wasActive) {
+        cell.classList.add('is-active');
+        if (mounted.has(artwork)) drawContour(artwork, ORANGE);   // it draws itself again, in orange
+      }
     });
   });
 }
