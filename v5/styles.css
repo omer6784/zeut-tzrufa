@@ -7482,10 +7482,16 @@ html:not(.portrait) #section-3[data-stage="2"] .dot-gallery { padding-top: 0; }
    sheets sets it, so the browser's default button colour was winning over the
    inherited value.) */
 #completion-view .cv-btn,
-#completion-view .cv-btn.cv-btn-dark,
-#completion-view .cv-modal .cv-btn {
+#completion-view .cv-btn.cv-btn-dark {
   color: #f5f5ed !important;
   --b: #f5f5ed;
+}
+/* …but the email dialog is a CREAM box, so its own buttons take the interface's
+   dark — frame and label alike — instead of disappearing into their ground. */
+#completion-view .cv-modal .cv-btn,
+#completion-view .cv-modal .cv-btn.cv-btn-dark {
+  color: #282828 !important;
+  --b: #282828;
 }
 
 /* ── Movement stage as a horizontal GALLERY ────────────────────────────────
