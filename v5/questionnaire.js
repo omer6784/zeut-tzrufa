@@ -3294,9 +3294,11 @@ if (typeof window !== 'undefined') {
       const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       byDay[key] = (byDay[key] || 0) + 1;
     }
-    const out = { total: kept.length, byDay, first: kept.length ? new Date(kept[0]).toLocaleString('he-IL') : null, last: kept.length ? new Date(kept[kept.length - 1]).toLocaleString('he-IL') : null };
+    let archived = 0;
+    try { const a = JSON.parse(localStorage.getItem(GALLERY_ARCHIVE_KEY) || '[]'); archived = Array.isArray(a) ? a.length : 0; } catch(_) {}
+    const out = { archivedTalismans: archived, total: kept.length, byDay, first: kept.length ? new Date(kept[0]).toLocaleString('he-IL') : null, last: kept.length ? new Date(kept[kept.length - 1]).toLocaleString('he-IL') : null };
     console.table(byDay);
-    console.info('[stats] total:', out.total, '· first:', out.first, '· last:', out.last);
+    console.info('[stats] counted since this build:', out.total, '· in the gallery archive (all time, capped):', archived, '· first:', out.first, '· last:', out.last);
     return out;
   };
 }
@@ -3313,7 +3315,10 @@ function archiveFinishedJewel(data){
     if (!Array.isArray(list)) list = [];
     list = list.filter(k => Array.isArray(k) && k.join(',') !== sig);
     list.push(keys.slice());
-    if (list.length > 80) list = list.slice(list.length - 80);
+    // Keep the history, not just what the wall needs: the display takes the
+    // newest handful, but this list is also the only record of how many
+    // talismans were finished, so it is no longer trimmed to eighty.
+    if (list.length > 2000) list = list.slice(list.length - 2000);
     localStorage.setItem(GALLERY_ARCHIVE_KEY, JSON.stringify(list));
     _artifactBC?.postMessage({ type: 'gallery' });   // a display already open picks it up now
   } catch(_) { /* best-effort: the gallery falls back to the authored set */ }
