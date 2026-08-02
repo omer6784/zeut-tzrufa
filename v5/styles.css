@@ -6494,10 +6494,15 @@ html:not(.cursor-active) *::after {
 /* Path stage sits on the interface ORANGE — the orange note would be invisible,
    so flip it to cream there. */
 #section-3[data-stage="5"] .stage-band .sb-note { color: #f5f5ed; }
-/* Stage 4 ("מה מניע אותך"): "המשך" sits 50px lower than it used to — the three
-   running lines want the ground under them clear. */
+/* Stage 4 ("מה מניע אותך"): the three running lines want the whole frame, so
+   "המשך" leaves the bottom band and sits on the instruction's own line — same
+   height, opposite corner (the instruction is top-right, the button top-left). */
 #section-3[data-stage="4"] .stage-band .sb-btn {
-  bottom: calc(80 * var(--sy)) !important;
+  position: fixed !important;
+  top: calc(85 * var(--sy) + 12px) !important;
+  left: calc(100 * var(--sx) + 20px) !important;
+  right: auto !important; bottom: auto !important;
+  transform: none !important;
 }
 .stage-band .sb-btn {
   position: absolute; left: 50%; bottom: calc(80 * var(--sy));    /* ABOVE the bottom grid line (y726) */

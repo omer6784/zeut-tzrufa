@@ -76,6 +76,7 @@ function dotsForLabel(label, fontPx) {
 
 export function mountDrive(host, opts = {}) {
   const onSelect = opts.onSelect || (() => {});
+  const onDeselect = opts.onDeselect || (() => {});
 
   document.getElementById('drive-field')?.remove();
   const field = document.createElement('div');
@@ -263,13 +264,14 @@ export function mountDrive(host, opts = {}) {
   };
 
   let down = null;
+  // A press is still listened for while a word is taken — that is how the same
+  // word is let go again.
   canvas.addEventListener('pointerdown', (e) => {
-    if (chosen) return;
     down = toField(e.clientX, e.clientY);
     if (down) pointer = down;
   });
   canvas.addEventListener('pointerup', (e) => {
-    if (chosen || !down) return;
+    if (!down) return;
     const p = toField(e.clientX, e.clientY);
     if (!p) { down = null; return; }
     const moved = Math.hypot(p.x - down.x, p.y - down.y);
@@ -280,15 +282,26 @@ export function mountDrive(host, opts = {}) {
   });
   canvas.addEventListener('pointercancel', () => { down = null; });
 
+  /* Pressing a word takes it: it turns dark and the lines slow almost to a
+     stop. Pressing the SAME word again lets it go — back to cream, and the
+     lines pick their pace up again. Pressing another word simply moves the
+     choice across. Only "המשך" commits it. */
   function select(it) {
-    if (chosen) return;
+    if (chosen === it) return release();
     chosen = it; chosenAt = performance.now();
-    setTimeout(() => onSelect(it.label), 520);    // the existing symbol flow takes over
+    onSelect(it.label);
+  }
+  function release() {
+    if (!chosen) return;
+    chosen = null;
+    onDeselect();
   }
 
   // dev/verification, like the other stages' hooks
   if (typeof window !== 'undefined') {
     window.__driveCanvas = () => canvas;
+    window.__drivePick = (label) => { for (const line of lines) for (const it of line.items) if (it.label === label) { select(it); return true; } return false; };
+    window.__driveRelease = () => release();
     window.__driveWarm = (n = 1) => { for (let k = 0; k < n; k++) step(performance.now(), 0.016); return lines.length; };
     window.__driveTest = () => lines.map(l => ({
       y: Math.round(l.yPx), fontPx: l.fontPx, v: l.v, slow: +l.slow.toFixed(2),
@@ -305,6 +318,11 @@ export function mountDrive(host, opts = {}) {
   };
   /* For the stage's ghost hand: where the words actually are right now, in
      screen coordinates, so the demo can drift toward one of them. */
+  teardown.pick = (label) => {
+    for (const line of lines) for (const it of line.items) if (it.label === label) { select(it); return true; }
+    return false;
+  };
+  teardown.release = () => release();
   teardown.wordPoints = () => {
     const r = canvas.getBoundingClientRect();
     const out = [];

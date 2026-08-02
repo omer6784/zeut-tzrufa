@@ -1972,6 +1972,14 @@ function _renderQuestionImpl(idx){
         if (res.symbol) st._forcedSymbol = res.symbol;
         armBand(advance);              // light up "המשך"; the press continues
       },
+      // A second press on the chosen word lets it go — the stage goes back to
+      // having no answer, and "המשך" sleeps again until another word is taken.
+      onDeselect: () => {
+        if (st.answers) delete st.answers.personal;
+        st.driveChoice = null; st._forcedSymbol = null;
+        const sb = ensureStageBand();
+        if (sb) { sb.btn.classList.add('is-disabled'); st._stageContinue = null; }
+      },
     });
     lockInput(); setTimeout(() => runProfDemo(), 1400);   // after the cards have entered
   } else if(q.type==='placeholder'){
@@ -2358,10 +2366,10 @@ function runTilesDemo(){
    It resets the pick afterwards so the visitor starts clean. Input is locked for
    its duration (lockInput). */
 function runProfDemo(){
-  // The words stand in a large typographic space, so the demo simply APPROACHES
-  // one: the hand drifts in and the word answers by leaning toward it, growing
-  // and gaining weight (drive.js does that from the real pointer distance) —
-  // showing the pull rather than a press. It never selects for the visitor.
+  // The words run past in three lines, so the demo shows the whole gesture: the
+  // hand comes to a word and PRESSES it (the word turns dark and the lines
+  // almost stop), then presses "המשך" — and then lets the word go again, so the
+  // visitor starts with everything running and nothing chosen for them.
   const api = st._driveTeardown;
   const pts = (api && api.wordPoints) ? api.wordPoints() : [];
   if(!pts.length) return;
@@ -2372,29 +2380,45 @@ function runProfDemo(){
   (async () => {
     const gh = getGhostHand();
     const dead = () => my !== st._profDemoToken || !document.getElementById('drive-field');
-    const abort = () => { gh.hide(); cleanup(); };
-    // a big word reads best for the demonstration; otherwise whatever is there
-    const target = pts.find(p => p.tier === 'large') || pts.find(p => p.tier === 'huge') || pts[0];
+    const abort = () => { try { api.release(); } catch(_){} gh.hide(); cleanup(); };
+    // the word nearest the middle of the frame reads best
+    const mid = (window.innerWidth || 1000) / 2;
+    const target = pts.reduce((best, p) => (!best || Math.abs(p.x - mid) < Math.abs(best.x - mid)) ? p : best, null);
     if(!target) return abort();
-    const cx = target.x, cy = target.y;
 
     await gh.sleep(300); if(dead()) return abort();
-    gh.open(); gh.place(cx + 150, (window.innerHeight || 900) + 60); gh.show('dark');
+    gh.open(); gh.place(target.x + 140, (window.innerHeight || 900) + 60); gh.show('dark');
     await gh.sleep(120); if(dead()) return abort();
-    // Drift in slowly — the word feels it coming and reaches back.
-    const N = 16;
+    // Drift in slowly — the word feels it coming and answers.
+    const N = 14;
     for(let i = 1; i <= N && !dead(); i++){
       const f = i / N;
-      const x = cx + 150 * (1 - f), y = cy + 120 * (1 - f);
+      const x = target.x + 140 * (1 - f), y = target.y + 110 * (1 - f);
       gh.move(x, y);
       window.dispatchEvent(new PointerEvent('pointermove', { clientX: x, clientY: y, bubbles: true }));
       await gh.sleep(70);
     }
     if(dead()) return abort();
-    gh.point(true);
+
+    // 1. press the word — it turns dark and the lines slow almost to a stop
+    await gh.tapPoint();
+    api.pick(target.label);
     await gh.sleep(900); if(dead()) return abort();
+
+    // 2. press "המשך"
     gh.open();
-    await gh.sleep(400);
+    const btn = document.querySelector('.stage-band .sb-btn');
+    if(btn){
+      const b = btn.getBoundingClientRect();
+      gh.move(b.left + b.width / 2, b.top + b.height / 2);
+      await gh.sleep(700); if(dead()) return abort();
+      btn.classList.add('is-pressed');
+      await gh.tap();
+      btn.classList.remove('is-pressed');
+    }
+    await gh.sleep(350);
+    // 3. let the word go: the visitor finds the lines running and nothing taken
+    try { api.release(); } catch(_){}
     gh.hide(); cleanup();
   })();
 }
