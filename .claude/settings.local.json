@@ -552,7 +552,8 @@
       "Bash(afconvert -f m4af -d aac -b 48000 -s 3 loop.wav bg-loop.m4a)",
       "Bash(awk '{print \"encoded:\", $5}')",
       "Bash(afinfo bg-loop.m4a)",
-      "Bash(node --input-type=module -e \"import\\('./drive.js'\\).then\\(\\(\\)=>console.log\\('parse ok'\\)\\).catch\\(e=>console.log\\('ERR', e.message\\)\\)\")"
+      "Bash(node --input-type=module -e \"import\\('./drive.js'\\).then\\(\\(\\)=>console.log\\('parse ok'\\)\\).catch\\(e=>console.log\\('ERR', e.message\\)\\)\")",
+      "Bash(curl -s -o /dev/null -w \"dev:%{http_code}\\\\n\" http://localhost:5173/v5/)"
     ]
   },
   "hooks": {
