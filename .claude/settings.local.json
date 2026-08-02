@@ -558,7 +558,8 @@
       "Bash(awk '/\\\\.sb-btn/{f=1} f{print NR\": \"$0} /^}/{if\\(f\\){f=0; print \"---\"}}' styles.css)",
       "Bash(curl -s -m 20 https://zehut-tzrufa.com/.netlify/functions/send-gif)",
       "Bash(curl -s -m 40 -w '\\\\nHTTP %{http_code}\\\\n' -X POST https://zehut-tzrufa.com/.netlify/functions/send-gif -H 'Content-Type: application/json' -d '{\"email\":\"delivered@resend.dev\",\"gif\":\"__TRACKED_VAR__\"}')",
-      "Bash(node --max-old-space-size=8192 /private/tmp/claude-501/-Users-omershushan-Desktop-final-project-code/ce2894cd-0dff-4c67-829d-9d8541009103/scratchpad/simulate.mjs)"
+      "Bash(node --max-old-space-size=8192 /private/tmp/claude-501/-Users-omershushan-Desktop-final-project-code/ce2894cd-0dff-4c67-829d-9d8541009103/scratchpad/simulate.mjs)",
+      "Bash(node --input-type=module -e \"import\\('./editor.js'\\).then\\(\\(\\)=>console.log\\('parse ok'\\)\\).catch\\(e=>console.log\\('ERR',e.message\\)\\)\")"
     ]
   },
   "hooks": {

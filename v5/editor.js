@@ -8,8 +8,9 @@
      · tap the BACKGROUND        → floating picker, all 4 colours
      · tap the FRAME (ornament)  → floating picker, 3 colours (background blocked)
      · tap a SYMBOL              → dotted selection ring + picker, 3 colours
-     · drag a symbol up/down     → reorder (the others close ranks in order)
      · pinch a symbol            → gentle scale (0.8–1.2)
+   The symbols keep the order the stages gave them: the stack IS the order the
+   talisman was made in, so it is not something to rearrange by hand.
    Every change re-broadcasts the artifact, so the embedded jewel and the real
    external display update live. Undo/redo buttons remain; a ghost-hand demo
    plays once on entry to teach the tap-to-edit idea (same idiom as the stages).
@@ -188,23 +189,6 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     const B = 85, ax = Math.abs(w.x), ay = Math.abs(w.y);
     return (Math.abs(ax - hw) <= B && ay <= hh + B) || (Math.abs(ay - hh) <= B && ax <= hw + B);
   }
-  // The stack SLOT under the finger (boundaries = midpoints between neighbours).
-  function slotAt(clientY) {
-    const w = worldPt(0, clientY);
-    if (!w || !w.L.items.length) return -1;
-    let slot = 0;
-    for (let i = 0; i < w.L.items.length - 1; i++) {
-      if (w.y > (w.L.items[i].y + w.L.items[i + 1].y) / 2) slot = i + 1;
-    }
-    return slot;
-  }
-  function applyReorder(from, to) {
-    if (from === to) return;
-    const move = (arr) => { if (Array.isArray(arr) && arr.length > from) { const v = arr.splice(from, 1)[0]; arr.splice(to, 0, v); } };
-    move(st.chosenSymbols); move(st.chosenSymbolSizes); move(st.chosenSymbolColors); move(st.artifactEdits);
-    push();
-  }
-
   // ---- floating colour picker -------------------------------------------------
   // A small plate of colour dots that opens AT the tap point. One open at a time;
   // a tap anywhere else (the backdrop) closes it.
@@ -276,14 +260,15 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
   }
 
   // ---- touch gestures ON the jewel ------------------------------------------
-  // Tap = open the right picker (routeTap). One-finger vertical drag = REORDER.
-  // Two-finger pinch = gentle scale (0.8–1.2).
+  // Tap = open the right picker (routeTap). Two-finger pinch = gentle scale
+  // (0.8–1.2). A single finger never moves a symbol: the stack's order is the
+  // order the stages gave it.
   const gest = document.createElement('div');
   gest.className = 'ed-gesture';
   jewelBox.appendChild(gest);
 
   const ptrs = new Map();   // active pointers on the gesture layer
-  let drag = null;          // { idx, y0, moved } single-finger reorder
+  let held = -1;            // the symbol a first finger is on (the pinch target)
   let pinch = null;         // { idx, d0, s0 }  two-finger scale
   let tapCand = null;       // {x,y} — becomes a routed tap if the finger never moves
   const dist = () => { const p = [...ptrs.values()]; return Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y); };
@@ -293,15 +278,13 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
     ptrs.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
     if (ptrs.size === 1) {
       tapCand = { x: ev.clientX, y: ev.clientY };
-      const idx = hitIndex(ev.clientX, ev.clientY);
-      drag = idx >= 0 ? { idx, y0: ev.clientY, moved: false } : null;
+      held = hitIndex(ev.clientX, ev.clientY);
     } else if (ptrs.size === 2) {
       tapCand = null;
-      // Pinch target: the symbol the first finger grabbed, else the NEAREST one to
+      // Pinch target: the symbol the first finger is on, else the NEAREST one to
       // the fingers' midpoint (loose — no band check, so the pinch always lands).
       const mid = [...ptrs.values()].reduce((a, p) => a + p.y, 0) / 2;
-      const idx = (drag && drag.idx >= 0) ? drag.idx : hitIndex(0, mid, true);
-      drag = null;
+      const idx = held >= 0 ? held : hitIndex(0, mid, true);
       if (idx >= 0) pinch = { idx, d0: dist(), s0: (st.artifactEdits[idx] && st.artifactEdits[idx].scale) || 1 };
     }
   });
@@ -314,19 +297,16 @@ export function mountEditor({ st, broadcast, symbolName, onDone }) {
       const s = Math.max(0.8, Math.min(1.2, pinch.s0 * (dist() / pinch.d0)));
       editAt(pinch.idx).scale = Math.round(s * 100) / 100;
       push();
-    } else if (drag) {
-      if (!drag.moved && Math.abs(ev.clientY - drag.y0) > 8) drag.moved = true;
-      const slot = slotAt(ev.clientY);
-      if (slot >= 0 && slot !== drag.idx) { applyReorder(drag.idx, slot); drag.idx = slot; drag.moved = true; }
     }
+    // A single finger moving does nothing: dragging a symbol out of its place is
+    // no longer possible — its place is the stage that gave it.
   });
   const endPtr = (ev) => {
     ptrs.delete(ev.pointerId);
     if (pinch && ptrs.size < 2) { pinch = null; record(); }
     if (ptrs.size === 0) {
-      if (drag && drag.moved) record();
-      else if (tapCand) routeTap(tapCand.x, tapCand.y);
-      drag = null; tapCand = null;
+      if (tapCand) routeTap(tapCand.x, tapCand.y);
+      held = -1; tapCand = null;
     }
   };
   gest.addEventListener('pointerup', endPtr);
