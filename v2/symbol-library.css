@@ -240,18 +240,14 @@ body::-webkit-scrollbar-thumb {
               color 0.25s ease;
 }
 
-.symbol-artwork svg {
+/* The artwork is the INTERFACE's own dotted contour, drawn on a canvas from the
+   symbol's .obj — the same image the symbol window shows when the piece hands a
+   visitor that symbol. It only has to be fitted to the cell here. */
+.symbol-artwork canvas {
   width: 100%;
   height: 100%;
-  color: #282828;
   display: block;
-  transition: color 0.25s ease;
-}
-/* Dotted outlines — every stroked shape becomes evenly-spaced round dots. */
-.symbol-artwork svg :is(path, line, polygon, polyline, rect, circle, ellipse) {
-  stroke-dasharray: 0.001 3.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  transition: filter 0.25s ease, opacity 0.25s ease;
 }
 
 /* Clicked (active) symbol → orange dots; the artwork lifts to make room for the
@@ -259,8 +255,9 @@ body::-webkit-scrollbar-thumb {
 .symbol-cell.is-active .symbol-artwork {
   transform: translateY(-20%) scale(0.82);
 }
-.symbol-cell.is-active .symbol-artwork svg {
-  color: #fb5716;
+.symbol-cell.is-active .symbol-artwork canvas {
+  /* the dark dots turn the interface's orange, without redrawing the contour */
+  filter: brightness(0) saturate(100%) invert(45%) sepia(89%) saturate(3000%) hue-rotate(360deg) brightness(101%) contrast(101%);
 }
 
 /* ─── Info panel — shows BELOW the symbol when the cell is clicked ──────── */

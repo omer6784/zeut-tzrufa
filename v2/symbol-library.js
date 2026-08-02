@@ -1,3 +1,5 @@
+import { mountSymbolContour } from '../v5/symbol-contour.js';
+
 /* ═══════════════════════════════════════════════════════════════
    Symbol Library — JavaScript
    Populates the 5×5 grid with symbols from the project's
@@ -483,6 +485,35 @@ const SYMBOL_INFO = {
   triskele_spiral:{ name: 'טריסקל ספירלי',      tradition: 'המסורת הקלטית',                         meaning: 'תנועה מתמדת, התקדמות ואיזון' },
 };
 
+/* The 2D artwork is no longer the library's own line-art: every symbol here is
+   drawn by the INTERFACE's own contour routine, from the same .obj file and with
+   the same settings the symbol window uses — so a visitor sees on this page
+   exactly the image the piece showed them when the symbol was given.
+   (Sizes are the window's, scaled by one factor, so the dot rhythm is identical.) */
+/* The window draws on a 1000px canvas and shows it large; a library cell is a
+   fraction of that. Scaling the whole drawing down would turn every dot into a
+   hairline, so the canvas follows the cell's real size and the dot keeps its
+   WEIGHT — the same lesson the tiles taught: a dot must stay a dot. */
+function contourOptsFor(host) {
+  const w = Math.max(80, Math.round(host.getBoundingClientRect().width));
+  const size = Math.round(w * 2);                 // draw at twice the display size
+  return { size, objScale: size * 0.64, dotSize: Math.max(2.4, size * 0.013), sampleStep: 3,
+           dotColor: '#282828', dotsPerSec: 900 };
+}
+const MOTIF_OBJ = {
+  hamsa: '/hamsa.obj', scarab: '/scarab.obj', eye: '/eye.obj', rimon: '/rimon.obj',
+  fish: '/fish.obj', lotus: '/lotus.obj', dharma: '/Dharma.obj', vegvisir: '/VEGVISIR.obj',
+  pyramid: '/pyramid.obj', anah: '/anah.obj', djed: '/djed.obj', horseshoe: '/horseshoe.obj',
+  spiral: '/spiral.obj', moon: '/moon.obj', tiltan: '/tiltan.obj', circle: '/circle.obj',
+  bird: '/bird.obj', sun: '/sun.obj', diamond: '/diamond.obj', hexagram: '/hexagram.obj',
+  pentagram: '/pentagram.obj', cowrie: '/cowrie.obj', snake: '/snake.obj', algiz: '/algiz.obj',
+  triskele: '/triskele.obj', solarcross: '/solarcross.obj', endlessknot: '/endlessknot.obj',
+  triquetra: '/triquetra.obj',
+};
+/* The same per-motif turns the window applies: two models are authored facing
+   the X axis, so their frontal silhouette needs a quarter turn. */
+const MOTIF_CONTOUR = { lotus: { rotateY: Math.PI / 2 }, dharma: { rotateY: Math.PI / 2 } };
+
 /* ── The symbols BUILT in the interface (3D .obj + 2D contour), keyed by their
    interface motif key (see v5/symbol-window.js MOTIF_OBJ / symbol-info.js). The
    library shows exactly these 16 — each paired with the library's line-art icon.
@@ -519,15 +550,32 @@ const BUILT = [
   { key: 'triquetra',   svg: 'triquetra' },
 ];
 
+/* Each cell draws its symbol the moment it comes into view: the interface's own
+   contour routine, the same .obj and the same settings as the symbol window. A
+   page of 28 models is never fetched all at once. */
+const contourWatcher = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    const host = e.target;
+    contourWatcher.unobserve(host);
+    const motif = host.dataset.motif;
+    const objPath = MOTIF_OBJ[motif];
+    if (!objPath) continue;
+    mountSymbolContour(host, objPath, Object.assign(contourOptsFor(host), MOTIF_CONTOUR[motif]));
+  }
+}, { rootMargin: '200px' });
+
 /* ── Build the grid ── */
 function buildGrid() {
   const grid = document.getElementById('symbol-grid');
   if (!grid) return;
 
-  BUILT.forEach(({ key, svg: svgKey }, idx) => {
+  BUILT.forEach(({ key }, idx) => {
     const info = IFACE_INFO[key];       // authoritative name / origin / meaning
-    const svg  = MOTIF_SVG[svgKey];
-    if (!info || !svg) return;
+    // A symbol belongs here if the interface can DRAW it — its text and its
+    // model. (The guard used to depend on the library's own line-art icon, which
+    // is no longer what the cell shows.)
+    if (!info || !MOTIF_OBJ[key]) return;
 
     const cell = document.createElement('div');
     cell.className = 'symbol-cell';
@@ -547,7 +595,9 @@ function buildGrid() {
     // SVG artwork
     const artwork = document.createElement('div');
     artwork.className = 'symbol-artwork';
-    artwork.innerHTML = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
+    // The interface's own dotted contour — built lazily, so a page of 28 models
+    // is not fetched and rasterised all at once.
+    artwork.dataset.motif = key;
 
     // Index number
     const index = document.createElement('span');
@@ -558,6 +608,8 @@ function buildGrid() {
     cell.appendChild(artwork);
     cell.appendChild(index);
     grid.appendChild(cell);
+
+    contourWatcher.observe(artwork);
 
     // Click → this symbol's dots turn orange + its info shows below (one active
     // at a time; click again to close).
