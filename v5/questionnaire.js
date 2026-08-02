@@ -23,6 +23,7 @@ if (typeof window !== 'undefined') {
   window.__closeSymbolWindow = closeSymbolWindow;
   window.__goQuestion = (i) => renderQuestion(i);   // dev/verification: jump to a stage
   window.__pathsApi = () => st._pathsDemo;          // dev/verification: the maze's demo/analyze API
+  window.__tilesApi = () => st._dotTiles;           // dev/verification: the movement gallery's API
 }
 
 let BLUE   = '#282828';
@@ -2327,36 +2328,40 @@ function runTilesDemo(){
     const abort = () => { gh.hide(); cleanup(); };
     const c = dt.tileCenter(dt.centreIndex());
     if(!c) return abort();
-    await gh.sleep(200); if(dead()) return abort();
-    gh.open(); gh.place(c.x, (window.innerHeight || 900) + 60); gh.show('dark');
-    await gh.sleep(90); if(dead()) return abort();
+    const span = Math.min(300, (window.innerWidth || 1000) * 0.24);
 
-    // 1. the hand SWIPES the row: the next tile rides into the centre
-    gh.point(true);
-    gh.move(c.x, c.y);
-    await gh.sleep(600); if(dead()) return abort();
-    const span = Math.min(260, (window.innerWidth || 1000) * 0.22);
-    for(let k = 0; k < 2; k++){
-      dt.selectTile(dt.centreIndex() + 1);      // one tile along
-      gh.move(c.x - span, c.y);
-      await gh.sleep(520); if(dead()) return abort();
-      gh.move(c.x, c.y);
-      await gh.sleep(220); if(dead()) return abort();
+    await gh.sleep(250); if(dead()) return abort();
+    // the hand arrives on the row and takes hold of it
+    gh.open(); gh.place(c.x + span * 0.5, (window.innerHeight || 900) + 60); gh.show('dark');
+    await gh.sleep(120); if(dead()) return abort();
+    gh.move(c.x + span * 0.5, c.y);
+    await gh.sleep(520); if(dead()) return abort();
+
+    // 1. SWEEP: the hand drags the row along, twice, and the tiles travel with it
+    for(let k = 0; k < 2 && !dead(); k++){
+      gh.grab(true);
+      dt.sweepBy(1, 820);
+      gh.move(c.x - span * 0.5, c.y);
+      await gh.sleep(880); if(dead()) return abort();
+      gh.open();
+      // lift and come back for the next sweep
+      gh.move(c.x + span * 0.5, c.y);
+      await gh.sleep(420);
     }
+    if(dead()) return abort();
 
-    // 2. move to "המשך" and press it (illustrative — does not actually advance)
+    // 2. press "המשך" — the tile standing at the centre is the one it takes
     gh.open();
     const btn = document.querySelector('.stage-band .sb-btn');
     if(btn){
       const b = btn.getBoundingClientRect();
       gh.move(b.left + b.width / 2, b.top + b.height / 2);
-      await gh.sleep(700); if(dead()) return abort();
+      await gh.sleep(650); if(dead()) return abort();
       btn.classList.add('is-pressed');
       await gh.tap();
       btn.classList.remove('is-pressed');
     }
-    await gh.sleep(400);
-    // The tile at the centre stays the candidate, so "המשך" stays live.
+    await gh.sleep(350);
     gh.hide(); cleanup();
   })();
 }

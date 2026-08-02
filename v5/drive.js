@@ -206,10 +206,12 @@ export function mountDrive(host, opts = {}) {
         let alpha = 1 - 0.25 * (focus - it.near);            // the rest step back
         let scale = 1 + 0.10 * it.near;                       // it grows, gently
         let r = DOT_R * (1 + 0.25 * it.near);                 // and gains weight
-        if (chosen) {
+        if (it === chosen) {
+          // the chosen word answers with one pulse; the others are left alone —
+          // the colour already says which one was taken
           const k = clamp01((now - chosenAt) / 320);
-          if (it === chosen) { r *= 1 + 0.3 * Math.sin(k * Math.PI); scale *= 1 + 0.04 * Math.sin(k * Math.PI); }
-          else alpha *= 1 - 0.6 * k;
+          r *= 1 + 0.3 * Math.sin(k * Math.PI);
+          scale *= 1 + 0.04 * Math.sin(k * Math.PI);
         }
         if (alpha <= 0.01) continue;
         const cx = it.x - it.ox * scale, cy = line.yPx - it.oy * scale;

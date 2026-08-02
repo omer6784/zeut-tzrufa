@@ -692,7 +692,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
   /* ── State: `pos` is the gallery's position in TILE UNITS (fractional). ── */
   let pos = 0, vel = 0;
   let dragging = false, dragId = -1, lastX = 0, moved = 0, lastT = 0;
-  let selected = -1, notified = -1, chosen = -1, chosenAt = 0, done = false, locked = false;
+  let selected = -1, notified = -1, chosen = -1, chosenAt = 0, done = false, locked = false, sweepTimer = 0;
   let raf = 0, t0 = performance.now(), pulseAt = -1, hintDone = false;
   // The tile before and the tile after stand WHOLE inside the interface's own
   // vertical grid lines — never running onto them — with only a narrow channel
@@ -845,6 +845,21 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     pos += d; vel = 0;
   }
 
+  /* A SWEEP of the row, as a hand would make it: the row eases along by whole
+     tiles over the given time. Used by the stage's demo so the movement it
+     shows is the real one — the same travel, the same swish, the same snap. */
+  function sweepBy(delta = 1, durMs = 900) {
+    if (chosen >= 0) return;
+    const from = pos, to = pos + delta, t0s = performance.now();
+    locked = true; vel = 0;
+    clearInterval(sweepTimer);
+    sweepTimer = setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0s) / durMs);
+      pos = from + (to - from) * (1 - Math.pow(1 - k, 3));       // eased, like a hand
+      if (k >= 1) { clearInterval(sweepTimer); sweepTimer = 0; pos = Math.round(to); locked = false; }
+    }, 16);
+  }
+
   function confirm() {
     if (chosen >= 0) return;
     const c = centreIndex();
@@ -862,7 +877,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
 
   return {
     teardown() {
-      cancelAnimationFrame(raf); clearTimeout(hintTimer);
+      cancelAnimationFrame(raf); clearTimeout(hintTimer); clearInterval(sweepTimer);
       sizeTimers.forEach(clearTimeout);
       ro && ro.disconnect();
       window.removeEventListener('resize', onResize);
@@ -870,6 +885,7 @@ export function mountDotTiles(host, { onSelect, onConfirm } = {}) {
     },
     confirm,
     selectTile,                           // used by the demo: bring a tile to the centre
+    sweepBy,                              // used by the demo: sweep the row as a hand would
     deselect,
     stopActive: noop,
     tileCenter(i) {
