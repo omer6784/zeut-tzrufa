@@ -45,24 +45,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* The page is a single screenful: 28 symbols, no scroll. The grid sizes itself
+   from whichever runs out first — the width or the height — so the whole set is
+   always in view at once. */
 body {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   font-family: 'ArbelG', 'Georgia', serif;
   background: #1e1e1e;
   color: #f5f5ed;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   direction: rtl;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(245, 245, 237, 0.18) #1e1e1e;
-}
-
-body::-webkit-scrollbar { width: 4px; }
-body::-webkit-scrollbar-track { background: #1e1e1e; }
-body::-webkit-scrollbar-thumb {
-  background: rgba(245, 245, 237, 0.18);
-  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ─── Custom cursor ──────────────────────────────────────── */
@@ -86,8 +81,8 @@ body::-webkit-scrollbar-thumb {
 /* ─── Back link ──────────────────────────────────────────── */
 #back-link {
   position: fixed;
-  top: 80px;
-  left: 32px;
+  top: 22px;
+  left: 28px;
   z-index: 100;
   font-family: 'ArbelG', sans-serif;
   font-size: 11px;
@@ -102,51 +97,15 @@ body::-webkit-scrollbar-thumb {
 }
 #back-link:hover { opacity: 0.55; }
 
-/* ─── Page header ────────────────────────────────────────── */
-#lib-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  z-index: 90;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 32px;
-  background: #1e1e1e;
-  border-bottom: 1px solid rgba(245, 245, 237, 0.1);
-  direction: ltr;
-}
-
-#lib-header-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.lib-coord {
-  font-family: 'ArbelG', sans-serif;
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: rgba(245, 245, 237, 0.45);
-}
-
-.lib-coord-dot {
-  font-size: 10px;
-  color: rgba(245, 245, 237, 0.22);
-}
-
 /* ─── Symbol grid ────────────────────────────────────────── */
 #symbol-grid {
+  --cell: min((100vw - 96px) / 7, (100vh - 108px) / 4);
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, var(--cell));
+  grid-auto-rows: var(--cell);
   gap: 0;
-  width: 100%;
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 96px 48px 80px;
+  margin: 52px auto 0;
+  padding: 0;
   direction: ltr;
 }
 
@@ -306,7 +265,8 @@ body::-webkit-scrollbar-thumb {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 48px 28px;
+  margin-top: auto;
+  padding: 12px 32px 14px;
   direction: ltr;
 }
 
@@ -332,47 +292,21 @@ body::-webkit-scrollbar-thumb {
   }
 }
 
-/* ─── Responsive ─────────────────────────────────────────── */
-@media (max-width: 1180px) {
-  #symbol-grid {
-    grid-template-columns: repeat(4, 1fr);
-    padding: 88px 28px 60px;
-  }
-}
-
+/* ─── Responsive ──────────────────────────────────────────
+   The 7×4 grid never breaks apart — the cell simply gets smaller, so the
+   whole set stays on one screen at any size. Only the margins give way. */
 @media (max-width: 700px) {
   #symbol-grid {
-    grid-template-columns: repeat(3, 1fr);
-    padding: 80px 16px 48px;
-  }
-
-  #lib-header {
-    padding: 0 16px;
-    height: 52px;
+    --cell: min((100vw - 32px) / 7, (100vh - 84px) / 4);
+    margin-top: 42px;
   }
 
   #back-link {
-    top: 62px;
+    top: 16px;
     left: 16px;
   }
 
-  .symbol-artwork {
-    width: 45%;
-    height: 45%;
-  }
-
-  .symbol-info {
-    top: 8%;
-    left: 8%;
-    right: 8%;
-  }
-}
-
-@media (max-width: 480px) {
-  #symbol-grid {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 72px 12px 40px;
-  }
+  #lib-footer { padding: 8px 16px 10px; }
 }
 
 /* ─── Reduced motion ─────────────────────────────────────── */
