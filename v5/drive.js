@@ -25,7 +25,8 @@
 
 import { DISPLAY_WORDS } from './drive-words.js';
 
-const INK = '#282828';
+const INK = '#f5f5ed';      // the words: the interface's cream
+const PICKED = '#282828';   // the one chosen: the interface's dark
 const DOT_R = 1.15;          // dot RADIUS — one weight at every size…
 const PITCH = 4.4;           // …and one spacing: a bigger word gets MORE dots
 const NEAR_R = 260;          // how far out a word feels a hand
@@ -33,10 +34,11 @@ const NEAR_R = 260;          // how far out a word feels a hand
 /* The three lines. `h` is the type size as a share of the content area's
    height, `y` where the line sits in it, `v` how fast it travels (px a second),
    `gap` the clear ground between one word and the next, in type sizes. */
+const PACE = 30;             // every line travels at the same pace
 const LINES = [
-  { y: 0.17, h: 0.26, v: 30, gap: 0.85 },
-  { y: 0.50, h: 0.30, v: 22, gap: 0.70 },
-  { y: 0.83, h: 0.24, v: 37, gap: 0.95 },
+  { y: 0.17, h: 0.26, v: PACE, gap: 0.85 },
+  { y: 0.50, h: 0.30, v: PACE, gap: 0.70 },
+  { y: 0.83, h: 0.24, v: PACE, gap: 0.95 },
 ];
 
 const clamp01 = v => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -197,7 +199,6 @@ export function mountDrive(host, opts = {}) {
 
     /* ── paint ─────────────────────────────────────────────────────────── */
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = INK;
     for (const line of lines) {
       for (const it of line.items) {
         if (it.x + it.hw < -10 || it.x - it.hw > W + 10) continue;
@@ -211,6 +212,7 @@ export function mountDrive(host, opts = {}) {
         }
         if (alpha <= 0.01) continue;
         const cx = it.x - it.ox * scale, cy = line.yPx - it.oy * scale;
+        ctx.fillStyle = (it === chosen) ? PICKED : INK;
         ctx.globalAlpha = alpha;
         ctx.beginPath();
         for (const d of it.pts) {
