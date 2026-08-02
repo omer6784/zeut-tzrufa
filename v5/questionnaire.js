@@ -3012,6 +3012,7 @@ function enterCompletion(){
   st.finalJewelryState = buildArtifactData(w, h);
   try { localStorage.setItem(FINAL_JEWELRY_KEY, JSON.stringify(st.finalJewelryState)); } catch (_) {}
   archiveFinishedJewel(st.finalJewelryState);   // it joins the display's idle gallery
+  countFinishedJewel();                        // and it is counted, with its date
   broadcastArtifact();   // push the frozen snapshot to every display before the GIF page mounts
   if (_completionTeardown) { try { _completionTeardown(); } catch (_) {} }
   _completionTeardown = mountCompletion({ /* onSendGif wired in Part B (GIF capture + email service) */ });
@@ -3262,6 +3263,44 @@ window.addEventListener('opening-morph-start', () => {
    same sequence twice. Only COMPLETE pieces qualify: a run that skipped stages
    (the step dots allow it) arrives with fewer than six symbols and is not a
    finished talisman, so it never reaches the wall. */
+/* ── How many talismans were finished, and when ─────────────────────────────
+   A talisman is counted at the ONE moment that defines it: "סיימתי" in the
+   editor. Only a timestamp is kept — nothing about the visitor, nothing about
+   the jewel — so the stand can say how many were made on any given day.
+   (The gallery archive below cannot answer that: it holds no dates, it drops a
+   repeat of the same six symbols, and it keeps only the last eighty.)
+   Read it on the exhibition machine with __stats(). */
+const COUNTER_KEY = 'zehut-completions';
+function countFinishedJewel(){
+  try {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(COUNTER_KEY) || '[]'); } catch(_) { list = []; }
+    if (!Array.isArray(list)) list = [];
+    list.push(Date.now());
+    if (list.length > 20000) list = list.slice(list.length - 20000);
+    localStorage.setItem(COUNTER_KEY, JSON.stringify(list));
+  } catch(_) { /* counting must never break the experience */ }
+}
+if (typeof window !== 'undefined') {
+  window.__stats = (fromISO) => {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(COUNTER_KEY) || '[]'); } catch(_) {}
+    if (!Array.isArray(list)) list = [];
+    const from = fromISO ? new Date(fromISO).getTime() : 0;
+    const kept = list.filter(t => typeof t === 'number' && t >= from);
+    const byDay = {};
+    for (const t of kept) {
+      const d = new Date(t);
+      const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      byDay[key] = (byDay[key] || 0) + 1;
+    }
+    const out = { total: kept.length, byDay, first: kept.length ? new Date(kept[0]).toLocaleString('he-IL') : null, last: kept.length ? new Date(kept[kept.length - 1]).toLocaleString('he-IL') : null };
+    console.table(byDay);
+    console.info('[stats] total:', out.total, '· first:', out.first, '· last:', out.last);
+    return out;
+  };
+}
+
 const GALLERY_ARCHIVE_KEY = 'zehut-gallery-archive';
 const GALLERY_FULL_STACK = 6;   // one symbol from each of the six symbol-giving stages
 function archiveFinishedJewel(data){

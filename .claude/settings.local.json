@@ -555,7 +555,9 @@
       "Bash(node --input-type=module -e \"import\\('./drive.js'\\).then\\(\\(\\)=>console.log\\('parse ok'\\)\\).catch\\(e=>console.log\\('ERR', e.message\\)\\)\")",
       "Bash(curl -s -o /dev/null -w \"dev:%{http_code}\\\\n\" http://localhost:5173/v5/)",
       "Bash(curl -s -o /dev/null -w \"live site: HTTP %{http_code}\\\\n\" -m 15 https://zehut-tzrufa.com/v5/)",
-      "Bash(awk '/\\\\.sb-btn/{f=1} f{print NR\": \"$0} /^}/{if\\(f\\){f=0; print \"---\"}}' styles.css)"
+      "Bash(awk '/\\\\.sb-btn/{f=1} f{print NR\": \"$0} /^}/{if\\(f\\){f=0; print \"---\"}}' styles.css)",
+      "Bash(curl -s -m 20 https://zehut-tzrufa.com/.netlify/functions/send-gif)",
+      "Bash(curl -s -m 40 -w '\\\\nHTTP %{http_code}\\\\n' -X POST https://zehut-tzrufa.com/.netlify/functions/send-gif -H 'Content-Type: application/json' -d '{\"email\":\"delivered@resend.dev\",\"gif\":\"__TRACKED_VAR__\"}')"
     ]
   },
   "hooks": {
